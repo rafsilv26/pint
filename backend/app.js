@@ -14,6 +14,14 @@ sequelize.authenticate()
     .then(() => console.log('Conetado ao Neon com sucesso!'))
     .catch(err => console.error('Erro ao ligar ao Neon:', err));
 
+    
+const { User, Badge, Candidatura, Evidencia, HistoricoCandidatura } = require('./src/models/index');
+
+// Sincroniza os modelos com a BD (cria as tabelas se não existirem)
+sequelize.sync({ alter: true })
+  .then(() => console.log('Tabelas sincronizadas com a BD!'))
+  .catch(err => console.error('Erro ao sincronizar tabelas:', err));
+
 // Rotas (criar a seguir)
 // app.use('/api/auth', require('./src/routes/authRoutes'));
 // app.use('/api/users', require('./src/routes/userRoutes'));
