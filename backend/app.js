@@ -17,6 +17,11 @@ sequelize.authenticate()
     
 const { User, Badge, Candidatura, Evidencia, HistoricoCandidatura } = require('./src/models/index');
 
+
+app.use('/api/candidaturas', require('./src/routes/candidaturaRoutes'));
+app.use('/api/relatorios', require('./src/routes/relatorioRoutes'));
+app.use('/badge', require('./src/routes/relatorioRoutes'));
+
 // Sincroniza os modelos com a BD (cria as tabelas se não existirem)
 sequelize.sync({ alter: true })
   .then(() => console.log('Tabelas sincronizadas com a BD!'))
