@@ -18,9 +18,8 @@ sequelize.authenticate()
 const { User, Badge, Candidatura, Evidencia, HistoricoCandidatura } = require('./src/models/index');
 
 
-app.use('/api/candidaturas', require('./src/routes/candidaturaRoutes'));
-app.use('/api/relatorios', require('./src/routes/relatorioRoutes'));
-app.use('/badge', require('./src/routes/relatorioRoutes'));
+
+
 
 // Sincroniza os modelos com a BD (cria as tabelas se não existirem)
 sequelize.sync({ alter: true })
@@ -30,6 +29,14 @@ sequelize.sync({ alter: true })
 // Rotas (criar a seguir)
 // app.use('/api/auth', require('./src/routes/authRoutes'));
 // app.use('/api/users', require('./src/routes/userRoutes'));
+
+app.use('/api/candidaturas', require('./src/routes/candidaturaRoutes'));
+app.use('/api/relatorios', require('./src/routes/relatorioRoutes'));
+app.use('/badge', require('./src/routes/relatorioRoutes'));
+
+app.get('/api/teste', (req, res) => {
+  res.json({ mensagem: 'API funcionando!', data: new Date() });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
