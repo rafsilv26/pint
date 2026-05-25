@@ -1,0 +1,598 @@
+import 'package:flutter/material.dart';
+
+import '../models/consultant_profile.dart';
+import 'consultant_detail_page.dart';
+
+class ConsultantsDirectoryPage extends StatefulWidget {
+  const ConsultantsDirectoryPage({super.key});
+
+  @override
+  State<ConsultantsDirectoryPage> createState() =>
+      _ConsultantsDirectoryPageState();
+}
+
+class _ConsultantsDirectoryPageState extends State<ConsultantsDirectoryPage> {
+  final TextEditingController searchController = TextEditingController();
+  String query = '';
+
+  final List<ConsultantProfile> consultants = ConsultantProfile.samples();
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filteredConsultants = consultants.where((consultant) {
+      final text = '${consultant.name} ${consultant.role} ${consultant.area}'
+          .toLowerCase();
+      return text.contains(query.toLowerCase());
+    }).toList();
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F7FB),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            _DirectoryHeader(
+              controller: searchController,
+              onChanged: (value) {
+                setState(() {
+                  query = value;
+                });
+              },
+            ),
+            Expanded(
+              child: _DirectoryList(
+                consultants: filteredConsultants,
+                onConsultantTap: (consultant) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ConsultantDetailPage(consultant: consultant),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: const _ConsultantsBottomNavigation(),
+    );
+  }
+}
+
+class _DirectoryHeader extends StatelessWidget {
+  const _DirectoryHeader({required this.controller, required this.onChanged});
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(22, 16, 22, 18),
+      color: const Color(0xFF006DAA),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextButton.icon(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(0, 30),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            icon: const Icon(Icons.arrow_back, size: 18),
+            label: const Text(
+              'Voltar',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Row(
+            children: [
+              _HeaderIcon(),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Consultores',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: 3),
+                    Text(
+                      '10 consultores',
+                      style: TextStyle(color: Color(0xD9FFFFFF), fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          TextField(
+            controller: controller,
+            onChanged: onChanged,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: 'Pesquisar consultores...',
+              hintStyle: const TextStyle(color: Color(0xD9FFFFFF)),
+              prefixIcon: const Icon(Icons.search, color: Colors.white),
+              contentPadding: const EdgeInsets.symmetric(vertical: 13),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(999),
+                borderSide: const BorderSide(color: Color(0xB3FFFFFF)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(999),
+                borderSide: const BorderSide(color: Colors.white, width: 1.4),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DirectoryList extends StatelessWidget {
+  const _DirectoryList({
+    required this.consultants,
+    required this.onConsultantTap,
+  });
+
+  final List<ConsultantProfile> consultants;
+  final ValueChanged<ConsultantProfile> onConsultantTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final horizontalPadding = constraints.maxWidth < 380 ? 16.0 : 22.0;
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            horizontalPadding,
+            18,
+            horizontalPadding,
+            28,
+          ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Column(
+                children: [
+                  const _DirectoryStats(),
+                  const SizedBox(height: 18),
+                  if (consultants.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 40),
+                      child: Text(
+                        'Nenhum consultor encontrado.',
+                        style: TextStyle(color: Color(0xFF667085)),
+                      ),
+                    )
+                  else
+                    for (final consultant in consultants) ...[
+                      _ConsultantListCard(
+                        consultant: consultant,
+                        onTap: () => onConsultantTap(consultant),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _DirectoryStats extends StatelessWidget {
+  const _DirectoryStats();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6F8FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFB6D2FF)),
+      ),
+      child: const Row(
+        children: [
+          Expanded(
+            child: _DirectoryStat(value: '10', label: 'Consultores'),
+          ),
+          Expanded(
+            child: _DirectoryStat(value: '79', label: 'Badges Total'),
+          ),
+          Expanded(
+            child: _DirectoryStat(value: '14', label: 'Especiais'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DirectoryStat extends StatelessWidget {
+  const _DirectoryStat({required this.value, required this.label});
+
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = value == '79'
+        ? const Color(0xFF8B35FF)
+        : value == '14'
+        ? const Color(0xFFFF4E00)
+        : const Color(0xFF005DFF);
+
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontSize: 19,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Color(0xFF475467), fontSize: 11),
+        ),
+      ],
+    );
+  }
+}
+
+class _ConsultantListCard extends StatelessWidget {
+  const _ConsultantListCard({required this.consultant, required this.onTap});
+
+  final ConsultantProfile consultant;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE0E5EE)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x12101828),
+              blurRadius: 14,
+              offset: Offset(0, 7),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _ConsultantAvatar(consultant: consultant, size: 56),
+                Positioned(
+                  top: -7,
+                  right: -7,
+                  child: _RankBubble(rank: consultant.rank),
+                ),
+              ],
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          consultant.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFF111827),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      if (consultant.isCurrentUser)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEAF3FF),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: const Text(
+                            'Você',
+                            style: TextStyle(
+                              color: Color(0xFF005DFF),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    consultant.role,
+                    style: const TextStyle(
+                      color: Color(0xFF475467),
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _AreaPill(text: consultant.area),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 6,
+                    children: [
+                      _MiniMetric(
+                        icon: Icons.location_on_outlined,
+                        text: consultant.location,
+                      ),
+                      _MiniMetric(
+                        icon: Icons.trending_up,
+                        text: '${consultant.points} pts',
+                        color: const Color(0xFF005DFF),
+                      ),
+                      _MiniMetric(
+                        icon: Icons.workspace_premium_outlined,
+                        text: '${consultant.badges}',
+                        color: const Color(0xFF8B35FF),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right, color: Color(0xFF98A2B3)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderIcon extends StatelessWidget {
+  const _HeaderIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 42,
+      height: 42,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(13),
+      ),
+      child: const Icon(Icons.groups_2_outlined, color: Colors.white),
+    );
+  }
+}
+
+class _RankBubble extends StatelessWidget {
+  const _RankBubble({required this.rank});
+
+  final int rank;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 26,
+      height: 26,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        color: Color(0xFF2F8AB9),
+        shape: BoxShape.circle,
+      ),
+      child: Text(
+        '$rank',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _ConsultantsBottomNavigation extends StatelessWidget {
+  const _ConsultantsBottomNavigation();
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomNavigationBar(
+      currentIndex: 4,
+      type: BottomNavigationBarType.fixed,
+      backgroundColor: Colors.white,
+      elevation: 12,
+      selectedItemColor: const Color(0xFF006DAA),
+      unselectedItemColor: const Color(0xFF5E6878),
+      selectedFontSize: 11,
+      unselectedFontSize: 11,
+      onTap: (index) {
+        if (index == 4) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      },
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home_outlined),
+          label: 'Início',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.workspace_premium_outlined),
+          label: 'Catálogo',
+        ),
+        BottomNavigationBarItem(
+          icon: _BadgeNavigationIcon(),
+          label: 'Meus\nBadges',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.emoji_events_outlined),
+          label: 'Ranking',
+        ),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+      ],
+    );
+  }
+}
+
+class _BadgeNavigationIcon extends StatelessWidget {
+  const _BadgeNavigationIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        const Icon(Icons.notifications_none),
+        Positioned(
+          top: -7,
+          right: -8,
+          child: Container(
+            width: 16,
+            height: 16,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Color(0xFFFF3B48),
+              shape: BoxShape.circle,
+            ),
+            child: const Text(
+              '2',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ConsultantAvatar extends StatelessWidget {
+  const _ConsultantAvatar({required this.consultant, required this.size});
+
+  final ConsultantProfile consultant;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Image.asset(
+        consultant.imagePath,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: size,
+            height: size,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEAF3FF),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              Icons.person,
+              color: const Color(0xFF006DAA),
+              size: size * 0.5,
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _AreaPill extends StatelessWidget {
+  const _AreaPill({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          color: Color(0xFF475467),
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniMetric extends StatelessWidget {
+  const _MiniMetric({
+    required this.icon,
+    required this.text,
+    this.color = const Color(0xFF667085),
+  });
+
+  final IconData icon;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: color, size: 13),
+        const SizedBox(width: 3),
+        Text(text, style: TextStyle(color: color, fontSize: 11)),
+      ],
+    );
+  }
+}
