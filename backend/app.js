@@ -23,6 +23,18 @@ sequelize.authenticate()
 //Importar as rotas
 app.use('/api/', require('./src/routes'));
 
+app.post('/api/teste/badge', async (req, res) => {
+  const { Badge } = require('./src/models/index');
+  const badge = await Badge.create({
+    nome: 'Badge Júnior OutSystems',
+    descricao: 'Nível júnior em Low Code OutSystems',
+    nivel: 'A',
+    pontos: 100,
+    temExpiracao: false
+  });
+  res.json(badge);
+});
+
 app.get('/api/teste', (req, res) => {
     res.json({ mensagem: 'API funcionando!', data: new Date() });
 });
