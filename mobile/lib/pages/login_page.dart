@@ -21,6 +21,7 @@ class _LoginPageState extends State<LoginPage> {
 
   bool hidePassword = true;
   bool rememberLogin = false;
+  bool isSubmitting = false;
 
   @override
   void initState() {
@@ -42,6 +43,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> login() async {
+    if (isSubmitting) {
+      return;
+    }
+
     if (emailController.text.trim().isEmpty ||
         passwordController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -50,14 +55,44 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    await authService.login(
-      email: emailController.text.trim(),
-      password: passwordController.text,
-      rememberLogin: rememberLogin,
-    );
+    setState(() {
+      isSubmitting = true;
+    });
 
-    if (mounted) {
-      widget.onAuthenticated();
+    try {
+      await authService.login(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+        rememberLogin: rememberLogin,
+      );
+
+      if (mounted) {
+        widget.onAuthenticated();
+      }
+    } on AuthException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nao foi possivel comunicar com a API.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -177,7 +212,10 @@ class _LoginPageState extends State<LoginPage> {
                             ],
                           ),
                           SizedBox(height: screenHeight < 700 ? 42 : 88),
-                          PrimaryAuthButton(text: 'Login', onPressed: login),
+                          PrimaryAuthButton(
+                            text: isSubmitting ? 'A entrar...' : 'Login',
+                            onPressed: login,
+                          ),
                           const SizedBox(height: 16),
                           Center(
                             child: TextButton(

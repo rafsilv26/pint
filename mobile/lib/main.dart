@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'pages/auth_gate.dart';
+import 'repositories/dashboard_repository.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DashboardRepository().prepareLocalData();
   runApp(const SoftinsaBadgesApp());
 }
 

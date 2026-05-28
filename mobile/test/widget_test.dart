@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,6 +7,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:softinsa_badges_mobile/main.dart';
 
 void main() {
+  Map<String, Object> loggedSession() {
+    return {
+      'softinsa_user_logged_in': true,
+      'softinsa_auth_token': fakeValidToken(),
+    };
+  }
+
   testWidgets('mostra login quando o utilizador nao tem sessao', (
     WidgetTester tester,
   ) async {
@@ -18,10 +27,22 @@ void main() {
     expect(find.text('Criar conta'), findsOneWidget);
   });
 
-  testWidgets('mostra a pagina inicial quando o utilizador tem sessao', (
+  testWidgets('nao entra se existir apenas flag antiga sem token', (
     WidgetTester tester,
   ) async {
     SharedPreferences.setMockInitialValues({'softinsa_user_logged_in': true});
+
+    await tester.pumpWidget(const SoftinsaBadgesApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Entrar'), findsOneWidget);
+    expect(find.text('Login'), findsOneWidget);
+  });
+
+  testWidgets('mostra a pagina inicial quando o utilizador tem sessao', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues(loggedSession());
 
     await tester.pumpWidget(const SoftinsaBadgesApp());
     await tester.pumpAndSettle();
@@ -35,7 +56,7 @@ void main() {
   testWidgets('abre a pagina de perfil pelo menu inferior', (
     WidgetTester tester,
   ) async {
-    SharedPreferences.setMockInitialValues({'softinsa_user_logged_in': true});
+    SharedPreferences.setMockInitialValues(loggedSession());
 
     await tester.pumpWidget(const SoftinsaBadgesApp());
     await tester.pumpAndSettle();
@@ -51,7 +72,7 @@ void main() {
   testWidgets('abre a gestao de assinatura atraves do perfil', (
     WidgetTester tester,
   ) async {
-    SharedPreferences.setMockInitialValues({'softinsa_user_logged_in': true});
+    SharedPreferences.setMockInitialValues(loggedSession());
 
     await tester.pumpWidget(const SoftinsaBadgesApp());
     await tester.pumpAndSettle();
@@ -80,7 +101,7 @@ void main() {
   testWidgets('abre diretorio e detalhes de consultor pelo perfil', (
     WidgetTester tester,
   ) async {
-    SharedPreferences.setMockInitialValues({'softinsa_user_logged_in': true});
+    SharedPreferences.setMockInitialValues(loggedSession());
 
     await tester.pumpWidget(const SoftinsaBadgesApp());
     await tester.pumpAndSettle();
@@ -114,7 +135,7 @@ void main() {
   testWidgets('abre gamification pelo menu de ranking', (
     WidgetTester tester,
   ) async {
-    SharedPreferences.setMockInitialValues({'softinsa_user_logged_in': true});
+    SharedPreferences.setMockInitialValues(loggedSession());
 
     await tester.pumpWidget(const SoftinsaBadgesApp());
     await tester.pumpAndSettle();
@@ -130,7 +151,7 @@ void main() {
   testWidgets('abre conquistas especiais pelo card da home', (
     WidgetTester tester,
   ) async {
-    SharedPreferences.setMockInitialValues({'softinsa_user_logged_in': true});
+    SharedPreferences.setMockInitialValues(loggedSession());
 
     await tester.pumpWidget(const SoftinsaBadgesApp());
     await tester.pumpAndSettle();
@@ -149,7 +170,7 @@ void main() {
   testWidgets('abre notificacoes pelo sino da home', (
     WidgetTester tester,
   ) async {
-    SharedPreferences.setMockInitialValues({'softinsa_user_logged_in': true});
+    SharedPreferences.setMockInitialValues(loggedSession());
 
     await tester.pumpWidget(const SoftinsaBadgesApp());
     await tester.pumpAndSettle();
@@ -165,7 +186,7 @@ void main() {
   testWidgets('abre alterar password atraves do perfil', (
     WidgetTester tester,
   ) async {
-    SharedPreferences.setMockInitialValues({'softinsa_user_logged_in': true});
+    SharedPreferences.setMockInitialValues(loggedSession());
 
     await tester.pumpWidget(const SoftinsaBadgesApp());
     await tester.pumpAndSettle();
@@ -183,4 +204,14 @@ void main() {
     expect(find.text('Palavra-Passe Atual'), findsOneWidget);
     expect(find.text('Dicas de Segurança'), findsOneWidget);
   });
+}
+
+String fakeValidToken() {
+  String encodePart(Map<String, Object> value) {
+    return base64Url.encode(utf8.encode(jsonEncode(value))).replaceAll('=', '');
+  }
+
+  final header = encodePart({'alg': 'HS256', 'typ': 'JWT'});
+  final payload = encodePart({'exp': 4102444800});
+  return '$header.$payload.signature';
 }

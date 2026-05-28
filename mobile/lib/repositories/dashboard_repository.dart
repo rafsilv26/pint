@@ -1,32 +1,47 @@
 import '../models/dashboard_data.dart';
 import '../services/badges_api_service.dart';
-import '../services/dashboard_cache_service.dart';
+import '../services/dashboard_sync_service.dart';
+import '../services/local_badges_database.dart';
 
 class DashboardRepository {
   DashboardRepository({
     BadgesApiService? apiService,
-    DashboardCacheService? cacheService,
+    LocalBadgesDatabase? database,
+    DashboardSyncService? syncService,
   }) : apiService = apiService ?? BadgesApiService(),
-       cacheService = cacheService ?? DashboardCacheService();
+       database = database ?? LocalBadgesDatabase.instance,
+       syncService =
+           syncService ??
+           DashboardSyncService(
+             apiService: apiService ?? BadgesApiService(),
+             database: database ?? LocalBadgesDatabase.instance,
+           );
 
   final BadgesApiService apiService;
-  final DashboardCacheService cacheService;
+  final LocalBadgesDatabase database;
+  final DashboardSyncService syncService;
+  bool _lastSyncSucceeded = false;
+
+  Future<void> prepareLocalData() async {
+    _lastSyncSucceeded = await syncService.syncDashboard();
+  }
 
   Future<DashboardData> getDashboard() async {
-    try {
-      final onlineData = await apiService.fetchDashboard();
-      await cacheService.saveDashboard(onlineData);
-      return onlineData.copyWith(loadedFromCache: false);
-    } catch (_) {
-      final cachedData = await cacheService.getDashboard();
+    await database.ensureSeedData();
+    final localData = await database.getDashboard();
 
-      if (cachedData != null) {
-        return cachedData.copyWith(loadedFromCache: true);
-      }
-
-      final sampleData = DashboardData.sample();
-      await cacheService.saveDashboard(sampleData);
-      return sampleData.copyWith(loadedFromCache: true);
+    if (localData != null) {
+      return localData.copyWith(loadedFromCache: !_lastSyncSucceeded);
     }
+
+    return DashboardData.sample().copyWith(loadedFromCache: true);
+  }
+
+  Future<void> refreshFromApi() async {
+    _lastSyncSucceeded = await syncService.syncDashboard();
+  }
+
+  Future<void> handleFirebaseAtualizaNotification() async {
+    await syncService.syncFromFirebaseAtualizaNotification();
   }
 }

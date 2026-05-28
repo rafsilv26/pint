@@ -23,7 +23,7 @@ class _AuthGateState extends State<AuthGate> {
 
   void showHome() {
     setState(() {
-      loggedInFuture = Future.value(true);
+      loggedInFuture = authService.isLoggedIn();
     });
   }
 
