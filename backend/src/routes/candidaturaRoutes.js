@@ -10,11 +10,11 @@ router.get('/minhas', protect, candidaturaController.listarMinhasCandidaturas);
 
 // TALENT MANAGER
 router.get('/talent/pendentes', protect, authorize('TalentManager'), candidaturaController.listarCandidaturasTalent);
-router.put('/:id/talent', protect, authorize('TalentManager'), candidaturaController.validarTalentManager);
+router.put('/talent/:id/validar', protect, authorize('TalentManager'), candidaturaController.validarTalentManager);
 
 // SERVICE LINE LEADER
 router.get('/serviceline/pendentes', protect, authorize('ServiceLine'), candidaturaController.listarCandidaturasServiceLine);
-router.put('/:id/serviceline', protect, authorize('ServiceLine'), candidaturaController.validarServiceLine);
+router.put('/serviceline/:id/validar', protect, authorize('ServiceLine'), candidaturaController.validarServiceLine);
 
 // ⚠️ Esta tem de ficar SEMPRE no fim — apanha qualquer /:id
 router.get('/:id', protect, candidaturaController.detalhesCandidatura);
