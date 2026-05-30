@@ -1,13 +1,5 @@
 const { Candidatura, Evidencia, Badge, User, HistoricoCandidatura } = require('../models/index');
 const { uploadFicheiro } = require('../services/cloudinary.service');
-const {
-  emailCandidaturaSubmetida,
-  emailNovaSubmissao,
-  emailEnviadoParaServiceLine,
-  emailBadgeAprovado,
-  emailBadgeRejeitado,
-  emailSendBack
-} = require('../services/email.service');
 
 // ─────────────────────────────────────────────
 // CONSULTOR — Submeter candidatura a um badge
@@ -15,16 +7,14 @@ const {
 exports.submeterCandidatura = async (req, res) => {
   try {
     const { badgeId } = req.body;
-    const consultorId = req.user.id; // vem do middleware de auth da Pessoa 1
+    const consultorId = req.user.id;
     const ficheiros = req.files;
 
-    // 1. Verifica se o badge existe
     const badge = await Badge.findByPk(badgeId);
     if (!badge) {
       return res.status(404).json({ erro: 'Badge não encontrado' });
     }
 
-    // 2. Verifica se já tem candidatura pendente para este badge
     const candidaturaExistente = await Candidatura.findOne({
       where: {
         consultorId,
@@ -36,7 +26,6 @@ exports.submeterCandidatura = async (req, res) => {
       return res.status(400).json({ erro: 'Já tens uma candidatura pendente para este badge' });
     }
 
-    // 3. Faz upload das evidências para o Cloudinary
     const evidencias = await Promise.all(
       ficheiros.map(async (ficheiro) => {
         const url = await uploadFicheiro(ficheiro);
@@ -48,21 +37,18 @@ exports.submeterCandidatura = async (req, res) => {
       })
     );
 
-    // 4. Cria a candidatura na BD
     const candidatura = await Candidatura.create({
       consultorId,
       badgeId,
       estado: 'SUBMITTED'
     });
 
-    // 5. Guarda as evidências associadas à candidatura
     await Promise.all(
       evidencias.map(ev =>
         Evidencia.create({ ...ev, candidaturaId: candidatura.id })
       )
     );
 
-    // 6. Regista no histórico
     await HistoricoCandidatura.create({
       candidaturaId: candidatura.id,
       estadoAnterior: 'OPEN',
@@ -71,19 +57,6 @@ exports.submeterCandidatura = async (req, res) => {
       userId: consultorId
     });
 
-    // 7. Envia emails
-    const consultor = await User.findByPk(consultorId);
-    await emailCandidaturaSubmetida(consultor, badge);
-
-    // Notifica todos os Talent Managers
-    const talentManagers = await User.findAll({
-      where: { role: 'TalentManager' }
-    });
-    await Promise.all(
-      talentManagers.map(tm => emailNovaSubmissao(tm, consultor, badge))
-    );
-
-    // 8. Responde ao frontend
     res.status(201).json({
       mensagem: 'Candidatura submetida com sucesso!',
       candidaturaId: candidatura.id
@@ -154,7 +127,7 @@ exports.listarCandidaturasTalent = async (req, res) => {
         { model: Evidencia },
         { model: User, as: 'consultor' }
       ],
-      order: [['createdAt', 'ASC']] // mais antigas primeiro
+      order: [['createdAt', 'ASC']]
     });
 
     res.json(candidaturas);
@@ -168,9 +141,8 @@ exports.listarCandidaturasTalent = async (req, res) => {
 // ─────────────────────────────────────────────
 exports.validarTalentManager = async (req, res) => {
   try {
-    const { id } = req.params; // id da candidatura
+    const { id } = req.params;
     const { decisao, comentario } = req.body;
-    // decisao: 'APROVAR' ou 'REJEITAR'
     const talentManagerId = req.user.id;
 
     const candidatura = await Candidatura.findByPk(id, {
@@ -186,14 +158,12 @@ exports.validarTalentManager = async (req, res) => {
     }
 
     if (decisao === 'APROVAR') {
-      // Muda estado para EM_VALIDACAO
       await candidatura.update({
         estado: 'EM_VALIDACAO',
         talentManagerId,
         dataValidacaoTalent: new Date()
       });
 
-      // Regista no histórico
       await HistoricoCandidatura.create({
         candidaturaId: candidatura.id,
         estadoAnterior: 'SUBMITTED',
@@ -203,23 +173,9 @@ exports.validarTalentManager = async (req, res) => {
         userId: talentManagerId
       });
 
-      // Notifica o consultor
-      await emailEnviadoParaServiceLine(candidatura.consultor, candidatura.Badge);
-
-      // Notifica o Service Line Leader da área do badge
-      const serviceLineLeaders = await User.findAll({
-        where: { role: 'ServiceLine' }
-      });
-      await Promise.all(
-        serviceLineLeaders.map(sl =>
-          emailNovaSubmissao(sl, candidatura.consultor, candidatura.Badge)
-        )
-      );
-
       res.json({ mensagem: 'Candidatura enviada para o Service Line Leader' });
 
     } else if (decisao === 'REJEITAR') {
-      // Volta ao estado OPEN
       await candidatura.update({
         estado: 'OPEN',
         talentManagerId,
@@ -227,7 +183,6 @@ exports.validarTalentManager = async (req, res) => {
         comentario
       });
 
-      // Regista no histórico
       await HistoricoCandidatura.create({
         candidaturaId: candidatura.id,
         estadoAnterior: 'SUBMITTED',
@@ -236,9 +191,6 @@ exports.validarTalentManager = async (req, res) => {
         comentario,
         userId: talentManagerId
       });
-
-      // Notifica o consultor
-      await emailBadgeRejeitado(candidatura.consultor, candidatura.Badge, comentario);
 
       res.json({ mensagem: 'Candidatura devolvida ao consultor' });
 
@@ -281,7 +233,6 @@ exports.validarServiceLine = async (req, res) => {
   try {
     const { id } = req.params;
     const { decisao, comentario } = req.body;
-    // decisao: 'APROVAR', 'REJEITAR', 'SEND_BACK'
     const serviceLineId = req.user.id;
 
     const candidatura = await Candidatura.findByPk(id, {
@@ -297,7 +248,6 @@ exports.validarServiceLine = async (req, res) => {
     }
 
     if (decisao === 'APROVAR') {
-      // Calcula data de expiração se o badge tiver duração definida
       let dataExpiracao = null;
       if (candidatura.Badge.temExpiracao && candidatura.Badge.duracaoMeses) {
         dataExpiracao = new Date();
@@ -311,13 +261,6 @@ exports.validarServiceLine = async (req, res) => {
         dataExpiracao
       });
 
-      // Adiciona pontos ao consultor
-      const consultor = candidatura.consultor;
-      await consultor.update({
-        // o colega precisa de adicionar campo "pontos" ao modelo User
-        // pontos: consultor.pontos + candidatura.Badge.pontos
-      });
-
       await HistoricoCandidatura.create({
         candidaturaId: candidatura.id,
         estadoAnterior: 'EM_VALIDACAO',
@@ -326,12 +269,6 @@ exports.validarServiceLine = async (req, res) => {
         comentario,
         userId: serviceLineId
       });
-
-      await emailBadgeAprovado(
-        candidatura.consultor,
-        candidatura.Badge,
-        candidatura.Badge.uuid
-      );
 
       res.json({ mensagem: 'Badge aprovado e publicado!' });
 
@@ -352,8 +289,6 @@ exports.validarServiceLine = async (req, res) => {
         userId: serviceLineId
       });
 
-      await emailBadgeRejeitado(candidatura.consultor, candidatura.Badge, comentario);
-
       res.json({ mensagem: 'Candidatura rejeitada' });
 
     } else if (decisao === 'SEND_BACK') {
@@ -372,8 +307,6 @@ exports.validarServiceLine = async (req, res) => {
         comentario,
         userId: serviceLineId
       });
-
-      await emailSendBack(candidatura.consultor, candidatura.Badge, comentario);
 
       res.json({ mensagem: 'Candidatura devolvida ao consultor para correção' });
 
