@@ -6,7 +6,6 @@ const { protect, authorize } = require('../middlewares/authMiddleware');
 
 router.use('/auth', require('./authRoutes'));
 router.use('/users', protect, authorize('Admin'), require('./userRoutes'));
-router.use('/candidaturas', protect, authorize('Consultor', 'TalentManager'), require('./candidaturaRoutes'));
 router.use('/relatorios', protect, authorize('Admin', 'TalentManager', 'ServiceLineLeader'), require('./relatorioRoutes'));
 
 module.exports = router;
