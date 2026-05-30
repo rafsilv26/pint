@@ -34,6 +34,8 @@ const authorize = (...rolesPermitidos) => {
         if (!req.user) {
             return res.status(500).json({ message: 'Erro interno de configuração de segurança.' });
         }
+        
+        console.log('Role do utilizador:', req.user.role, '| Roles permitidos:', rolesPermitidos);
 
         // Verificar se o role do utilizador está na lista de perfis permitidos para esta rota
         if (!rolesPermitidos.includes(req.user.role)) {
