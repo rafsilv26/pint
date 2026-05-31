@@ -3,13 +3,13 @@ const router = express.Router();
 const relatorioController = require('../controllers/relatorioController');
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
-// Exportar Excel (só TalentManager e ServiceLine)
-router.get('/excel', protect, authorize('TalentManager', 'ServiceLine', 'Admin'), relatorioController.exportarCandidaturasExcel);
+// Consultor pode descarregar o seu certificado
+router.get('/certificado/:id', relatorioController.downloadCertificado);
 
-// Download certificado (consultor dono ou admin)
-router.get('/certificado/:id', protect, relatorioController.downloadCertificado);
+// Só Admin, TalentManager e ServiceLine podem ver Excel
+router.get('/excel', protect, authorize('Admin', 'TalentManager', 'ServiceLine'), relatorioController.exportarCandidaturasExcel);
 
-// Verificação pública do badge (sem auth — qualquer pessoa pode ver)
+// Público — sem restrições
 router.get('/verificar/:uuid', relatorioController.verificarBadge);
 
 module.exports = router;

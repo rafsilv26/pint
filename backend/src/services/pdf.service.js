@@ -92,7 +92,7 @@ const gerarCertificado = (consultor, badge, dataAprovacao) => {
     doc.fillColor('#003087')
        .fontSize(10)
        .text(
-         `Verificar autenticidade em: ${process.env.APP_URL}/badge/verificar/${badge.uuid}`,
+         `Verificar autenticidade em: ${process.env.APP_URL}/api/relatorios/verificar/${badge.uuid}`,
          0, 395, { align: 'center' }
        );
 
