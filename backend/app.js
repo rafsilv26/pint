@@ -21,7 +21,7 @@ sequelize.authenticate()
     .catch(err => console.error('❌ Erro crucial de ligação:', err));
 
 //Importar as rotas
-app.use('/api/', require('./src/routes'));
+app.use('/api', require('./src/routes'));
 
 app.post('/api/teste/badge', async (req, res) => {
   const { Badge } = require('./src/models/index');
