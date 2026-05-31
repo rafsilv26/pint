@@ -1,6 +1,6 @@
 const { Candidatura, Badge, User } = require('../models/index');
-const ExcelJS = require('exceljs');
 const { gerarCertificado } = require('../services/pdf.service');
+const { gerarExcelCandidaturas } = require('../services/excel.service');
 
 // Exportar candidaturas para Excel
 exports.exportarCandidaturasExcel = async (req, res) => {
@@ -9,30 +9,8 @@ exports.exportarCandidaturasExcel = async (req, res) => {
       include: [Badge, { model: User, as: 'consultor' }]
     });
 
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Candidaturas');
+    const workbook = await gerarExcelCandidaturas(candidaturas);
 
-    // Cabeçalhos
-    sheet.columns = [
-      { header: 'ID', key: 'id', width: 10 },
-      { header: 'Consultor', key: 'consultor', width: 30 },
-      { header: 'Badge', key: 'badge', width: 30 },
-      { header: 'Estado', key: 'estado', width: 20 },
-      { header: 'Data Submissão', key: 'data', width: 20 }
-    ];
-
-    // Dados
-    candidaturas.forEach(c => {
-      sheet.addRow({
-        id: c.id,
-        consultor: c.consultor?.email,
-        badge: c.Badge?.nome,
-        estado: c.estado,
-        data: c.createdAt?.toLocaleDateString('pt-PT')
-      });
-    });
-
-    // Envia o ficheiro
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=candidaturas.xlsx');
 
@@ -40,6 +18,7 @@ exports.exportarCandidaturasExcel = async (req, res) => {
     res.end();
 
   } catch (erro) {
+    console.error(erro);
     res.status(500).json({ erro: 'Erro ao gerar Excel' });
   }
 };
@@ -68,11 +47,12 @@ exports.downloadCertificado = async (req, res) => {
     res.send(pdfBuffer);
 
   } catch (erro) {
+    console.error(erro);
     res.status(500).json({ erro: 'Erro ao gerar certificado' });
   }
 };
 
-// Página pública de verificação do badge
+// Verificação pública do badge
 exports.verificarBadge = async (req, res) => {
   try {
     const { uuid } = req.params;
@@ -91,7 +71,6 @@ exports.verificarBadge = async (req, res) => {
       return res.status(404).json({ erro: 'Badge não foi atribuído' });
     }
 
-    // Devolve info pública — não devolve dados sensíveis!
     res.json({
       badge: {
         nome: badge.nome,
@@ -100,16 +79,17 @@ exports.verificarBadge = async (req, res) => {
         imagem: badge.imagem
       },
       consultor: {
-        nome: candidatura.consultor.nome,
+        nome: candidatura.consultor.nome
       },
       dataAtribuicao: candidatura.dataValidacaoServiceLine,
       dataExpiracao: candidatura.dataExpiracao,
-      valido: candidatura.dataExpiracao 
-        ? new Date() < new Date(candidatura.dataExpiracao) 
+      valido: candidatura.dataExpiracao
+        ? new Date() < new Date(candidatura.dataExpiracao)
         : true
     });
 
   } catch (erro) {
+    console.error(erro);
     res.status(500).json({ erro: 'Erro ao verificar badge' });
   }
 };
