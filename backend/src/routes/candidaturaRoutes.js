@@ -16,6 +16,11 @@ router.put('/talent/:id/validar', protect, authorize('TalentManager'), candidatu
 router.get('/serviceline/pendentes', protect, authorize('ServiceLine'), candidaturaController.listarCandidaturasServiceLine);
 router.put('/serviceline/:id/validar', protect, authorize('ServiceLine'), candidaturaController.validarServiceLine);
 
+router.use((req, res, next) => {
+  console.log('Rota chamada:', req.method, req.path);
+  next();
+});
+
 // ⚠️ Esta tem de ficar SEMPRE no fim — apanha qualquer /:id
 router.get('/:id', protect, candidaturaController.detalhesCandidatura);
 
