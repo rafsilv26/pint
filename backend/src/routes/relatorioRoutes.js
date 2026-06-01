@@ -9,6 +9,9 @@ router.get('/certificado/:id', relatorioController.downloadCertificado);
 // Só Admin, TalentManager e ServiceLine podem ver Excel
 router.get('/excel', protect, authorize('Admin', 'TalentManager', 'ServiceLine'), relatorioController.exportarCandidaturasExcel);
 
+// Relatório PDF de todas as candidaturas
+router.get('/pdf', protect, authorize('Admin', 'TalentManager', 'ServiceLine'), relatorioController.exportarCandidaturasPDF);
+
 // Público — sem restrições
 router.get('/verificar/:uuid', relatorioController.verificarBadge);
 

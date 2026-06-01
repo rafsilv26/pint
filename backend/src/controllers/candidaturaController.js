@@ -1,5 +1,13 @@
 const { Candidatura, Evidencia, Badge, User, HistoricoCandidatura } = require('../models/index');
 const { uploadFicheiro } = require('../services/cloudinary.service');
+const {
+  emailCandidaturaSubmetida,
+  emailNovaSubmissao,
+  emailEnviadoParaServiceLine,
+  emailBadgeAprovado,
+  emailBadgeRejeitado,
+  emailSendBack
+} = require('../services/email.service');
 
 // ─────────────────────────────────────────────
 // CONSULTOR — Submeter candidatura a um badge
@@ -56,6 +64,13 @@ exports.submeterCandidatura = async (req, res) => {
       acao: 'SUBMETIDO',
       userId: consultorId
     });
+
+    // Emails
+    const consultor = await User.findByPk(consultorId);
+    await emailCandidaturaSubmetida(consultor, badge);
+
+    const talentManagers = await User.findAll({ where: { role: 'TalentManager' } });
+    await Promise.all(talentManagers.map(tm => emailNovaSubmissao(tm, consultor, badge)));
 
     res.status(201).json({
       mensagem: 'Candidatura submetida com sucesso!',
@@ -173,6 +188,11 @@ exports.validarTalentManager = async (req, res) => {
         userId: talentManagerId
       });
 
+      await emailEnviadoParaServiceLine(candidatura.consultor, candidatura.Badge);
+
+      const serviceLineLeaders = await User.findAll({ where: { role: 'ServiceLine' } });
+      await Promise.all(serviceLineLeaders.map(sl => emailNovaSubmissao(sl, candidatura.consultor, candidatura.Badge)));
+
       res.json({ mensagem: 'Candidatura enviada para o Service Line Leader' });
 
     } else if (decisao === 'REJEITAR') {
@@ -191,6 +211,8 @@ exports.validarTalentManager = async (req, res) => {
         comentario,
         userId: talentManagerId
       });
+
+      await emailBadgeRejeitado(candidatura.consultor, candidatura.Badge, comentario);
 
       res.json({ mensagem: 'Candidatura devolvida ao consultor' });
 
@@ -270,6 +292,12 @@ exports.validarServiceLine = async (req, res) => {
         userId: serviceLineId
       });
 
+      await emailBadgeAprovado(
+        candidatura.consultor,
+        candidatura.Badge,
+        candidatura.Badge.uuid
+      );
+
       res.json({ mensagem: 'Badge aprovado e publicado!' });
 
     } else if (decisao === 'REJEITAR') {
@@ -289,6 +317,8 @@ exports.validarServiceLine = async (req, res) => {
         userId: serviceLineId
       });
 
+      await emailBadgeRejeitado(candidatura.consultor, candidatura.Badge, comentario);
+
       res.json({ mensagem: 'Candidatura rejeitada' });
 
     } else if (decisao === 'SEND_BACK') {
@@ -307,6 +337,8 @@ exports.validarServiceLine = async (req, res) => {
         comentario,
         userId: serviceLineId
       });
+
+      await emailSendBack(candidatura.consultor, candidatura.Badge, comentario);
 
       res.json({ mensagem: 'Candidatura devolvida ao consultor para correção' });
 

@@ -1,67 +1,183 @@
-// src/services/email.service.js
 const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // ou SendGrid
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   }
 });
 
+// Função base
 const enviarEmail = async (para, assunto, html) => {
-  await transporter.sendMail({
-    from: '"Softinsa Badges" <badges@softinsa.pt>',
-    to: para,
-    subject: assunto,
-    html
-  });
+  try {
+    await transporter.sendMail({
+      from: `"Softinsa Badges" <${process.env.EMAIL_USER}>`,
+      to: para,
+      subject: assunto,
+      html
+    });
+    console.log(`✅ Email enviado para ${para}`);
+  } catch (erro) {
+    console.error('❌ Erro ao enviar email:', erro.message);
+    throw erro;
+  }
 };
 
-// Emails específicos do projeto
-const emailCandidaturaSubmetida = (consultor, badge) => {
-  return enviarEmail(
+// Email ao consultor quando submete candidatura
+const emailCandidaturaSubmetida = async (consultor, badge) => {
+  await enviarEmail(
     consultor.email,
-    'Candidatura submetida com sucesso',
-    `<h2>Olá ${consultor.nome}!</h2>
-     <p>A tua candidatura ao badge <strong>${badge.nome}</strong> foi submetida.</p>
-     <p>Aguarda validação do Talent Manager.</p>`
+    '✅ Candidatura submetida com sucesso',
+    `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #003087; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
+        <p style="color: #cccccc; margin: 5px 0;">Plataforma de Badges</p>
+      </div>
+      <div style="padding: 30px; background-color: #f9f9f9;">
+        <h2>Olá ${consultor.nome}!</h2>
+        <p>A tua candidatura ao badge <strong>${badge.nome}</strong> foi submetida com sucesso.</p>
+        <p>Aguarda a validação do Talent Manager. Serás notificado por email.</p>
+        <div style="background-color: #e8f0fe; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Badge:</strong> ${badge.nome}</p>
+          <p style="margin: 5px 0;"><strong>Nível:</strong> ${badge.nivel}</p>
+          <p style="margin: 5px 0;"><strong>Estado:</strong> Submetido</p>
+        </div>
+        <p>Equipa Softinsa Badges</p>
+      </div>
+    </div>
+    `
   );
 };
 
-const emailAprovado = (consultor, badge) => {
-  return enviarEmail(
+// Email ao Talent Manager quando há nova candidatura
+const emailNovaSubmissao = async (talentManager, consultor, badge) => {
+  await enviarEmail(
+    talentManager.email,
+    '🔔 Nova candidatura para validar',
+    `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #003087; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
+        <p style="color: #cccccc; margin: 5px 0;">Plataforma de Badges</p>
+      </div>
+      <div style="padding: 30px; background-color: #f9f9f9;">
+        <h2>Nova candidatura recebida</h2>
+        <p>O consultor <strong>${consultor.nome}</strong> submeteu uma candidatura.</p>
+        <div style="background-color: #e8f0fe; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Consultor:</strong> ${consultor.nome}</p>
+          <p style="margin: 5px 0;"><strong>Badge:</strong> ${badge.nome}</p>
+          <p style="margin: 5px 0;"><strong>Nível:</strong> ${badge.nivel}</p>
+        </div>
+        <p>Acede à plataforma para validar as evidências.</p>
+      </div>
+    </div>
+    `
+  );
+};
+
+// Email ao consultor quando Talent Manager aprova
+const emailEnviadoParaServiceLine = async (consultor, badge) => {
+  await enviarEmail(
+    consultor.email,
+    '🔄 Candidatura em validação final',
+    `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #003087; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
+      </div>
+      <div style="padding: 30px; background-color: #f9f9f9;">
+        <h2>Olá ${consultor.nome}!</h2>
+        <p>A tua candidatura ao badge <strong>${badge.nome}</strong> foi validada pelo Talent Manager.</p>
+        <p>Está agora em validação final pelo Service Line Leader.</p>
+      </div>
+    </div>
+    `
+  );
+};
+
+// Email ao consultor quando badge aprovado
+const emailBadgeAprovado = async (consultor, badge, uuid) => {
+  await enviarEmail(
     consultor.email,
     '🎉 Badge aprovado!',
-    `<h2>Parabéns ${consultor.nome}!</h2>
-     <p>O teu badge <strong>${badge.nome}</strong> foi aprovado!</p>
-     <p>Já podes consultar o teu badge em: <a href="${process.env.APP_URL}/badge/${badge.uuid}">Ver Badge</a></p>`
+    `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #003087; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
+      </div>
+      <div style="padding: 30px; background-color: #f9f9f9;">
+        <h2>Parabéns ${consultor.nome}! 🎉</h2>
+        <p>O teu badge <strong>${badge.nome}</strong> foi aprovado!</p>
+        <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Badge:</strong> ${badge.nome}</p>
+          <p style="margin: 5px 0;"><strong>Nível:</strong> ${badge.nivel}</p>
+          <p style="margin: 5px 0;"><strong>Pontos:</strong> ${badge.pontos}</p>
+        </div>
+        <a href="${process.env.APP_URL}/api/relatorios/verificar/${uuid}" 
+           style="background-color: #003087; color: white; padding: 10px 20px; 
+                  text-decoration: none; border-radius: 5px;">
+          Ver Badge
+        </a>
+      </div>
+    </div>
+    `
   );
 };
 
-const emailRejeitado = (consultor, badge, motivo) => {
-  return enviarEmail(
+// Email ao consultor quando rejeitado
+const emailBadgeRejeitado = async (consultor, badge, motivo) => {
+  await enviarEmail(
     consultor.email,
-    'Candidatura rejeitada',
-    `<h2>Olá ${consultor.nome}</h2>
-     <p>A tua candidatura ao badge <strong>${badge.nome}</strong> foi rejeitada.</p>
-     <p><strong>Motivo:</strong> ${motivo}</p>`
+    '❌ Candidatura rejeitada',
+    `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #003087; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
+      </div>
+      <div style="padding: 30px; background-color: #f9f9f9;">
+        <h2>Olá ${consultor.nome}</h2>
+        <p>A tua candidatura ao badge <strong>${badge.nome}</strong> foi rejeitada.</p>
+        <div style="background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Motivo:</strong> ${motivo}</p>
+        </div>
+        <p>Podes submeter uma nova candidatura com as evidências corretas.</p>
+      </div>
+    </div>
+    `
   );
 };
 
-const emailTalentManager = (talentManager, consultor, badge) => {
-  return enviarEmail(
-    talentManager.email,
-    'Nova candidatura para validar',
-    `<h2>Nova candidatura recebida</h2>
-     <p>O consultor <strong>${consultor.nome}</strong> submeteu candidatura ao badge <strong>${badge.nome}</strong>.</p>
-     <p><a href="${process.env.APP_URL}/talent/candidaturas">Ver candidatura</a></p>`
+// Email ao consultor quando send back
+const emailSendBack = async (consultor, badge, comentario) => {
+  await enviarEmail(
+    consultor.email,
+    '↩️ Candidatura devolvida para correção',
+    `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #003087; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
+      </div>
+      <div style="padding: 30px; background-color: #f9f9f9;">
+        <h2>Olá ${consultor.nome}</h2>
+        <p>A tua candidatura ao badge <strong>${badge.nome}</strong> foi devolvida para correção.</p>
+        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Comentário:</strong> ${comentario}</p>
+        </div>
+        <p>Por favor corrige as evidências e volta a submeter.</p>
+      </div>
+    </div>
+    `
   );
 };
 
 module.exports = {
   emailCandidaturaSubmetida,
-  emailAprovado,
-  emailRejeitado,
-  emailTalentManager
+  emailNovaSubmissao,
+  emailEnviadoParaServiceLine,
+  emailBadgeAprovado,
+  emailBadgeRejeitado,
+  emailSendBack
 };
