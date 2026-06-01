@@ -1,4 +1,5 @@
 const cloudinary = require('cloudinary').v2;
+const { Readable } = require('stream');
 require('dotenv').config();
 
 cloudinary.config({
@@ -9,9 +10,30 @@ cloudinary.config({
 
 const uploadFicheiro = async (ficheiro) => {
   try {
+    if (ficheiro.buffer) {
+      return await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'softinsa/evidencias',
+            resource_type: 'auto'
+          },
+          (erro, resultado) => {
+            if (erro) {
+              reject(new Error('Erro ao fazer upload do ficheiro: ' + erro.message));
+              return;
+            }
+
+            resolve(resultado.secure_url);
+          }
+        );
+
+        Readable.from(ficheiro.buffer).pipe(uploadStream);
+      });
+    }
+
     const resultado = await cloudinary.uploader.upload(ficheiro.path, {
       folder: 'softinsa/evidencias',
-      resource_type: 'auto' // aceita PDF e imagens
+      resource_type: 'auto'
     });
     return resultado.secure_url;
   } catch (erro) {
