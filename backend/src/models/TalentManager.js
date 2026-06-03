@@ -5,7 +5,7 @@ const TalentManager = sequelize.define('TalentManager', {
     tmId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        references: { model: 'Users', key: 'id' }
+        references: { model: 'UTILIZADOR', key: 'id' }
     },
     createdAt: {
         type: DataTypes.DATE,

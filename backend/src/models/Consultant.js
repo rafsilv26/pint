@@ -5,7 +5,7 @@ const Consultant = sequelize.define('Consultant', {
     consultorId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        references: { model: 'Users', key: 'id' }
+        references: { model: 'UTILIZADOR', key: 'id' }
     },
     areaId: {
         type: DataTypes.INTEGER,

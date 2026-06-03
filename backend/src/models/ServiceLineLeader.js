@@ -5,7 +5,7 @@ const ServiceLineLeader = sequelize.define('ServiceLineLeader', {
     sslId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        references: { model: 'Users', key: 'id' }
+        references: { model: 'UTILIZADOR', key: 'id' }
     },
     serviceLineId: {
         type: DataTypes.INTEGER,

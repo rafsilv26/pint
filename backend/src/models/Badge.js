@@ -54,12 +54,10 @@ const Badge = sequelize.define('Badge', {
   },
   slug: {
     type: DataTypes.STRING(100),
-    unique: true,
     comment: "URL-friendly identifier para públicos (ex: 'aws-solutions-architect'), que depois fica /badges/aws-solutions-architect para a pagina pública"
   },
   publicToken: {
     type: DataTypes.STRING(255),
-    unique: true,
     comment: 'Token público para compartilhar prova de conquista'
   },
   ativo: {
@@ -80,7 +78,17 @@ const Badge = sequelize.define('Badge', {
   }
 }, {
   tableName: 'BADGE',
-  timestamps: false
+  timestamps: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['slug']
+    },
+    {
+      unique: true,
+      fields: ['publicToken']
+    }
+  ]
 });
 
 module.exports = Badge;
