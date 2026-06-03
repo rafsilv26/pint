@@ -1,25 +1,25 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Area = sequelize.define('Area', {
-    id: {
+const EmailSignature = sequelize.define('EmailSignature', {
+    signatureId: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true
     },
-    serviceLineId: {
+    consultorId: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    nome: {
-        type: DataTypes.STRING(255),
+    badgeId: {
+        type: DataTypes.INTEGER,
         allowNull: false
     },
-    descricao: {
-        type: DataTypes.STRING(1000),
+    templateHtml: {
+        type: DataTypes.TEXT,
         allowNull: true
     },
-    ativo: {
+    active: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
     },
@@ -30,14 +30,10 @@ const Area = sequelize.define('Area', {
     updatedAt: {
         type: DataTypes.DATE,
         allowNull: true
-    },
-    deletedAt: {
-        type: DataTypes.DATE,
-        allowNull: true
     }
 }, {
-    tableName: 'AREA',
+    tableName: 'EMAIL_ASSINATURA',
     timestamps: false
 });
 
-module.exports = Area;
+module.exports = EmailSignature;

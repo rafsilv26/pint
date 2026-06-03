@@ -1,43 +1,39 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Area = sequelize.define('Area', {
-    id: {
+const CertificateDownload = sequelize.define('CertificateDownload', {
+    downloadId: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true
     },
-    serviceLineId: {
+    consultorId: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    nome: {
-        type: DataTypes.STRING(255),
+    badgeId: {
+        type: DataTypes.INTEGER,
         allowNull: false
     },
-    descricao: {
-        type: DataTypes.STRING(1000),
-        allowNull: true
-    },
-    ativo: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true
-    },
-    createdAt: {
+    downloadedAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
     },
-    updatedAt: {
-        type: DataTypes.DATE,
+    originIP: {
+        type: DataTypes.STRING(45),
         allowNull: true
     },
-    deletedAt: {
-        type: DataTypes.DATE,
+    userAgent: {
+        type: DataTypes.STRING(500),
         allowNull: true
+    },
+    format: {
+        type: DataTypes.STRING(20),
+        defaultValue: 'PDF'
     }
 }, {
-    tableName: 'AREA',
+    tableName: 'CERTIFICADO_DOWNLOAD',
     timestamps: false
 });
 
-module.exports = Area;
+module.exports = CertificateDownload;

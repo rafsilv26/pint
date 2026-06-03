@@ -1,27 +1,35 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Area = sequelize.define('Area', {
-    id: {
+const BadgePremium = sequelize.define('BadgePremium', {
+    badgePremiumId: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true
     },
-    serviceLineId: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    nome: {
+    name: {
         type: DataTypes.STRING(255),
         allowNull: false
     },
-    descricao: {
-        type: DataTypes.STRING(1000),
+    description: {
+        type: DataTypes.TEXT,
         allowNull: true
     },
-    ativo: {
+    icon: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    criteriaDescription: {
+        type: DataTypes.STRING(500),
+        allowNull: true
+    },
+    active: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
+    },
+    createdBy: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     },
     createdAt: {
         type: DataTypes.DATE,
@@ -36,8 +44,8 @@ const Area = sequelize.define('Area', {
         allowNull: true
     }
 }, {
-    tableName: 'AREA',
+    tableName: 'BADGE_PREMIUM',
     timestamps: false
 });
 
-module.exports = Area;
+module.exports = BadgePremium;

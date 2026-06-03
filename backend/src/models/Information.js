@@ -1,27 +1,39 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Area = sequelize.define('Area', {
-    id: {
+const Information = sequelize.define('Information', {
+    infoId: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true
     },
-    serviceLineId: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    nome: {
+    title: {
         type: DataTypes.STRING(255),
         allowNull: false
     },
-    descricao: {
-        type: DataTypes.STRING(1000),
+    message: {
+        type: DataTypes.TEXT,
+        allowNull: false
+    },
+    type: {
+        type: DataTypes.STRING(50),
         allowNull: true
     },
-    ativo: {
+    active: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
+    },
+    startDate: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    endDate: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    createdBy: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     },
     createdAt: {
         type: DataTypes.DATE,
@@ -36,8 +48,8 @@ const Area = sequelize.define('Area', {
         allowNull: true
     }
 }, {
-    tableName: 'AREA',
+    tableName: 'INFORMACAO',
     timestamps: false
 });
 
-module.exports = Area;
+module.exports = Information;

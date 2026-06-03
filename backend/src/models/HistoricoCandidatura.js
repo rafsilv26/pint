@@ -2,26 +2,38 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const HistoricoCandidatura = sequelize.define('HistoricoCandidatura', {
-  estadoAnterior: { 
-    type: DataTypes.STRING 
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
   },
-  estadoNovo: { 
-    type: DataTypes.STRING 
+  candidaturaId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
   },
-  comentario: { 
-    type: DataTypes.TEXT 
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
   },
-  acao: {
-    type: DataTypes.ENUM(
-      'SUBMETIDO',
-      'APROVADO_TALENT',
-      'REJEITADO_TALENT', 
-      'APROVADO_SERVICELINE',
-      'REJEITADO_SERVICELINE',
-      'SEND_BACK'
-    )
+  estadoAnterior: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
-  // quem fez a ação fica guardado pela associação com User
+  estadoNovo: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  motivo: {
+    type: DataTypes.STRING(500),
+    allowNull: true
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  }
+}, {
+  tableName: 'LOGSWORKFLOW_CANDIDATURABADGE',
+  timestamps: false
 });
 
 module.exports = HistoricoCandidatura;

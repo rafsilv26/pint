@@ -2,37 +2,86 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Badge = sequelize.define('Badge', {
-  nome: { 
-    type: DataTypes.STRING, 
-    allowNull: false 
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
   },
-  descricao: { 
-    type: DataTypes.TEXT 
+  nivelId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
-  imagem: { 
-    type: DataTypes.STRING // URL da imagem
+  nome: {
+    type: DataTypes.STRING,
+    allowNull: false
   },
-  pontos: { 
-    type: DataTypes.INTEGER, 
-    defaultValue: 0 
+  descricao: {
+    type: DataTypes.TEXT
   },
-  uuid: { 
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4, // link único verificável
-    unique: true
+  ponto: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    comment: 'Pontos gamification atribuídos ao conquistar badge'
   },
-  temExpiracao: { 
-    type: DataTypes.BOOLEAN, 
-    defaultValue: false 
+  tipo: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    comment: "Ex: 'Certificacao', 'Formacao', 'Conquista'"
   },
-  duracaoMeses: { 
-    type: DataTypes.INTEGER, // quantos meses até expirar
-    allowNull: true 
+  fornecedor: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    comment: 'Entidade que oferece (ex: AWS, Microsoft, etc)'
   },
-  ativo: { 
-    type: DataTypes.BOOLEAN, 
-    defaultValue: true 
+  custoEstimado: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+    comment: 'Custo financeiro para completar a badge'
+  },
+  expiracao: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: false,
+    comment: 'Data absoluta de expiração (null = nunca expira)'
+  },
+  duracaoMeses: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    comment: 'Meses até expiração (ex: 12 meses para AWS)'
+  },
+  imagem: {
+    type: DataTypes.STRING,
+    comment: 'URL da imagem/icon da badge'
+  },
+  slug: {
+    type: DataTypes.STRING(100),
+    unique: true,
+    comment: "URL-friendly identifier para públicos (ex: 'aws-solutions-architect'), que depois fica /badges/aws-solutions-architect para a pagina pública"
+  },
+  publicToken: {
+    type: DataTypes.STRING(255),
+    unique: true,
+    comment: 'Token público para compartilhar prova de conquista'
+  },
+  ativo: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
+}, {
+  tableName: 'BADGE',
+  timestamps: false
 });
 
 module.exports = Badge;

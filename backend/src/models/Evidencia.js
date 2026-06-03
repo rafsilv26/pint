@@ -2,6 +2,11 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Evidencia = sequelize.define('Evidencia', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
   url: { 
     type: DataTypes.STRING, 
     allowNull: false // URL do Cloudinary
@@ -12,7 +17,38 @@ const Evidencia = sequelize.define('Evidencia', {
   tipo: { 
     type: DataTypes.ENUM('PDF', 'IMAGEM'), 
     allowNull: false 
+  },
+  candidaturaId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  requisitoId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  descricao: {
+    type: DataTypes.STRING(500),
+    allowNull: true
+  },
+  dataUpload: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  },
+  uploadedBy: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
+}, {
+  tableName: 'EVIDENCIA',
+  timestamps: false
 });
 
 module.exports = Evidencia;

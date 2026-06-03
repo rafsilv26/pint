@@ -1,27 +1,27 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Area = sequelize.define('Area', {
-    id: {
+const Feedback = sequelize.define('Feedback', {
+    feedbackId: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true
     },
-    serviceLineId: {
+    candidaturaId: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    nome: {
-        type: DataTypes.STRING(255),
+    userId: {
+        type: DataTypes.INTEGER,
         allowNull: false
     },
-    descricao: {
-        type: DataTypes.STRING(1000),
+    text: {
+        type: DataTypes.TEXT,
         allowNull: true
     },
-    ativo: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true
+    type: {
+        type: DataTypes.STRING(50),
+        allowNull: false
     },
     createdAt: {
         type: DataTypes.DATE,
@@ -30,14 +30,10 @@ const Area = sequelize.define('Area', {
     updatedAt: {
         type: DataTypes.DATE,
         allowNull: true
-    },
-    deletedAt: {
-        type: DataTypes.DATE,
-        allowNull: true
     }
 }, {
-    tableName: 'AREA',
+    tableName: 'FEEDBACK_CANDIDATURA',
     timestamps: false
 });
 
-module.exports = Area;
+module.exports = Feedback;

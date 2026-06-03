@@ -1,25 +1,33 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Area = sequelize.define('Area', {
-    id: {
+const ExternalIntegration = sequelize.define('ExternalIntegration', {
+    integrationId: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true
     },
-    serviceLineId: {
+    userId: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    nome: {
-        type: DataTypes.STRING(255),
+    platform: {
+        type: DataTypes.STRING(50),
         allowNull: false
     },
-    descricao: {
-        type: DataTypes.STRING(1000),
+    externalUserId: {
+        type: DataTypes.STRING(500),
+        allowNull: false
+    },
+    webhookUrl: {
+        type: DataTypes.STRING(500),
         allowNull: true
     },
-    ativo: {
+    accessToken: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    active: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
     },
@@ -30,14 +38,10 @@ const Area = sequelize.define('Area', {
     updatedAt: {
         type: DataTypes.DATE,
         allowNull: true
-    },
-    deletedAt: {
-        type: DataTypes.DATE,
-        allowNull: true
     }
 }, {
-    tableName: 'AREA',
+    tableName: 'INTEGRACAO_EXTERNA',
     timestamps: false
 });
 
-module.exports = Area;
+module.exports = ExternalIntegration;

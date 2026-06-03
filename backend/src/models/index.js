@@ -8,56 +8,196 @@ const ServiceLine = require('./ServiceLine');
 const Area = require('./Area');
 const Level = require('./Level');
 const Requirement = require('./Requirement');
+const Administrator = require('./Administrator');
+const Consultant = require('./Consultant');
+const ServiceLineLeader = require('./ServiceLineLeader');
+const TalentManager = require('./TalentManager');
+const PolicyRGPD = require('./PolicyRGPD');
+const PolicyRGPDAcceptance = require('./PolicyRGPDAcceptance');
+const BadgeStatus = require('./BadgeStatus');
+const SLAConfig = require('./SLAConfig');
+const ConsultorBadge = require('./ConsultorBadge');
+const CertificateDownload = require('./CertificateDownload');
+const BadgePremium = require('./BadgePremium');
+const ConsultorBadgePremium = require('./ConsultorBadgePremium');
+const ConsultorTimeline = require('./ConsultorTimeline');
+const RankingSnapshot = require('./RankingSnapshot');
+const NotificationConfig = require('./NotificationConfig');
+const Notice = require('./Notice');
+const Information = require('./Information');
+const Feedback = require('./Feedback');
+const ExternalIntegration = require('./ExternalIntegration');
+const EmailSignature = require('./EmailSignature');
+const LogsWorkflow = require('./LogsWorkflow');
 
-// Um Consultor pode ter várias Candidaturas
-User.hasMany(Candidatura, { foreignKey: 'consultorId', as: 'candidaturas' });
-Candidatura.belongsTo(User, { foreignKey: 'consultorId', as: 'consultor' });
+// User roles associations
+User.hasOne(Administrator, { foreignKey: 'adminId' });
+Administrator.belongsTo(User, { foreignKey: 'adminId' });
 
-// Um Badge pode ter várias Candidaturas
-Badge.hasMany(Candidatura, { foreignKey: 'badgeId' });
+User.hasOne(Consultant, { foreignKey: 'consultorId' });
+Consultant.belongsTo(User, { foreignKey: 'consultorId' });
+
+User.hasOne(ServiceLineLeader, { foreignKey: 'sslId' });
+ServiceLineLeader.belongsTo(User, { foreignKey: 'sslId' });
+
+User.hasOne(TalentManager, { foreignKey: 'tmId' });
+TalentManager.belongsTo(User, { foreignKey: 'tmId' });
+
+// Organizational hierarchy
+LearningPath.hasMany(ServiceLine, { foreignKey: 'learningPathId', as: 'serviceLines' });
+ServiceLine.belongsTo(LearningPath, { foreignKey: 'learningPathId' });
+
+ServiceLine.hasMany(Area, { foreignKey: 'serviceLineId', as: 'areas' });
+Area.belongsTo(ServiceLine, { foreignKey: 'serviceLineId' });
+
+Area.hasMany(Level, { foreignKey: 'areaId', as: 'levels' });
+Level.belongsTo(Area, { foreignKey: 'areaId' });
+
+Area.hasMany(Consultant, { foreignKey: 'areaId', as: 'consultants' });
+Consultant.belongsTo(Area, { foreignKey: 'areaId' });
+
+ServiceLine.hasMany(ServiceLineLeader, { foreignKey: 'serviceLineId' });
+ServiceLineLeader.belongsTo(ServiceLine, { foreignKey: 'serviceLineId' });
+
+// Badge and Level
+Level.hasMany(Badge, { foreignKey: 'nivelId', as: 'badges' });
+Badge.belongsTo(Level, { foreignKey: 'nivelId' });
+
+Level.hasMany(Requirement, { foreignKey: 'nivelId', as: 'requirements' });
+Requirement.belongsTo(Level, { foreignKey: 'nivelId' });
+
+// Candidature workflow
+Badge.hasMany(Candidatura, { foreignKey: 'badgeId', as: 'candidaturas' });
 Candidatura.belongsTo(Badge, { foreignKey: 'badgeId' });
 
-// Uma Candidatura tem várias Evidências
-Candidatura.hasMany(Evidencia, { foreignKey: 'candidaturaId' });
+Consultant.hasMany(Candidatura, { foreignKey: 'consultorId', as: 'candidaturas' });
+Candidatura.belongsTo(Consultant, { foreignKey: 'consultorId' });
+
+BadgeStatus.hasMany(Candidatura, { foreignKey: 'estadoId' });
+Candidatura.belongsTo(BadgeStatus, { foreignKey: 'estadoId', as: 'status' });
+
+TalentManager.hasMany(Candidatura, { foreignKey: 'talentManagerId' });
+Candidatura.belongsTo(TalentManager, { foreignKey: 'talentManagerId', as: 'talentManager' });
+
+ServiceLineLeader.hasMany(Candidatura, { foreignKey: 'serviceLineLeaderId' });
+Candidatura.belongsTo(ServiceLineLeader, { foreignKey: 'serviceLineLeaderId', as: 'serviceLineLeader' });
+
+SLAConfig.hasMany(Candidatura, { foreignKey: 'slaId' });
+Candidatura.belongsTo(SLAConfig, { foreignKey: 'slaId' });
+
+// Evidence
+Candidatura.hasMany(Evidencia, { foreignKey: 'candidaturaId', as: 'evidencias' });
 Evidencia.belongsTo(Candidatura, { foreignKey: 'candidaturaId' });
 
-// Uma Candidatura tem um Histórico
-Candidatura.hasMany(HistoricoCandidatura, { foreignKey: 'candidaturaId' });
+Requirement.hasMany(Evidencia, { foreignKey: 'requisitoId', as: 'evidencias' });
+Evidencia.belongsTo(Requirement, { foreignKey: 'requisitoId' });
+
+// Candidature history
+Candidatura.hasMany(HistoricoCandidatura, { foreignKey: 'candidaturaId', as: 'history' });
 HistoricoCandidatura.belongsTo(Candidatura, { foreignKey: 'candidaturaId' });
 
-// Quem fez cada ação no histórico
 User.hasMany(HistoricoCandidatura, { foreignKey: 'userId' });
 HistoricoCandidatura.belongsTo(User, { foreignKey: 'userId', as: 'responsavel' });
 
-// Uma Service Line pertence a um Learning Path
-ServiceLine.belongsTo(LearningPath, { foreignKey: 'learningPathId', onDelete: 'CASCADE' });
-LearningPath.hasMany(ServiceLine, { foreignKey: 'learningPathId' });
+BadgeStatus.hasMany(HistoricoCandidatura, { foreignKey: 'estadoAnterior', as: 'oldStatus' });
+BadgeStatus.hasMany(HistoricoCandidatura, { foreignKey: 'estadoNovo', as: 'newStatus' });
 
-// Uma Area pertence a uma Service Line
-Area.belongsTo(ServiceLine, { foreignKey: 'serviceLineId', onDelete: 'CASCADE' });
-ServiceLine.hasMany(Area, { foreignKey: 'serviceLineId' });
+// Feedback
+Candidatura.hasMany(Feedback, { foreignKey: 'candidaturaId', as: 'feedback' });
+Feedback.belongsTo(Candidatura, { foreignKey: 'candidaturaId' });
 
-// Uma level pertence a uma Area
-Level.belongsTo(Area, { foreignKey: 'areaId', onDelete: 'CASCADE' });
-Area.hasMany(Level, { foreignKey: 'areaId' });
+User.hasMany(Feedback, { foreignKey: 'userId' });
+Feedback.belongsTo(User, { foreignKey: 'userId', as: 'author' });
 
-// Um Badge pode estar associado a um Nível (Opcional, aceita NULL)
-Badge.belongsTo(Level, { foreignKey: { name: 'levelId', allowNull: true }, onDelete: 'CASCADE' });
-Level.hasOne(Badge, { foreignKey: 'levelId' });
+// Badge acquisition and tracking
+Consultant.hasMany(ConsultorBadge, { foreignKey: 'consultorId', as: 'acquiredBadges' });
+ConsultorBadge.belongsTo(Consultant, { foreignKey: 'consultorId' });
 
-// Um Requirement pertence a um Level
-Requirement.belongsTo(Level, { foreignKey: 'levelId', onDelete: 'CASCADE' });
-Level.hasMany(Requirement, { foreignKey: 'levelId' });
+Badge.hasMany(ConsultorBadge, { foreignKey: 'badgeId', as: 'acquiredBy' });
+ConsultorBadge.belongsTo(Badge, { foreignKey: 'badgeId' });
 
-module.exports = { 
-  User, 
-  Badge, 
-  Candidatura, 
-  Evidencia, 
+ConsultorBadge.hasMany(CertificateDownload, { foreignKey: ['consultorId', 'badgeId'] });
+CertificateDownload.belongsTo(ConsultorBadge, { foreignKey: ['consultorId', 'badgeId'] });
+
+ConsultorBadge.hasMany(EmailSignature, { foreignKey: ['consultorId', 'badgeId'] });
+EmailSignature.belongsTo(ConsultorBadge, { foreignKey: ['consultorId', 'badgeId'] });
+
+// Premium badges
+BadgePremium.hasMany(ConsultorBadgePremium, { foreignKey: 'badgePremiumId', as: 'acquiredBy' });
+ConsultorBadgePremium.belongsTo(BadgePremium, { foreignKey: 'badgePremiumId' });
+
+Consultant.hasMany(ConsultorBadgePremium, { foreignKey: 'consultorId', as: 'premiumBadges' });
+ConsultorBadgePremium.belongsTo(Consultant, { foreignKey: 'consultorId' });
+
+// Timeline and ranking
+Consultant.hasMany(ConsultorTimeline, { foreignKey: 'consultorId', as: 'timeline' });
+ConsultorTimeline.belongsTo(Consultant, { foreignKey: 'consultorId' });
+
+Consultant.hasMany(RankingSnapshot, { foreignKey: 'consultorId', as: 'rankings' });
+RankingSnapshot.belongsTo(Consultant, { foreignKey: 'consultorId' });
+
+// Policies
+Administrator.hasMany(PolicyRGPD, { foreignKey: 'createdBy' });
+PolicyRGPD.belongsTo(Administrator, { foreignKey: 'createdBy', as: 'creator' });
+
+PolicyRGPD.hasMany(PolicyRGPDAcceptance, { foreignKey: 'policyId', as: 'acceptances' });
+PolicyRGPDAcceptance.belongsTo(PolicyRGPD, { foreignKey: 'policyId' });
+
+Consultant.hasMany(PolicyRGPDAcceptance, { foreignKey: 'consultorId' });
+PolicyRGPDAcceptance.belongsTo(Consultant, { foreignKey: 'consultorId' });
+
+// Notifications
+User.hasMany(Notice, { foreignKey: 'userId', as: 'notices' });
+Notice.belongsTo(User, { foreignKey: 'userId' });
+
+NotificationConfig.hasMany(Notice, { foreignKey: 'notificationType' });
+Notice.belongsTo(NotificationConfig, { foreignKey: 'notificationType', as: 'notificationConfig' });
+
+// Information
+Administrator.hasMany(Information, { foreignKey: 'createdBy' });
+Information.belongsTo(Administrator, { foreignKey: 'createdBy', as: 'creator' });
+
+// Integrations
+User.hasMany(ExternalIntegration, { foreignKey: 'userId', as: 'integrations' });
+ExternalIntegration.belongsTo(User, { foreignKey: 'userId' });
+
+// Logs
+User.hasMany(LogsWorkflow, { foreignKey: 'userId' });
+LogsWorkflow.belongsTo(User, { foreignKey: 'userId', as: 'actor' });
+
+Candidatura.hasMany(LogsWorkflow, { foreignKey: 'candidaturaId', as: 'logs' });
+LogsWorkflow.belongsTo(Candidatura, { foreignKey: 'candidaturaId' });
+
+module.exports = {
+  User,
+  Badge,
+  Candidatura,
+  Evidencia,
   HistoricoCandidatura,
   LearningPath,
   ServiceLine,
   Area,
   Level,
-  Requirement
+  Requirement,
+  Administrator,
+  Consultant,
+  ServiceLineLeader,
+  TalentManager,
+  PolicyRGPD,
+  PolicyRGPDAcceptance,
+  BadgeStatus,
+  SLAConfig,
+  ConsultorBadge,
+  CertificateDownload,
+  BadgePremium,
+  ConsultorBadgePremium,
+  ConsultorTimeline,
+  RankingSnapshot,
+  NotificationConfig,
+  Notice,
+  Information,
+  Feedback,
+  ExternalIntegration,
+  EmailSignature,
+  LogsWorkflow
 };

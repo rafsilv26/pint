@@ -1,23 +1,51 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const Level = require('./Level');
 
 const Requirement = sequelize.define('Requirement', {
-    id: { type: DataTypes.INTEGER, 
-        autoIncrement: true, 
-        primaryKey: true 
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
     },
-    nome: { // Ex: "Curso AWS Practitioner"
-        type: DataTypes.STRING, 
-        allowNull: false 
-    }, 
-    descricao: { 
-        type: DataTypes.TEXT 
+    nivelId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     },
-    tipo: { 
-        type: DataTypes.ENUM('Curso', 'Certificacao', 'Formacao'), 
-        defaultValue: 'Curso' 
+    titulo: {
+        type: DataTypes.STRING(100),
+        allowNull: false
+    },
+    descricao: {
+        type: DataTypes.STRING(500),
+        allowNull: true
+    },
+    icone: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    obrigatorio: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    },
+    ordem: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    createdAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    deletedAt: {
+        type: DataTypes.DATE,
+        allowNull: true
     }
+}, {
+    tableName: 'REQUISITO',
+    timestamps: false
 });
 
 module.exports = Requirement;
