@@ -1,14 +1,40 @@
-const { Candidatura, Badge, User } = require('../models/index');
+const {
+  Candidatura,
+  Badge,
+  BadgeStatus,
+  Consultant,
+  User,
+  ConsultorBadge,
+  CertificateDownload
+} = require('../models');
 const { gerarCertificado } = require('../services/pdf.service');
 const { gerarExcelCandidaturas } = require('../services/excel.service');
 
-// Exportar candidaturas para Excel
-exports.exportarCandidaturasExcel = async (req, res) => {
-  try {
-    const candidaturas = await Candidatura.findAll({
-      include: [Badge, { model: User, as: 'consultor' }]
-    });
+const reportInclude = [
+  { model: Badge },
+  { model: BadgeStatus, as: 'status' },
+  { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] }
+];
 
+const findAwardByPublicToken = async (publicToken) => {
+  const badge = await Badge.findOne({ where: { publicToken } });
+  if (!badge) return null;
+
+  const award = await ConsultorBadge.findOne({
+    where: { badgeId: badge.id, valid: true },
+    include: [
+      { model: Badge },
+      { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] }
+    ],
+    order: [['obtainedDate', 'DESC']]
+  });
+
+  return award ? { badge, award } : { badge, award: null };
+};
+
+exports.exportarCandidaturasExcel = async (_req, res) => {
+  try {
+    const candidaturas = await Candidatura.findAll({ include: reportInclude });
     const workbook = await gerarExcelCandidaturas(candidaturas);
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -16,91 +42,84 @@ exports.exportarCandidaturasExcel = async (req, res) => {
 
     await workbook.xlsx.write(res);
     res.end();
-
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao gerar Excel' });
+    res.status(500).json({ erro: 'Erro ao gerar Excel', details: erro.message });
   }
 };
 
-// Download de certificado PDF
 exports.downloadCertificado = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const candidatura = await Candidatura.findByPk(id, {
-      include: [Badge, { model: User, as: 'consultor' }]
-    });
-
-    if (!candidatura || candidatura.estado !== 'FECHADO_APROVADO') {
-      return res.status(404).json({ erro: 'Badge não aprovado ou não encontrado' });
+    const result = await findAwardByPublicToken(req.params.publicToken);
+    if (!result || !result.award) {
+      return res.status(404).json({ erro: 'Badge atribuída não encontrada.' });
     }
 
+    const consultor = result.award.Consultant?.User;
     const pdfBuffer = await gerarCertificado(
-      candidatura.consultor,
-      candidatura.Badge,
-      candidatura.dataValidacaoServiceLine
+      consultor,
+      result.award.Badge,
+      result.award.obtainedDate
     );
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=certificado-${candidatura.Badge.nome}.pdf`);
-    res.send(pdfBuffer);
+    await CertificateDownload.create({
+      consultorId: result.award.consultorId,
+      badgeId: result.award.badgeId,
+      originIP: req.ip,
+      userAgent: req.headers['user-agent'],
+      format: 'PDF'
+    }).catch(() => null);
 
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=certificado-${result.award.Badge.nome}.pdf`);
+    res.send(pdfBuffer);
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao gerar certificado' });
+    res.status(500).json({ erro: 'Erro ao gerar certificado', details: erro.message });
   }
 };
 
-// Verificação pública do badge
 exports.verificarBadge = async (req, res) => {
   try {
-    const { uuid } = req.params;
-
-    const badge = await Badge.findOne({ where: { uuid } });
-    if (!badge) {
-      return res.status(404).json({ erro: 'Badge não encontrado' });
+    const result = await findAwardByPublicToken(req.params.publicToken);
+    if (!result) {
+      return res.status(404).json({ erro: 'Badge não encontrada.' });
     }
 
-    const candidatura = await Candidatura.findOne({
-      where: { badgeId: badge.id, estado: 'FECHADO_APROVADO' },
-      include: [{ model: User, as: 'consultor' }]
-    });
-
-    if (!candidatura) {
-      return res.status(404).json({ erro: 'Badge não foi atribuído' });
+    if (!result.award) {
+      return res.status(404).json({ erro: 'Badge ainda não foi atribuída.' });
     }
+
+    const consultor = result.award.Consultant?.User;
+    const expirationDate = result.award.expirationDate;
 
     res.json({
       badge: {
-        nome: badge.nome,
-        descricao: badge.descricao,
-        nivel: badge.nivel,
-        imagem: badge.imagem
+        id: result.badge.id,
+        nome: result.badge.nome,
+        descricao: result.badge.descricao,
+        imagem: result.badge.imagem,
+        fornecedor: result.badge.fornecedor,
+        tipo: result.badge.tipo,
+        publicToken: result.badge.publicToken
       },
-      consultor: {
-        nome: candidatura.consultor.nome
-      },
-      dataAtribuicao: candidatura.dataValidacaoServiceLine,
-      dataExpiracao: candidatura.dataExpiracao,
-      valido: candidatura.dataExpiracao
-        ? new Date() < new Date(candidatura.dataExpiracao)
-        : true
+      consultor: consultor ? {
+        id: consultor.id,
+        nome: consultor.nome
+      } : null,
+      dataAtribuicao: result.award.obtainedDate,
+      dataExpiracao: expirationDate,
+      valido: expirationDate ? new Date() < new Date(expirationDate) : true
     });
-
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao verificar badge' });
+    res.status(500).json({ erro: 'Erro ao verificar badge', details: erro.message });
   }
 };
 
-// Exportar candidaturas para PDF
-exports.exportarCandidaturasPDF = async (req, res) => {
+exports.exportarCandidaturasPDF = async (_req, res) => {
   try {
-    const candidaturas = await Candidatura.findAll({
-      include: [Badge, { model: User, as: 'consultor' }]
-    });
-
+    const candidaturas = await Candidatura.findAll({ include: reportInclude });
     const PDFDocument = require('pdfkit');
     const doc = new PDFDocument({ margin: 30, size: 'A4', layout: 'landscape' });
     const buffers = [];
@@ -113,72 +132,46 @@ exports.exportarCandidaturasPDF = async (req, res) => {
       res.send(pdfBuffer);
     });
 
-    // Título
-    doc.fillColor('#003087')
-       .fontSize(20)
-       .font('Helvetica-Bold')
-       .text('SOFTINSA — Relatório de Candidaturas', { align: 'center' });
-
+    doc.fillColor('#003087').fontSize(20).font('Helvetica-Bold').text('SOFTINSA - Relatorio de Candidaturas', { align: 'center' });
+    doc.moveDown();
+    doc.fillColor('#666666').fontSize(10).font('Helvetica').text(`Gerado em: ${new Date().toLocaleDateString('pt-PT')}`, { align: 'center' });
     doc.moveDown();
 
-    // Data do relatório
-    doc.fillColor('#666666')
-       .fontSize(10)
-       .font('Helvetica')
-       .text(`Gerado em: ${new Date().toLocaleDateString('pt-PT')}`, { align: 'center' });
-
-    doc.moveDown();
-
-    // Cabeçalho da tabela
     const startX = 30;
     const startY = doc.y;
-    const colWidths = [40, 150, 180, 60, 120, 100];
-    const headers = ['ID', 'Consultor', 'Badge', 'Nível', 'Estado', 'Data'];
+    const colWidths = [40, 150, 180, 90, 120, 100];
+    const headers = ['ID', 'Consultor', 'Badge', 'Estado', 'Data Sub.', 'Data Aprov.'];
 
-    // Fundo cabeçalho
-    doc.rect(startX, startY, colWidths.reduce((a, b) => a + b, 0), 20)
-       .fill('#003087');
+    doc.rect(startX, startY, colWidths.reduce((a, b) => a + b, 0), 20).fill('#003087');
 
-    // Texto cabeçalho
     let currentX = startX;
     headers.forEach((header, i) => {
-      doc.fillColor('#ffffff')
-         .fontSize(10)
-         .font('Helvetica-Bold')
-         .text(header, currentX + 5, startY + 5, { width: colWidths[i], align: 'left' });
+      doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold').text(header, currentX + 5, startY + 5, { width: colWidths[i] });
       currentX += colWidths[i];
     });
 
-    // Linhas de dados
     let currentY = startY + 20;
     candidaturas.forEach((c, index) => {
-      // Cor alternada
       if (index % 2 === 0) {
-        doc.rect(startX, currentY, colWidths.reduce((a, b) => a + b, 0), 20)
-           .fill('#e8f0fe');
+        doc.rect(startX, currentY, colWidths.reduce((a, b) => a + b, 0), 20).fill('#e8f0fe');
       }
 
       const rowData = [
         String(c.id),
-        c.consultor?.nome || c.consultor?.email || '-',
+        c.Consultant?.User?.nome || '-',
         c.Badge?.nome || '-',
-        c.Badge?.nivel || '-',
-        c.estado,
-        c.createdAt ? new Date(c.createdAt).toLocaleDateString('pt-PT') : '-'
+        c.status?.code || '-',
+        c.dataSubmicao ? new Date(c.dataSubmicao).toLocaleDateString('pt-PT') : '-',
+        c.dataAprovacao ? new Date(c.dataAprovacao).toLocaleDateString('pt-PT') : '-'
       ];
 
       currentX = startX;
       rowData.forEach((data, i) => {
-        doc.fillColor('#333333')
-           .fontSize(9)
-           .font('Helvetica')
-           .text(data, currentX + 5, currentY + 5, { width: colWidths[i] - 5, align: 'left' });
+        doc.fillColor('#333333').fontSize(9).font('Helvetica').text(data, currentX + 5, currentY + 5, { width: colWidths[i] - 5 });
         currentX += colWidths[i];
       });
 
       currentY += 20;
-
-      // Nova página se necessário
       if (currentY > doc.page.height - 50) {
         doc.addPage();
         currentY = 30;
@@ -186,9 +179,8 @@ exports.exportarCandidaturasPDF = async (req, res) => {
     });
 
     doc.end();
-
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao gerar PDF' });
+    res.status(500).json({ erro: 'Erro ao gerar PDF', details: erro.message });
   }
 };

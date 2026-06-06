@@ -17,7 +17,6 @@ const User = sequelize.define(
         email: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
             validate: { isEmail: true },
         },
         password: {
@@ -32,16 +31,6 @@ const User = sequelize.define(
             type: DataTypes.STRING(5),
             defaultValue: 'PT',
             comment: 'Preferência de língua (PT, EN, ES, etc)',
-        },
-        role: { // necessário para autenticação e autorização rapida com o auth middleware
-            type: DataTypes.ENUM(
-                "Admin",
-                "Consultor",
-                "TalentManager",
-                "ServiceLineLeader",
-            ),
-            allowNull: false,
-            defaultValue: "Consultor",
         },
         mustChangePassword: {
             type: DataTypes.BOOLEAN,
@@ -104,6 +93,12 @@ const User = sequelize.define(
     },
     {
         tableName: 'UTILIZADOR',
+        indexes: [
+            {
+                unique: true,
+                fields: ['email']
+            }
+        ],
         hooks: {
             beforeCreate: async (user) => {
                 if (user.password) {

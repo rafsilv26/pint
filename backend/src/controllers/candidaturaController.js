@@ -1,4 +1,14 @@
-const { Candidatura, Evidencia, Badge, User, HistoricoCandidatura } = require('../models/index');
+const { Op } = require('sequelize');
+const {
+  Candidatura,
+  Evidencia,
+  Badge,
+  BadgeStatus,
+  Consultant,
+  User,
+  HistoricoCandidatura,
+  ConsultorBadge
+} = require('../models');
 const { uploadFicheiro } = require('../services/cloudinary.service');
 const {
   emailCandidaturaSubmetida,
@@ -9,345 +19,347 @@ const {
   emailSendBack
 } = require('../services/email.service');
 
-// ─────────────────────────────────────────────
-// CONSULTOR — Submeter candidatura a um badge
-// ─────────────────────────────────────────────
+const STATUS = {
+  OPEN: 'OPEN',
+  SUBMITTED: 'SUBMITTED',
+  IN_VALIDATION: 'IN_VALIDATION',
+  VALIDATED: 'VALIDATED',
+  IN_APPROVAL: 'IN_APPROVAL',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
+const getStatus = async (code) => {
+  const status = await BadgeStatus.findOne({ where: { code } });
+  if (!status) {
+    throw new Error(`Estado de candidatura não encontrado: ${code}`);
+  }
+  return status;
+};
+
+const getStatuses = async (codes) => {
+  const statuses = await BadgeStatus.findAll({ where: { code: codes } });
+  return statuses.reduce((acc, status) => {
+    acc[status.code] = status;
+    return acc;
+  }, {});
+};
+
+const candidaturaInclude = [
+  { model: Badge },
+  { model: BadgeStatus, as: 'status' },
+  { model: Evidencia, as: 'evidencias' },
+  { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] },
+  { model: HistoricoCandidatura, as: 'history' }
+];
+
+const sendEmail = async (fn, ...args) => {
+  try {
+    await fn(...args);
+  } catch (error) {
+    console.error('Erro ao enviar email:', error.message);
+  }
+};
+
+const calcularExpiracao = (badge) => {
+  if (badge.expiracao) {
+    return badge.expiracao;
+  }
+
+  if (!badge.duracaoMeses) {
+    return null;
+  }
+
+  const data = new Date();
+  data.setMonth(data.getMonth() + badge.duracaoMeses);
+  return data;
+};
+
 exports.submeterCandidatura = async (req, res) => {
   try {
-    const { badgeId } = req.body;
+    // Extrair dados da requisição
+    const { badgeId, requisitoIds = [], descricao } = req.body;
     const consultorId = req.user.id;
-    const ficheiros = req.files;
+    const ficheiros = req.files || [];
 
+    // Validar badge
     const badge = await Badge.findByPk(badgeId);
-    if (!badge) {
-      return res.status(404).json({ erro: 'Badge não encontrado' });
+    if (!badge || badge.ativo === false) {
+      return res.status(404).json({ erro: 'Badge não encontrada ou inativa.' });
     }
 
+    // Validar consultor
+    const consultant = await Consultant.findByPk(consultorId);
+    if (!consultant) {
+      return res.status(403).json({ erro: 'Apenas consultores podem submeter candidaturas.' });
+    }
+
+    const statuses = await getStatuses([STATUS.OPEN, STATUS.SUBMITTED, STATUS.IN_VALIDATION, STATUS.VALIDATED, STATUS.IN_APPROVAL]);
+    const estadoIdsPendentes = Object.values(statuses).map((status) => status.statusId);
+
+    // Verificar se já existe uma candidatura pendente para esta badge
     const candidaturaExistente = await Candidatura.findOne({
       where: {
         consultorId,
         badgeId,
-        estado: ['OPEN', 'SUBMITTED', 'EM_VALIDACAO']
+        estadoId: { [Op.in]: estadoIdsPendentes }
       }
     });
+
     if (candidaturaExistente) {
-      return res.status(400).json({ erro: 'Já tens uma candidatura pendente para este badge' });
+      return res.status(400).json({ erro: 'Já existe uma candidatura pendente para esta badge.' });
     }
 
-    const evidencias = await Promise.all(
-      ficheiros.map(async (ficheiro) => {
-        const url = await uploadFicheiro(ficheiro);
-        return {
-          url,
-          nomeFicheiro: ficheiro.originalname,
-          tipo: ficheiro.mimetype === 'application/pdf' ? 'PDF' : 'IMAGEM'
-        };
-      })
-    );
-
+    // Criar candidatura
+    const submitted = statuses[STATUS.SUBMITTED] || await getStatus(STATUS.SUBMITTED);
     const candidatura = await Candidatura.create({
       consultorId,
       badgeId,
-      estado: 'SUBMITTED'
+      estadoId: submitted.statusId,
+      dataSubmicao: new Date()
     });
 
+    // Validar requisitoIds e associar evidências
+    const idsRequisitos = Array.isArray(requisitoIds) ? requisitoIds : [requisitoIds].filter(Boolean);
+    if (ficheiros.length > 0 && idsRequisitos.length === 0) {
+      return res.status(400).json({ erro: 'É obrigatório indicar requisitoIds para associar as evidências.' });
+    }
+
+    // Fazer upload dos ficheiros e criar evidências associadas
     await Promise.all(
-      evidencias.map(ev =>
-        Evidencia.create({ ...ev, candidaturaId: candidatura.id })
-      )
+      ficheiros.map(async (ficheiro, index) => {
+        const url = await uploadFicheiro(ficheiro);
+        return Evidencia.create({
+          url,
+          nomeFicheiro: ficheiro.originalname,
+          tipo: ficheiro.mimetype === 'application/pdf' ? 'PDF' : 'IMAGEM',
+          candidaturaId: candidatura.id,
+          requisitoId: idsRequisitos[index] || idsRequisitos[0],
+          descricao,
+          uploadedBy: consultorId
+        });
+      })
     );
 
+    // Criar histórico da candidatura
     await HistoricoCandidatura.create({
       candidaturaId: candidatura.id,
-      estadoAnterior: 'OPEN',
-      estadoNovo: 'SUBMITTED',
-      acao: 'SUBMETIDO',
-      userId: consultorId
+      userId: consultorId,
+      estadoAnterior: submitted.statusId,
+      estadoNovo: submitted.statusId,
+      motivo: 'Candidatura submetida'
     });
 
-    // Emails
+    // Enviar email de notificação
     const consultor = await User.findByPk(consultorId);
-    await emailCandidaturaSubmetida(consultor, badge);
+    await sendEmail(emailCandidaturaSubmetida, consultor, badge);
 
-    const talentManagers = await User.findAll({ where: { role: 'TalentManager' } });
-    await Promise.all(talentManagers.map(tm => emailNovaSubmissao(tm, consultor, badge)));
+    // Notificar Talent Managers sobre nova candidatura
+    const talentManagers = await User.findAll({
+      include: [{ association: User.associations.TalentManager, required: true }]
+    }).catch(() => []);
+    await Promise.all(talentManagers.map((tm) => sendEmail(emailNovaSubmissao, tm, consultor, badge)));
 
     res.status(201).json({
-      mensagem: 'Candidatura submetida com sucesso!',
+      mensagem: 'Candidatura submetida com sucesso.',
       candidaturaId: candidatura.id
     });
-
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao submeter candidatura' });
+    res.status(500).json({ erro: 'Erro ao submeter candidatura.', details: erro.message });
   }
 };
 
-// ─────────────────────────────────────────────
-// CONSULTOR — Ver as suas candidaturas
-// ─────────────────────────────────────────────
 exports.listarMinhasCandidaturas = async (req, res) => {
   try {
-    const consultorId = req.user.id;
-
     const candidaturas = await Candidatura.findAll({
-      where: { consultorId },
-      include: [
-        { model: Badge },
-        { model: Evidencia }
-      ],
+      where: { consultorId: req.user.id },
+      include: candidaturaInclude,
       order: [['createdAt', 'DESC']]
     });
 
     res.json(candidaturas);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar candidaturas' });
+    res.status(500).json({ erro: 'Erro ao listar candidaturas.', details: erro.message });
   }
 };
 
-// ─────────────────────────────────────────────
-// CONSULTOR — Ver detalhe de uma candidatura
-// ─────────────────────────────────────────────
 exports.detalhesCandidatura = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const candidatura = await Candidatura.findByPk(id, {
-      include: [
-        { model: Badge },
-        { model: Evidencia },
-        { model: HistoricoCandidatura, include: [{ model: User, as: 'responsavel' }] }
-      ]
+    const candidatura = await Candidatura.findByPk(req.params.id, {
+      include: candidaturaInclude
     });
 
     if (!candidatura) {
-      return res.status(404).json({ erro: 'Candidatura não encontrada' });
+      return res.status(404).json({ erro: 'Candidatura não encontrada.' });
+    }
+
+    const isOwner = candidatura.consultorId === req.user.id;
+    const canReview = req.user.roles.some((role) => ['Admin', 'TalentManager', 'ServiceLineLeader'].includes(role));
+    if (!isOwner && !canReview) {
+      return res.status(403).json({ erro: 'Sem permissões para consultar esta candidatura.' });
     }
 
     res.json(candidatura);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao buscar candidatura' });
+    res.status(500).json({ erro: 'Erro ao buscar candidatura.', details: erro.message });
   }
 };
 
-// ─────────────────────────────────────────────
-// TALENT MANAGER — Ver todas as candidaturas submetidas
-// ─────────────────────────────────────────────
-exports.listarCandidaturasTalent = async (req, res) => {
+exports.listarCandidaturasTalent = async (_req, res) => {
+  // Listar candidaturas com estado SUBMITTED para validação do Talent Manager
   try {
+    const submitted = await getStatus(STATUS.SUBMITTED);
     const candidaturas = await Candidatura.findAll({
-      where: { estado: 'SUBMITTED' },
-      include: [
-        { model: Badge },
-        { model: Evidencia },
-        { model: User, as: 'consultor' }
-      ],
+      where: { estadoId: submitted.statusId },
+      include: candidaturaInclude,
       order: [['createdAt', 'ASC']]
     });
 
     res.json(candidaturas);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar candidaturas' });
+    res.status(500).json({ erro: 'Erro ao listar candidaturas.', details: erro.message });
   }
 };
 
-// ─────────────────────────────────────────────
-// TALENT MANAGER — Validar candidatura
-// ─────────────────────────────────────────────
 exports.validarTalentManager = async (req, res) => {
+  // Validar ou rejeitar candidatura pelo Talent Manager
   try {
-    const { id } = req.params;
     const { decisao, comentario } = req.body;
-    const talentManagerId = req.user.id;
+    const candidatura = await Candidatura.findByPk(req.params.id, { include: candidaturaInclude });
+    if (!candidatura) {
+      return res.status(404).json({ erro: 'Candidatura não encontrada.' });
+    }
 
-    const candidatura = await Candidatura.findByPk(id, {
-      include: [Badge, { model: User, as: 'consultor' }]
+    const statuses = await getStatuses([STATUS.SUBMITTED, STATUS.VALIDATED, STATUS.REJECTED]);
+    if (candidatura.estadoId !== statuses[STATUS.SUBMITTED].statusId) {
+      return res.status(400).json({ erro: 'Candidatura não está submetida.' });
+    }
+
+    const nextStatus = decisao === 'APROVAR' ? statuses[STATUS.VALIDATED] : statuses[STATUS.REJECTED];
+    if (!nextStatus) {
+      return res.status(400).json({ erro: 'Decisão inválida. Use APROVAR ou REJEITAR.' });
+    }
+    
+    // Atualizar candidatura com nova decisão do Talent Manager
+    await candidatura.update({
+      estadoId: nextStatus.statusId,
+      talentManagerId: req.user.id,
+      dataValidacao: new Date(),
+      comentario
     });
 
-    if (!candidatura) {
-      return res.status(404).json({ erro: 'Candidatura não encontrada' });
-    }
+    // Criar histórico da candidatura
+    await HistoricoCandidatura.create({
+      candidaturaId: candidatura.id,
+      userId: req.user.id,
+      estadoAnterior: statuses[STATUS.SUBMITTED].statusId,
+      estadoNovo: nextStatus.statusId,
+      motivo: comentario || decisao
+    });
 
-    if (candidatura.estado !== 'SUBMITTED') {
-      return res.status(400).json({ erro: 'Candidatura não está em estado SUBMITTED' });
-    }
-
+    // Enviar email de notificação ao consultor sobre decisão do Talent Manager
+    const consultor = candidatura.Consultant?.User;
     if (decisao === 'APROVAR') {
-      await candidatura.update({
-        estado: 'EM_VALIDACAO',
-        talentManagerId,
-        dataValidacaoTalent: new Date()
-      });
-
-      await HistoricoCandidatura.create({
-        candidaturaId: candidatura.id,
-        estadoAnterior: 'SUBMITTED',
-        estadoNovo: 'EM_VALIDACAO',
-        acao: 'APROVADO_TALENT',
-        comentario,
-        userId: talentManagerId
-      });
-
-      await emailEnviadoParaServiceLine(candidatura.consultor, candidatura.Badge);
-
-      const serviceLineLeaders = await User.findAll({ where: { role: 'ServiceLine' } });
-      await Promise.all(serviceLineLeaders.map(sl => emailNovaSubmissao(sl, candidatura.consultor, candidatura.Badge)));
-
-      res.json({ mensagem: 'Candidatura enviada para o Service Line Leader' });
-
-    } else if (decisao === 'REJEITAR') {
-      await candidatura.update({
-        estado: 'OPEN',
-        talentManagerId,
-        dataValidacaoTalent: new Date(),
-        comentario
-      });
-
-      await HistoricoCandidatura.create({
-        candidaturaId: candidatura.id,
-        estadoAnterior: 'SUBMITTED',
-        estadoNovo: 'OPEN',
-        acao: 'REJEITADO_TALENT',
-        comentario,
-        userId: talentManagerId
-      });
-
-      await emailBadgeRejeitado(candidatura.consultor, candidatura.Badge, comentario);
-
-      res.json({ mensagem: 'Candidatura devolvida ao consultor' });
-
-    } else {
-      res.status(400).json({ erro: 'Decisão inválida. Use APROVAR ou REJEITAR' });
+      await sendEmail(emailEnviadoParaServiceLine, consultor, candidatura.Badge);
+      return res.json({ mensagem: 'Candidatura validada e enviada para aprovação final.' });
     }
 
+    // Se a decisão for rejeitar, enviar email de rejeição
+    await sendEmail(emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
+    return res.json({ mensagem: 'Candidatura rejeitada pelo Talent Manager.' });
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao validar candidatura' });
+    res.status(500).json({ erro: 'Erro ao validar candidatura.', details: erro.message });
   }
 };
 
-// ─────────────────────────────────────────────
-// SERVICE LINE LEADER — Ver candidaturas em validação
-// ─────────────────────────────────────────────
-exports.listarCandidaturasServiceLine = async (req, res) => {
+exports.listarCandidaturasServiceLine = async (_req, res) => {
+  // Listar candidaturas com estado VALIDATED para aprovação do Service Line Leader
   try {
+    const validated = await getStatus(STATUS.VALIDATED);
     const candidaturas = await Candidatura.findAll({
-      where: { estado: 'EM_VALIDACAO' },
-      include: [
-        { model: Badge },
-        { model: Evidencia },
-        { model: User, as: 'consultor' },
-        { model: HistoricoCandidatura }
-      ],
+      where: { estadoId: validated.statusId },
+      include: candidaturaInclude,
       order: [['createdAt', 'ASC']]
     });
 
     res.json(candidaturas);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar candidaturas' });
+    res.status(500).json({ erro: 'Erro ao listar candidaturas.', details: erro.message });
   }
 };
 
-// ─────────────────────────────────────────────
-// SERVICE LINE LEADER — Validação final
-// ─────────────────────────────────────────────
 exports.validarServiceLine = async (req, res) => {
   try {
-    const { id } = req.params;
     const { decisao, comentario } = req.body;
-    const serviceLineId = req.user.id;
+    const candidatura = await Candidatura.findByPk(req.params.id, { include: candidaturaInclude });
+    if (!candidatura) {
+      return res.status(404).json({ erro: 'Candidatura não encontrada.' });
+    }
 
-    const candidatura = await Candidatura.findByPk(id, {
-      include: [Badge, { model: User, as: 'consultor' }]
+    // Verificar se a candidatura está no estado correto para aprovação final
+    const statuses = await getStatuses([STATUS.VALIDATED, STATUS.APPROVED, STATUS.REJECTED, STATUS.OPEN]);
+    if (candidatura.estadoId !== statuses[STATUS.VALIDATED].statusId) {
+      return res.status(400).json({ erro: 'Candidatura não está validada.' });
+    }
+
+    // Determinar próximo estado com base na decisão do Service Line Leader
+    let nextStatus;
+    if (decisao === 'APROVAR') nextStatus = statuses[STATUS.APPROVED];
+    if (decisao === 'REJEITAR') nextStatus = statuses[STATUS.REJECTED];
+    if (decisao === 'SEND_BACK') nextStatus = statuses[STATUS.OPEN];
+    if (!nextStatus) {
+      return res.status(400).json({ erro: 'Decisão inválida. Use APROVAR, REJEITAR ou SEND_BACK.' });
+    }
+
+    // Atualizar candidatura com nova decisão do Service Line Leader
+    await candidatura.update({
+      estadoId: nextStatus.statusId,
+      serviceLineLeaderId: req.user.id,
+      dataAprovacao: decisao === 'APROVAR' ? new Date() : null,
+      comentario
     });
 
-    if (!candidatura) {
-      return res.status(404).json({ erro: 'Candidatura não encontrada' });
-    }
+    // Criar histórico da candidatura
+    await HistoricoCandidatura.create({
+      candidaturaId: candidatura.id,
+      userId: req.user.id,
+      estadoAnterior: statuses[STATUS.VALIDATED].statusId,
+      estadoNovo: nextStatus.statusId,
+      motivo: comentario || decisao
+    });
 
-    if (candidatura.estado !== 'EM_VALIDACAO') {
-      return res.status(400).json({ erro: 'Candidatura não está em validação' });
-    }
-
+    
+    const consultor = candidatura.Consultant?.User;
     if (decisao === 'APROVAR') {
-      let dataExpiracao = null;
-      if (candidatura.Badge.temExpiracao && candidatura.Badge.duracaoMeses) {
-        dataExpiracao = new Date();
-        dataExpiracao.setMonth(dataExpiracao.getMonth() + candidatura.Badge.duracaoMeses);
-      }
-
-      await candidatura.update({
-        estado: 'FECHADO_APROVADO',
-        serviceLineLeaderId: serviceLineId,
-        dataValidacaoServiceLine: new Date(),
-        dataExpiracao
+      // Atribuir badge ao consultor e calcular data de expiração
+      const expirationDate = calcularExpiracao(candidatura.Badge);
+      await ConsultorBadge.upsert({
+        consultorId: candidatura.consultorId,
+        badgeId: candidatura.badgeId,
+        obtainedDate: new Date(),
+        expirationDate,
+        durationMonths: candidatura.Badge.duracaoMeses,
+        valid: true,
+        pointsObtained: candidatura.Badge.ponto
       });
-
-      await HistoricoCandidatura.create({
-        candidaturaId: candidatura.id,
-        estadoAnterior: 'EM_VALIDACAO',
-        estadoNovo: 'FECHADO_APROVADO',
-        acao: 'APROVADO_SERVICELINE',
-        comentario,
-        userId: serviceLineId
-      });
-
-      await emailBadgeAprovado(
-        candidatura.consultor,
-        candidatura.Badge,
-        candidatura.Badge.uuid
-      );
-
-      res.json({ mensagem: 'Badge aprovado e publicado!' });
-
-    } else if (decisao === 'REJEITAR') {
-      await candidatura.update({
-        estado: 'FECHADO_REJEITADO',
-        serviceLineLeaderId: serviceLineId,
-        dataValidacaoServiceLine: new Date(),
-        comentario
-      });
-
-      await HistoricoCandidatura.create({
-        candidaturaId: candidatura.id,
-        estadoAnterior: 'EM_VALIDACAO',
-        estadoNovo: 'FECHADO_REJEITADO',
-        acao: 'REJEITADO_SERVICELINE',
-        comentario,
-        userId: serviceLineId
-      });
-
-      await emailBadgeRejeitado(candidatura.consultor, candidatura.Badge, comentario);
-
-      res.json({ mensagem: 'Candidatura rejeitada' });
-
-    } else if (decisao === 'SEND_BACK') {
-      await candidatura.update({
-        estado: 'OPEN',
-        serviceLineLeaderId: serviceLineId,
-        dataValidacaoServiceLine: new Date(),
-        comentario
-      });
-
-      await HistoricoCandidatura.create({
-        candidaturaId: candidatura.id,
-        estadoAnterior: 'EM_VALIDACAO',
-        estadoNovo: 'OPEN',
-        acao: 'SEND_BACK',
-        comentario,
-        userId: serviceLineId
-      });
-
-      await emailSendBack(candidatura.consultor, candidatura.Badge, comentario);
-
-      res.json({ mensagem: 'Candidatura devolvida ao consultor para correção' });
-
-    } else {
-      res.status(400).json({ erro: 'Decisão inválida. Use APROVAR, REJEITAR ou SEND_BACK' });
+      // Enviar email de notificação ao consultor sobre decisão do Service Line Leader
+      await sendEmail(emailBadgeAprovado, consultor, candidatura.Badge, candidatura.Badge.publicToken);
+      return res.json({ mensagem: 'Badge aprovada e atribuída ao consultor.' });
     }
 
+    // Se a decisão for enviar de volta para o consultor, enviar email de notificação para o consultor corrigir a candidatura
+    if (decisao === 'SEND_BACK') {
+      await sendEmail(emailSendBack, consultor, candidatura.Badge, comentario);
+      return res.json({ mensagem: 'Candidatura devolvida ao consultor.' });
+    }
+
+    // Se a decisão for rejeitar, enviar email de rejeição para o consultor
+    await sendEmail(emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
+    return res.json({ mensagem: 'Candidatura rejeitada.' });
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro na validação final' });
+    res.status(500).json({ erro: 'Erro na aprovação final.', details: erro.message });
   }
 };

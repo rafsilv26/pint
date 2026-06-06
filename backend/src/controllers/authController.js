@@ -1,53 +1,94 @@
-const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const { applyUserRoles, getUserRoles, normalizeRoles } = require('../services/userRoles.service');
 
-// 1. REGISTO DE UTILIZADOR
+const publicUser = async (user) => {
+    const roles = await getUserRoles(user.id);
+    return {
+        id: user.id,
+        nome: user.nome,
+        email: user.email,
+        fotoPerfil: user.fotoPerfil,
+        idioma: user.idioma,
+        mustChangePassword: user.mustChangePassword,
+        role: roles[0] || null,
+        roles
+    };
+};
+
 exports.register = async (req, res) => {
     try {
-        const { nome, email, password, role } = req.body;
+        const {
+            nome,
+            email,
+            password,
+            roles = ['Consultor'],
+            areaId,
+            serviceLineId
+        } = req.body;
 
-        // Verificar se o email já existe
+        if (!nome || !email || !password) {
+            return res.status(400).json({ message: 'Nome, email e password são obrigatórios.' });
+        }
+
+        const normalizedRoles = normalizeRoles(roles);
+        if (normalizedRoles.length === 0) {
+            return res.status(400).json({ message: 'Indica pelo menos um perfil válido.' });
+        }
+
         const userExists = await User.findOne({ where: { email } });
         if (userExists) {
             return res.status(400).json({ message: 'Este email já está registado.' });
         }
 
-        // Criar o utilizador (o hook do modelo vai encriptar a password)
-        const newUser = await User.create({ nome, email, password, role });
+        const newUser = await User.create({ nome, email, password });
+        const assignedRoles = await applyUserRoles(newUser.id, normalizedRoles, { areaId, serviceLineId });
 
-        res.status(201).json({ 
-            message: 'Utilizador registado com sucesso!', 
-            user: { id: newUser.id, nome: newUser.nome, email: newUser.email, role: newUser.role } 
+        res.status(201).json({
+            message: 'Utilizador registado com sucesso!',
+            user: {
+                id: newUser.id,
+                nome: newUser.nome,
+                email: newUser.email,
+                roles: assignedRoles
+            }
         });
     } catch (error) {
         res.status(500).json({ error: 'Erro ao registar o utilizador.', details: error.message });
     }
 };
 
-// 2. LOGIN
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Procurar o utilizador por email
+        // verificar se o email existe e se o utilizador está ativo
         const user = await User.findOne({ where: { email } });
-        if (!user) {
-            return res.status(401).json({ message: 'Credenciais inválidas (Email ou Password incorretos).' });
+        if (!user || user.ativo === false) {
+            return res.status(401).json({ message: 'Credenciais inválidas.' });
         }
 
-        // Comparar a password enviada com o hash guardado na BD
+        // comparar a password fornecida com a password armazenada (hash)
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ message: 'Credenciais inválidas (Email ou Password incorretos).' });
+            return res.status(401).json({ message: 'Credenciais inválidas.' });
         }
 
-        // Gerar o Token JWT com o ID e o Role do utilizador
+        // gerar token JWT e obter os perfis do utilizador
+        const roles = await getUserRoles(user.id);
         const token = jwt.sign(
-            { id: user.id, role: user.role },
+            { id: user.id },
             process.env.JWT_SECRET,
             { expiresIn: '12h' }
         );
+
+        // atualizar a data do último login e, se for o primeiro login, definir a data do primeiro login
+        user.lastLogin = new Date();
+        if (!user.firstLoginDate) {
+            user.firstLoginDate = new Date();
+        }
+        await user.save();
 
         res.json({
             message: 'Login efetuado com sucesso!',
@@ -55,11 +96,46 @@ exports.login = async (req, res) => {
             user: {
                 id: user.id,
                 nome: user.nome,
-                role: user.role,
+                email: user.email,
+                role: roles[0] || null,
+                roles,
                 mustChangePassword: user.mustChangePassword
             }
         });
     } catch (error) {
         res.status(500).json({ error: 'Erro ao processar o login.', details: error.message });
+    }
+};
+
+exports.me = async (req, res) => {
+    res.json({ user: await publicUser(req.user.data) });
+};
+
+exports.changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Password atual e nova password sao obrigatorias.' });
+        }
+
+        if (newPassword.length < 8) {
+            return res.status(400).json({ message: 'A nova password deve ter pelo menos 8 caracteres.' });
+        }
+
+        const user = await User.findByPk(req.user.id);
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Password atual invalida.' });
+        }
+
+        user.password = newPassword;
+        user.mustChangePassword = false;
+        user.updatedAt = new Date();
+        await user.save();
+
+        res.json({ message: 'Password alterada com sucesso.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao alterar password.', details: error.message });
     }
 };

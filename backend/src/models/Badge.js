@@ -41,6 +41,7 @@ const Badge = sequelize.define('Badge', {
   expiracao: {
     type: DataTypes.DATE,
     allowNull: true,
+    defaultValue: null,
     comment: 'Data absoluta de expiração (null = nunca expira)'
   },
   duracaoMeses: {

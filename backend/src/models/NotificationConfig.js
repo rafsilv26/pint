@@ -10,7 +10,6 @@ const NotificationConfig = sequelize.define('NotificationConfig', {
     type: {
         type: DataTypes.STRING(100),
         allowNull: false,
-        unique: true,
         comment: "Ex: 'candidatura_submetida', 'sla_expirando'"
     },
     description: {
@@ -48,7 +47,13 @@ const NotificationConfig = sequelize.define('NotificationConfig', {
     }
 }, {
     tableName: 'NOTIFICACAO_CONFIG',
-    timestamps: false
+    timestamps: false,
+    indexes: [
+        {
+            unique: true,
+            fields: ['type']
+        }
+    ]
 });
 
 module.exports = NotificationConfig;

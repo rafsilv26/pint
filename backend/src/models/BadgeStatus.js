@@ -16,8 +16,7 @@ const BadgeStatus = sequelize.define('BadgeStatus', {
         allowNull: true
     },
     code: {
-        type: DataTypes.STRING(20),
-        unique: true
+        type: DataTypes.STRING(20)
     },
     active: {
         type: DataTypes.BOOLEAN,
@@ -25,7 +24,13 @@ const BadgeStatus = sequelize.define('BadgeStatus', {
     }
 }, {
     tableName: 'ESTADO_CANDIDATURABADGE',
-    timestamps: false
+    timestamps: false,
+    indexes: [
+        {
+            unique: true,
+            fields: ['code']
+        }
+    ]
 });
 
 module.exports = BadgeStatus;
