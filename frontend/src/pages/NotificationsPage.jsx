@@ -21,6 +21,17 @@ export default function NotificationsPage() {
   const [lidas, setLidas] = useState({})
   const [apagadas, setApagadas] = useState({})
 
+  function marcarLida(id) {
+    setLidas((a) => ({ ...a, [id]: true }))
+    api.markNotificationRead(id).catch(() => {})
+  }
+  function marcarTodas() {
+    const todas = {}
+    ;(data || []).forEach((n) => { todas[n.id] = true })
+    setLidas(todas)
+    api.markAllNotificationsRead().catch(() => {})
+  }
+
   const lista = (data || [])
     .filter((n) => !apagadas[n.id])
     .filter((n) => (filtro === 'nao-lidas' ? !(n.lida || lidas[n.id]) : true))
@@ -57,6 +68,12 @@ export default function NotificationsPage() {
             className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
         </div>
+        <button
+          onClick={marcarTodas}
+          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-muted transition hover:text-ink"
+        >
+          Marcar todas como lidas
+        </button>
       </div>
 
       {loading ? (
@@ -71,7 +88,7 @@ export default function NotificationsPage() {
             return (
               <div
                 key={n.id}
-                onClick={() => setLidas((a) => ({ ...a, [n.id]: true }))}
+                onClick={() => marcarLida(n.id)}
                 className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition hover:shadow-sm ${
                   lida ? 'border-gray-200 bg-gray-50' : 'border-brand/30 bg-white'
                 }`}

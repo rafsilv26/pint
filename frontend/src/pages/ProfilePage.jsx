@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext'
 const ACOES = [
   { to: '/perfil/alterar-password', icon: KeyRound, title: 'Alterar Palavra-passe', desc: 'Atualiza a tua palavra-passe de acesso' },
   { to: '/perfil/assinatura', icon: Mail, title: 'Assinatura de Email', desc: 'Configura a tua assinatura profissional' },
-  { to: '/ranking', icon: Users, title: 'Diretório de Consultores', desc: 'Explora os perfis dos teus colegas' },
+  { to: '/consultores', icon: Users, title: 'Diretório de Consultores', desc: 'Explora os perfis dos teus colegas' },
   { to: '/perfil/preferencias', icon: Settings, title: 'Preferências', desc: 'Notificações e idioma' },
 ]
 
