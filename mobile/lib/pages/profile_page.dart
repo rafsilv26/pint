@@ -211,7 +211,11 @@ class _ProfileSummaryCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const _SoftPill(text: 'Hybrid Cloud'),
+                    _SoftPill(
+                      text: data.userRole.isNotEmpty
+                          ? data.userRole
+                          : 'Consultor',
+                    ),
                   ],
                 ),
               ),

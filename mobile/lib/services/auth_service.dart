@@ -92,10 +92,37 @@ class AuthService {
   Future<void> createAccount({
     required String name,
     required String email,
+    required String password,
   }) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/auth/register');
+    final response = await client
+        .post(
+          uri,
+          headers: const {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'nome': name,
+            'email': email,
+            'password': password,
+            'roles': ['Consultor'],
+          }),
+        )
+        .timeout(const Duration(seconds: 12));
+
+    final body = _decodeBody(response);
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw AuthException(
+        body['message'] as String? ??
+            body['error'] as String? ??
+            'Nao foi possivel criar a conta.',
+      );
+    }
+
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(_nameKey, name);
     await preferences.setString(_emailKey, email);
+
+    await login(email: email, password: password, rememberLogin: true);
   }
 
   Future<void> confirmAccount() async {
@@ -106,6 +133,16 @@ class AuthService {
   Future<String?> getSavedEmail() async {
     final preferences = await SharedPreferences.getInstance();
     return preferences.getString(_emailKey);
+  }
+
+  Future<String?> getSavedName() async {
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getString(_nameKey);
+  }
+
+  Future<String?> getSavedRole() async {
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getString(_roleKey);
   }
 
   Future<String?> getToken() async {
