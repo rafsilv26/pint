@@ -2,6 +2,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { LogOut, KeyRound, Mail, Users, Settings, ExternalLink } from 'lucide-react'
 import { Card } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
+import { useAsync } from '../hooks/useAsync'
+import * as api from '../services/api'
 
 const ACOES = [
   { to: '/perfil/alterar-password', icon: KeyRound, title: 'Alterar Palavra-passe', desc: 'Atualiza a tua palavra-passe de acesso' },
@@ -14,8 +16,20 @@ export default function ProfilePage() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
-  const iniciais = (user?.nome || 'U')
-    .split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
+  // Dados reais do consultor (pontos, badges, área, biografia, …)
+  const { data: consultor, loading } = useAsync(
+    () => api.getConsultant(user.id).catch(() => null),
+    [user?.id]
+  )
+
+  const nome = consultor?.name || user?.nome || 'Consultor'
+  const email = user?.email || consultor?.email || ''
+  const pontos = consultor?.points ?? 0
+  const badges = consultor?.badges ?? 0
+  const biografia = consultor?.biography || ''
+  const serviceLine = consultor?.serviceLine || ''
+  const tags = [consultor?.area, consultor?.serviceLine].filter(Boolean)
+  const iniciais = nome.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
 
   return (
     <div className="space-y-6">
@@ -30,23 +44,26 @@ export default function ProfilePage() {
           <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-brand-light text-2xl font-bold text-brand">
             {iniciais}
           </div>
-          <p className="mt-3 font-semibold text-ink">{user?.nome}</p>
-          <p className="text-sm text-muted">{user?.email}</p>
-          <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-            <span className="rounded-full bg-brand-light px-2 py-0.5 text-xs font-medium text-brand">Application Operations</span>
-            <span className="rounded-full bg-brand-light px-2 py-0.5 text-xs font-medium text-brand">SRE</span>
-          </div>
+          <p className="mt-3 font-semibold text-ink">{nome}</p>
+          <p className="text-sm text-muted">{email}</p>
+          {tags.length > 0 && (
+            <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+              {tags.map((t) => (
+                <span key={t} className="rounded-full bg-brand-light px-2 py-0.5 text-xs font-medium text-brand">{t}</span>
+              ))}
+            </div>
+          )}
           <Link to="/perfil/publico" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand hover:underline">
             Ver Perfil Público <ExternalLink size={14} />
           </Link>
 
           <div className="mt-5 flex justify-center gap-6 border-t border-gray-100 pt-4">
             <div>
-              <p className="text-xl font-bold text-brand">1250</p>
+              <p className="text-xl font-bold text-brand">{loading ? '—' : pontos}</p>
               <p className="text-xs text-muted">Pontos</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-brand">8</p>
+              <p className="text-xl font-bold text-brand">{loading ? '—' : badges}</p>
               <p className="text-xs text-muted">Badges</p>
             </div>
           </div>
@@ -59,24 +76,25 @@ export default function ProfilePage() {
           </button>
         </Card>
 
-        {/* Informações da conta */}
-        <Card className="lg:col-span-2">
+        {/* Informações da conta (key força os campos a recarregar com os dados reais) */}
+        <Card key={loading ? 'loading' : 'loaded'} className="lg:col-span-2">
           <h2 className="mb-4 font-semibold text-ink">Informações da Conta</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-ink">Nome Completo</span>
-              <input defaultValue={user?.nome} className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
+              <input defaultValue={nome} className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
             </label>
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-ink">Email</span>
-              <input defaultValue={user?.email} className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
+              <input defaultValue={email} className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
             </label>
           </div>
           <label className="mt-4 block">
             <span className="mb-1.5 block text-sm font-medium text-ink">Biografia</span>
             <textarea
               rows={3}
-              defaultValue="Desenvolvedor Frontend focado em React/Next.js e TypeScript."
+              defaultValue={biografia}
+              placeholder="Escreve uma breve biografia…"
               className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
           </label>
@@ -85,7 +103,7 @@ export default function ProfilePage() {
               Service Line
               <Link to="/escolher-area" className="text-xs font-normal text-brand hover:underline">Selecionar área</Link>
             </span>
-            <input defaultValue="Application Operations - Site Reliability Engineering" className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
+            <input defaultValue={serviceLine} placeholder="Sem service line atribuída" className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
           </label>
           <div className="mt-5 flex justify-end">
             <button className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark">

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Award, Star, Percent, Calendar, Mail, ArrowLeft } from 'lucide-react'
-import { Card, Spinner } from '../components/ui'
+import { Award, Star, Sparkles, Calendar, Mail, ArrowLeft } from 'lucide-react'
+import { Card, Spinner, EmptyState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import { useAuth } from '../context/AuthContext'
 import * as api from '../services/api'
@@ -10,17 +10,28 @@ const TABS = ['Sobre', 'Badges Conquistados', 'Conquistas Especiais']
 
 export default function PublicProfilePage() {
   const { user } = useAuth()
-  const { data: badges, loading } = useAsync(() => api.getMeusBadges())
+  const { data, loading } = useAsync(async () => {
+    const [consultor, badges] = await Promise.all([
+      api.getConsultant(user.id).catch(() => null),
+      api.getMeusBadges().catch(() => []),
+    ])
+    return { consultor, badges }
+  }, [user?.id])
   const [tab, setTab] = useState('Sobre')
 
-  const nome = user?.nome || 'Consultor'
+  const consultor = data?.consultor
+  const badges = data?.badges || []
+
+  const nome = consultor?.name || user?.nome || 'Consultor'
+  const cargo = consultor?.role || user?.role || 'Consultor'
+  const bio = consultor?.biography || 'Sem biografia definida.'
   const iniciais = nome.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
 
   const stats = [
-    { icon: Award, label: 'Badges Completados', value: badges?.length ?? 0 },
-    { icon: Star, label: 'Pontos Totais', value: 300 },
-    { icon: Percent, label: 'Taxa de Aprovação', value: '74%' },
-    { icon: Calendar, label: 'Consultor desde', value: '1/1/2020' },
+    { icon: Award, label: 'Badges Completados', value: consultor?.badges ?? badges.length },
+    { icon: Star, label: 'Pontos Totais', value: consultor?.points ?? 0 },
+    { icon: Sparkles, label: 'Conquistas Especiais', value: consultor?.specials ?? 0 },
+    { icon: Calendar, label: 'Consultor desde', value: consultor?.startDate || '—' },
   ]
 
   return (
@@ -40,7 +51,7 @@ export default function PublicProfilePage() {
               </div>
               <div className="pb-1">
                 <h1 className="text-xl font-bold text-ink">{nome}</h1>
-                <p className="text-sm text-muted">Desenvolvedor Web</p>
+                <p className="text-sm text-muted">{cargo}</p>
               </div>
             </div>
             <p className="flex items-center gap-1 pb-1 text-sm text-muted">
@@ -53,7 +64,6 @@ export default function PublicProfilePage() {
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         {/* Conteúdo */}
         <div className="lg:col-span-2">
-          {/* Tabs */}
           <div className="mb-4 flex gap-1 border-b border-gray-200">
             {TABS.map((t) => (
               <button
@@ -72,51 +82,41 @@ export default function PublicProfilePage() {
             <Spinner />
           ) : tab === 'Sobre' ? (
             <Card>
-              <div className="flex items-center gap-2">
-                <h2 className="font-semibold text-ink">{nome}</h2>
-                <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-600">React</span>
-              </div>
-              <p className="mt-3 text-sm leading-relaxed text-muted">
-                Desenvolvedor Frontend focado em React/Next.js e TypeScript. Proficiente em gestão de estado
-                complexa, UX/UX responsivo e testes unitários. Comprometido com as melhores práticas de
-                acessibilidade e Web Vitals.
-              </p>
-              <h3 className="mt-5 font-semibold text-ink">Assinatura de Badges</h3>
-              <div className="mt-2 flex items-center gap-3 rounded-xl border border-gray-200 p-3">
-                <div className="grid h-11 w-11 place-items-center rounded-lg bg-red-100 text-red-500"><Award size={20} /></div>
-                <div>
-                  <p className="font-medium text-ink">Java - Intermédio</p>
-                  <p className="text-xs text-muted">Softinsa Certification</p>
+              <h2 className="font-semibold text-ink">{nome}</h2>
+              {(consultor?.area || consultor?.serviceLine) && (
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {[consultor?.area, consultor?.serviceLine].filter(Boolean).map((t) => (
+                    <span key={t} className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-600">{t}</span>
+                  ))}
                 </div>
-              </div>
+              )}
+              <p className="mt-3 text-sm leading-relaxed text-muted">{bio}</p>
             </Card>
           ) : tab === 'Badges Conquistados' ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {badges.map((b) => (
-                <Card key={b.badgeId} className="flex items-center gap-3">
-                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-brand-light text-brand"><Award size={22} /></div>
-                  <div>
-                    <p className="font-semibold text-ink">{b.nome}</p>
-                    <p className="text-xs text-muted">{b.fornecedor} · {b.pontos} pts</p>
-                  </div>
-                </Card>
-              ))}
-            </div>
+            badges.length === 0 ? (
+              <EmptyState icon={Award} title="Sem badges conquistados" description="Ainda não há badges para mostrar." />
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {badges.map((b) => (
+                  <Card key={b.badgeId} className="flex items-center gap-3">
+                    <div className="grid h-12 w-12 place-items-center rounded-xl bg-brand-light text-brand"><Award size={22} /></div>
+                    <div>
+                      <p className="font-semibold text-ink">{b.nome}</p>
+                      <p className="text-xs text-muted">{b.fornecedor} · {b.pontos} pts</p>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {[
-                { t: 'Primeiros Passos', d: 'Primeiro badge conquistado' },
-                { t: 'Cloud Explorer', d: '2 badges de cloud conquistados' },
-              ].map((c) => (
-                <Card key={c.t} className="flex items-center gap-3">
-                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-amber-100 text-amber-600"><Star size={22} /></div>
-                  <div>
-                    <p className="font-semibold text-ink">{c.t}</p>
-                    <p className="text-xs text-muted">{c.d}</p>
-                  </div>
-                </Card>
-              ))}
-            </div>
+            (consultor?.specials ?? 0) === 0 ? (
+              <EmptyState icon={Sparkles} title="Sem conquistas especiais" description="As conquistas especiais aparecem aqui quando as desbloqueares." />
+            ) : (
+              <Card className="flex items-center gap-3">
+                <div className="grid h-12 w-12 place-items-center rounded-xl bg-amber-100 text-amber-600"><Sparkles size={22} /></div>
+                <p className="font-semibold text-ink">{consultor.specials} conquista(s) especial(is)</p>
+              </Card>
+            )
           )}
         </div>
 
@@ -128,7 +128,7 @@ export default function PublicProfilePage() {
                 <s.icon size={20} />
               </div>
               <div>
-                <p className="text-lg font-bold">{s.value}</p>
+                <p className="text-lg font-bold">{loading ? '—' : s.value}</p>
                 <p className="text-xs text-white/80">{s.label}</p>
               </div>
             </div>

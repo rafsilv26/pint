@@ -41,9 +41,9 @@ export const mockBadges = TECHS.flatMap((t) =>
     duracaoMeses: 24,
     descricao: `Demonstra competências em ${t.nome} ao nível ${nivel}, aplicadas em contexto de projeto real.`,
     requisitos: [
-      'Certificado oficial reconhecido',
-      'Projeto prático validado',
-      'Avaliação por um Talent Manager',
+      { id: 1, titulo: 'Certificado oficial reconhecido' },
+      { id: 2, titulo: 'Projeto prático validado' },
+      { id: 3, titulo: 'Avaliação por um Talent Manager' },
     ],
     slug: `${t.nome.toLowerCase().replace(/\s+/g, '-')}-${nivel.toLowerCase()}`,
   }))

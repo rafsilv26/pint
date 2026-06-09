@@ -3,7 +3,7 @@ import {
   TrendingUp, Award, Clock, Trophy, Bell, UserCircle, Compass,
   ChevronRight, Calendar,
 } from 'lucide-react'
-import { Card, Spinner, StatusPill } from '../components/ui'
+import { Card, Spinner, StatusPill, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
 
@@ -44,7 +44,8 @@ function StatCard({ icon: Icon, label, value, delta, tint, deltaTint }) {
 }
 
 export default function DashboardPage() {
-  const { data, loading } = useAsync(() => api.getDashboard())
+  const { data, loading, error, reload } = useAsync(() => api.getDashboard())
+  if (error) return <ErrorState onRetry={reload} />
   if (loading || !data) return <Spinner />
 
   return (

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Bell, Calendar, Trash2, Search } from 'lucide-react'
-import { Spinner, EmptyState } from '../components/ui'
+import { Spinner, EmptyState, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
 
@@ -15,7 +15,7 @@ function formatar(dt) {
 }
 
 export default function NotificationsPage() {
-  const { data, loading } = useAsync(() => api.getNotificacoes())
+  const { data, loading, error, reload } = useAsync(() => api.getNotificacoes())
   const [filtro, setFiltro] = useState('todas')
   const [pesquisa, setPesquisa] = useState('')
   const [lidas, setLidas] = useState({})
@@ -78,6 +78,8 @@ export default function NotificationsPage() {
 
       {loading ? (
         <Spinner />
+      ) : error ? (
+        <ErrorState onRetry={reload} />
       ) : lista.length === 0 ? (
         <EmptyState icon={Bell} title="Sem notificações" description="Estás em dia! 🎉" />
       ) : (

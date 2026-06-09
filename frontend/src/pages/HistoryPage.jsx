@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Award, Download, ExternalLink, ShieldCheck } from 'lucide-react'
-import { PageHeader, Card, Spinner, EmptyState } from '../components/ui'
+import { PageHeader, Card, Spinner, EmptyState, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
 
@@ -9,15 +9,17 @@ function formatarData(d) {
 }
 
 export default function HistoryPage() {
-  const { data: badges, loading } = useAsync(() => api.getMeusBadges())
+  const { data: badges, loading, error, reload } = useAsync(() => api.getMeusBadges())
 
   return (
     <div>
       <PageHeader title="Histórico de Badges" subtitle="Os badges que já conquistaste." />
 
-      {loading || !badges ? (
+      {loading ? (
         <Spinner />
-      ) : badges.length === 0 ? (
+      ) : error ? (
+        <ErrorState onRetry={reload} />
+      ) : (badges || []).length === 0 ? (
         <EmptyState icon={Award} title="Ainda não tens badges" description="Conquista o teu primeiro badge!" />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Coins, Award, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Spinner, EmptyState } from '../components/ui'
+import { Spinner, EmptyState, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
 
@@ -15,10 +15,11 @@ const TECH_TINTS = {
 const POR_PAGINA = 12
 
 export default function CatalogPage() {
-  const { data: badges, loading } = useAsync(() => api.getBadges())
+  const { data: badges, loading, error, reload } = useAsync(() => api.getBadges())
   const [pesquisa, setPesquisa] = useState('')
   const [pagina, setPagina] = useState(1)
 
+  if (error) return <ErrorState onRetry={reload} />
   if (loading || !badges) return <Spinner />
 
   const filtrados = badges.filter((b) =>

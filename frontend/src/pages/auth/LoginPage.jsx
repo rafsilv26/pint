@@ -34,14 +34,6 @@ export default function LoginPage() {
     <AuthShell
       title="Login"
       subtitle="Introduzir as credenciais de acesso"
-      footer={
-        <>
-          Ainda não tens conta?{' '}
-          <Link to="/registo" className="font-semibold text-brand hover:underline">
-            Criar conta
-          </Link>
-        </>
-      }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {erro && (

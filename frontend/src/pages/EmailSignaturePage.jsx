@@ -35,11 +35,11 @@ function Campo({ label, value, onChange }) {
 
 export default function EmailSignaturePage() {
   const [d, setD] = useState({
-    nome: 'Rafael Silva',
+    nome: '',
     cargo: 'Consultor',
-    email: 'rafael@softinsa.pt',
-    telefone: '+351 912 345 678',
-    localizacao: 'Santa Maria da Feira, Portugal',
+    email: '',
+    telefone: '',
+    localizacao: '',
   })
   const [mostrarBadges, setMostrarBadges] = useState(true)
   const [copiado, setCopiado] = useState(false)

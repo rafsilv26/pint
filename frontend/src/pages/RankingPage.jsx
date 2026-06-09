@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Trophy, Star, Medal, TrendingUp, Percent, Award } from 'lucide-react'
-import { Card, Spinner } from '../components/ui'
+import { Card, Spinner, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
 
@@ -32,10 +32,11 @@ const PODIO = {
 }
 
 export default function RankingPage() {
-  const { data, loading } = useAsync(() => api.getGamification())
+  const { data, loading, error, reload } = useAsync(() => api.getGamification())
   const [periodo, setPeriodo] = useState('Total')
   const [categoria, setCategoria] = useState('Pontos')
 
+  if (error) return <ErrorState onRetry={reload} />
   if (loading || !data) return <Spinner />
 
   const { me, lista, top3 } = data
@@ -51,7 +52,7 @@ export default function RankingPage() {
     <div className="space-y-6">
       <div>
         <h1 className="flex items-center gap-2 text-2xl font-bold text-ink">
-          <Trophy className="text-amber-500" /> Ranking & Gamificação
+          <Trophy className="text-amber-500" /> Ranking
         </h1>
         <p className="mt-1 text-sm text-muted">Compete com os melhores consultores da Softinsa</p>
       </div>

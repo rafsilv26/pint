@@ -39,6 +39,21 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(STORAGE_KEY)
   }
 
+  // Limpa a flag de primeira-troca de password (após o utilizador a alterar)
+  function markPasswordChanged() {
+    setUser((prev) => {
+      if (!prev) return prev
+      const updated = { ...prev, mustChangePassword: false }
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...saved, user: updated }))
+      } catch {
+        // ignora
+      }
+      return updated
+    })
+  }
+
   const value = {
     user,
     token,
@@ -46,6 +61,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(token),
     login,
     logout,
+    markPasswordChanged,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

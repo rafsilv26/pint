@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Calendar, Clock, FileText, Award, Plus, RefreshCw, Share2 } from 'lucide-react'
-import { Spinner, EmptyState, StatusPill } from '../components/ui'
+import { Spinner, EmptyState, StatusPill, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
 
@@ -69,7 +69,7 @@ function Acoes({ c }) {
 }
 
 export default function ApplicationsPage() {
-  const { data: candidaturas, loading } = useAsync(() => api.getMinhasCandidaturas())
+  const { data: candidaturas, loading, error, reload } = useAsync(() => api.getMinhasCandidaturas())
   const [pesquisa, setPesquisa] = useState('')
 
   const filtradas = (candidaturas || []).filter((c) =>
@@ -100,6 +100,8 @@ export default function ApplicationsPage() {
 
       {loading ? (
         <Spinner />
+      ) : error ? (
+        <ErrorState onRetry={reload} />
       ) : filtradas.length === 0 ? (
         <EmptyState
           icon={Award}

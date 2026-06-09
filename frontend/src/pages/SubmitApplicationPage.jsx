@@ -4,7 +4,7 @@ import {
   ArrowLeft, UploadCloud, FileText, Image, Video, Link2,
   Plus, Send, CheckCircle2, Info, Trash2,
 } from 'lucide-react'
-import { Spinner } from '../components/ui'
+import { Spinner, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
 
@@ -18,37 +18,61 @@ const TIPOS = [
 export default function SubmitApplicationPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { data: badges, loading } = useAsync(() => api.getBadges())
+  const { data: badges, loading, error, reload } = useAsync(() => api.getBadges())
 
   const [badgeId, setBadgeId] = useState(searchParams.get('badge') || '')
   const [tipo, setTipo] = useState('Ficheiro')
   const [titulo, setTitulo] = useState('')
-  const [requisito, setRequisito] = useState('')
+  const [requisitoId, setRequisitoId] = useState('')
   const [descricao, setDescricao] = useState('')
-  const [ref, setRef] = useState('') // nome do ficheiro ou URL
+  const [ficheiro, setFicheiro] = useState(null) // File real
+  const [link, setLink] = useState('')
   const [prontas, setProntas] = useState([])
   const [enviando, setEnviando] = useState(false)
   const [sucesso, setSucesso] = useState(false)
+  const [erroSubmit, setErroSubmit] = useState(null)
 
-  if (loading || !badges) return <Spinner />
+  // Carrega os requisitos do badge selecionado (para os associar às evidências)
+  const { data: badgeDetalhe } = useAsync(
+    () => (badgeId ? api.getBadge(badgeId) : Promise.resolve(null)),
+    [badgeId]
+  )
+  const requisitos = badgeDetalhe?.requisitos || []
 
-  const badge = badges.find((b) => b.id === Number(badgeId))
+  if (loading) return <Spinner />
+  if (error) return <ErrorState onRetry={reload} />
 
   function adicionar() {
-    if (!titulo || !ref) return
-    setProntas((atual) => [...atual, { id: Date.now(), tipo, titulo, requisito, descricao, ref }])
+    const ehLink = tipo === 'Link'
+    if (!titulo || (ehLink ? !link : !ficheiro)) return
+    setProntas((atual) => [
+      ...atual,
+      {
+        id: Date.now(),
+        tipo,
+        titulo,
+        requisitoId,
+        descricao,
+        file: ehLink ? null : ficheiro,
+        ref: ehLink ? link : ficheiro?.name,
+      },
+    ])
     setTitulo('')
-    setRequisito('')
+    setRequisitoId('')
     setDescricao('')
-    setRef('')
+    setFicheiro(null)
+    setLink('')
   }
 
   async function submeter() {
     setEnviando(true)
+    setErroSubmit(null)
     try {
       await api.submeterCandidatura({ badgeId: Number(badgeId), descricao: '', ficheiros: prontas })
       setSucesso(true)
       setTimeout(() => navigate('/candidaturas'), 1600)
+    } catch (err) {
+      setErroSubmit(err.message)
     } finally {
       setEnviando(false)
     }
@@ -84,9 +108,7 @@ export default function SubmitApplicationPage() {
           >
             <option value="">Seleciona um badge…</option>
             {badges.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.nome} - {b.nivel}
-              </option>
+              <option key={b.id} value={b.id}>{b.nome} - {b.nivel}</option>
             ))}
           </select>
         </div>
@@ -115,16 +137,14 @@ export default function SubmitApplicationPage() {
                       <p className="truncate font-medium text-ink">{e.titulo}</p>
                       <p className="truncate text-xs text-muted">{e.tipo} · {e.ref}</p>
                     </div>
-                    <button
-                      onClick={() => setProntas((atual) => atual.filter((x) => x.id !== e.id))}
-                      className="text-gray-400 hover:text-red-600"
-                    >
+                    <button onClick={() => setProntas((a) => a.filter((x) => x.id !== e.id))} className="text-gray-400 hover:text-red-600">
                       <Trash2 size={15} />
                     </button>
                   </li>
                 ))}
               </ul>
             )}
+            {erroSubmit && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{erroSubmit}</p>}
             <button
               onClick={submeter}
               disabled={prontas.length === 0 || !badgeId || enviando}
@@ -142,7 +162,6 @@ export default function SubmitApplicationPage() {
               <Plus size={18} /> Nova Evidência
             </h2>
 
-            {/* Tipo */}
             <p className="mb-2 text-sm font-medium text-ink">Tipo de Evidência</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {TIPOS.map(({ key, icon: Icon }) => (
@@ -159,13 +178,12 @@ export default function SubmitApplicationPage() {
               ))}
             </div>
 
-            {/* Ficheiro ou Link */}
             {tipo === 'Link' ? (
               <div className="mt-5">
                 <label className="mb-1.5 block text-sm font-medium text-ink">URL</label>
                 <input
-                  value={ref}
-                  onChange={(e) => setRef(e.target.value)}
+                  value={link}
+                  onChange={(e) => setLink(e.target.value)}
                   placeholder="https://…"
                   className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                 />
@@ -176,16 +194,11 @@ export default function SubmitApplicationPage() {
                 <p className="mt-2 text-sm text-muted">Arraste o ficheiro aqui ou clique para selecionar</p>
                 <p className="mt-1 text-xs text-gray-400">Suporta PDF, DOCX, PNG, JPG, MP4 (máx. 50MB)</p>
                 <span className="mt-3 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white">Escolher Ficheiro</span>
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={(e) => setRef(e.target.files?.[0]?.name || '')}
-                />
-                {ref && <p className="mt-2 text-xs font-medium text-brand">{ref}</p>}
+                <input type="file" className="hidden" onChange={(e) => setFicheiro(e.target.files?.[0] || null)} />
+                {ficheiro && <p className="mt-2 text-xs font-medium text-brand">{ficheiro.name}</p>}
               </label>
             )}
 
-            {/* Título */}
             <div className="mt-5">
               <label className="mb-1.5 block text-sm font-medium text-ink">Título da Evidência</label>
               <input
@@ -196,33 +209,31 @@ export default function SubmitApplicationPage() {
               />
             </div>
 
-            {/* Requisito */}
-            {badge?.requisitos?.length > 0 && (
+            {requisitos.length > 0 && (
               <div className="mt-5">
                 <label className="mb-2 block text-sm font-medium text-ink">Selecionar requisito</label>
                 <div className="space-y-2">
-                  {badge.requisitos.map((req) => (
+                  {requisitos.map((req) => (
                     <label
-                      key={req}
+                      key={req.id}
                       className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-sm transition ${
-                        requisito === req ? 'border-brand bg-brand-light text-brand' : 'border-gray-200 text-ink hover:border-gray-300'
+                        requisitoId === req.id ? 'border-brand bg-brand-light text-brand' : 'border-gray-200 text-ink hover:border-gray-300'
                       }`}
                     >
                       <input
                         type="radio"
                         name="requisito"
-                        checked={requisito === req}
-                        onChange={() => setRequisito(req)}
+                        checked={requisitoId === req.id}
+                        onChange={() => setRequisitoId(req.id)}
                         className="text-brand focus:ring-brand"
                       />
-                      {req}
+                      {req.titulo}
                     </label>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Descrição */}
             <div className="mt-5">
               <label className="mb-1.5 block text-sm font-medium text-ink">Descrição (Opcional)</label>
               <textarea
@@ -236,14 +247,13 @@ export default function SubmitApplicationPage() {
 
             <button
               onClick={adicionar}
-              disabled={!titulo || !ref}
+              disabled={!titulo || (tipo === 'Link' ? !link : !ficheiro)}
               className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-gray-300"
             >
               <Plus size={16} /> Adicionar Evidência
             </button>
           </div>
 
-          {/* Dicas */}
           <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
             <p className="flex items-center gap-1.5 text-sm font-semibold text-amber-900">
               <Info size={16} /> Dicas para Evidências de Qualidade
@@ -252,7 +262,7 @@ export default function SubmitApplicationPage() {
               <li>Adiciona múltiplas evidências para aumentar a hipótese de aprovação.</li>
               <li>Certifica-te de que o ficheiro está claro e legível.</li>
               <li>Descreve como cada evidência demonstra a competência do badge.</li>
-              <li>Para projetos, inclui links que reapresentem o teu trabalho.</li>
+              <li>Para projetos, inclui links que representem o teu trabalho.</li>
             </ul>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, ChevronDown, Coins } from 'lucide-react'
-import { Spinner } from '../components/ui'
+import { Spinner, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
 
@@ -14,24 +14,24 @@ const HERO_TINTS = {
 
 export default function BadgeDetailPage() {
   const { id } = useParams()
-  const { data: badge, loading } = useAsync(() => api.getBadge(id), [id])
+  const { data: badge, loading, error, reload } = useAsync(() => api.getBadge(id), [id])
   const [aberto, setAberto] = useState(0)
 
+  const voltar = (
+    <Link to="/catalogo" className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
+      <ArrowLeft size={16} /> Voltar ao catálogo
+    </Link>
+  )
+
   if (loading) return <Spinner />
+  if (error) return <div>{voltar}<ErrorState onRetry={reload} /></div>
   if (!badge) {
-    return (
-      <div>
-        <Link to="/catalogo" className="text-sm text-brand hover:underline">← Voltar ao catálogo</Link>
-        <p className="mt-4 text-muted">Badge não encontrado.</p>
-      </div>
-    )
+    return <div>{voltar}<p className="mt-4 text-muted">Badge não encontrado.</p></div>
   }
 
   return (
     <div>
-      <Link to="/catalogo" className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
-        <ArrowLeft size={16} /> Voltar ao catálogo
-      </Link>
+      {voltar}
 
       {/* Hero */}
       <div className={`overflow-hidden rounded-2xl bg-gradient-to-br ${HERO_TINTS[badge.tint] || HERO_TINTS.sky} p-6 sm:p-8`}>
@@ -78,25 +78,31 @@ export default function BadgeDetailPage() {
 
         <section>
           <h2 className="mb-3 font-semibold text-ink">Requisitos</h2>
-          <div className="space-y-2">
-            {badge.requisitos.map((req, i) => (
-              <div key={i} className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-                <button
-                  onClick={() => setAberto(aberto === i ? -1 : i)}
-                  className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left text-sm font-medium text-ink"
-                >
-                  {i + 1}. {req}
-                  <ChevronDown size={18} className={`shrink-0 text-muted transition ${aberto === i ? 'rotate-180' : ''}`} />
-                </button>
-                {aberto === i && (
-                  <p className="border-t border-gray-100 px-4 py-3 text-sm text-muted">
-                    Para cumprir este requisito deves submeter evidências que demonstrem,
-                    de forma clara, a competência indicada.
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
+          {badge.requisitos.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-gray-200 p-4 text-sm text-muted">
+              Sem requisitos específicos definidos para este badge.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {badge.requisitos.map((req, i) => (
+                <div key={req.id ?? i} className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+                  <button
+                    onClick={() => setAberto(aberto === i ? -1 : i)}
+                    className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left text-sm font-medium text-ink"
+                  >
+                    {i + 1}. {req.titulo}
+                    <ChevronDown size={18} className={`shrink-0 text-muted transition ${aberto === i ? 'rotate-180' : ''}`} />
+                  </button>
+                  {aberto === i && (
+                    <p className="border-t border-gray-100 px-4 py-3 text-sm text-muted">
+                      Para cumprir este requisito deves submeter evidências que demonstrem,
+                      de forma clara, a competência indicada.
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </div>

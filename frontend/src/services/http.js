@@ -14,6 +14,15 @@ function getToken() {
   }
 }
 
+// Utilizador autenticado guardado (para obter o id nas chamadas filtradas)
+export function getUser() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}').user || null
+  } catch {
+    return null
+  }
+}
+
 function safeJson(text) {
   try {
     return JSON.parse(text)

@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Search, Star, Medal, Users } from 'lucide-react'
-import { PageHeader, Card, Spinner, EmptyState } from '../components/ui'
+import { PageHeader, Card, Spinner, EmptyState, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
 
 const iniciais = (n = '') => n.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
 
 export default function ConsultoresPage() {
-  const { data, loading } = useAsync(() => api.getConsultants())
+  const { data, loading, error, reload } = useAsync(() => api.getConsultants())
   const [pesquisa, setPesquisa] = useState('')
 
   const lista = (data || []).filter((c) =>
@@ -30,6 +30,8 @@ export default function ConsultoresPage() {
 
       {loading ? (
         <Spinner />
+      ) : error ? (
+        <ErrorState onRetry={reload} />
       ) : lista.length === 0 ? (
         <EmptyState icon={Users} title="Nenhum consultor encontrado" description="Tenta outra pesquisa." />
       ) : (
