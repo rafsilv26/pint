@@ -224,6 +224,17 @@ class _HeaderCard extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
+                    if (data.userRole.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        data.userRole,
+                        style: const TextStyle(
+                          color: Color(0xFFE6F5FF),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

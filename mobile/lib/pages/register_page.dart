@@ -27,8 +27,13 @@ class _RegisterPageState extends State<RegisterPage> {
   bool hidePassword = true;
   bool hideConfirmPassword = true;
   bool acceptedTerms = false;
+  bool isSubmitting = false;
 
   Future<void> continueToConfirmation() async {
+    if (isSubmitting) {
+      return;
+    }
+
     if (nameController.text.trim().isEmpty ||
         emailController.text.trim().isEmpty ||
         companyPasswordController.text.trim().isEmpty ||
@@ -54,23 +59,52 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    await authService.createAccount(
-      name: nameController.text.trim(),
-      email: emailController.text.trim(),
-    );
+    setState(() {
+      isSubmitting = true;
+    });
 
-    if (!mounted) {
-      return;
-    }
+    try {
+      await authService.createAccount(
+        name: nameController.text.trim(),
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ConfirmationPage(
-          email: emailController.text.trim(),
-          onAuthenticated: widget.onAuthenticated,
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ConfirmationPage(
+            email: emailController.text.trim(),
+            onAuthenticated: widget.onAuthenticated,
+          ),
         ),
-      ),
-    );
+      );
+    } on AuthException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nao foi possivel comunicar com a API.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
@@ -185,7 +219,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 32),
                 PrimaryAuthButton(
-                  text: 'Continuar',
+                  text: isSubmitting ? 'A criar conta...' : 'Continuar',
                   onPressed: continueToConfirmation,
                 ),
               ],

@@ -1,4 +1,5 @@
 import '../models/dashboard_data.dart';
+import '../services/auth_service.dart';
 import '../services/badges_api_service.dart';
 import '../services/dashboard_sync_service.dart';
 import '../services/local_badges_database.dart';
@@ -6,9 +7,11 @@ import '../services/local_badges_database.dart';
 class DashboardRepository {
   DashboardRepository({
     BadgesApiService? apiService,
+    AuthService? authService,
     LocalBadgesDatabase? database,
     DashboardSyncService? syncService,
   }) : apiService = apiService ?? BadgesApiService(),
+       authService = authService ?? AuthService(),
        database = database ?? LocalBadgesDatabase.instance,
        syncService =
            syncService ??
@@ -18,6 +21,7 @@ class DashboardRepository {
            );
 
   final BadgesApiService apiService;
+  final AuthService authService;
   final LocalBadgesDatabase database;
   final DashboardSyncService syncService;
   bool _lastSyncSucceeded = false;
@@ -31,10 +35,14 @@ class DashboardRepository {
     final localData = await database.getDashboard();
 
     if (localData != null) {
-      return localData.copyWith(loadedFromCache: !_lastSyncSucceeded);
+      return (await _withSessionUser(
+        localData,
+      )).copyWith(loadedFromCache: !_lastSyncSucceeded);
     }
 
-    return DashboardData.sample().copyWith(loadedFromCache: true);
+    return (await _withSessionUser(
+      DashboardData.sample(),
+    )).copyWith(loadedFromCache: true);
   }
 
   Future<void> refreshFromApi() async {
@@ -43,5 +51,27 @@ class DashboardRepository {
 
   Future<void> handleFirebaseAtualizaNotification() async {
     await syncService.syncFromFirebaseAtualizaNotification();
+  }
+
+  Future<DashboardData> _withSessionUser(DashboardData data) async {
+    final localUser = await database.getCurrentUserProfile();
+    if (localUser != null) {
+      return data.copyWith(
+        userName: localUser.name.isNotEmpty ? localUser.name : data.userName,
+        userRole: localUser.role.isNotEmpty ? localUser.role : data.userRole,
+      );
+    }
+
+    final savedName = await authService.getSavedName();
+    final savedRole = await authService.getSavedRole();
+
+    return data.copyWith(
+      userName: savedName != null && savedName.isNotEmpty
+          ? savedName
+          : data.userName,
+      userRole: savedRole != null && savedRole.isNotEmpty
+          ? savedRole
+          : data.userRole,
+    );
   }
 }

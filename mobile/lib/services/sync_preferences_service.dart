@@ -4,6 +4,7 @@ class SyncPreferencesService {
   static const String _lastDashboardUpdateKey =
       'softinsa_dashboard_ultimaatualizacao';
 
+
   Future<DateTime?> getLastDashboardUpdate() async {
     final preferences = await SharedPreferences.getInstance();
     final value = preferences.getString(_lastDashboardUpdateKey);

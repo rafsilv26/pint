@@ -19,6 +19,11 @@ class DashboardSyncService {
     await database.ensureSeedData();
 
     try {
+      final currentUser = await apiService.fetchCurrentUser();
+      if (currentUser != null) {
+        await database.upsertCurrentUser(currentUser);
+      }
+
       final lastUpdate = await preferencesService.getLastDashboardUpdate();
       final apiUpdate = await apiService.fetchDashboardUpdates(
         lastUpdate: lastUpdate,
@@ -31,6 +36,10 @@ class DashboardSyncService {
       final updateDate = apiUpdate.serverUpdatedAt ?? DateTime.now();
       await database.upsertDashboard(
         apiUpdate.dashboard,
+        updatedAt: updateDate,
+      );
+      await database.upsertApiSnapshot(
+        apiUpdate.rawPayload,
         updatedAt: updateDate,
       );
       await preferencesService.saveLastDashboardUpdate(updateDate);

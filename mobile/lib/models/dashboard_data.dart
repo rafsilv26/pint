@@ -1,6 +1,7 @@
 class DashboardData {
   const DashboardData({
     required this.userName,
+    required this.userRole,
     required this.greeting,
     required this.totalPoints,
     required this.learningPathTitle,
@@ -17,6 +18,7 @@ class DashboardData {
   });
 
   final String userName;
+  final String userRole;
   final String greeting;
   final int totalPoints;
   final String learningPathTitle;
@@ -31,9 +33,14 @@ class DashboardData {
   final int ranking;
   final bool loadedFromCache;
 
-  DashboardData copyWith({bool? loadedFromCache}) {
+  DashboardData copyWith({
+    String? userName,
+    String? userRole,
+    bool? loadedFromCache,
+  }) {
     return DashboardData(
-      userName: userName,
+      userName: userName ?? this.userName,
+      userRole: userRole ?? this.userRole,
       greeting: greeting,
       totalPoints: totalPoints,
       learningPathTitle: learningPathTitle,
@@ -53,6 +60,7 @@ class DashboardData {
   Map<String, dynamic> toJson() {
     return {
       'userName': userName,
+      'userRole': userRole,
       'greeting': greeting,
       'totalPoints': totalPoints,
       'learningPathTitle': learningPathTitle,
@@ -71,21 +79,51 @@ class DashboardData {
   }
 
   factory DashboardData.fromJson(Map<String, dynamic> json) {
-    final recommendationsJson = json['recommendations'] as List<dynamic>? ?? [];
+    final recommendationsJson = _listValue(json, const [
+      'recommendations',
+      'badgeRecommendations',
+      'badges',
+    ]);
 
     return DashboardData(
-      userName: json['userName'] as String? ?? '',
-      greeting: json['greeting'] as String? ?? 'Boa noite,',
-      totalPoints: json['totalPoints'] as int? ?? 0,
+      userName: _textValue(json, const ['userName', 'user_name', 'nome']) ?? '',
+      userRole: _textValue(json, const ['userRole', 'user_role', 'role']) ?? '',
+      greeting: _textValue(json, const ['greeting']) ?? 'Boa noite,',
+      totalPoints:
+          _intValue(json, const [
+            'totalPoints',
+            'total_points',
+            'totalPontos',
+          ]) ??
+          0,
       learningPathTitle:
-          json['learningPathTitle'] as String? ?? 'Learning Path',
+          _textValue(json, const [
+            'learningPathTitle',
+            'learning_path_title',
+          ]) ??
+          'Learning Path',
       learningPathProgress:
-          (json['learningPathProgress'] as num?)?.toDouble() ?? 0,
-      noticeTitle: json['noticeTitle'] as String? ?? '',
-      noticeMessage: json['noticeMessage'] as String? ?? '',
-      specialAchievementTitle: json['specialAchievementTitle'] as String? ?? '',
+          _doubleValue(json, const [
+            'learningPathProgress',
+            'learning_path_progress',
+          ]) ??
+          0,
+      noticeTitle:
+          _textValue(json, const ['noticeTitle', 'notice_title']) ?? '',
+      noticeMessage:
+          _textValue(json, const ['noticeMessage', 'notice_message']) ?? '',
+      specialAchievementTitle:
+          _textValue(json, const [
+            'specialAchievementTitle',
+            'special_achievement_title',
+          ]) ??
+          '',
       specialAchievementMessage:
-          json['specialAchievementMessage'] as String? ?? '',
+          _textValue(json, const [
+            'specialAchievementMessage',
+            'special_achievement_message',
+          ]) ??
+          '',
       recommendations: recommendationsJson
           .map(
             (item) => BadgeRecommendation.fromJson(
@@ -93,15 +131,79 @@ class DashboardData {
             ),
           )
           .toList(),
-      badgesWon: json['badgesWon'] as int? ?? 0,
-      inProgress: json['inProgress'] as int? ?? 0,
-      ranking: json['ranking'] as int? ?? 0,
+      badgesWon: _intValue(json, const ['badgesWon', 'badges_won']) ?? 0,
+      inProgress: _intValue(json, const ['inProgress', 'in_progress']) ?? 0,
+      ranking: _intValue(json, const ['ranking']) ?? 0,
     );
+  }
+
+  static Object? _field(Map<String, dynamic> json, List<String> keys) {
+    for (final key in keys) {
+      if (json.containsKey(key)) {
+        return json[key];
+      }
+    }
+
+    final lowerCaseKeys = {
+      for (final entry in json.entries) entry.key.toLowerCase(): entry.value,
+    };
+    for (final key in keys) {
+      final value = lowerCaseKeys[key.toLowerCase()];
+      if (value != null) {
+        return value;
+      }
+    }
+
+    return null;
+  }
+
+  static String? _textValue(Map<String, dynamic> json, List<String> keys) {
+    return _field(json, keys)?.toString();
+  }
+
+  static int? _intValue(Map<String, dynamic> json, List<String> keys) {
+    final value = _field(json, keys);
+    if (value is int) {
+      return value;
+    }
+    if (value is num) {
+      return value.toInt();
+    }
+    if (value is String) {
+      return int.tryParse(value);
+    }
+
+    return null;
+  }
+
+  static double? _doubleValue(Map<String, dynamic> json, List<String> keys) {
+    final value = _field(json, keys);
+    if (value is num) {
+      return value.toDouble();
+    }
+    if (value is String) {
+      return double.tryParse(value);
+    }
+
+    return null;
+  }
+
+  static List<dynamic> _listValue(
+    Map<String, dynamic> json,
+    List<String> keys,
+  ) {
+    final value = _field(json, keys);
+    if (value is List) {
+      return value;
+    }
+
+    return const [];
   }
 
   factory DashboardData.sample() {
     return const DashboardData(
       userName: 'Rafael Silva',
+      userRole: 'Consultor',
       greeting: 'Boa noite,',
       totalPoints: 1250,
       learningPathTitle: 'Learning Path: Jornada Técnica',
@@ -195,17 +297,71 @@ class BadgeRecommendation {
   }
 
   factory BadgeRecommendation.fromJson(Map<String, dynamic> json) {
-    final prerequisitesJson = json['prerequisites'] as List<dynamic>? ?? [];
+    final prerequisitesJson = _listValue(json, const [
+      'prerequisites',
+      'requisitos',
+    ]);
 
     return BadgeRecommendation(
-      title: json['title'] as String? ?? '',
-      description: json['description'] as String? ?? '',
-      level: json['level'] as String? ?? '',
-      tag: json['tag'] as String? ?? '',
-      points: json['points'] as int? ?? 0,
-      duration: json['duration'] as String? ?? '',
+      title: _textValue(json, const ['title', 'nome']) ?? '',
+      description: _textValue(json, const ['description', 'descricao']) ?? '',
+      level: _textValue(json, const ['level', 'nivel', 'ordem']) ?? '',
+      tag: _textValue(json, const ['tag', 'tipo']) ?? '',
+      points: _intValue(json, const ['points', 'pontos']) ?? 0,
       prerequisites: prerequisitesJson.map((item) => item.toString()).toList(),
-      iconName: json['iconName'] as String? ?? 'badge',
+      duration: _textValue(json, const ['duration', 'duracao']) ?? '',
+      iconName: _textValue(json, const ['iconName', 'imagem']) ?? 'badge',
     );
+  }
+
+  static Object? _field(Map<String, dynamic> json, List<String> keys) {
+    for (final key in keys) {
+      if (json.containsKey(key)) {
+        return json[key];
+      }
+    }
+
+    final lowerCaseKeys = {
+      for (final entry in json.entries) entry.key.toLowerCase(): entry.value,
+    };
+    for (final key in keys) {
+      final value = lowerCaseKeys[key.toLowerCase()];
+      if (value != null) {
+        return value;
+      }
+    }
+
+    return null;
+  }
+
+  static String? _textValue(Map<String, dynamic> json, List<String> keys) {
+    return _field(json, keys)?.toString();
+  }
+
+  static int? _intValue(Map<String, dynamic> json, List<String> keys) {
+    final value = _field(json, keys);
+    if (value is int) {
+      return value;
+    }
+    if (value is num) {
+      return value.toInt();
+    }
+    if (value is String) {
+      return int.tryParse(value);
+    }
+
+    return null;
+  }
+
+  static List<dynamic> _listValue(
+    Map<String, dynamic> json,
+    List<String> keys,
+  ) {
+    final value = _field(json, keys);
+    if (value is List) {
+      return value;
+    }
+
+    return const [];
   }
 }

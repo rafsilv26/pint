@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../repositories/dashboard_repository.dart';
 import '../services/auth_service.dart';
 import 'home_page.dart';
 import 'login_page.dart';
@@ -18,12 +19,12 @@ class _AuthGateState extends State<AuthGate> {
   @override
   void initState() {
     super.initState();
-    loggedInFuture = authService.isLoggedIn();
+    loggedInFuture = _checkSessionAndSync();
   }
 
   void showHome() {
     setState(() {
-      loggedInFuture = authService.isLoggedIn();
+      loggedInFuture = _checkSessionAndSync();
     });
   }
 
@@ -31,6 +32,15 @@ class _AuthGateState extends State<AuthGate> {
     setState(() {
       loggedInFuture = Future.value(false);
     });
+  }
+
+  Future<bool> _checkSessionAndSync() async {
+    final isLoggedIn = await authService.isLoggedIn();
+    if (isLoggedIn) {
+      await DashboardRepository().prepareLocalData();
+    }
+
+    return isLoggedIn;
   }
 
   @override
