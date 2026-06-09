@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { KeyRound, ArrowLeft, CheckCircle2, Info } from 'lucide-react'
 import { Card, Field, Button } from '../components/ui'
+import * as api from '../services/api'
 
 const REGRAS = [
   'Mínimo de 8 caracteres',
@@ -18,13 +19,18 @@ export default function ChangePasswordPage() {
   const [erro, setErro] = useState(null)
   const [sucesso, setSucesso] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     setErro(null)
     if (nova.length < 8) return setErro('A nova palavra-passe deve ter pelo menos 8 caracteres.')
     if (nova !== confirmar) return setErro('As palavras-passe não coincidem.')
-    setSucesso(true)
-    setTimeout(() => navigate('/perfil'), 1500)
+    try {
+      await api.changePassword({ currentPassword: atual, newPassword: nova })
+      setSucesso(true)
+      setTimeout(() => navigate('/perfil'), 1500)
+    } catch (err) {
+      setErro(err.message)
+    }
   }
 
   return (

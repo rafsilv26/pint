@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Mail, ArrowLeft, Copy, Download, Award, Phone, MapPin, Info } from 'lucide-react'
 import { Card, Toggle } from '../components/ui'
+import * as api from '../services/api'
 
 function gerarHTML(d) {
   return `<table style="font-family:Arial,sans-serif;color:#1f2330">
@@ -43,14 +44,33 @@ export default function EmailSignaturePage() {
   const [mostrarBadges, setMostrarBadges] = useState(true)
   const [copiado, setCopiado] = useState(false)
 
+  // Carrega a assinatura guardada (popula os campos)
+  useEffect(() => {
+    api.getEmailSignature()
+      .then((s) =>
+        setD((cur) => ({
+          ...cur,
+          nome: s.nome || cur.nome,
+          cargo: s.cargo || cur.cargo,
+          email: s.email || cur.email,
+          telefone: s.telefone || cur.telefone,
+          localizacao: s.localizacao || cur.localizacao,
+        }))
+      )
+      .catch(() => {})
+  }, [])
+
   const set = (k) => (v) => setD({ ...d, [k]: v })
   const iniciais = (d.nome[0] || 'S').toUpperCase()
 
   function copiarHTML() {
-    navigator.clipboard?.writeText(gerarHTML(d)).then(() => {
+    const html = gerarHTML(d)
+    navigator.clipboard?.writeText(html).then(() => {
       setCopiado(true)
       setTimeout(() => setCopiado(false), 2000)
     })
+    // Persiste a assinatura no backend (quando ligado à API real)
+    api.saveEmailSignature({ templateHtml: html }).catch(() => {})
   }
 
   return (

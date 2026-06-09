@@ -20,6 +20,7 @@ import PreferencesPage from './pages/PreferencesPage'
 import EmailSignaturePage from './pages/EmailSignaturePage'
 import ChangePasswordPage from './pages/ChangePasswordPage'
 import EscolhaAreaPage from './pages/EscolhaAreaPage'
+import ConsultoresPage from './pages/ConsultoresPage'
 import PublicProfilePage from './pages/PublicProfilePage'
 import CertificatePage from './pages/CertificatePage'
 import PublicBadgePage from './pages/PublicBadgePage'
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="/perfil/alterar-password" element={<ChangePasswordPage />} />
         <Route path="/perfil/publico" element={<PublicProfilePage />} />
         <Route path="/escolher-area" element={<EscolhaAreaPage />} />
+        <Route path="/consultores" element={<ConsultoresPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
