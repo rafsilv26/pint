@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Mail, Lock } from 'lucide-react'
 import AuthShell from '../../components/layout/AuthShell'
 import { Field } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
+import { homeForRole } from '../../config/navigation'
 
 export default function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
 
   const [email, setEmail] = useState('rafael@softinsa.pt')
   const [password, setPassword] = useState('')
@@ -20,9 +20,8 @@ export default function LoginPage() {
     setErro(null)
     setLoading(true)
     try {
-      await login({ email, password })
-      const destino = location.state?.from?.pathname || '/'
-      navigate(destino, { replace: true })
+      const u = await login({ email, password })
+      navigate(homeForRole(u), { replace: true })
     } catch (err) {
       setErro(err.message)
     } finally {

@@ -253,3 +253,75 @@ export const mockPublicBadges = {
     valido: true,
   },
 }
+
+// =============================================================
+//  TALENT MANAGER
+// =============================================================
+export const mockTalentDashboard = {
+  stats: [
+    { label: 'Consultores', value: '40.689', delta: '+0.5%', tint: 'sky' },
+    { label: 'Badges', value: '10.589', delta: '+0.5%', tint: 'violet' },
+    { label: 'Candidaturas', value: '30.889', delta: '+0.5%', tint: 'amber' },
+    { label: 'Service Lines', value: '20.789', delta: '+0.5%', tint: 'emerald' },
+  ],
+  pontuacaoGlobal: [
+    { rank: 1, nome: 'Cody Fisher', pontos: 7500 },
+    { rank: 2, nome: 'Kathryn Murphy', pontos: 6200 },
+    { rank: 3, nome: 'Kristin Watson', pontos: 5400 },
+    { rank: 4, nome: 'Jerome Bell', pontos: 4800 },
+    { rank: 5, nome: 'Annette Black', pontos: 4200 },
+    { rank: 6, nome: 'Marvin McKinney', pontos: 3600 },
+    { rank: 7, nome: 'Devon Lane', pontos: 3100 },
+    { rank: 8, nome: 'Floyd Miles', pontos: 2700 },
+  ],
+  pedidosFechados: [12, 18, 9, 22, 15, 28, 20],
+  atividadeRecente: [
+    { nome: 'João Silva', texto: 'Submeteu o badge "React Expert"' },
+    { nome: 'Ana Fernandes', texto: 'Novo utilizador criado' },
+    { nome: 'Carlos Lopes', texto: 'Badge "TypeScript" expirado' },
+  ],
+}
+
+export const mockTalentCandidaturas = [
+  { id: 201, trackingId: '#20482', consultor: 'Matt Dickerson', badge: 'Java', nivel: 'A', data: '13/06/2022', status: ESTADOS.IN_VALIDATION },
+  { id: 202, trackingId: '#20482', consultor: 'Joaquim Pernil', badge: 'OutSystems', nivel: 'A', data: '13/06/2022', status: ESTADOS.IN_VALIDATION },
+  { id: 203, trackingId: '#20482', consultor: 'Joaquim Pernil', badge: 'MongoDB', nivel: 'C', data: '13/06/2022', status: ESTADOS.SUBMITTED },
+  { id: 204, trackingId: '#20482', consultor: 'Joaquim Pernil', badge: 'Visual Code', nivel: 'A', data: '13/06/2022', status: ESTADOS.IN_VALIDATION },
+  { id: 205, trackingId: '#20482', consultor: 'Joaquim Pernil', badge: 'Java', nivel: 'C', data: '13/06/2022', status: ESTADOS.IN_VALIDATION },
+  { id: 206, trackingId: '#20482', consultor: 'Joaquim Pernil', badge: 'OutSystems', nivel: 'A', data: '13/06/2022', status: ESTADOS.SUBMITTED },
+]
+
+// =============================================================
+//  SERVICE LINE LEADER
+// =============================================================
+export const mockServiceLineDashboard = {
+  stats: [
+    { label: 'Consultores LowCode', value: '890', delta: '+0.5%', tint: 'sky' },
+    { label: 'Badges atribuídos', value: '367', delta: '+0.5%', tint: 'violet' },
+    { label: 'Pedidos de badges', value: '189', delta: '+0.5%', tint: 'amber' },
+    { label: 'Pontos atribuídos', value: '20.789', delta: '+0.5%', tint: 'emerald' },
+  ],
+  pontuacaoMensal: [
+    { rank: 1, nome: 'Cody Fisher', badges: 8, pontos: 1500 },
+    { rank: 2, nome: 'Kathryn Murphy', badges: 7, pontos: 1200 },
+    { rank: 3, nome: 'Kristin Watson', badges: 6, pontos: 900 },
+    { rank: 4, nome: 'Jerome Bell', badges: 5, pontos: 500 },
+    { rank: 5, nome: 'Annette Black', badges: 4, pontos: 350 },
+    { rank: 6, nome: 'Marvin McKinney', badges: 3, pontos: 200 },
+  ],
+  badgesAtribuidos: [10, 16, 12, 22, 18, 26, 20],
+  atividadeRecente: [
+    { nome: 'João Silva', texto: 'Pedido em validação' },
+    { nome: 'Ana Fernandes', texto: 'Pedido devolvido ao consultor' },
+    { nome: 'Carlos Lopes', texto: 'Badge expira em 10 dias' },
+  ],
+}
+
+export const mockServiceLinePedidos = [
+  { id: 301, trackingId: '#20482', badge: 'Java', consultor: 'Matt Dickerson', data: '13/06/2022', nivel: 'A', pontos: 100, status: ESTADOS.VALIDATED },
+  { id: 302, trackingId: '#20482', badge: 'OutSystems', consultor: 'Joaquim Pernil', data: '13/06/2022', nivel: 'A', pontos: 100, status: ESTADOS.VALIDATED },
+  { id: 303, trackingId: '#20482', badge: 'MongoDB', consultor: 'Joaquim Pernil', data: '13/06/2022', nivel: 'C', pontos: 100, status: ESTADOS.APPROVED },
+  { id: 304, trackingId: '#20482', badge: 'Visual Code', consultor: 'Joaquim Pernil', data: '13/06/2022', nivel: 'A', pontos: 100, status: ESTADOS.REJECTED },
+  { id: 305, trackingId: '#20482', badge: 'Java', consultor: 'Joaquim Pernil', data: '13/06/2022', nivel: 'C', pontos: 100, status: ESTADOS.VALIDATED },
+  { id: 306, trackingId: '#20482', badge: 'OutSystems', consultor: 'Joaquim Pernil', data: '13/06/2022', nivel: 'A', pontos: 100, status: ESTADOS.APPROVED },
+]

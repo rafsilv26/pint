@@ -12,6 +12,10 @@ import {
   mockGamification,
   mockDashboard,
   mockPublicBadges,
+  mockTalentDashboard,
+  mockTalentCandidaturas,
+  mockServiceLineDashboard,
+  mockServiceLinePedidos,
 } from '../data/mockData'
 
 const delay = (ms = 400) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -142,4 +146,156 @@ export async function getConsultant(id) {
 export async function me() {
   await delay()
   return { user: clone(mockUser) }
+}
+
+// ---------- Talent Manager ----------
+export async function getTalentDashboard() {
+  await delay()
+  return clone(mockTalentDashboard)
+}
+export async function getTalentCandidaturas(estado = 'pendentes') {
+  await delay()
+  if (estado === 'validadas') {
+    return clone(mockTalentCandidaturas.filter((c) => c.status.code === 'VALIDATED'))
+  }
+  return clone(mockTalentCandidaturas)
+}
+export async function getCandidatura(id) {
+  await delay()
+  const base = mockTalentCandidaturas.find((c) => c.id === Number(id))
+  return {
+    id: Number(id),
+    numero: base?.trackingId || `#${id}`,
+    estado: base?.status || { code: 'SUBMITTED', name: 'Submetido', cor: 'amber' },
+    consultor: base?.consultor || 'Consultor',
+    submissao: base?.data || '—',
+    badge: { nome: base?.badge || 'Badge', nivel: base?.nivel || '—', tint: 'salmon' },
+    evidencias: [
+      { id: 1, nome: 'Certificado.pdf', url: '#', requisito: 'Certificado oficial reconhecido pela entidade fornecedora.' },
+      { id: 2, nome: 'Projeto.pdf', url: '#', requisito: 'Projeto prático validado, com evidências do trabalho realizado.' },
+    ],
+    historico: [
+      { estado: 'Submetida', data: base?.data || '—', motivo: 'Candidatura submetida pelo consultor' },
+    ],
+  }
+}
+export async function validarTalentManager() {
+  await delay(500)
+  return { mensagem: 'Decisão registada.' }
+}
+
+// ---------- Service Line Leader ----------
+export async function getServiceLineDashboard() {
+  await delay()
+  return clone(mockServiceLineDashboard)
+}
+export async function getServiceLinePedidos() {
+  await delay()
+  return clone(mockServiceLinePedidos)
+}
+export async function validarServiceLine() {
+  await delay(500)
+  return { mensagem: 'Decisão registada.' }
+}
+
+// ---------- Admin (CRUD genérico, com store em memória) ----------
+let _adminId = 1000
+const adminStore = {
+  badges: [
+    { id: 1, nome: 'OutSystems', nivel: 'Júnior', ponto: 100, descricao: 'Low-code com OutSystems.' },
+    { id: 2, nome: 'Java', nivel: 'Sénior', ponto: 150, descricao: 'Desenvolvimento Java.' },
+    { id: 3, nome: 'MongoDB', nivel: 'Intermédio', ponto: 120, descricao: 'Base de dados NoSQL.' },
+  ],
+  'learning-paths': [
+    { id: 1, nome: 'Cloud Foundations', descricao: 'Trilho de cloud.' },
+    { id: 2, nome: 'Data & AI', descricao: 'Trilho de dados e inteligência artificial.' },
+  ],
+  policies: [
+    { id: 1, titulo: 'Política de Privacidade', versao: '2.0', descricao: 'Tratamento de dados pessoais.' },
+  ],
+  notices: [
+    { id: 1, title: 'Manutenção programada', message: 'A plataforma estará offline dia 20/06.' },
+  ],
+  information: [
+    { id: 1, titulo: 'Nova época de candidaturas', mensagem: 'Candidaturas abertas até 30 de junho.' },
+  ],
+}
+const ensure = (r) => (adminStore[r] = adminStore[r] || [])
+
+export async function listResource(resource) {
+  await delay()
+  return clone(ensure(resource))
+}
+export async function createResource(resource, body) {
+  await delay()
+  const row = { id: ++_adminId, ...body }
+  ensure(resource).push(row)
+  return clone(row)
+}
+export async function updateResource(resource, id, body) {
+  await delay()
+  const arr = ensure(resource)
+  const i = arr.findIndex((r) => r.id === Number(id))
+  if (i >= 0) arr[i] = { ...arr[i], ...body }
+  return clone(arr[i] || null)
+}
+export async function deleteResource(resource, id) {
+  await delay()
+  const arr = ensure(resource)
+  const i = arr.findIndex((r) => r.id === Number(id))
+  if (i >= 0) arr.splice(i, 1)
+  return { ok: true }
+}
+
+// ---------- Admin: Utilizadores ----------
+let _userId = 50
+const usersStore = [
+  { id: 1, nome: 'Rafael Silva', email: 'rafael@softinsa.pt', roles: ['Consultor'], ativo: true },
+  { id: 2, nome: 'Joana Freitas', email: 'joana@softinsa.pt', roles: ['TalentManager'], ativo: true },
+  { id: 3, nome: 'Pedro Costa', email: 'pedro@softinsa.pt', roles: ['ServiceLineLeader'], ativo: true },
+  { id: 4, nome: 'Admin Softinsa', email: 'admin@softinsa.pt', roles: ['Admin'], ativo: true },
+]
+export async function getUsers() {
+  await delay()
+  return clone(usersStore)
+}
+export async function createUser(body) {
+  await delay()
+  const u = { id: ++_userId, nome: body.nome, email: body.email, roles: body.roles || ['Consultor'], ativo: true }
+  usersStore.push(u)
+  return clone(u)
+}
+export async function updateUser(id, body) {
+  await delay()
+  const i = usersStore.findIndex((u) => u.id === Number(id))
+  if (i >= 0) usersStore[i] = { ...usersStore[i], ...body }
+  return clone(usersStore[i] || null)
+}
+export async function deleteUser(id) {
+  await delay()
+  const i = usersStore.findIndex((u) => u.id === Number(id))
+  if (i >= 0) usersStore[i].ativo = false
+  return { ok: true }
+}
+
+// ---------- Admin: Pedidos ----------
+export async function getAdminPedidos() {
+  await delay()
+  return clone(mockServiceLinePedidos)
+}
+
+// ---------- Exportações (gera um CSV de demonstração) ----------
+export async function exportarRelatorio() {
+  await delay(300)
+  const csv = 'Tracking,Consultor,Badge,Nivel,Estado\n#20482,Matt Dickerson,Java,A,Em Validacao\n#20482,Joaquim Pernil,OutSystems,A,Submetido\n'
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'relatorio-mock.csv'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+  return { ok: true }
 }

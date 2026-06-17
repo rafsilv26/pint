@@ -6,7 +6,7 @@ export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/ap
 
 const STORAGE_KEY = 'softinsa.auth'
 
-function getToken() {
+export function getToken() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}').token || null
   } catch {

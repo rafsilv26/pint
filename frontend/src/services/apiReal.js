@@ -3,7 +3,7 @@
 //  Cada função chama o endpoint real e ADAPTA a resposta para o
 //  formato que as páginas esperam (que vem do design Figma).
 // =============================================================
-import { http, getUser } from './http'
+import { http, getUser, getToken, API_URL } from './http'
 
 const CODE_COR = {
   OPEN: 'gray', SUBMITTED: 'blue', IN_VALIDATION: 'amber', VALIDATED: 'indigo',
@@ -233,4 +233,172 @@ export async function getConsultants(q = '') {
 }
 export async function getConsultant(id) {
   return http(`/consultants/${id}`)
+}
+
+// ---------- Talent Manager ----------
+export async function getTalentDashboard() {
+  const [consultants, badges, slines, pendentes] = await Promise.all([
+    http('/consultants').catch(() => ({ data: [], total: 0 })),
+    http('/catalog/badges').catch(() => []),
+    http('/catalog/service-lines').catch(() => []),
+    http('/candidaturas/talent/pendentes').catch(() => []),
+  ])
+  const cons = consultants?.data || []
+  return {
+    stats: [
+      { label: 'Consultores', value: String(consultants?.total ?? cons.length), delta: '', tint: 'sky' },
+      { label: 'Badges', value: String((badges || []).length), delta: '', tint: 'violet' },
+      { label: 'Candidaturas', value: String((pendentes || []).length), delta: '', tint: 'amber' },
+      { label: 'Service Lines', value: String((slines || []).length), delta: '', tint: 'emerald' },
+    ],
+    pontuacaoGlobal: cons.slice(0, 8).map((c, i) => ({ rank: i + 1, nome: c.name, pontos: c.points })),
+    pedidosFechados: [],
+    atividadeRecente: (pendentes || []).slice(0, 3).map((c) => ({
+      nome: c.Consultant?.User?.nome || 'Consultor',
+      texto: `Submeteu o badge "${c.Badge?.nome || ''}"`,
+    })),
+  }
+}
+export async function getTalentCandidaturas(estado = 'pendentes') {
+  if (estado !== 'pendentes') return []
+  const rows = await http('/candidaturas/talent/pendentes').catch(() => [])
+  return (rows || []).map((c) => ({
+    id: c.id,
+    trackingId: `#${String(c.id).padStart(5, '0')}`,
+    consultor: c.Consultant?.User?.nome || `Consultor #${c.consultorId}`,
+    badge: c.Badge?.nome || `Badge #${c.badgeId}`,
+    nivel: c.Badge?.nivelId != null ? String(c.Badge.nivelId) : '—',
+    data: c.dataSubmicao ? new Date(c.dataSubmicao).toLocaleDateString('pt-PT') : '—',
+    status: { code: c.status?.code || 'SUBMITTED', name: c.status?.name || 'Submetido', cor: 'amber' },
+  }))
+}
+export async function getCandidatura(id) {
+  const c = await http(`/candidaturas/${id}`)
+  const code = c.status?.code
+  return {
+    id: c.id,
+    numero: `#${String(c.id).padStart(6, '0')}`,
+    estado: { code, name: c.status?.name || code || '—', cor: CODE_COR[code] || 'gray' },
+    consultor: c.Consultant?.User?.nome || `Consultor #${c.consultorId}`,
+    submissao: dataPT(c.dataSubmicao),
+    badge: {
+      nome: c.Badge?.nome || 'Badge',
+      nivel: c.Badge?.nivelId != null ? `Nível ${c.Badge.nivelId}` : '—',
+      tint: tintFor(c.Badge?.fornecedor || c.Badge?.nome || ''),
+    },
+    evidencias: (c.evidencias || []).map((e) => ({
+      id: e.id, nome: e.nomeFicheiro || 'Evidência', url: e.url || '#', requisito: e.descricao || '—',
+    })),
+    historico: (c.history || []).map((h) => ({
+      estado: '—', data: dataPT(h.createdAt), motivo: h.motivo || h.reason || '',
+    })),
+  }
+}
+export async function validarTalentManager(id, { decisao, comentario } = {}) {
+  return http(`/candidaturas/talent/${id}/validar`, { method: 'PUT', body: { decisao, comentario } })
+}
+
+// ---------- Service Line Leader ----------
+export async function getServiceLineDashboard() {
+  const [consultants, badges, pendentes] = await Promise.all([
+    http('/consultants').catch(() => ({ data: [], total: 0 })),
+    http('/catalog/badges').catch(() => []),
+    http('/candidaturas/serviceline/pendentes').catch(() => []),
+  ])
+  const cons = consultants?.data || []
+  return {
+    stats: [
+      { label: 'Consultores LowCode', value: String(consultants?.total ?? cons.length), delta: '', tint: 'sky' },
+      { label: 'Badges atribuídos', value: String((badges || []).length), delta: '', tint: 'violet' },
+      { label: 'Pedidos de badges', value: String((pendentes || []).length), delta: '', tint: 'amber' },
+      { label: 'Pontos atribuídos', value: String(cons.reduce((s, c) => s + (c.points || 0), 0)), delta: '', tint: 'emerald' },
+    ],
+    pontuacaoMensal: cons.slice(0, 6).map((c, i) => ({ rank: i + 1, nome: c.name, badges: c.badges, pontos: c.points })),
+    badgesAtribuidos: [],
+    atividadeRecente: (pendentes || []).slice(0, 3).map((c) => ({
+      nome: c.Consultant?.User?.nome || 'Consultor',
+      texto: `Pedido "${c.Badge?.nome || ''}" em aprovação`,
+    })),
+  }
+}
+export async function getServiceLinePedidos() {
+  const rows = await http('/candidaturas/serviceline/pendentes').catch(() => [])
+  return (rows || []).map((c) => ({
+    id: c.id,
+    trackingId: `#${String(c.id).padStart(5, '0')}`,
+    badge: c.Badge?.nome || `Badge #${c.badgeId}`,
+    consultor: c.Consultant?.User?.nome || `Consultor #${c.consultorId}`,
+    data: c.dataSubmicao ? new Date(c.dataSubmicao).toLocaleDateString('pt-PT') : '—',
+    nivel: c.Badge?.nivelId != null ? String(c.Badge.nivelId) : '—',
+    pontos: c.Badge?.ponto ?? 0,
+    status: { code: c.status?.code || 'VALIDATED', name: c.status?.name || 'Validada', cor: 'indigo' },
+  }))
+}
+export async function validarServiceLine(id, { decisao, comentario } = {}) {
+  return http(`/candidaturas/serviceline/${id}/validar`, { method: 'PUT', body: { decisao, comentario } })
+}
+
+// ---------- Admin (CRUD genérico via catálogo) ----------
+export async function listResource(resource) {
+  return http(`/catalog/${resource}`)
+}
+export async function createResource(resource, body) {
+  return http(`/catalog/${resource}`, { method: 'POST', body })
+}
+export async function updateResource(resource, id, body) {
+  return http(`/catalog/${resource}/${id}`, { method: 'PUT', body })
+}
+export async function deleteResource(resource, id) {
+  return http(`/catalog/${resource}/${id}`, { method: 'DELETE' })
+}
+
+// ---------- Admin: Utilizadores ----------
+export async function getUsers() {
+  const rows = await http('/users')
+  return (rows || []).map((u) => ({
+    id: u.id, nome: u.nome, email: u.email, roles: u.roles || [], ativo: u.ativo !== false,
+  }))
+}
+export async function createUser(body) {
+  return http('/auth/register', { method: 'POST', body })
+}
+export async function updateUser(id, body) {
+  return http(`/users/${id}`, { method: 'PUT', body })
+}
+export async function deleteUser(id) {
+  return http(`/users/${id}`, { method: 'DELETE' })
+}
+
+// ---------- Admin: Pedidos (melhor esforço — backend não tem listagem global) ----------
+export async function getAdminPedidos() {
+  const rows = await http('/candidaturas/talent/pendentes').catch(() => [])
+  return (rows || []).map((c) => ({
+    id: c.id,
+    trackingId: `#${String(c.id).padStart(5, '0')}`,
+    badge: c.Badge?.nome || `Badge #${c.badgeId}`,
+    consultor: c.Consultant?.User?.nome || `Consultor #${c.consultorId}`,
+    data: c.dataSubmicao ? new Date(c.dataSubmicao).toLocaleDateString('pt-PT') : '—',
+    nivel: c.Badge?.nivelId != null ? String(c.Badge.nivelId) : '—',
+    pontos: c.Badge?.ponto ?? 0,
+    status: { code: c.status?.code || 'SUBMITTED', name: c.status?.name || 'Submetido', cor: 'amber' },
+  }))
+}
+
+// ---------- Exportações (descarrega o ficheiro do backend) ----------
+export async function exportarRelatorio(formato = 'excel') {
+  const token = getToken()
+  const res = await fetch(`${API_URL}/relatorios/${formato}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  if (!res.ok) throw new Error('Não foi possível exportar.')
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `relatorio-candidaturas.${formato === 'excel' ? 'xlsx' : 'pdf'}`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+  return { ok: true }
 }

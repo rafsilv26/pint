@@ -49,3 +49,28 @@ export const saveEmailSignature = impl.saveEmailSignature
 
 // Público
 export const verificarBadge = impl.verificarBadge
+
+// Talent Manager
+export const getTalentDashboard = impl.getTalentDashboard
+export const getTalentCandidaturas = impl.getTalentCandidaturas
+export const getCandidatura = impl.getCandidatura
+export const validarTalentManager = impl.validarTalentManager
+
+// Service Line Leader
+export const getServiceLineDashboard = impl.getServiceLineDashboard
+export const getServiceLinePedidos = impl.getServiceLinePedidos
+export const validarServiceLine = impl.validarServiceLine
+
+// Admin (CRUD genérico)
+export const listResource = impl.listResource
+export const createResource = impl.createResource
+export const updateResource = impl.updateResource
+export const deleteResource = impl.deleteResource
+
+// Admin: utilizadores, pedidos, exportações
+export const getUsers = impl.getUsers
+export const createUser = impl.createUser
+export const updateUser = impl.updateUser
+export const deleteUser = impl.deleteUser
+export const getAdminPedidos = impl.getAdminPedidos
+export const exportarRelatorio = impl.exportarRelatorio
