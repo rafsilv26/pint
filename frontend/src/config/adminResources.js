@@ -70,4 +70,58 @@ export const ADMIN_RESOURCES = {
       { key: 'mensagem', label: 'Mensagem', type: 'textarea' },
     ],
   },
+  'service-lines': {
+    resource: 'service-lines',
+    titulo: 'Service Lines',
+    singular: 'Service Line',
+    colunas: [
+      { key: 'nome', label: 'Nome' },
+      { key: 'descricao', label: 'Descrição' },
+    ],
+    campos: [
+      { key: 'nome', label: 'Nome' },
+      { key: 'descricao', label: 'Descrição', type: 'textarea' },
+    ],
+  },
+  areas: {
+    resource: 'areas',
+    titulo: 'Áreas',
+    singular: 'Área',
+    colunas: [
+      { key: 'nome', label: 'Nome' },
+      { key: 'descricao', label: 'Descrição' },
+    ],
+    campos: [
+      { key: 'nome', label: 'Nome' },
+      { key: 'descricao', label: 'Descrição', type: 'textarea' },
+    ],
+  },
+  levels: {
+    resource: 'levels',
+    titulo: 'Níveis',
+    singular: 'Nível',
+    colunas: [
+      { key: 'codigo', label: 'Código' },
+      { key: 'nome', label: 'Nome' },
+      { key: 'ordem', label: 'Ordem' },
+    ],
+    campos: [
+      { key: 'codigo', label: 'Código' },
+      { key: 'nome', label: 'Nome' },
+      { key: 'ordem', label: 'Ordem', type: 'number' },
+    ],
+  },
+  requirements: {
+    resource: 'requirements',
+    titulo: 'Requisitos',
+    singular: 'Requisito',
+    colunas: [
+      { key: 'titulo', label: 'Título' },
+      { key: 'descricao', label: 'Descrição' },
+    ],
+    campos: [
+      { key: 'titulo', label: 'Título' },
+      { key: 'descricao', label: 'Descrição', type: 'textarea' },
+    ],
+  },
 }

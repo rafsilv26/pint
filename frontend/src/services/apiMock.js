@@ -219,6 +219,25 @@ const adminStore = {
   information: [
     { id: 1, titulo: 'Nova época de candidaturas', mensagem: 'Candidaturas abertas até 30 de junho.' },
   ],
+  'service-lines': [
+    { id: 1, nome: 'Technology', descricao: 'Service line de tecnologia.' },
+    { id: 2, nome: 'LowCode', descricao: 'Service line de low-code.' },
+  ],
+  areas: [
+    { id: 1, nome: 'Cloud & Infrastructure', descricao: 'Cloud, redes e infraestrutura.' },
+    { id: 2, nome: 'Data & AI', descricao: 'Dados e inteligência artificial.' },
+    { id: 3, nome: 'Custom Development', descricao: 'Desenvolvimento à medida.' },
+  ],
+  levels: [
+    { id: 1, codigo: 'JR', nome: 'Júnior', ordem: 1 },
+    { id: 2, codigo: 'IN', nome: 'Intermédio', ordem: 2 },
+    { id: 3, codigo: 'SR', nome: 'Sénior', ordem: 3 },
+    { id: 4, codigo: 'ES', nome: 'Especialista', ordem: 4 },
+  ],
+  requirements: [
+    { id: 1, titulo: 'Certificado oficial', descricao: 'Certificado reconhecido pela entidade.' },
+    { id: 2, titulo: 'Projeto prático', descricao: 'Projeto validado por um Talent Manager.' },
+  ],
 }
 const ensure = (r) => (adminStore[r] = adminStore[r] || [])
 

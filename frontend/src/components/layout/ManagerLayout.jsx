@@ -1,5 +1,5 @@
-import { Outlet, NavLink, useLocation } from 'react-router-dom'
-import { Search } from 'lucide-react'
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { Search, LogOut } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { panelForPath } from '../../config/navigation'
 import Logo from '../Logo'
@@ -8,10 +8,12 @@ import ChangePasswordModal from '../ChangePasswordModal'
 // Layout dos painéis de gestão (Admin / Talent Manager / Service Line Leader):
 // sidebar azul à esquerda + barra de pesquisa no topo + conteúdo.
 export default function ManagerLayout() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const bloqueado = Boolean(user?.mustChangePassword)
   const panel = panelForPath(location.pathname)
+  const base = '/' + (location.pathname.split('/')[1] || '')
 
   const iniciais = (user?.nome || 'U')
     .split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
@@ -43,12 +45,20 @@ export default function ManagerLayout() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3 border-t border-white/10 px-4 py-4">
-          <div className="grid h-9 w-9 place-items-center rounded-full bg-white/15 text-sm font-semibold">{iniciais}</div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">{user?.nome}</p>
-            <p className="truncate text-xs text-white/60">{panel.label}</p>
-          </div>
+        <div className="border-t border-white/10 px-3 py-3">
+          <NavLink to={`${base}/conta`} className="flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-white/10">
+            <div className="grid h-9 w-9 place-items-center rounded-full bg-white/15 text-sm font-semibold">{iniciais}</div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold">{user?.nome}</p>
+              <p className="truncate text-xs text-white/60">{panel.label}</p>
+            </div>
+          </NavLink>
+          <button
+            onClick={() => { logout(); navigate('/login') }}
+            className="mt-1 flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm text-white/80 transition hover:bg-white/10"
+          >
+            <LogOut size={18} /> Terminar sessão
+          </button>
         </div>
       </aside>
 

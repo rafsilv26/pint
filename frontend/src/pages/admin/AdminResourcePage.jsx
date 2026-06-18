@@ -7,7 +7,7 @@ import { ADMIN_RESOURCES } from '../../config/adminResources'
 
 // Página genérica de gestão (lista + adicionar/editar + eliminar) para os
 // recursos do catálogo. Configurada por ADMIN_RESOURCES[resourceKey].
-export default function AdminResourcePage({ resourceKey }) {
+export default function AdminResourcePage({ resourceKey, readOnly = false }) {
   const cfg = ADMIN_RESOURCES[resourceKey]
   const { data, loading, error, reload } = useAsync(() => api.listResource(cfg.resource), [resourceKey])
 
@@ -58,7 +58,7 @@ export default function AdminResourcePage({ resourceKey }) {
     <div>
       <PageHeader
         title={cfg.titulo}
-        action={<Button onClick={() => abrir(null)}><Plus size={16} /> Adicionar {cfg.singular}</Button>}
+        action={readOnly ? null : <Button onClick={() => abrir(null)}><Plus size={16} /> Adicionar {cfg.singular}</Button>}
       />
 
       <Card className="overflow-hidden p-0">
@@ -74,7 +74,7 @@ export default function AdminResourcePage({ resourceKey }) {
               <thead className="border-b border-gray-100 bg-gray-50 text-left text-xs font-medium text-muted">
                 <tr>
                   {cfg.colunas.map((c) => <th key={c.key} className="px-4 py-3">{c.label}</th>)}
-                  <th className="px-4 py-3 text-right">Ações</th>
+                  {!readOnly && <th className="px-4 py-3 text-right">Ações</th>}
                 </tr>
               </thead>
               <tbody>
@@ -83,12 +83,14 @@ export default function AdminResourcePage({ resourceKey }) {
                     {cfg.colunas.map((c) => (
                       <td key={c.key} className="max-w-xs truncate px-4 py-3 text-ink">{String(r[c.key] ?? '—')}</td>
                     ))}
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-3">
-                        <button onClick={() => abrir(r)} className="text-muted hover:text-brand" aria-label="Editar"><Pencil size={16} /></button>
-                        <button onClick={() => setConfirmar(r)} className="text-muted hover:text-red-600" aria-label="Eliminar"><Trash2 size={16} /></button>
-                      </div>
-                    </td>
+                    {!readOnly && (
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-3">
+                          <button onClick={() => abrir(r)} className="text-muted hover:text-brand" aria-label="Editar"><Pencil size={16} /></button>
+                          <button onClick={() => setConfirmar(r)} className="text-muted hover:text-red-600" aria-label="Eliminar"><Trash2 size={16} /></button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

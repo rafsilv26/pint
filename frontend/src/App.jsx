@@ -29,7 +29,7 @@ import PublicBadgePage from './pages/PublicBadgePage'
 import TalentDashboardPage from './pages/tm/TalentDashboardPage'
 import TalentCandidaturasPage from './pages/tm/TalentCandidaturasPage'
 import TalentCandidaturaDetailPage from './pages/tm/TalentCandidaturaDetailPage'
-import EmConstrucao from './pages/EmConstrucao'
+import BadgesGridView from './components/BadgesGridView'
 
 // Service Line Leader
 import SLLDashboardPage from './pages/sll/SLLDashboardPage'
@@ -40,6 +40,13 @@ import SLLPedidoDetailPage from './pages/sll/SLLPedidoDetailPage'
 import AdminResourcePage from './pages/admin/AdminResourcePage'
 import AdminUsersPage from './pages/admin/AdminUsersPage'
 import AdminPedidosPage from './pages/admin/AdminPedidosPage'
+import AdminDefinicoesPage from './pages/admin/AdminDefinicoesPage'
+import SLLRelatoriosPage from './pages/sll/SLLRelatoriosPage'
+
+// Páginas partilhadas pelos perfis de gestão
+import ManagerConsultorDetailPage from './pages/ManagerConsultorDetailPage'
+import ManagerBadgeDetailPage from './pages/ManagerBadgeDetailPage'
+import ManagerContaPage from './pages/ManagerContaPage'
 
 export default function App() {
   return (
@@ -87,29 +94,40 @@ export default function App() {
         <Route path="/tm" element={<TalentDashboardPage />} />
         <Route path="/tm/candidaturas" element={<TalentCandidaturasPage />} />
         <Route path="/tm/candidaturas/:id" element={<TalentCandidaturaDetailPage />} />
-        <Route path="/tm/catalogo" element={<EmConstrucao titulo="Catálogo de Badges" />} />
-        <Route path="/tm/learning-paths" element={<EmConstrucao titulo="Learning Paths" />} />
-        <Route path="/tm/consultores" element={<EmConstrucao titulo="Consultores" />} />
+        <Route path="/tm/catalogo" element={<BadgesGridView titulo="Catálogo de Badges" linkBase="/tm/catalogo" />} />
+        <Route path="/tm/catalogo/:id" element={<ManagerBadgeDetailPage />} />
+        <Route path="/tm/learning-paths" element={<AdminResourcePage resourceKey="learning-paths" readOnly />} />
+        <Route path="/tm/consultores" element={<ConsultoresPage linkBase="/tm/consultores" />} />
+        <Route path="/tm/consultores/:id" element={<ManagerConsultorDetailPage />} />
+        <Route path="/tm/conta" element={<ManagerContaPage />} />
 
         {/* Service Line Leader */}
         <Route path="/sll" element={<SLLDashboardPage />} />
         <Route path="/sll/pedidos" element={<SLLPedidosPage />} />
         <Route path="/sll/pedidos/:id" element={<SLLPedidoDetailPage />} />
-        <Route path="/sll/consultores" element={<EmConstrucao titulo="Consultores" />} />
-        <Route path="/sll/badges" element={<EmConstrucao titulo="Badges" />} />
-        <Route path="/sll/relatorios" element={<EmConstrucao titulo="Relatórios" />} />
-        <Route path="/sll/notificacoes" element={<EmConstrucao titulo="Notificações" />} />
+        <Route path="/sll/consultores" element={<ConsultoresPage linkBase="/sll/consultores" />} />
+        <Route path="/sll/consultores/:id" element={<ManagerConsultorDetailPage />} />
+        <Route path="/sll/badges" element={<BadgesGridView titulo="Badges" linkBase="/sll/badges" />} />
+        <Route path="/sll/badges/:id" element={<ManagerBadgeDetailPage />} />
+        <Route path="/sll/relatorios" element={<SLLRelatoriosPage />} />
+        <Route path="/sll/notificacoes" element={<NotificationsPage />} />
+        <Route path="/sll/conta" element={<ManagerContaPage />} />
 
         {/* Admin */}
         <Route path="/admin" element={<TalentDashboardPage />} />
         <Route path="/admin/badges" element={<AdminResourcePage resourceKey="badges" />} />
         <Route path="/admin/learning-paths" element={<AdminResourcePage resourceKey="learning-paths" />} />
+        <Route path="/admin/service-lines" element={<AdminResourcePage resourceKey="service-lines" />} />
+        <Route path="/admin/areas" element={<AdminResourcePage resourceKey="areas" />} />
+        <Route path="/admin/niveis" element={<AdminResourcePage resourceKey="levels" />} />
+        <Route path="/admin/requisitos" element={<AdminResourcePage resourceKey="requirements" />} />
         <Route path="/admin/politicas" element={<AdminResourcePage resourceKey="policies" />} />
         <Route path="/admin/avisos" element={<AdminResourcePage resourceKey="notices" />} />
         <Route path="/admin/informacoes" element={<AdminResourcePage resourceKey="information" />} />
         <Route path="/admin/utilizadores" element={<AdminUsersPage />} />
         <Route path="/admin/pedidos" element={<AdminPedidosPage />} />
-        <Route path="/admin/definicoes" element={<EmConstrucao titulo="Definições" />} />
+        <Route path="/admin/definicoes" element={<AdminDefinicoesPage />} />
+        <Route path="/admin/conta" element={<ManagerContaPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
