@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../models/mobile_api_data.dart';
+import '../repositories/mobile_api_repository.dart';
+
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
 
@@ -8,98 +11,140 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  final List<_NotificationItem> notifications = [
-    const _NotificationItem(
-      title: 'O seu badge Nível Júnior - OutSystems foi aprovado!',
-      date: '4 de dezembro de 2025',
-      type: _NotificationType.success,
-      unread: true,
-    ),
-    const _NotificationItem(
-      title: 'O badge AWS Cloud Practitioner expira em 30 dias',
-      date: '3 de dezembro de 2025',
-      type: _NotificationType.warning,
-      unread: true,
-    ),
-    const _NotificationItem(
-      title: 'Feedback necessário para o badge Azure Fundamentals',
-      date: '2 de dezembro de 2025',
-      type: _NotificationType.alert,
-    ),
-  ];
+  final MobileApiRepository repository = MobileApiRepository();
+  late Future<List<AppNotification>> notificationsFuture;
 
-  int get unreadCount => notifications.where((item) => item.unread).length;
-
-  void markAllAsRead() {
-    setState(() {
-      for (var index = 0; index < notifications.length; index++) {
-        notifications[index] = notifications[index].copyWith(unread: false);
-      }
-    });
+  @override
+  void initState() {
+    super.initState();
+    notificationsFuture = repository.getNotifications();
   }
 
-  void markAsRead(int index) {
+  Future<void> reload() async {
+    final future = repository.getNotifications();
     setState(() {
-      notifications[index] = notifications[index].copyWith(unread: false);
+      notificationsFuture = future;
     });
+    await future;
+  }
+
+  Future<void> markAllAsRead() async {
+    try {
+      await repository.markAllNotificationsAsRead();
+      await reload();
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Não foi possível atualizar as notificações.'),
+        ),
+      );
+    }
+  }
+
+  Future<void> markAsRead(AppNotification notification) async {
+    try {
+      await repository.markNotificationAsRead(notification.id);
+      await reload();
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Não foi possível marcar a notificação como lida.'),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            _NotificationsHeader(
-              unreadCount: unreadCount,
-              onBack: () => Navigator.of(context).pop(),
-              onMarkAll: markAllAsRead,
-            ),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final horizontalPadding = constraints.maxWidth < 380
-                      ? 16.0
-                      : 24.0;
+    return FutureBuilder<List<AppNotification>>(
+      future: notificationsFuture,
+      builder: (context, snapshot) {
+        final notifications = snapshot.data ?? const <AppNotification>[];
+        final unreadCount = notifications.where((item) => item.unread).length;
 
-                  return SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      28,
-                      horizontalPadding,
-                      28,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 560),
-                        child: Column(
-                          children: [
-                            for (
-                              var index = 0;
-                              index < notifications.length;
-                              index++
-                            ) ...[
-                              _NotificationCard(
-                                notification: notifications[index],
-                                onMarkAsRead: () => markAsRead(index),
-                              ),
-                              const SizedBox(height: 18),
-                            ],
-                            const _NotificationsTip(),
-                          ],
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                _NotificationsHeader(
+                  unreadCount: unreadCount,
+                  onBack: () => Navigator.of(context).pop(),
+                  onMarkAll: notifications.isEmpty ? null : markAllAsRead,
+                ),
+                Expanded(
+                  child: snapshot.connectionState == ConnectionState.waiting
+                      ? const Center(child: CircularProgressIndicator())
+                      : RefreshIndicator(
+                          onRefresh: reload,
+                          child: _NotificationsList(
+                            notifications: notifications,
+                            onMarkAsRead: markAsRead,
+                          ),
                         ),
+                ),
+              ],
+            ),
+          ),
+          bottomNavigationBar: const _NotificationsBottomNavigation(),
+        );
+      },
+    );
+  }
+}
+
+class _NotificationsList extends StatelessWidget {
+  const _NotificationsList({
+    required this.notifications,
+    required this.onMarkAsRead,
+  });
+
+  final List<AppNotification> notifications;
+  final ValueChanged<AppNotification> onMarkAsRead;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final horizontalPadding = constraints.maxWidth < 380 ? 16.0 : 24.0;
+
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(
+            horizontalPadding,
+            28,
+            horizontalPadding,
+            28,
+          ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Column(
+                children: [
+                  if (notifications.isEmpty)
+                    const _EmptyNotificationsCard()
+                  else
+                    for (final notification in notifications) ...[
+                      _NotificationCard(
+                        notification: notification,
+                        onMarkAsRead: () => onMarkAsRead(notification),
                       ),
-                    ),
-                  );
-                },
+                      const SizedBox(height: 18),
+                    ],
+                  const _NotificationsTip(),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: const _NotificationsBottomNavigation(),
+          ),
+        );
+      },
     );
   }
 }
@@ -113,7 +158,7 @@ class _NotificationsHeader extends StatelessWidget {
 
   final int unreadCount;
   final VoidCallback onBack;
-  final VoidCallback onMarkAll;
+  final VoidCallback? onMarkAll;
 
   @override
   Widget build(BuildContext context) {
@@ -160,6 +205,7 @@ class _NotificationsHeader extends StatelessWidget {
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF3D8DBA),
               foregroundColor: Colors.white,
+              disabledBackgroundColor: const Color(0xFF6EA7C8),
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -179,12 +225,15 @@ class _NotificationCard extends StatelessWidget {
     required this.onMarkAsRead,
   });
 
-  final _NotificationItem notification;
+  final AppNotification notification;
   final VoidCallback onMarkAsRead;
 
   @override
   Widget build(BuildContext context) {
-    final colors = notification.colors;
+    final colors = _colorsFor(notification);
+    final text = notification.message.isNotEmpty
+        ? notification.message
+        : notification.title;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -224,7 +273,7 @@ class _NotificationCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  notification.title,
+                  text,
                   style: const TextStyle(
                     color: Color(0xFF111827),
                     fontSize: 19,
@@ -233,7 +282,7 @@ class _NotificationCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  notification.date,
+                  _formatDate(notification.createdAt),
                   style: const TextStyle(
                     color: Color(0xFF667085),
                     fontSize: 16,
@@ -256,6 +305,28 @@ class _NotificationCard extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _EmptyNotificationsCard extends StatelessWidget {
+  const _EmptyNotificationsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE8EDF3)),
+      ),
+      child: const Text(
+        'Sem notificações sincronizadas.',
+        style: TextStyle(color: Color(0xFF667085), fontSize: 16),
       ),
     );
   }
@@ -389,51 +460,6 @@ class _BadgeNavigationIcon extends StatelessWidget {
   }
 }
 
-enum _NotificationType { success, warning, alert }
-
-class _NotificationItem {
-  const _NotificationItem({
-    required this.title,
-    required this.date,
-    required this.type,
-    this.unread = false,
-  });
-
-  final String title;
-  final String date;
-  final _NotificationType type;
-  final bool unread;
-
-  _NotificationItem copyWith({bool? unread}) {
-    return _NotificationItem(
-      title: title,
-      date: date,
-      type: type,
-      unread: unread ?? this.unread,
-    );
-  }
-
-  _NotificationColors get colors {
-    return switch (type) {
-      _NotificationType.success => const _NotificationColors(
-        background: Color(0xFFDDFBE7),
-        foreground: Color(0xFF00A651),
-        icon: Icons.check_circle_outline,
-      ),
-      _NotificationType.warning => const _NotificationColors(
-        background: Color(0xFFFFF1C6),
-        foreground: Color(0xFFE67800),
-        icon: Icons.schedule,
-      ),
-      _NotificationType.alert => const _NotificationColors(
-        background: Color(0xFFFFDDE1),
-        foreground: Color(0xFFE60012),
-        icon: Icons.error_outline,
-      ),
-    };
-  }
-}
-
 class _NotificationColors {
   const _NotificationColors({
     required this.background,
@@ -444,4 +470,42 @@ class _NotificationColors {
   final Color background;
   final Color foreground;
   final IconData icon;
+}
+
+_NotificationColors _colorsFor(AppNotification notification) {
+  final source =
+      '${notification.type} ${notification.title} '
+              '${notification.message}'
+          .toLowerCase();
+
+  if (source.contains('aprov') || source.contains('success')) {
+    return const _NotificationColors(
+      background: Color(0xFFDDFBE7),
+      foreground: Color(0xFF00A651),
+      icon: Icons.check_circle_outline,
+    );
+  }
+  if (source.contains('expir') || source.contains('warning')) {
+    return const _NotificationColors(
+      background: Color(0xFFFFF1C6),
+      foreground: Color(0xFFE67800),
+      icon: Icons.schedule,
+    );
+  }
+  return const _NotificationColors(
+    background: Color(0xFFFFDDE1),
+    foreground: Color(0xFFE60012),
+    icon: Icons.error_outline,
+  );
+}
+
+String _formatDate(DateTime? date) {
+  if (date == null) {
+    return '';
+  }
+
+  final local = date.toLocal();
+  final day = local.day.toString().padLeft(2, '0');
+  final month = local.month.toString().padLeft(2, '0');
+  return '$day/$month/${local.year}';
 }

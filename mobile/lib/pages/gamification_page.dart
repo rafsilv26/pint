@@ -1,52 +1,96 @@
 import 'package:flutter/material.dart';
 
-class GamificationPage extends StatelessWidget {
+import '../models/mobile_api_data.dart';
+import '../repositories/mobile_api_repository.dart';
+
+class GamificationPage extends StatefulWidget {
   const GamificationPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final horizontalPadding = constraints.maxWidth < 380 ? 16.0 : 24.0;
+  State<GamificationPage> createState() => _GamificationPageState();
+}
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 26),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 560),
-                child: Column(
-                  children: [
-                    const _GamificationHeader(),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: horizontalPadding,
-                      ),
-                      child: const Column(
+class _GamificationPageState extends State<GamificationPage> {
+  final MobileApiRepository repository = MobileApiRepository();
+  late Future<GamificationData> gamificationFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    gamificationFuture = repository.getGamification();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<GamificationData>(
+      future: gamificationFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final data = snapshot.data ?? GamificationData.empty();
+
+        return SafeArea(
+          bottom: false,
+          child: RefreshIndicator(
+            onRefresh: () async {
+              final future = repository.getGamification();
+              setState(() {
+                gamificationFuture = future;
+              });
+              await future;
+            },
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final horizontalPadding = constraints.maxWidth < 380
+                    ? 16.0
+                    : 24.0;
+
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 26),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 560),
+                      child: Column(
                         children: [
-                          SizedBox(height: 18),
-                          _SpecialAchievementsGrid(),
-                          SizedBox(height: 22),
-                          _LeaderboardSection(),
-                          SizedBox(height: 22),
-                          _ProfessionalEvolution(),
+                          _GamificationHeader(data: data),
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: horizontalPadding,
+                            ),
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 18),
+                                _SpecialAchievementsGrid(
+                                  achievements: data.achievements,
+                                ),
+                                const SizedBox(height: 22),
+                                _LeaderboardSection(users: data.ranking),
+                                const SizedBox(height: 22),
+                                _ProfessionalEvolution(events: data.timeline),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
 
 class _GamificationHeader extends StatelessWidget {
-  const _GamificationHeader();
+  const _GamificationHeader({required this.data});
+
+  final GamificationData data;
 
   @override
   Widget build(BuildContext context) {
@@ -109,11 +153,14 @@ class _GamificationHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                _HeaderStat(title: 'A Sua Posição', value: '#12'),
-                _HeaderStat(title: 'Pontos', value: '1250'),
-                _HeaderStat(title: 'Badges', value: '8'),
+                _HeaderStat(
+                  title: 'A Sua Posição',
+                  value: data.summary.rank > 0 ? '#${data.summary.rank}' : '-',
+                ),
+                _HeaderStat(title: 'Pontos', value: '${data.summary.points}'),
+                _HeaderStat(title: 'Badges', value: '${data.summary.badges}'),
               ],
             ),
           ),
@@ -155,37 +202,12 @@ class _HeaderStat extends StatelessWidget {
 }
 
 class _SpecialAchievementsGrid extends StatelessWidget {
-  const _SpecialAchievementsGrid();
+  const _SpecialAchievementsGrid({required this.achievements});
+
+  final List<GamificationAchievement> achievements;
 
   @override
   Widget build(BuildContext context) {
-    final achievements = const [
-      _CompactAchievement(
-        icon: Icons.star_border,
-        title: 'Early Adopter',
-        description: 'Primeiros 100 utilizadores da plataforma',
-        color: Color(0xFFFF9900),
-      ),
-      _CompactAchievement(
-        icon: Icons.trending_up,
-        title: 'Streak Master',
-        description: '30 dias consecutivos com atividade',
-        color: Color(0xFF00C853),
-      ),
-      _CompactAchievement(
-        icon: Icons.workspace_premium_outlined,
-        title: 'Badge Collector',
-        description: '10+ badges conquistados',
-        color: Color(0xFF5C6CFF),
-      ),
-      _CompactAchievement(
-        icon: Icons.diamond_outlined,
-        title: 'Quick Learner',
-        description: '3 certificações num mês',
-        color: Color(0xFFE681DB),
-      ),
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -195,89 +217,87 @@ class _SpecialAchievementsGrid extends StatelessWidget {
           iconColor: Color(0xFFFF9900),
         ),
         const SizedBox(height: 14),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: achievements.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 1.05,
-          ),
-          itemBuilder: (context, index) {
-            final achievement = achievements[index];
+        if (achievements.isEmpty)
+          const _EmptyCard(text: 'Sem conquistas especiais sincronizadas.')
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: achievements.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1.05,
+            ),
+            itemBuilder: (context, index) {
+              final achievement = achievements[index];
+              final color = _achievementColor(index);
 
-            return Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFE0E5EE)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: achievement.color,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(achievement.icon, color: Colors.white),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    achievement.title,
-                    style: const TextStyle(
-                      color: Color(0xFF111827),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Expanded(
-                    child: Text(
-                      achievement.description,
-                      style: const TextStyle(
-                        color: Color(0xFF475467),
-                        fontSize: 11,
-                        height: 1.25,
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFE0E5EE)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _iconFor(achievement.icon),
+                        color: Colors.white,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+                    const SizedBox(height: 14),
+                    Text(
+                      achievement.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Color(0xFF111827),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Expanded(
+                      child: Text(
+                        achievement.description,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF475467),
+                          fontSize: 11,
+                          height: 1.25,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
       ],
     );
   }
 }
 
 class _LeaderboardSection extends StatelessWidget {
-  const _LeaderboardSection();
+  const _LeaderboardSection({required this.users});
+
+  final List<LeaderboardUser> users;
 
   @override
   Widget build(BuildContext context) {
-    final consultants = const [
-      _LeaderboardUser('👩‍💼', 'Ana Costa', 2850, 15),
-      _LeaderboardUser('👨‍💼', 'Carlos Mendes', 2650, 14),
-      _LeaderboardUser('👩‍💻', 'Maria Silva', 2400, 12),
-      _LeaderboardUser('🧑‍💼', 'Pedro Santos', 2100, 11),
-      _LeaderboardUser('🤓', 'Rita Oliveira', 1950, 10),
-      _LeaderboardUser('👨‍🔧', 'João Ferreira', 1850, 10),
-      _LeaderboardUser('👨‍🎓', 'Sofia Rodrigues', 1700, 9),
-      _LeaderboardUser('🧑‍💻', 'Miguel Alves', 1600, 9),
-      _LeaderboardUser('👩‍🔬', 'Teresa Carvalho', 1500, 8),
-      _LeaderboardUser('👨‍🔧', 'Francisco Dias', 1400, 8),
-      _LeaderboardUser('👩‍💼', 'Inês Martins', 1300, 8),
-      _LeaderboardUser('👤', 'João Silva', 1250, 8, currentUser: true),
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -287,23 +307,26 @@ class _LeaderboardSection extends StatelessWidget {
           iconColor: Color(0xFF005DFF),
         ),
         const SizedBox(height: 14),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE0E5EE)),
+        if (users.isEmpty)
+          const _EmptyCard(text: 'Sem ranking local sincronizado.')
+        else
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE0E5EE)),
+            ),
+            child: Column(
+              children: [
+                for (var index = 0; index < users.length; index++)
+                  _LeaderboardRow(
+                    user: users[index],
+                    rank: users[index].rank > 0 ? users[index].rank : index + 1,
+                    isLast: index == users.length - 1,
+                  ),
+              ],
+            ),
           ),
-          child: Column(
-            children: [
-              for (var index = 0; index < consultants.length; index++)
-                _LeaderboardRow(
-                  user: consultants[index],
-                  rank: index + 1,
-                  isLast: index == consultants.length - 1,
-                ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -316,18 +339,18 @@ class _LeaderboardRow extends StatelessWidget {
     required this.isLast,
   });
 
-  final _LeaderboardUser user;
+  final LeaderboardUser user;
   final int rank;
   final bool isLast;
 
   @override
   Widget build(BuildContext context) {
     final rankText = rank == 1
-        ? '👑'
+        ? '1'
         : rank == 2
-        ? '🥈'
+        ? '2'
         : rank == 3
-        ? '🥉'
+        ? '3'
         : '$rank';
 
     return Container(
@@ -361,7 +384,7 @@ class _LeaderboardRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Text(user.icon, style: const TextStyle(fontSize: 20)),
+          _InitialsAvatar(name: user.name, highlighted: user.currentUser),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -369,6 +392,8 @@ class _LeaderboardRow extends StatelessWidget {
               children: [
                 Text(
                   user.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: user.currentUser
                         ? const Color(0xFF005DFF)
@@ -379,7 +404,7 @@ class _LeaderboardRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '♙ ${user.badges}',
+                  '${user.badges} badges',
                   style: const TextStyle(
                     color: Color(0xFF475467),
                     fontSize: 11,
@@ -412,43 +437,12 @@ class _LeaderboardRow extends StatelessWidget {
 }
 
 class _ProfessionalEvolution extends StatelessWidget {
-  const _ProfessionalEvolution();
+  const _ProfessionalEvolution({required this.events});
+
+  final List<TimelineEventData> events;
 
   @override
   Widget build(BuildContext context) {
-    final events = const [
-      _TimelineEvent(
-        icon: Icons.workspace_premium_outlined,
-        title: 'Badge Azure Fundamentals aprovado',
-        date: '1 de dezembro de 2025',
-        color: Color(0xFFEAF3FF),
-      ),
-      _TimelineEvent(
-        icon: Icons.star_border,
-        title: 'Atingiu 1000 pontos',
-        date: '15 de novembro de 2025',
-        color: Color(0xFFEAFBF0),
-      ),
-      _TimelineEvent(
-        icon: Icons.workspace_premium_outlined,
-        title: 'Badge Docker Essentials conquistado',
-        date: '20 de outubro de 2025',
-        color: Color(0xFFEAF3FF),
-      ),
-      _TimelineEvent(
-        icon: Icons.trending_up,
-        title: 'Subiu para nível Sénior',
-        date: '1 de outubro de 2025',
-        color: Color(0xFFF3E8FF),
-      ),
-      _TimelineEvent(
-        icon: Icons.workspace_premium_outlined,
-        title: 'Primeira certificação completada',
-        date: '10 de setembro de 2025',
-        color: Color(0xFFEAF3FF),
-      ),
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -458,23 +452,26 @@ class _ProfessionalEvolution extends StatelessWidget {
           iconColor: Color(0xFF005DFF),
         ),
         const SizedBox(height: 14),
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE0E5EE)),
+        if (events.isEmpty)
+          const _EmptyCard(text: 'Sem eventos de evolução sincronizados.')
+        else
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE0E5EE)),
+            ),
+            child: Column(
+              children: [
+                for (var index = 0; index < events.length; index++)
+                  _TimelineRow(
+                    event: events[index],
+                    isLast: index == events.length - 1,
+                  ),
+              ],
+            ),
           ),
-          child: Column(
-            children: [
-              for (var index = 0; index < events.length; index++)
-                _TimelineRow(
-                  event: events[index],
-                  isLast: index == events.length - 1,
-                ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -483,7 +480,7 @@ class _ProfessionalEvolution extends StatelessWidget {
 class _TimelineRow extends StatelessWidget {
   const _TimelineRow({required this.event, required this.isLast});
 
-  final _TimelineEvent event;
+  final TimelineEventData event;
   final bool isLast;
 
   @override
@@ -497,11 +494,11 @@ class _TimelineRow extends StatelessWidget {
               width: 38,
               height: 38,
               alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: event.color,
+              decoration: const BoxDecoration(
+                color: Color(0xFFEAF3FF),
                 shape: BoxShape.circle,
               ),
-              child: Icon(event.icon, color: const Color(0xFF005DFF), size: 20),
+              child: Icon(_iconFor(event.icon), color: const Color(0xFF005DFF)),
             ),
             if (!isLast)
               Container(width: 2, height: 38, color: const Color(0xFFE0E5EE)),
@@ -522,9 +519,19 @@ class _TimelineRow extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                if (event.description.isNotEmpty) ...[
+                  const SizedBox(height: 5),
+                  Text(
+                    event.description,
+                    style: const TextStyle(
+                      color: Color(0xFF475467),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 6),
                 Text(
-                  event.date,
+                  _formatDate(event.date),
                   style: const TextStyle(
                     color: Color(0xFF667085),
                     fontSize: 11,
@@ -535,6 +542,34 @@ class _TimelineRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _InitialsAvatar extends StatelessWidget {
+  const _InitialsAvatar({required this.name, required this.highlighted});
+
+  final String name;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 34,
+      height: 34,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: highlighted ? const Color(0xFF006DAA) : const Color(0xFFEAF3FF),
+        shape: BoxShape.circle,
+      ),
+      child: Text(
+        _initials(name),
+        style: TextStyle(
+          color: highlighted ? Colors.white : const Color(0xFF006DAA),
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
     );
   }
 }
@@ -571,46 +606,77 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-class _CompactAchievement {
-  const _CompactAchievement({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.color,
-  });
+class _EmptyCard extends StatelessWidget {
+  const _EmptyCard({required this.text});
 
-  final IconData icon;
-  final String title;
-  final String description;
-  final Color color;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE0E5EE)),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(color: Color(0xFF667085), fontSize: 13),
+      ),
+    );
+  }
 }
 
-class _LeaderboardUser {
-  const _LeaderboardUser(
-    this.icon,
-    this.name,
-    this.points,
-    this.badges, {
-    this.currentUser = false,
-  });
-
-  final String icon;
-  final String name;
-  final int points;
-  final int badges;
-  final bool currentUser;
+IconData _iconFor(String value) {
+  final normalized = value.toLowerCase();
+  if (normalized.contains('badge') ||
+      normalized.contains('premium') ||
+      normalized.contains('workspace')) {
+    return Icons.workspace_premium_outlined;
+  }
+  if (normalized.contains('rank') || normalized.contains('trophy')) {
+    return Icons.emoji_events_outlined;
+  }
+  if (normalized.contains('timeline') || normalized.contains('trend')) {
+    return Icons.trending_up;
+  }
+  if (normalized.contains('star')) {
+    return Icons.star_border;
+  }
+  return Icons.auto_awesome;
 }
 
-class _TimelineEvent {
-  const _TimelineEvent({
-    required this.icon,
-    required this.title,
-    required this.date,
-    required this.color,
-  });
+Color _achievementColor(int index) {
+  const colors = [
+    Color(0xFFFF9900),
+    Color(0xFF00A651),
+    Color(0xFF5C6CFF),
+    Color(0xFFE681DB),
+  ];
+  return colors[index % colors.length];
+}
 
-  final IconData icon;
-  final String title;
-  final String date;
-  final Color color;
+String _initials(String name) {
+  final parts = name
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((part) => part.isNotEmpty)
+      .toList();
+  if (parts.isEmpty) {
+    return '?';
+  }
+  return parts.take(2).map((part) => part[0].toUpperCase()).join();
+}
+
+String _formatDate(DateTime? date) {
+  if (date == null) {
+    return '';
+  }
+
+  final local = date.toLocal();
+  final day = local.day.toString().padLeft(2, '0');
+  final month = local.month.toString().padLeft(2, '0');
+  return '$day/$month/${local.year}';
 }

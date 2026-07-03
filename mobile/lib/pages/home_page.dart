@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../models/dashboard_data.dart';
 import '../repositories/dashboard_repository.dart';
+import '../repositories/mobile_api_repository.dart';
+import 'catalog_page.dart';
 import 'gamification_page.dart';
+import 'my_badges_page.dart';
 import 'notifications_page.dart';
 import 'profile_page.dart';
 import 'special_achievements_page.dart';
@@ -47,6 +50,14 @@ class _HomePageState extends State<HomePage> {
 
           final data = snapshot.data!;
 
+          if (selectedIndex == 1) {
+            return const CatalogPage();
+          }
+
+          if (selectedIndex == 2) {
+            return const MyBadgesPage();
+          }
+
           if (selectedIndex == 3) {
             return const GamificationPage();
           }
@@ -58,7 +69,14 @@ class _HomePageState extends State<HomePage> {
             );
           }
 
-          return _HomeContent(data: data);
+          return _HomeContent(
+            data: data,
+            onOpenCatalog: () {
+              setState(() {
+                selectedIndex = 1;
+              });
+            },
+          );
         },
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -107,9 +125,10 @@ class _HomePageState extends State<HomePage> {
 }
 
 class _HomeContent extends StatelessWidget {
-  const _HomeContent({required this.data});
+  const _HomeContent({required this.data, required this.onOpenCatalog});
 
   final DashboardData data;
+  final VoidCallback onOpenCatalog;
 
   @override
   Widget build(BuildContext context) {
@@ -143,15 +162,18 @@ class _HomeContent extends StatelessWidget {
                           const SizedBox(height: 22),
                           _AchievementCard(data: data),
                           const SizedBox(height: 22),
-                          const _SectionTitle(),
+                          _SectionTitle(onOpenCatalog: onOpenCatalog),
                           const SizedBox(height: 14),
                           const _SuggestionCard(),
                           const SizedBox(height: 16),
                           for (final badge in data.recommendations) ...[
-                            _RecommendationCard(badge: badge),
+                            _RecommendationCard(
+                              badge: badge,
+                              onOpenCatalog: onOpenCatalog,
+                            ),
                             const SizedBox(height: 16),
                           ],
-                          _ExploreButton(onPressed: () {}),
+                          _ExploreButton(onPressed: onOpenCatalog),
                         ],
                       ),
                     ),
@@ -307,57 +329,91 @@ class _HeaderCard extends StatelessWidget {
   }
 }
 
-class _NotificationButton extends StatelessWidget {
+class _NotificationButton extends StatefulWidget {
   const _NotificationButton();
 
   @override
+  State<_NotificationButton> createState() => _NotificationButtonState();
+}
+
+class _NotificationButtonState extends State<_NotificationButton> {
+  final MobileApiRepository repository = MobileApiRepository();
+  late Future<int> unreadCountFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    unreadCountFuture = _loadUnreadCount();
+  }
+
+  Future<int> _loadUnreadCount() async {
+    final notifications = await repository.getNotifications();
+    return notifications.where((item) => item.unread).length;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const NotificationsPage()),
-        );
-      },
-      borderRadius: BorderRadius.circular(999),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: const BoxDecoration(
-              color: Color(0xFF4E9AC1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.notifications_none,
-              color: Colors.white,
-              size: 22,
-            ),
-          ),
-          Positioned(
-            top: -3,
-            right: -3,
-            child: Container(
-              width: 18,
-              height: 18,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFF3B48),
-                shape: BoxShape.circle,
+    return FutureBuilder<int>(
+      future: unreadCountFuture,
+      builder: (context, snapshot) {
+        final unreadCount = snapshot.data ?? 0;
+
+        return InkWell(
+          onTap: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const NotificationsPage(),
               ),
-              child: const Text(
-                '2',
-                style: TextStyle(
+            );
+            if (mounted) {
+              setState(() {
+                unreadCountFuture = _loadUnreadCount();
+              });
+            }
+          },
+          borderRadius: BorderRadius.circular(999),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF4E9AC1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.notifications_none,
                   color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
+                  size: 22,
                 ),
               ),
-            ),
+              if (unreadCount > 0)
+                Positioned(
+                  top: -3,
+                  right: -3,
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFF3B48),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      unreadCount > 9 ? '9+' : '$unreadCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -581,7 +637,9 @@ class _AchievementCard extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle();
+  const _SectionTitle({required this.onOpenCatalog});
+
+  final VoidCallback onOpenCatalog;
 
   @override
   Widget build(BuildContext context) {
@@ -600,7 +658,7 @@ class _SectionTitle extends StatelessWidget {
           ),
         ),
         TextButton(
-          onPressed: () {},
+          onPressed: onOpenCatalog,
           style: TextButton.styleFrom(
             foregroundColor: const Color(0xFF005DFF),
             padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -668,9 +726,10 @@ class _SuggestionCard extends StatelessWidget {
 }
 
 class _RecommendationCard extends StatelessWidget {
-  const _RecommendationCard({required this.badge});
+  const _RecommendationCard({required this.badge, required this.onOpenCatalog});
 
   final BadgeRecommendation badge;
+  final VoidCallback onOpenCatalog;
 
   @override
   Widget build(BuildContext context) {
@@ -740,7 +799,7 @@ class _RecommendationCard extends StatelessWidget {
             ),
           const Divider(height: 1, color: Color(0xFFE8EDF3)),
           InkWell(
-            onTap: () {},
+            onTap: onOpenCatalog,
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(10),
               bottomRight: Radius.circular(10),
@@ -1089,37 +1148,66 @@ class _CardShell extends StatelessWidget {
   }
 }
 
-class _BadgeNavigationIcon extends StatelessWidget {
+class _BadgeNavigationIcon extends StatefulWidget {
   const _BadgeNavigationIcon();
 
   @override
+  State<_BadgeNavigationIcon> createState() => _BadgeNavigationIconState();
+}
+
+class _BadgeNavigationIconState extends State<_BadgeNavigationIcon> {
+  final MobileApiRepository repository = MobileApiRepository();
+  late Future<int> inProgressFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    inProgressFuture = _loadInProgressCount();
+  }
+
+  Future<int> _loadInProgressCount() async {
+    final applications = await repository.getMyBadgeApplications();
+    return applications
+        .where((item) => !item.isApproved && !item.isRejected)
+        .length;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        const Icon(Icons.workspace_premium_outlined),
-        Positioned(
-          top: -7,
-          right: -8,
-          child: Container(
-            width: 16,
-            height: 16,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFF3B48),
-              shape: BoxShape.circle,
-            ),
-            child: const Text(
-              '2',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
+    return FutureBuilder<int>(
+      future: inProgressFuture,
+      builder: (context, snapshot) {
+        final count = snapshot.data ?? 0;
+
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            const Icon(Icons.workspace_premium_outlined),
+            if (count > 0)
+              Positioned(
+                top: -7,
+                right: -8,
+                child: Container(
+                  width: 16,
+                  height: 16,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFF3B48),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    count > 9 ? '9+' : '$count',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }

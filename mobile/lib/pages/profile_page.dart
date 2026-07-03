@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/dashboard_data.dart';
+import '../repositories/mobile_api_repository.dart';
 import '../services/auth_service.dart';
 import 'change_password_page.dart';
 import 'consultants_directory_page.dart';
@@ -18,16 +19,27 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final AuthService authService = AuthService();
-  late Future<String> emailFuture;
+  final MobileApiRepository mobileRepository = MobileApiRepository();
+  late Future<_ProfileViewData> profileFuture;
 
   @override
   void initState() {
     super.initState();
-    emailFuture = loadEmail();
+    profileFuture = loadProfileData();
   }
 
-  Future<String> loadEmail() async {
-    return await authService.getSavedEmail() ?? 'rafsilv26@gmail.com';
+  Future<_ProfileViewData> loadProfileData() async {
+    await mobileRepository.syncConsultantsDirectory();
+    final localUser = await mobileRepository.database.getCurrentUserProfile();
+    final consultant = await mobileRepository.database
+        .getCurrentConsultantProfile();
+    final savedEmail = await authService.getSavedEmail();
+
+    return _ProfileViewData(
+      email: consultant?.email ?? localUser?.email ?? savedEmail ?? '',
+      area: consultant?.area ?? '',
+      serviceLine: consultant?.serviceLine ?? '',
+    );
   }
 
   Future<void> logout() async {
@@ -40,14 +52,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: emailFuture,
+    return FutureBuilder<_ProfileViewData>(
+      future: profileFuture,
       builder: (context, snapshot) {
-        final email = snapshot.data ?? 'rafsilv26@gmail.com';
+        final profile = snapshot.data ?? const _ProfileViewData();
 
         return _ProfileContent(
           data: widget.data,
-          email: email,
+          profile: profile,
           onLogout: logout,
         );
       },
@@ -55,73 +67,75 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
+class _ProfileViewData {
+  const _ProfileViewData({
+    this.email = '',
+    this.area = '',
+    this.serviceLine = '',
+  });
+
+  final String email;
+  final String area;
+  final String serviceLine;
+}
+
 class _ProfileContent extends StatelessWidget {
   const _ProfileContent({
     required this.data,
-    required this.email,
+    required this.profile,
     required this.onLogout,
   });
 
   final DashboardData data;
-  final String email;
+  final _ProfileViewData profile;
   final VoidCallback onLogout;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final horizontalPadding = constraints.maxWidth < 380 ? 16.0 : 24.0;
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F7FB),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final horizontalPadding = constraints.maxWidth < 380 ? 16.0 : 24.0;
 
-        return CustomScrollView(
-          slivers: [
-            const SliverToBoxAdapter(child: _ProfileHeader()),
-            SliverToBoxAdapter(
-              child: Center(
+          return ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              const _ProfileHeader(),
+              Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 560),
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(
                       horizontalPadding,
-                      0,
+                      16,
                       horizontalPadding,
-                      26,
+                      36,
                     ),
                     child: Column(
                       children: [
-                        const SizedBox(height: 16),
-                        _ProfileSummaryCard(data: data, email: email),
-                        const SizedBox(height: 16),
-                        _ConsultantsCard(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const ConsultantsDirectoryPage(),
-                              ),
-                            );
-                          },
+                        _ProfileSummaryCard(data: data, email: profile.email),
+                        const SizedBox(height: 18),
+                        _AccountCard(
+                          email: profile.email,
+                          area: profile.area,
+                          serviceLine: profile.serviceLine,
                         ),
                         const SizedBox(height: 18),
-                        _AccountCard(email: email),
-                        const SizedBox(height: 18),
                         const _LanguageSection(),
-                        const SizedBox(height: 18),
-                        const _EmailSignatureCard(),
                         const SizedBox(height: 18),
                         const _PrivacyCard(),
                         const SizedBox(height: 20),
                         _LogoutButton(onPressed: onLogout),
-                        const SizedBox(height: 36),
-                        const _FooterInfo(),
                       ],
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
-        );
-      },
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -307,97 +321,62 @@ class _ProfileStat extends StatelessWidget {
   }
 }
 
-class _ConsultantsCard extends StatelessWidget {
-  const _ConsultantsCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2F8AB9),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x332F8AB9),
-              blurRadius: 18,
-              offset: Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Icon(
-                Icons.groups_2_outlined,
-                color: Colors.white,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 14),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Diretório de\nConsultores',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      height: 1.25,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Descubra o perfil de outros colegas',
-                    style: TextStyle(
-                      color: Color(0xEFFFFFFF),
-                      fontSize: 14,
-                      height: 1.35,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: Colors.white, size: 28),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _AccountCard extends StatelessWidget {
-  const _AccountCard({required this.email});
+  const _AccountCard({
+    required this.email,
+    required this.area,
+    required this.serviceLine,
+  });
 
   final String email;
+  final String area;
+  final String serviceLine;
 
   @override
   Widget build(BuildContext context) {
+    final areaValue = [
+      if (area.isNotEmpty) area,
+      if (serviceLine.isNotEmpty) serviceLine,
+    ].join(' · ');
+
     return _ProfileCard(
       padding: EdgeInsets.zero,
       child: Column(
         children: [
           const _SectionHeader(icon: Icons.person_outline, title: 'Conta'),
-          _InfoRow(icon: Icons.mail_outline, title: 'Email', value: email),
-          const _InfoRow(
+          _InfoRow(
+            icon: Icons.mail_outline,
+            title: 'Email',
+            value: email.isNotEmpty ? email : 'Sem email local',
+          ),
+          _InfoRow(
             icon: Icons.work_outline,
             title: 'Área',
-            value: 'Hybrid Cloud',
+            value: areaValue.isNotEmpty ? areaValue : 'Sem área local',
+          ),
+          _InfoRow(
+            icon: Icons.groups_2_outlined,
+            title: 'Diretório de\nConsultores',
+            showArrow: true,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const ConsultantsDirectoryPage(),
+                ),
+              );
+            },
+          ),
+          _InfoRow(
+            icon: Icons.description_outlined,
+            title: 'Configurar Assinatura',
+            showArrow: true,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const EmailSignaturePage(),
+                ),
+              );
+            },
           ),
           _InfoRow(
             icon: Icons.shield_outlined,
@@ -450,124 +429,6 @@ class _LanguageSection extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-}
-
-class _EmailSignatureCard extends StatelessWidget {
-  const _EmailSignatureCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return _ProfileCard(
-      padding: EdgeInsets.zero,
-      child: Column(
-        children: [
-          const _SectionHeader(
-            icon: Icons.description_outlined,
-            title: 'Assinatura de Email',
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Configure a sua assinatura de email profissional com os badges conquistados.',
-                  style: TextStyle(
-                    color: Color(0xFF475467),
-                    fontSize: 15,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                InkWell(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const EmailSignaturePage(),
-                      ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF6F9FF),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFB6D2FF)),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2F8AB9),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.settings_outlined,
-                            color: Colors.white,
-                            size: 26,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Configurar Assinatura',
-                                style: TextStyle(
-                                  color: Color(0xFF111827),
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Personalize e exporte',
-                                style: TextStyle(
-                                  color: Color(0xFF667085),
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(
-                          Icons.chevron_right,
-                          color: Color(0xFF005DFF),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFFAEB),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFFFD666)),
-                  ),
-                  child: const Text(
-                    'Mostre as suas certificações em todos os emails que enviar!',
-                    style: TextStyle(
-                      color: Color(0xFF8A3B12),
-                      fontSize: 13,
-                      height: 1.35,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -814,36 +675,6 @@ class _LogoutButton extends StatelessWidget {
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
-    );
-  }
-}
-
-class _FooterInfo extends StatelessWidget {
-  const _FooterInfo();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        Text(
-          'Versão 3.2 Mobile',
-          style: TextStyle(
-            color: Color(0xFF667085),
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        SizedBox(height: 12),
-        Text(
-          '© 2025 Softinsa. Todos os direitos reservados.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Color(0xFF667085),
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
     );
   }
 }

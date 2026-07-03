@@ -6,7 +6,9 @@ import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as path;
 import 'package:sqflite/sqflite.dart';
 
+import '../models/consultant_profile.dart';
 import '../models/dashboard_data.dart';
+import '../models/mobile_api_data.dart';
 
 class LocalBadgesDatabase {
   LocalBadgesDatabase._();
@@ -16,7 +18,7 @@ class LocalBadgesDatabase {
   Database? _database;
   DashboardData? _memoryDashboard;
 
-  static const int _databaseVersion = 3;
+  static const int _databaseVersion = 4;
 
   Future<Database> get database async {
     final currentDatabase = _database;
@@ -72,6 +74,9 @@ class LocalBadgesDatabase {
     }
     if (oldVersion < 3) {
       await _addDashboardUserRoleColumn(db);
+    }
+    if (oldVersion < 4) {
+      await _createMobileFeatureTables(db);
     }
   }
 
@@ -289,6 +294,138 @@ class LocalBadgesDatabase {
       'CREATE INDEX IF NOT EXISTS idx_historico_candidatura '
       'ON historico_candidaturas (candidatura_id)',
     );
+
+    await _createMobileFeatureTables(db);
+  }
+
+  Future<void> _createMobileFeatureTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS consultants (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        role TEXT NOT NULL,
+        area TEXT NOT NULL,
+        service_line TEXT NOT NULL,
+        location TEXT NOT NULL,
+        email TEXT NOT NULL,
+        start_date TEXT NOT NULL,
+        points INTEGER NOT NULL,
+        badges INTEGER NOT NULL,
+        specials INTEGER NOT NULL,
+        rank INTEGER NOT NULL,
+        image_path TEXT NOT NULL,
+        biography TEXT NOT NULL,
+        linkedin_url TEXT NOT NULL,
+        is_current_user INTEGER NOT NULL,
+        raw_json TEXT NOT NULL,
+        last_synced_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS consultant_directory_stats (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        consultants INTEGER NOT NULL,
+        badges_total INTEGER NOT NULL,
+        specials_total INTEGER NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS notifications (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        type TEXT NOT NULL,
+        read INTEGER NOT NULL,
+        created_at TEXT,
+        read_at TEXT,
+        raw_json TEXT NOT NULL,
+        last_synced_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS gamification_summary (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        rank INTEGER NOT NULL,
+        points INTEGER NOT NULL,
+        badges INTEGER NOT NULL,
+        raw_json TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS gamification_achievements (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        icon TEXT NOT NULL,
+        awarded_at TEXT,
+        raw_json TEXT NOT NULL,
+        last_synced_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS gamification_ranking (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        points INTEGER NOT NULL,
+        badges INTEGER NOT NULL,
+        rank INTEGER NOT NULL,
+        current_user INTEGER NOT NULL,
+        raw_json TEXT NOT NULL,
+        last_synced_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS gamification_timeline (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        icon TEXT NOT NULL,
+        event_date TEXT,
+        raw_json TEXT NOT NULL,
+        last_synced_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS email_signature_profile (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        role TEXT NOT NULL,
+        website TEXT NOT NULL,
+        template_html TEXT NOT NULL,
+        raw_json TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS email_signature_badges (
+        id INTEGER PRIMARY KEY,
+        title TEXT NOT NULL,
+        image_path TEXT NOT NULL,
+        public_token TEXT NOT NULL,
+        selected INTEGER NOT NULL,
+        raw_json TEXT NOT NULL,
+        last_synced_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_consultants_rank ON consultants (rank)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_notifications_created '
+      'ON notifications (created_at)',
+    );
   }
 
   Future<void> _addDashboardUserRoleColumn(Database db) async {
@@ -480,12 +617,23 @@ class LocalBadgesDatabase {
         }),
         idKeys: const ['id', 'badgeId', 'BADGEID'],
         values: (row) => {
-          'level_id': _intValue(row, const ['levelId', 'NIVELID']),
+          'level_id': _intValue(row, const ['levelId', 'nivelId', 'NIVELID']),
           'nome': _textValue(row, const ['nome', 'NOME', 'title']),
           'descricao': _textValue(row, const ['descricao', 'DESCRICAO']),
           'imagem': _textValue(row, const ['imagem', 'IMAGEM', 'iconName']),
-          'pontos': _intValue(row, const ['pontos', 'PONTO', 'points']),
-          'uuid': _textValue(row, const ['uuid', 'PUBLIC_TOKEN', 'SLUG']),
+          'pontos': _intValue(row, const [
+            'pontos',
+            'ponto',
+            'PONTO',
+            'points',
+          ]),
+          'uuid': _textValue(row, const [
+            'uuid',
+            'publicToken',
+            'PUBLIC_TOKEN',
+            'slug',
+            'SLUG',
+          ]),
           'tem_expiracao': _boolIntValue(row, const ['temExpiracao', 'ATIVO']),
           'duracao_meses': _intValue(row, const [
             'duracaoMeses',
@@ -509,10 +657,10 @@ class LocalBadgesDatabase {
         }),
         idKeys: const ['id', 'requirementId', 'REQUISITOID'],
         values: (row) => {
-          'level_id': _intValue(row, const ['levelId', 'NIVELID']),
-          'nome': _textValue(row, const ['nome', 'NOME', 'TITULO']),
+          'level_id': _intValue(row, const ['levelId', 'nivelId', 'NIVELID']),
+          'nome': _textValue(row, const ['nome', 'titulo', 'NOME', 'TITULO']),
           'descricao': _textValue(row, const ['descricao', 'DESCRICAO']),
-          'tipo': _textValue(row, const ['tipo', 'TIPO']),
+          'tipo': _textValue(row, const ['tipo', 'icone', 'TIPO']),
           'created_at': _textValue(row, const ['createdAt', 'CREATED_AT']),
           'updated_at': _textValue(row, const ['updatedAt', 'UPDATED_AT']),
         },
@@ -531,7 +679,9 @@ class LocalBadgesDatabase {
         values: (row) => {
           'consultor_id': _intValue(row, const ['consultorId', 'CONSULTORID']),
           'badge_id': _intValue(row, const ['badgeId', 'BADGEID']),
-          'estado': _textValue(row, const ['estado', 'ESTADOID']),
+          'estado':
+              _statusCodeFromRow(row) ??
+              _textValue(row, const ['estado', 'estadoId', 'ESTADOID']),
           'talent_manager_id': _intValue(row, const [
             'talentManagerId',
             'TMID',
@@ -550,8 +700,18 @@ class LocalBadgesDatabase {
           ]),
           'comentario': _textValue(row, const ['comentario']),
           'data_expiracao': _textValue(row, const ['dataExpiracao']),
-          'created_at': _textValue(row, const ['createdAt', 'CREATED_AT']),
-          'updated_at': _textValue(row, const ['updatedAt', 'UPDATED_AT']),
+          'created_at': _textValue(row, const [
+            'createdAt',
+            'dataSubmicao',
+            'CREATED_AT',
+          ]),
+          'updated_at': _textValue(row, const [
+            'updatedAt',
+            'dataAprovacao',
+            'dataValidacao',
+            'CREATED_AT',
+            'UPDATED_AT',
+          ]),
         },
         syncedAt: timestamp,
       );
@@ -656,6 +816,692 @@ class LocalBadgesDatabase {
         'updated_at': timestamp,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     });
+  }
+
+  Future<void> upsertConsultantsDirectory(
+    Map<String, dynamic> payload, {
+    DateTime? updatedAt,
+  }) async {
+    if (_useMemoryStore) {
+      return;
+    }
+
+    final rows = _mapsFromPayload(payload, const [
+      'data',
+      'consultants',
+      'items',
+    ]);
+    final stats = _mapFromPayload(payload, const ['stats']) ?? const {};
+    final timestamp = (updatedAt ?? DateTime.now()).toUtc().toIso8601String();
+    final db = await database;
+
+    await db.transaction((transaction) async {
+      await transaction.delete('consultants');
+
+      for (final row in rows) {
+        final profile = ConsultantProfile.fromJson(row);
+        final id = profile.id ?? _intValue(row, const ['id', 'consultorId']);
+        if (id == null) {
+          continue;
+        }
+
+        await transaction.insert('consultants', {
+          'id': id,
+          'name': profile.name,
+          'role': profile.role,
+          'area': profile.area,
+          'service_line': profile.serviceLine,
+          'location': profile.location,
+          'email': profile.email,
+          'start_date': profile.startDate,
+          'points': profile.points,
+          'badges': profile.badges,
+          'specials': profile.specials,
+          'rank': profile.rank,
+          'image_path': profile.imagePath,
+          'biography': profile.biography,
+          'linkedin_url': profile.linkedinUrl,
+          'is_current_user': profile.isCurrentUser ? 1 : 0,
+          'raw_json': jsonEncode(row),
+          'last_synced_at': timestamp,
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+
+      await transaction.insert('consultant_directory_stats', {
+        'id': 1,
+        'consultants': _intValue(stats, const ['consultants']) ?? rows.length,
+        'badges_total':
+            _intValue(stats, const ['badgesTotal']) ??
+            rows.fold<int>(
+              0,
+              (total, row) => total + (_intValue(row, const ['badges']) ?? 0),
+            ),
+        'specials_total':
+            _intValue(stats, const ['specialsTotal']) ??
+            rows.fold<int>(
+              0,
+              (total, row) => total + (_intValue(row, const ['specials']) ?? 0),
+            ),
+        'updated_at': timestamp,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+      await transaction.insert('api_payloads', {
+        'key': 'consultants_directory',
+        'payload_json': jsonEncode(payload),
+        'updated_at': timestamp,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    });
+  }
+
+  Future<ConsultantsDirectoryData> getConsultantsDirectory() async {
+    if (_useMemoryStore) {
+      return ConsultantsDirectoryData(
+        consultants: ConsultantProfile.samples(),
+        stats: const ConsultantsDirectoryStats(
+          consultants: 10,
+          badgesTotal: 79,
+          specialsTotal: 14,
+        ),
+        loadedFromCache: true,
+      );
+    }
+
+    final db = await database;
+    final rows = await db.query('consultants', orderBy: 'rank ASC, name ASC');
+    final statsRows = await db.query(
+      'consultant_directory_stats',
+      where: 'id = ?',
+      whereArgs: [1],
+      limit: 1,
+    );
+
+    final consultants = rows.map(_consultantFromRow).toList();
+    final stats = statsRows.isEmpty
+        ? ConsultantsDirectoryStats(
+            consultants: consultants.length,
+            badgesTotal: consultants.fold(0, (sum, item) => sum + item.badges),
+            specialsTotal: consultants.fold(
+              0,
+              (sum, item) => sum + item.specials,
+            ),
+          )
+        : ConsultantsDirectoryStats(
+            consultants: statsRows.first['consultants'] as int,
+            badgesTotal: statsRows.first['badges_total'] as int,
+            specialsTotal: statsRows.first['specials_total'] as int,
+          );
+
+    return ConsultantsDirectoryData(consultants: consultants, stats: stats);
+  }
+
+  Future<ConsultantProfile?> getCurrentConsultantProfile() async {
+    if (_useMemoryStore) {
+      return ConsultantProfile.samples().first;
+    }
+
+    final db = await database;
+    final rows = await db.query(
+      'consultants',
+      where: 'is_current_user = ?',
+      whereArgs: [1],
+      limit: 1,
+    );
+
+    if (rows.isEmpty) {
+      return null;
+    }
+
+    return _consultantFromRow(rows.first);
+  }
+
+  Future<void> upsertNotifications(
+    Map<String, dynamic> payload, {
+    DateTime? updatedAt,
+  }) async {
+    if (_useMemoryStore) {
+      return;
+    }
+
+    final rows = _mapsFromPayload(payload, const ['data', 'notifications']);
+    final timestamp = (updatedAt ?? DateTime.now()).toUtc().toIso8601String();
+    final db = await database;
+
+    await db.transaction((transaction) async {
+      await transaction.delete('notifications');
+
+      for (final row in rows) {
+        final notification = AppNotification.fromJson(row);
+        if (notification.id.isEmpty) {
+          continue;
+        }
+
+        await transaction.insert('notifications', {
+          'id': notification.id,
+          'title': notification.title,
+          'message': notification.message,
+          'type': notification.type,
+          'read': notification.read ? 1 : 0,
+          'created_at': notification.createdAt?.toUtc().toIso8601String(),
+          'read_at': notification.readAt?.toUtc().toIso8601String(),
+          'raw_json': jsonEncode(row),
+          'last_synced_at': timestamp,
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+
+      await transaction.insert('api_payloads', {
+        'key': 'notifications',
+        'payload_json': jsonEncode(payload),
+        'updated_at': timestamp,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    });
+  }
+
+  Future<List<AppNotification>> getNotifications() async {
+    if (_useMemoryStore) {
+      return [
+        AppNotification(
+          id: '1',
+          title: 'O seu badge Nível Júnior - OutSystems foi aprovado!',
+          message: '',
+          type: 'success',
+          read: false,
+          createdAt: DateTime(2025, 12, 4),
+        ),
+        AppNotification(
+          id: '2',
+          title: 'O badge AWS Cloud Practitioner expira em 30 dias',
+          message: '',
+          type: 'warning',
+          read: false,
+          createdAt: DateTime(2025, 12, 3),
+        ),
+        AppNotification(
+          id: '3',
+          title: 'Feedback necessário para o badge Azure Fundamentals',
+          message: '',
+          type: 'alert',
+          read: true,
+          createdAt: DateTime(2025, 12, 2),
+        ),
+      ];
+    }
+
+    final db = await database;
+    final rows = await db.query(
+      'notifications',
+      orderBy: 'created_at DESC, last_synced_at DESC',
+    );
+    return rows.map(_notificationFromRow).toList();
+  }
+
+  Future<void> markNotificationReadLocally(String id) async {
+    if (_useMemoryStore) {
+      return;
+    }
+
+    final db = await database;
+    final now = DateTime.now().toUtc().toIso8601String();
+    await db.update(
+      'notifications',
+      {'read': 1, 'read_at': now, 'last_synced_at': now},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> markAllNotificationsReadLocally() async {
+    if (_useMemoryStore) {
+      return;
+    }
+
+    final db = await database;
+    final now = DateTime.now().toUtc().toIso8601String();
+    await db.update(
+      'notifications',
+      {'read': 1, 'read_at': now, 'last_synced_at': now},
+      where: 'read = ?',
+      whereArgs: [0],
+    );
+  }
+
+  Future<void> upsertGamification(
+    Map<String, dynamic> payload, {
+    DateTime? updatedAt,
+  }) async {
+    if (_useMemoryStore) {
+      return;
+    }
+
+    final timestamp = (updatedAt ?? DateTime.now()).toUtc().toIso8601String();
+    final summaryJson = _mapFromPayload(payload, const ['summary']) ?? const {};
+    final summary = GamificationSummary.fromJson(summaryJson);
+    final achievements = _mapsFromPayload(payload, const ['achievements']);
+    final ranking = _mapsFromPayload(payload, const ['ranking']);
+    final timeline = _mapsFromPayload(payload, const ['timeline']);
+    final db = await database;
+
+    await db.transaction((transaction) async {
+      await transaction.insert('gamification_summary', {
+        'id': 1,
+        'rank': summary.rank,
+        'points': summary.points,
+        'badges': summary.badges,
+        'raw_json': jsonEncode(summaryJson),
+        'updated_at': timestamp,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+      await transaction.delete('gamification_achievements');
+      for (final row in achievements) {
+        final achievement = GamificationAchievement.fromJson(row);
+        final id = achievement.id.isEmpty
+            ? _fallbackTextId(achievement.title, achievement.awardedAt)
+            : achievement.id;
+        await transaction.insert(
+          'gamification_achievements',
+          {
+            'id': id,
+            'title': achievement.title,
+            'description': achievement.description,
+            'icon': achievement.icon,
+            'awarded_at': achievement.awardedAt?.toUtc().toIso8601String(),
+            'raw_json': jsonEncode(row),
+            'last_synced_at': timestamp,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+
+      await transaction.delete('gamification_ranking');
+      for (final row in ranking) {
+        final user = LeaderboardUser.fromJson(row);
+        if (user.id == 0) {
+          continue;
+        }
+        await transaction.insert('gamification_ranking', {
+          'id': user.id,
+          'name': user.name,
+          'points': user.points,
+          'badges': user.badges,
+          'rank': user.rank,
+          'current_user': user.currentUser ? 1 : 0,
+          'raw_json': jsonEncode(row),
+          'last_synced_at': timestamp,
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+
+      await transaction.delete('gamification_timeline');
+      for (final row in timeline) {
+        final event = TimelineEventData.fromJson(row);
+        final id = event.id.isEmpty
+            ? _fallbackTextId(event.title, event.date)
+            : event.id;
+        await transaction.insert('gamification_timeline', {
+          'id': id,
+          'title': event.title,
+          'description': event.description,
+          'icon': event.icon,
+          'event_date': event.date?.toUtc().toIso8601String(),
+          'raw_json': jsonEncode(row),
+          'last_synced_at': timestamp,
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+
+      await transaction.insert('api_payloads', {
+        'key': 'gamification',
+        'payload_json': jsonEncode(payload),
+        'updated_at': timestamp,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    });
+  }
+
+  Future<GamificationData> getGamification() async {
+    if (_useMemoryStore) {
+      return GamificationData(
+        summary: const GamificationSummary(rank: 12, points: 1250, badges: 8),
+        achievements: [
+          GamificationAchievement(
+            id: 'early-adopter',
+            title: 'Early Adopter',
+            description: 'Primeiros 100 utilizadores da plataforma',
+            icon: 'star',
+            awardedAt: DateTime(2025, 12, 1),
+          ),
+          GamificationAchievement(
+            id: 'collector',
+            title: 'Badge Collector',
+            description: '10+ badges conquistados',
+            icon: 'badge',
+            awardedAt: DateTime(2025, 11, 15),
+          ),
+        ],
+        ranking: const [
+          LeaderboardUser(
+            id: 1,
+            name: 'Ana Costa',
+            points: 2850,
+            badges: 15,
+            rank: 1,
+          ),
+          LeaderboardUser(
+            id: 2,
+            name: 'Carlos Mendes',
+            points: 2650,
+            badges: 14,
+            rank: 2,
+          ),
+          LeaderboardUser(
+            id: 3,
+            name: 'João Silva',
+            points: 1250,
+            badges: 8,
+            rank: 12,
+            currentUser: true,
+          ),
+        ],
+        timeline: [
+          TimelineEventData(
+            id: 'azure-approved',
+            title: 'Badge Azure Fundamentals aprovado',
+            description: '',
+            icon: 'badge',
+            date: DateTime(2025, 12, 1),
+          ),
+        ],
+        loadedFromCache: true,
+      );
+    }
+
+    final db = await database;
+    final summaryRows = await db.query(
+      'gamification_summary',
+      where: 'id = ?',
+      whereArgs: [1],
+      limit: 1,
+    );
+    final achievements = await db.query(
+      'gamification_achievements',
+      orderBy: 'awarded_at DESC, title ASC',
+    );
+    final ranking = await db.query(
+      'gamification_ranking',
+      orderBy: 'rank ASC, points DESC',
+    );
+    final timeline = await db.query(
+      'gamification_timeline',
+      orderBy: 'event_date DESC, title ASC',
+    );
+
+    if (summaryRows.isEmpty &&
+        achievements.isEmpty &&
+        ranking.isEmpty &&
+        timeline.isEmpty) {
+      return GamificationData.empty(loadedFromCache: true);
+    }
+
+    return GamificationData(
+      summary: summaryRows.isEmpty
+          ? const GamificationSummary(rank: 0, points: 0, badges: 0)
+          : GamificationSummary(
+              rank: summaryRows.first['rank'] as int,
+              points: summaryRows.first['points'] as int,
+              badges: summaryRows.first['badges'] as int,
+            ),
+      achievements: achievements.map(_achievementFromRow).toList(),
+      ranking: ranking.map(_leaderboardUserFromRow).toList(),
+      timeline: timeline.map(_timelineEventFromRow).toList(),
+    );
+  }
+
+  Future<void> upsertEmailSignature(
+    Map<String, dynamic> payload, {
+    DateTime? updatedAt,
+  }) async {
+    if (_useMemoryStore) {
+      return;
+    }
+
+    final timestamp = (updatedAt ?? DateTime.now()).toUtc().toIso8601String();
+    final profileJson = _mapFromPayload(payload, const ['profile']) ?? const {};
+    final profile = EmailSignatureProfile.fromJson(profileJson);
+    final badges = _mapsFromPayload(payload, const ['badges']);
+    final templateHtml =
+        _textValue(payload, const ['templateHtml', 'template_html']) ?? '';
+    final db = await database;
+
+    await db.transaction((transaction) async {
+      await transaction.insert('email_signature_profile', {
+        'id': 1,
+        'name': profile.name,
+        'email': profile.email,
+        'role': profile.role,
+        'website': profile.website,
+        'template_html': templateHtml,
+        'raw_json': jsonEncode(profileJson),
+        'updated_at': timestamp,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+      await transaction.delete('email_signature_badges');
+      for (final row in badges) {
+        final badge = EmailSignatureBadge.fromJson(row);
+        if (badge.id == 0) {
+          continue;
+        }
+
+        await transaction.insert('email_signature_badges', {
+          'id': badge.id,
+          'title': badge.title,
+          'image_path': badge.imagePath,
+          'public_token': badge.publicToken,
+          'selected': badge.selected ? 1 : 0,
+          'raw_json': jsonEncode(row),
+          'last_synced_at': timestamp,
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+
+      await transaction.insert('api_payloads', {
+        'key': 'email_signature',
+        'payload_json': jsonEncode(payload),
+        'updated_at': timestamp,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    });
+  }
+
+  Future<EmailSignatureData> getEmailSignature() async {
+    if (_useMemoryStore) {
+      return const EmailSignatureData(
+        profile: EmailSignatureProfile(
+          name: 'João Silva',
+          email: 'rafsilv26@gmail.com',
+          role: 'Consultor',
+          website: 'www.softinsa.pt',
+        ),
+        badges: [
+          EmailSignatureBadge(
+            id: 1,
+            title: 'Azure Fundamentals',
+            imagePath: 'assets/images/badge_azure_fundamentals.png',
+            publicToken: '',
+          ),
+          EmailSignatureBadge(
+            id: 2,
+            title: 'AWS Cloud Practitioner',
+            imagePath: 'assets/images/badge_aws_cloud_practitioner.png',
+            publicToken: '',
+            selected: true,
+          ),
+        ],
+        templateHtml: '',
+        loadedFromCache: true,
+      );
+    }
+
+    final db = await database;
+    final profileRows = await db.query(
+      'email_signature_profile',
+      where: 'id = ?',
+      whereArgs: [1],
+      limit: 1,
+    );
+    final badgeRows = await db.query(
+      'email_signature_badges',
+      orderBy: 'selected DESC, title ASC',
+    );
+
+    if (profileRows.isEmpty && badgeRows.isEmpty) {
+      return EmailSignatureData.empty(loadedFromCache: true);
+    }
+
+    final profileRow = profileRows.isEmpty ? null : profileRows.first;
+    return EmailSignatureData(
+      profile: profileRow == null
+          ? const EmailSignatureProfile(
+              name: '',
+              email: '',
+              role: 'Consultor',
+              website: 'www.softinsa.pt',
+            )
+          : EmailSignatureProfile(
+              name: profileRow['name'] as String,
+              email: profileRow['email'] as String,
+              role: profileRow['role'] as String,
+              website: profileRow['website'] as String,
+            ),
+      badges: badgeRows.map(_emailSignatureBadgeFromRow).toList(),
+      templateHtml: profileRow?['template_html'] as String? ?? '',
+    );
+  }
+
+  Future<List<CatalogBadge>> getCatalogBadges() async {
+    if (_useMemoryStore) {
+      return DashboardData.sample().recommendations.asMap().entries.map((
+        entry,
+      ) {
+        final badge = entry.value;
+        return CatalogBadge(
+          id: entry.key + 1,
+          title: badge.title,
+          description: badge.description,
+          level: badge.level,
+          area: 'Hybrid Cloud',
+          points: badge.points,
+          duration: badge.duration,
+          type: badge.tag,
+          provider: '',
+          imagePath: badge.iconName,
+          requirements: badge.prerequisites,
+        );
+      }).toList();
+    }
+
+    final db = await database;
+    final rows = await db.rawQuery('''
+      SELECT
+        b.id,
+        b.level_id,
+        b.nome,
+        b.descricao,
+        b.imagem,
+        b.pontos,
+        b.duracao_meses,
+        b.raw_json,
+        l.nome AS level_nome,
+        l.ordem AS level_ordem,
+        a.nome AS area_nome
+      FROM badges b
+      LEFT JOIN levels l ON l.id = b.level_id
+      LEFT JOIN areas a ON a.id = l.area_id
+      WHERE b.ativo IS NULL OR b.ativo = 1
+      ORDER BY b.pontos DESC, b.nome ASC
+    ''');
+    final applicationRows = await db.query(
+      'candidaturas',
+      orderBy: 'updated_at DESC, created_at DESC',
+    );
+    final applicationByBadgeId = <int, String>{};
+    for (final row in applicationRows) {
+      final badgeId = row['badge_id'] as int?;
+      if (badgeId == null || applicationByBadgeId.containsKey(badgeId)) {
+        continue;
+      }
+      applicationByBadgeId[badgeId] = _statusLabel(
+        row['estado'] as String? ?? '',
+      );
+    }
+
+    final result = <CatalogBadge>[];
+    for (final row in rows) {
+      final levelId = row['level_id'] as int?;
+      final requirementRows = levelId == null
+          ? const <Map<String, Object?>>[]
+          : await db.query(
+              'requirements',
+              where: 'level_id = ?',
+              whereArgs: [levelId],
+              orderBy: 'nome ASC',
+            );
+      result.add(
+        _catalogBadgeFromRow(
+          row,
+          requirementRows
+              .map((item) => item['nome'] as String? ?? '')
+              .where((item) => item.isNotEmpty)
+              .toList(),
+          applicationByBadgeId[row['id'] as int? ?? 0] ?? '',
+        ),
+      );
+    }
+
+    return result;
+  }
+
+  Future<List<MyBadgeApplication>> getMyBadgeApplications() async {
+    if (_useMemoryStore) {
+      return [
+        MyBadgeApplication(
+          id: 1,
+          badgeId: 1,
+          title: 'Azure Fundamentals',
+          description: 'Candidatura em validação',
+          status: 'SUBMITTED',
+          statusLabel: 'Submetida',
+          points: 100,
+          imagePath: 'cloud',
+          createdAt: DateTime(2025, 12, 1),
+        ),
+        MyBadgeApplication(
+          id: 2,
+          badgeId: 2,
+          title: 'AWS Cloud Practitioner',
+          description: 'Badge aprovada',
+          status: 'APPROVED',
+          statusLabel: 'Aprovada',
+          points: 150,
+          imagePath: 'cloud',
+          createdAt: DateTime(2025, 11, 20),
+        ),
+      ];
+    }
+
+    final db = await database;
+    final rows = await db.rawQuery('''
+      SELECT
+        c.id AS candidatura_id,
+        c.badge_id,
+        c.estado,
+        c.created_at AS candidatura_created_at,
+        c.updated_at AS candidatura_updated_at,
+        c.raw_json AS candidatura_raw_json,
+        b.nome AS badge_nome,
+        b.descricao AS badge_descricao,
+        b.imagem AS badge_imagem,
+        b.pontos AS badge_pontos,
+        b.raw_json AS badge_raw_json
+      FROM candidaturas c
+      LEFT JOIN badges b ON b.id = c.badge_id
+      ORDER BY c.updated_at DESC, c.created_at DESC
+    ''');
+
+    return rows.map(_myBadgeApplicationFromRow).toList();
   }
 
   Future<DashboardData?> getDashboard() async {
@@ -836,6 +1682,246 @@ class LocalBadgesDatabase {
     }).toList();
   }
 
+  ConsultantProfile _consultantFromRow(Map<String, Object?> row) {
+    return ConsultantProfile(
+      id: row['id'] as int?,
+      name: row['name'] as String? ?? '',
+      role: row['role'] as String? ?? '',
+      area: row['area'] as String? ?? '',
+      serviceLine: row['service_line'] as String? ?? '',
+      location: row['location'] as String? ?? '',
+      email: row['email'] as String? ?? '',
+      startDate: row['start_date'] as String? ?? '',
+      points: row['points'] as int? ?? 0,
+      badges: row['badges'] as int? ?? 0,
+      specials: row['specials'] as int? ?? 0,
+      rank: row['rank'] as int? ?? 0,
+      imagePath: row['image_path'] as String? ?? '',
+      biography: row['biography'] as String? ?? '',
+      linkedinUrl: row['linkedin_url'] as String? ?? '',
+      isCurrentUser: (row['is_current_user'] as int? ?? 0) == 1,
+    );
+  }
+
+  AppNotification _notificationFromRow(Map<String, Object?> row) {
+    return AppNotification(
+      id: row['id'] as String? ?? '',
+      title: row['title'] as String? ?? '',
+      message: row['message'] as String? ?? '',
+      type: row['type'] as String? ?? 'info',
+      read: (row['read'] as int? ?? 0) == 1,
+      createdAt: _dateFromText(row['created_at'] as String?),
+      readAt: _dateFromText(row['read_at'] as String?),
+    );
+  }
+
+  GamificationAchievement _achievementFromRow(Map<String, Object?> row) {
+    return GamificationAchievement(
+      id: row['id'] as String? ?? '',
+      title: row['title'] as String? ?? '',
+      description: row['description'] as String? ?? '',
+      icon: row['icon'] as String? ?? 'star',
+      awardedAt: _dateFromText(row['awarded_at'] as String?),
+    );
+  }
+
+  LeaderboardUser _leaderboardUserFromRow(Map<String, Object?> row) {
+    return LeaderboardUser(
+      id: row['id'] as int? ?? 0,
+      name: row['name'] as String? ?? '',
+      points: row['points'] as int? ?? 0,
+      badges: row['badges'] as int? ?? 0,
+      rank: row['rank'] as int? ?? 0,
+      currentUser: (row['current_user'] as int? ?? 0) == 1,
+    );
+  }
+
+  TimelineEventData _timelineEventFromRow(Map<String, Object?> row) {
+    return TimelineEventData(
+      id: row['id'] as String? ?? '',
+      title: row['title'] as String? ?? '',
+      description: row['description'] as String? ?? '',
+      icon: row['icon'] as String? ?? 'timeline',
+      date: _dateFromText(row['event_date'] as String?),
+    );
+  }
+
+  EmailSignatureBadge _emailSignatureBadgeFromRow(Map<String, Object?> row) {
+    return EmailSignatureBadge(
+      id: row['id'] as int? ?? 0,
+      title: row['title'] as String? ?? '',
+      imagePath: row['image_path'] as String? ?? '',
+      publicToken: row['public_token'] as String? ?? '',
+      selected: (row['selected'] as int? ?? 0) == 1,
+    );
+  }
+
+  CatalogBadge _catalogBadgeFromRow(
+    Map<String, Object?> row,
+    List<String> requirements,
+    String applicationStatus,
+  ) {
+    final raw = _jsonMap(row['raw_json'] as String?);
+    final durationMonths = row['duracao_meses'] as int?;
+    final levelName = row['level_nome'] as String?;
+    final levelOrder = row['level_ordem'] as String?;
+
+    return CatalogBadge(
+      id: row['id'] as int? ?? 0,
+      title: row['nome'] as String? ?? '',
+      description: row['descricao'] as String? ?? '',
+      level: levelName?.isNotEmpty == true
+          ? levelName!
+          : levelOrder?.isNotEmpty == true
+          ? 'Nível $levelOrder'
+          : '',
+      area: row['area_nome'] as String? ?? '',
+      points: row['pontos'] as int? ?? 0,
+      duration: durationMonths == null || durationMonths <= 0
+          ? ''
+          : '$durationMonths meses',
+      type: _textValue(raw, const ['tipo']) ?? '',
+      provider: _textValue(raw, const ['fornecedor']) ?? '',
+      imagePath: row['imagem'] as String? ?? '',
+      requirements: requirements,
+      applicationStatus: applicationStatus,
+    );
+  }
+
+  MyBadgeApplication _myBadgeApplicationFromRow(Map<String, Object?> row) {
+    final candidaturaRaw = _jsonMap(row['candidatura_raw_json'] as String?);
+    final badgeRaw = _jsonMap(row['badge_raw_json'] as String?);
+    final nestedBadge = _mapValue(candidaturaRaw, const ['Badge', 'badge']);
+    final statusMap = _mapValue(candidaturaRaw, const ['status']);
+    final status =
+        _textValue(statusMap, const ['code']) ??
+        row['estado'] as String? ??
+        _textValue(candidaturaRaw, const ['estado', 'estadoId']) ??
+        '';
+    final statusLabel =
+        _textValue(statusMap, const ['name', 'description']) ??
+        _statusLabel(status);
+
+    return MyBadgeApplication(
+      id: row['candidatura_id'] as int? ?? 0,
+      badgeId: row['badge_id'] as int? ?? 0,
+      title:
+          row['badge_nome'] as String? ??
+          _textValue(nestedBadge, const ['nome']) ??
+          '',
+      description:
+          row['badge_descricao'] as String? ??
+          _textValue(nestedBadge, const ['descricao']) ??
+          '',
+      status: status,
+      statusLabel: statusLabel,
+      points:
+          row['badge_pontos'] as int? ??
+          _intValue(nestedBadge, const ['ponto', 'pontos']) ??
+          _intValue(badgeRaw, const ['ponto', 'pontos']) ??
+          0,
+      imagePath:
+          row['badge_imagem'] as String? ??
+          _textValue(nestedBadge, const ['imagem']) ??
+          '',
+      createdAt: _dateFromText(row['candidatura_created_at'] as String?),
+      updatedAt: _dateFromText(row['candidatura_updated_at'] as String?),
+    );
+  }
+
+  Map<String, dynamic> _jsonMap(String? value) {
+    if (value == null || value.isEmpty) {
+      return const {};
+    }
+
+    try {
+      final decoded = jsonDecode(value);
+      if (decoded is Map) {
+        return Map<String, dynamic>.from(decoded);
+      }
+    } catch (_) {
+      return const {};
+    }
+
+    return const {};
+  }
+
+  String? _statusCodeFromRow(Map<String, dynamic> row) {
+    final status = _mapValue(row, const ['status']);
+    return _textValue(status, const ['code', 'name']);
+  }
+
+  String _statusLabel(String status) {
+    return switch (status.toUpperCase()) {
+      'OPEN' => 'Aberta',
+      'SUBMITTED' => 'Submetida',
+      'IN_VALIDATION' => 'Em validação',
+      'VALIDATED' => 'Validada',
+      'IN_APPROVAL' => 'Em aprovação',
+      'APPROVED' => 'Aprovada',
+      'FECHADO_APROVADO' => 'Aprovada',
+      'REJECTED' => 'Rejeitada',
+      'FECHADO_REJEITADO' => 'Rejeitada',
+      _ => status.isEmpty ? 'Sem estado' : status,
+    };
+  }
+
+  DateTime? _dateFromText(String? value) {
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+
+    return DateTime.tryParse(value);
+  }
+
+  List<Map<String, dynamic>> _mapsFromPayload(
+    Object? payload,
+    List<String> keys,
+  ) {
+    if (payload is List) {
+      return payload
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    }
+
+    if (payload is! Map<String, dynamic>) {
+      return const [];
+    }
+
+    for (final key in keys) {
+      final value = _field(payload, [key]);
+      if (value is List) {
+        return value
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }
+    }
+
+    return const [];
+  }
+
+  Map<String, dynamic>? _mapFromPayload(Object? payload, List<String> keys) {
+    if (payload is! Map<String, dynamic>) {
+      return null;
+    }
+
+    for (final key in keys) {
+      final value = _field(payload, [key]);
+      if (value is Map) {
+        return Map<String, dynamic>.from(value);
+      }
+    }
+
+    return null;
+  }
+
+  String _fallbackTextId(String text, DateTime? date) {
+    final normalized = text.trim().toLowerCase().replaceAll(' ', '_');
+    return '${normalized}_${date?.millisecondsSinceEpoch ?? 0}';
+  }
+
   Future<void> _upsertMaps(
     Transaction transaction, {
     required String table,
@@ -907,6 +1993,15 @@ class LocalBadgesDatabase {
     }
 
     return null;
+  }
+
+  Map<String, dynamic> _mapValue(Map<String, dynamic> row, List<String> keys) {
+    final value = _field(row, keys);
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
+    }
+
+    return const {};
   }
 
   String? _textValue(Map<String, dynamic> row, List<String> keys) {

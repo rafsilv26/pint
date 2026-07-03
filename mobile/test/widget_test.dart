@@ -148,6 +148,36 @@ void main() {
     expect(find.text('Evolução Profissional'), findsOneWidget);
   });
 
+  testWidgets('abre catalogo pelo menu inferior', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues(loggedSession());
+
+    await tester.pumpWidget(const SoftinsaBadgesApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Catálogo'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Catálogo de Badges'), findsOneWidget);
+    expect(find.text('Todos'), findsOneWidget);
+    expect(find.text('OutSystems Advanced'), findsOneWidget);
+  });
+
+  testWidgets('abre meus badges pelo menu inferior', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues(loggedSession());
+
+    await tester.pumpWidget(const SoftinsaBadgesApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Meus\nBadges'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Meus Badges'), findsOneWidget);
+    expect(find.text('Azure Fundamentals'), findsOneWidget);
+    expect(find.text('Aprovada'), findsOneWidget);
+  });
+
   testWidgets('abre conquistas especiais pelo card da home', (
     WidgetTester tester,
   ) async {

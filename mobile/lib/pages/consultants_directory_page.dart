@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../models/consultant_profile.dart';
+import '../models/mobile_api_data.dart';
+import '../repositories/mobile_api_repository.dart';
 import 'consultant_detail_page.dart';
 
 class ConsultantsDirectoryPage extends StatefulWidget {
@@ -12,10 +14,16 @@ class ConsultantsDirectoryPage extends StatefulWidget {
 }
 
 class _ConsultantsDirectoryPageState extends State<ConsultantsDirectoryPage> {
+  final MobileApiRepository repository = MobileApiRepository();
   final TextEditingController searchController = TextEditingController();
+  late Future<ConsultantsDirectoryData> directoryFuture;
   String query = '';
 
-  final List<ConsultantProfile> consultants = ConsultantProfile.samples();
+  @override
+  void initState() {
+    super.initState();
+    directoryFuture = repository.getConsultantsDirectory();
+  }
 
   @override
   void dispose() {
@@ -25,41 +33,63 @@ class _ConsultantsDirectoryPageState extends State<ConsultantsDirectoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredConsultants = consultants.where((consultant) {
-      final text = '${consultant.name} ${consultant.role} ${consultant.area}'
-          .toLowerCase();
-      return text.contains(query.toLowerCase());
-    }).toList();
-
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FB),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            _DirectoryHeader(
-              controller: searchController,
-              onChanged: (value) {
-                setState(() {
-                  query = value;
-                });
-              },
+      body: FutureBuilder<ConsultantsDirectoryData>(
+        future: directoryFuture,
+        builder: (context, snapshot) {
+          final directory = snapshot.data ?? ConsultantsDirectoryData.empty();
+          final filteredConsultants = directory.consultants.where((consultant) {
+            final text =
+                '${consultant.name} ${consultant.role} ${consultant.area} '
+                        '${consultant.serviceLine} ${consultant.email}'
+                    .toLowerCase();
+            return text.contains(query.toLowerCase());
+          }).toList();
+
+          return SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                _DirectoryHeader(
+                  controller: searchController,
+                  total: directory.stats.consultants,
+                  onChanged: (value) {
+                    setState(() {
+                      query = value;
+                    });
+                  },
+                ),
+                Expanded(
+                  child: snapshot.connectionState == ConnectionState.waiting
+                      ? const Center(child: CircularProgressIndicator())
+                      : RefreshIndicator(
+                          onRefresh: () async {
+                            final future = repository.getConsultantsDirectory();
+                            setState(() {
+                              directoryFuture = future;
+                            });
+                            await future;
+                          },
+                          child: _DirectoryList(
+                            consultants: filteredConsultants,
+                            stats: directory.stats,
+                            onConsultantTap: (consultant) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ConsultantDetailPage(
+                                    consultant: consultant,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                ),
+              ],
             ),
-            Expanded(
-              child: _DirectoryList(
-                consultants: filteredConsultants,
-                onConsultantTap: (consultant) {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ConsultantDetailPage(consultant: consultant),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
       bottomNavigationBar: const _ConsultantsBottomNavigation(),
     );
@@ -67,9 +97,14 @@ class _ConsultantsDirectoryPageState extends State<ConsultantsDirectoryPage> {
 }
 
 class _DirectoryHeader extends StatelessWidget {
-  const _DirectoryHeader({required this.controller, required this.onChanged});
+  const _DirectoryHeader({
+    required this.controller,
+    required this.total,
+    required this.onChanged,
+  });
 
   final TextEditingController controller;
+  final int total;
   final ValueChanged<String> onChanged;
 
   @override
@@ -96,15 +131,15 @@ class _DirectoryHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Row(
+          Row(
             children: [
-              _HeaderIcon(),
-              SizedBox(width: 12),
+              const _HeaderIcon(),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Consultores',
                       style: TextStyle(
                         color: Colors.white,
@@ -112,10 +147,13 @@ class _DirectoryHeader extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    SizedBox(height: 3),
+                    const SizedBox(height: 3),
                     Text(
-                      '10 consultores',
-                      style: TextStyle(color: Color(0xD9FFFFFF), fontSize: 13),
+                      '$total consultores',
+                      style: const TextStyle(
+                        color: Color(0xD9FFFFFF),
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -151,10 +189,12 @@ class _DirectoryHeader extends StatelessWidget {
 class _DirectoryList extends StatelessWidget {
   const _DirectoryList({
     required this.consultants,
+    required this.stats,
     required this.onConsultantTap,
   });
 
   final List<ConsultantProfile> consultants;
+  final ConsultantsDirectoryStats stats;
   final ValueChanged<ConsultantProfile> onConsultantTap;
 
   @override
@@ -164,6 +204,7 @@ class _DirectoryList extends StatelessWidget {
         final horizontalPadding = constraints.maxWidth < 380 ? 16.0 : 22.0;
 
         return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.fromLTRB(
             horizontalPadding,
             18,
@@ -175,7 +216,7 @@ class _DirectoryList extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 560),
               child: Column(
                 children: [
-                  const _DirectoryStats(),
+                  _DirectoryStats(stats: stats),
                   const SizedBox(height: 18),
                   if (consultants.isEmpty)
                     const Padding(
@@ -204,7 +245,9 @@ class _DirectoryList extends StatelessWidget {
 }
 
 class _DirectoryStats extends StatelessWidget {
-  const _DirectoryStats();
+  const _DirectoryStats({required this.stats});
+
+  final ConsultantsDirectoryStats stats;
 
   @override
   Widget build(BuildContext context) {
@@ -215,16 +258,25 @@ class _DirectoryStats extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFB6D2FF)),
       ),
-      child: const Row(
+      child: Row(
         children: [
           Expanded(
-            child: _DirectoryStat(value: '10', label: 'Consultores'),
+            child: _DirectoryStat(
+              value: '${stats.consultants}',
+              label: 'Consultores',
+            ),
           ),
           Expanded(
-            child: _DirectoryStat(value: '79', label: 'Badges Total'),
+            child: _DirectoryStat(
+              value: '${stats.badgesTotal}',
+              label: 'Badges Total',
+            ),
           ),
           Expanded(
-            child: _DirectoryStat(value: '14', label: 'Especiais'),
+            child: _DirectoryStat(
+              value: '${stats.specialsTotal}',
+              label: 'Especiais',
+            ),
           ),
         ],
       ),
@@ -240,9 +292,9 @@ class _DirectoryStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = value == '79'
+    final color = label == 'Badges Total'
         ? const Color(0xFF8B35FF)
-        : value == '14'
+        : label == 'Especiais'
         ? const Color(0xFFFF4E00)
         : const Color(0xFF005DFF);
 
@@ -518,29 +570,56 @@ class _ConsultantAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imagePath = consultant.imagePath.trim();
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.network(
+          imagePath,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _ConsultantAvatarFallback(size: size);
+          },
+        ),
+      );
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: Image.asset(
-        consultant.imagePath,
+        imagePath,
         width: size,
         height: size,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: size,
-            height: size,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEAF3FF),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              Icons.person,
-              color: const Color(0xFF006DAA),
-              size: size * 0.5,
-            ),
-          );
+          return _ConsultantAvatarFallback(size: size);
         },
+      ),
+    );
+  }
+}
+
+class _ConsultantAvatarFallback extends StatelessWidget {
+  const _ConsultantAvatarFallback({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: const Color(0xFFEAF3FF),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(
+        Icons.person,
+        color: const Color(0xFF006DAA),
+        size: size * 0.5,
       ),
     );
   }
