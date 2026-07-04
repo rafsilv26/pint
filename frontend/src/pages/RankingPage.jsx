@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Trophy, Star, Medal, TrendingUp, Percent, Award } from 'lucide-react'
+import { useAsync } from '../hooks/useAsync.js' // Com o .js
 import { Card, Spinner, ErrorState } from '../components/ui'
-import { useAsync } from '../hooks/useAsync'
-import * as api from '../services/api'
+import { getGamification } from '../services/apiReal.js' // Usamos a importação nomeada com .js
 
 const iniciais = (nome) =>
   nome.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
@@ -32,14 +32,22 @@ const PODIO = {
 }
 
 export default function RankingPage() {
-  const { data, loading, error, reload } = useAsync(() => api.getGamification())
+  // Chamamos diretamente a função, pois o teu apiReal.js já a formata perfeitamente!
+  const { data, loading, error, reload } = useAsync(() => getGamification())
+  
   const [periodo, setPeriodo] = useState('Total')
   const [categoria, setCategoria] = useState('Pontos')
 
-  if (error) return <ErrorState onRetry={reload} />
+  // Se der erro, mostraremos isto na consola para sabermos exatamente porquê
+  if (error) {
+    console.error("Erro capturado no React:", error);
+    return <ErrorState onRetry={reload} />
+  }
+
   if (loading || !data) return <Spinner />
 
   const { me, lista, top3 } = data
+
   const stats = [
     { icon: Trophy, label: 'Posição', value: `#${me.posicao}`, hint: `em ${me.totalConsultores} consultores` },
     { icon: Star, label: 'Pontos', value: me.pontos },
@@ -90,7 +98,7 @@ export default function RankingPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold text-ink">{c.nome}</p>
-                  <p className="truncate text-xs text-muted">{c.area}</p>
+                  <p className="truncate text-xs text-muted">Consultor</p>
                 </div>
                 <div className="hidden items-center gap-1 text-sm text-ink sm:flex">
                   <Star size={14} className="text-amber-500" /> {c.pontos}
@@ -98,8 +106,8 @@ export default function RankingPage() {
                 <div className="hidden items-center gap-1 text-sm text-ink sm:flex">
                   <Medal size={14} className="text-orange-500" /> {c.badges}
                 </div>
-                <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
-                  {c.delta}
+                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">
+                  {c.delta || '-'}
                 </span>
               </div>
             ))}
@@ -111,7 +119,7 @@ export default function RankingPage() {
           <h2 className="mb-4 text-center font-semibold text-ink">Top 3 Consultores</h2>
           <div className="flex items-end justify-center gap-3">
             {top3.map((c) => {
-              const p = PODIO[c.rank]
+              const p = PODIO[c.rank] || PODIO[2]; // Prevenção de erro caso o rank não esteja mapeado
               return (
                 <div key={c.rank} className="flex w-1/3 flex-col items-center">
                   <div className={`grid h-12 w-12 place-items-center rounded-full bg-brand-light text-xs font-bold text-brand ring-2 ${p.ring}`}>

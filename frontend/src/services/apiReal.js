@@ -3,7 +3,7 @@
 //  Cada função chama o endpoint real e ADAPTA a resposta para o
 //  formato que as páginas esperam (que vem do design Figma).
 // =============================================================
-import { http, getUser, getToken, API_URL } from './http'
+import { http, getUser, getToken, API_URL } from './http.js'
 
 const CODE_COR = {
   OPEN: 'gray', SUBMITTED: 'blue', IN_VALIDATION: 'amber', VALIDATED: 'indigo',
