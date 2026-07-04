@@ -26,11 +26,11 @@ class BadgesApiService {
       throw const ApiNotConfiguredException();
     }
 
-    final normalizedBaseUrl = baseUrl.endsWith('/')
-        ? baseUrl.substring(0, baseUrl.length - 1)
-        : baseUrl;
     final response = await client
-        .get(Uri.parse('$normalizedBaseUrl/auth/me'), headers: await _headers())
+        .get(
+          Uri.parse('$_normalizedBaseUrl/auth/me'),
+          headers: await _headers(),
+        )
         .timeout(const Duration(seconds: 8));
 
     if (response.statusCode == 204 || response.body.trim().isEmpty) {
@@ -95,11 +95,109 @@ class BadgesApiService {
     );
   }
 
+  Future<Map<String, dynamic>?> fetchConsultantsDirectory() async {
+    return _getMap('/consultants');
+  }
+
+  Future<Map<String, dynamic>?> fetchNotifications() async {
+    return _getMap('/notifications');
+  }
+
+  Future<void> markNotificationAsRead(String id) async {
+    await _putMap('/notifications/$id/read');
+  }
+
+  Future<void> markAllNotificationsAsRead() async {
+    await _putMap('/notifications/read-all');
+  }
+
+  Future<Map<String, dynamic>?> fetchGamification() async {
+    return _getMap('/gamification');
+  }
+
+  Future<Map<String, dynamic>?> fetchEmailSignature() async {
+    return _getMap('/email-signature');
+  }
+
+  Future<Map<String, dynamic>?> saveEmailSignature({
+    required List<int> badgeIds,
+    required String templateHtml,
+  }) async {
+    return _putMap(
+      '/email-signature',
+      body: {'badgeIds': badgeIds, 'templateHtml': templateHtml},
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> fetchCatalogResource(
+    String resource,
+  ) async {
+    final decoded = await _getObject('/catalog/$resource');
+    if (decoded is List) {
+      return decoded
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    }
+
+    return const [];
+  }
+
+  Future<List<Map<String, dynamic>>> fetchMyCandidaturas() async {
+    final decoded = await _getObject('/candidaturas/minhas');
+    if (decoded is List) {
+      return decoded
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    }
+
+    return const [];
+  }
+
+  Future<Map<String, dynamic>?> submitCandidatura({
+    required int badgeId,
+    List<int> requisitoIds = const [],
+    String? descricao,
+  }) async {
+    if (baseUrl.trim().isEmpty) {
+      throw const ApiNotConfiguredException();
+    }
+
+    final response = await client
+        .post(
+          Uri.parse('$_normalizedBaseUrl/candidaturas'),
+          headers: await _headers(),
+          body: jsonEncode({
+            'badgeId': badgeId,
+            'requisitoIds': requisitoIds,
+            if (descricao != null && descricao.isNotEmpty)
+              'descricao': descricao,
+          }),
+        )
+        .timeout(const Duration(seconds: 12));
+
+    if (response.statusCode == 204 || response.body.trim().isEmpty) {
+      return null;
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiRequestException(response.statusCode);
+    }
+
+    final decoded = _decodeResponse(response);
+    if (decoded is Map<String, dynamic>) {
+      return decoded;
+    }
+    if (decoded is Map) {
+      return Map<String, dynamic>.from(decoded);
+    }
+
+    return null;
+  }
+
   Uri _dashboardUri(DateTime? lastUpdate) {
-    final normalizedBaseUrl = baseUrl.endsWith('/')
-        ? baseUrl.substring(0, baseUrl.length - 1)
-        : baseUrl;
-    final uri = Uri.parse('$normalizedBaseUrl/dashboard');
+    final uri = Uri.parse('$_normalizedBaseUrl/dashboard');
     final queryParameters = <String, String>{};
 
     if (lastUpdate != null) {
@@ -114,10 +212,83 @@ class BadgesApiService {
   }
 
   Uri _candidaturasUri() {
-    final normalizedBaseUrl = baseUrl.endsWith('/')
+    return Uri.parse('$_normalizedBaseUrl/candidaturas/minhas');
+  }
+
+  String get _normalizedBaseUrl {
+    return baseUrl.endsWith('/')
         ? baseUrl.substring(0, baseUrl.length - 1)
         : baseUrl;
-    return Uri.parse('$normalizedBaseUrl/candidaturas/minhas');
+  }
+
+  Future<Map<String, dynamic>?> _getMap(String path) async {
+    final decoded = await _getObject(path);
+    if (decoded == null) {
+      return null;
+    }
+    if (decoded is Map<String, dynamic>) {
+      return decoded;
+    }
+    if (decoded is Map) {
+      return Map<String, dynamic>.from(decoded);
+    }
+
+    throw const ApiInvalidResponseException();
+  }
+
+  Future<Object?> _getObject(String path) async {
+    if (baseUrl.trim().isEmpty) {
+      throw const ApiNotConfiguredException();
+    }
+
+    final response = await client
+        .get(Uri.parse('$_normalizedBaseUrl$path'), headers: await _headers())
+        .timeout(const Duration(seconds: 8));
+
+    if (response.statusCode == 204 || response.body.trim().isEmpty) {
+      return null;
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiRequestException(response.statusCode);
+    }
+
+    return _decodeResponse(response);
+  }
+
+  Future<Map<String, dynamic>?> _putMap(
+    String path, {
+    Map<String, dynamic>? body,
+  }) async {
+    if (baseUrl.trim().isEmpty) {
+      throw const ApiNotConfiguredException();
+    }
+
+    final response = await client
+        .put(
+          Uri.parse('$_normalizedBaseUrl$path'),
+          headers: await _headers(),
+          body: body == null ? null : jsonEncode(body),
+        )
+        .timeout(const Duration(seconds: 8));
+
+    if (response.statusCode == 204 || response.body.trim().isEmpty) {
+      return null;
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiRequestException(response.statusCode);
+    }
+
+    final decoded = _decodeResponse(response);
+    if (decoded is Map<String, dynamic>) {
+      return decoded;
+    }
+    if (decoded is Map) {
+      return Map<String, dynamic>.from(decoded);
+    }
+
+    return null;
   }
 
   Future<DashboardApiUpdate?> _fetchDashboardFromCandidaturas({

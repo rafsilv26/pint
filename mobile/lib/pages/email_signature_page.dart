@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../models/mobile_api_data.dart';
+import '../repositories/mobile_api_repository.dart';
+
 class EmailSignaturePage extends StatefulWidget {
   const EmailSignaturePage({super.key});
 
@@ -8,18 +11,15 @@ class EmailSignaturePage extends StatefulWidget {
 }
 
 class _EmailSignaturePageState extends State<EmailSignaturePage> {
+  final MobileApiRepository repository = MobileApiRepository();
   int selectedTab = 0;
   bool showCompanyLogo = true;
+  bool loading = true;
+  bool saving = false;
 
-  final TextEditingController nameController = TextEditingController(
-    text: 'João Silva',
-  );
-  final TextEditingController roleController = TextEditingController(
-    text: 'Consultor',
-  );
-  final TextEditingController emailController = TextEditingController(
-    text: 'rafsilv26@gmail.com',
-  );
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController roleController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController(
     text: '+351 21 000 0000',
   );
@@ -27,34 +27,103 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
     text: 'www.softinsa.pt',
   );
 
-  final List<_SignatureBadge> badges = const [
-    _SignatureBadge(
-      title: 'Azure Fundamentals',
-      imagePath: 'assets/images/badge_azure_fundamentals.png',
-      color: Color(0xFF244B7A),
-    ),
-    _SignatureBadge(
-      title: 'AWS Cloud Practitioner',
-      imagePath: 'assets/images/badge_aws_cloud_practitioner.png',
-      color: Color(0xFF2C5574),
-      selected: true,
-    ),
-    _SignatureBadge(
-      title: 'OutSystems Júnior',
-      imagePath: 'assets/images/badge_outsystems_junior.png',
-      color: Color(0xFF3B2E7E),
-    ),
-    _SignatureBadge(
-      title: 'Scrum Master',
-      imagePath: 'assets/images/badge_scrum_master.png',
-      color: Color(0xFFD8A85A),
-    ),
-    _SignatureBadge(
-      title: 'Cybersecurity Specialist',
-      imagePath: 'assets/images/badge_cybersecurity_specialist.png',
-      color: Color(0xFF1D7D79),
-    ),
-  ];
+  List<_SignatureBadge> badges = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadSignature();
+  }
+
+  Future<void> loadSignature() async {
+    final data = await repository.getEmailSignature();
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      applySignatureData(data);
+      loading = false;
+    });
+  }
+
+  void applySignatureData(EmailSignatureData data) {
+    nameController.text = data.profile.name;
+    roleController.text = data.profile.role;
+    emailController.text = data.profile.email;
+    websiteController.text = data.profile.website;
+    badges = data.badges.map(_SignatureBadge.fromApi).toList();
+  }
+
+  void toggleBadge(int index) {
+    final badge = badges[index];
+    final selectedCount = badges.where((item) => item.selected).length;
+    if (!badge.selected && selectedCount >= 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pode selecionar até 4 badges.')),
+      );
+      return;
+    }
+
+    setState(() {
+      badges = [
+        for (var i = 0; i < badges.length; i++)
+          if (i == index)
+            badges[i].copyWith(selected: !badges[i].selected)
+          else
+            badges[i],
+      ];
+    });
+  }
+
+  Future<void> saveSignature() async {
+    setState(() {
+      saving = true;
+    });
+
+    try {
+      final updated = await repository.saveEmailSignature(
+        badgeIds: badges
+            .where((badge) => badge.selected)
+            .map((badge) => badge.id)
+            .toList(),
+        templateHtml: buildTemplateHtml(),
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        applySignatureData(updated);
+        saving = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Assinatura guardada.')));
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        saving = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível guardar a assinatura.')),
+      );
+    }
+  }
+
+  String buildTemplateHtml() {
+    final selectedBadges = badges.where((badge) => badge.selected).toList();
+    final badgesHtml = selectedBadges
+        .map((badge) => '<span>${badge.title}</span>')
+        .join(' · ');
+    return '<strong>${nameController.text}</strong><br>'
+        '${roleController.text}<br>'
+        '${emailController.text}<br>'
+        '$badgesHtml';
+  }
 
   @override
   void dispose() {
@@ -68,6 +137,13 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (loading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFF4F7FB),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FB),
       body: SafeArea(
@@ -95,11 +171,14 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
                     websiteController: websiteController,
                     badges: badges,
                     showCompanyLogo: showCompanyLogo,
+                    saving: saving,
                     onLogoChanged: (value) {
                       setState(() {
                         showCompanyLogo = value;
                       });
                     },
+                    onBadgeTap: toggleBadge,
+                    onSave: saveSignature,
                   ),
                   _PreviewSignatureView(
                     name: nameController.text,
@@ -108,7 +187,7 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
                     phone: phoneController.text,
                     website: websiteController.text,
                     showCompanyLogo: showCompanyLogo,
-                    badges: badges,
+                    badges: badges.where((badge) => badge.selected).toList(),
                   ),
                   const _ExportSignatureView(),
                 ],
@@ -268,7 +347,10 @@ class _EditSignatureView extends StatelessWidget {
     required this.websiteController,
     required this.badges,
     required this.showCompanyLogo,
+    required this.saving,
     required this.onLogoChanged,
+    required this.onBadgeTap,
+    required this.onSave,
   });
 
   final TextEditingController nameController;
@@ -278,10 +360,15 @@ class _EditSignatureView extends StatelessWidget {
   final TextEditingController websiteController;
   final List<_SignatureBadge> badges;
   final bool showCompanyLogo;
+  final bool saving;
   final ValueChanged<bool> onLogoChanged;
+  final ValueChanged<int> onBadgeTap;
+  final VoidCallback onSave;
 
   @override
   Widget build(BuildContext context) {
+    final selectedCount = badges.where((badge) => badge.selected).length;
+
     return _SignatureScroll(
       child: Column(
         children: [
@@ -328,11 +415,11 @@ class _EditSignatureView extends StatelessWidget {
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Icon(Icons.auto_awesome, color: Color(0xFF8B35FF)),
-                    SizedBox(width: 12),
+                  children: [
+                    const Icon(Icons.auto_awesome, color: Color(0xFF8B35FF)),
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
+                      child: const Text(
                         'Badges\nConquistados',
                         style: TextStyle(
                           color: Color(0xFF111827),
@@ -343,9 +430,9 @@ class _EditSignatureView extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '1/4\nselecionados',
+                      '$selectedCount/4\nselecionados',
                       textAlign: TextAlign.right,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFF475467),
                         fontSize: 13,
                         height: 1.25,
@@ -363,19 +450,60 @@ class _EditSignatureView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: badges.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 1.08,
+                if (badges.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Text(
+                      'Sem badges conquistados sincronizados.',
+                      style: TextStyle(color: Color(0xFF667085)),
+                    ),
+                  )
+                else
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: badges.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1.08,
+                        ),
+                    itemBuilder: (context, index) {
+                      return _BadgeTile(
+                        badge: badges[index],
+                        onTap: () => onBadgeTap(index),
+                      );
+                    },
                   ),
-                  itemBuilder: (context, index) {
-                    return _BadgeTile(badge: badges[index]);
-                  },
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: FilledButton.icon(
+                    onPressed: saving ? null : onSave,
+                    icon: saving
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.save_outlined),
+                    label: Text(saving ? 'A guardar...' : 'Guardar seleção'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF006DAA),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -497,7 +625,7 @@ class _PreviewSignatureView extends StatelessWidget {
                     phone: phone,
                     website: website,
                     showCompanyLogo: showCompanyLogo,
-                    badge: badges.firstWhere((badge) => badge.selected),
+                    badges: badges,
                   ),
                 ),
               ],
@@ -741,59 +869,64 @@ class _SignatureTextField extends StatelessWidget {
 }
 
 class _BadgeTile extends StatelessWidget {
-  const _BadgeTile({required this.badge});
+  const _BadgeTile({required this.badge, required this.onTap});
 
   final _SignatureBadge badge;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: badge.selected ? const Color(0xFFEAF3FF) : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: badge.selected
-              ? const Color(0xFF005DFF)
-              : const Color(0xFFE0E5EE),
-          width: badge.selected ? 1.4 : 1,
-        ),
-      ),
-      child: Stack(
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _BadgeImage(badge: badge, size: 64),
-              const SizedBox(height: 10),
-              Text(
-                badge.title,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Color(0xFF344054),
-                  fontSize: 12,
-                  height: 1.2,
-                ),
-              ),
-            ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: badge.selected ? const Color(0xFFEAF3FF) : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: badge.selected
+                ? const Color(0xFF005DFF)
+                : const Color(0xFFE0E5EE),
+            width: badge.selected ? 1.4 : 1,
           ),
-          if (badge.selected)
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                width: 26,
-                height: 26,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2F80ED),
-                  shape: BoxShape.circle,
+        ),
+        child: Stack(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _BadgeImage(badge: badge, size: 64),
+                const SizedBox(height: 10),
+                Text(
+                  badge.title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF344054),
+                    fontSize: 12,
+                    height: 1.2,
+                  ),
                 ),
-                child: const Icon(Icons.check, color: Colors.white, size: 18),
-              ),
+              ],
             ),
-        ],
+            if (badge.selected)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  width: 26,
+                  height: 26,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF2F80ED),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check, color: Colors.white, size: 18),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -807,36 +940,64 @@ class _BadgeImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imagePath = badge.imagePath.trim();
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.network(
+          imagePath,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _BadgeFallback(color: badge.color, size: size);
+          },
+        ),
+      );
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Image.asset(
-        badge.imagePath,
+        imagePath.isNotEmpty ? imagePath : 'assets/images/badge_fallback.png',
         width: size,
         height: size,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: size,
-            height: size,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  badge.color.withValues(alpha: 0.95),
-                  badge.color.withValues(alpha: 0.55),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.workspace_premium_outlined,
-              color: Colors.white,
-              size: 30,
-            ),
-          );
+          return _BadgeFallback(color: badge.color, size: size);
         },
+      ),
+    );
+  }
+}
+
+class _BadgeFallback extends StatelessWidget {
+  const _BadgeFallback({required this.color, required this.size});
+
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.95),
+            color.withValues(alpha: 0.55),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Icon(
+        Icons.workspace_premium_outlined,
+        color: Colors.white,
+        size: 30,
       ),
     );
   }
@@ -850,7 +1011,7 @@ class _EmailPreviewCard extends StatelessWidget {
     required this.phone,
     required this.website,
     required this.showCompanyLogo,
-    required this.badge,
+    required this.badges,
   });
 
   final String name;
@@ -859,7 +1020,7 @@ class _EmailPreviewCard extends StatelessWidget {
   final String phone;
   final String website;
   final bool showCompanyLogo;
-  final _SignatureBadge badge;
+  final List<_SignatureBadge> badges;
 
   @override
   Widget build(BuildContext context) {
@@ -955,7 +1116,20 @@ class _EmailPreviewCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                _BadgeImage(badge: badge, size: 70),
+                if (badges.isEmpty)
+                  const Text(
+                    'Sem badges selecionados',
+                    style: TextStyle(color: Color(0xFF667085), fontSize: 12),
+                  )
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final badge in badges.take(4))
+                        _BadgeImage(badge: badge, size: 54),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -1228,14 +1402,51 @@ class _SignatureTabItem {
 
 class _SignatureBadge {
   const _SignatureBadge({
+    required this.id,
     required this.title,
     required this.imagePath,
+    required this.publicToken,
     required this.color,
     this.selected = false,
   });
 
+  final int id;
   final String title;
   final String imagePath;
+  final String publicToken;
   final Color color;
   final bool selected;
+
+  factory _SignatureBadge.fromApi(EmailSignatureBadge badge) {
+    return _SignatureBadge(
+      id: badge.id,
+      title: badge.title,
+      imagePath: badge.imagePath,
+      publicToken: badge.publicToken,
+      color: _colorFromId(badge.id),
+      selected: badge.selected,
+    );
+  }
+
+  _SignatureBadge copyWith({bool? selected}) {
+    return _SignatureBadge(
+      id: id,
+      title: title,
+      imagePath: imagePath,
+      publicToken: publicToken,
+      color: color,
+      selected: selected ?? this.selected,
+    );
+  }
+}
+
+Color _colorFromId(int id) {
+  const colors = [
+    Color(0xFF244B7A),
+    Color(0xFF2C5574),
+    Color(0xFF3B2E7E),
+    Color(0xFFD8A85A),
+    Color(0xFF1D7D79),
+  ];
+  return colors[id.abs() % colors.length];
 }

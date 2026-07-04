@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../repositories/dashboard_repository.dart';
+import '../repositories/mobile_api_repository.dart';
 import '../services/auth_service.dart';
 import 'home_page.dart';
 import 'login_page.dart';
@@ -38,6 +39,7 @@ class _AuthGateState extends State<AuthGate> {
     final isLoggedIn = await authService.isLoggedIn();
     if (isLoggedIn) {
       await DashboardRepository().prepareLocalData();
+      await MobileApiRepository().syncAvailableMobileData();
     }
 
     return isLoggedIn;

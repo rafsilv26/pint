@@ -226,9 +226,11 @@ class _ConsultantSummary extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          const Text(
-            'Especialista em Cloud Computing com foco em soluções Azure e AWS. Apaixonado por automação e DevOps.',
-            style: TextStyle(
+          Text(
+            consultant.biography.isNotEmpty
+                ? consultant.biography
+                : 'Perfil profissional sincronizado a partir da plataforma.',
+            style: const TextStyle(
               color: Color(0xFF344054),
               fontSize: 15,
               height: 1.45,
@@ -767,29 +769,49 @@ class _DetailAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imagePath = consultant.imagePath.trim();
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return ClipOval(
+        child: Image.network(
+          imagePath,
+          width: 72,
+          height: 72,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const _DetailAvatarFallback();
+          },
+        ),
+      );
+    }
+
     return ClipOval(
       child: Image.asset(
-        consultant.imagePath,
+        imagePath,
         width: 72,
         height: 72,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: 72,
-            height: 72,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Colors.black,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.person_outline,
-              color: Colors.white,
-              size: 36,
-            ),
-          );
+          return const _DetailAvatarFallback();
         },
       ),
+    );
+  }
+}
+
+class _DetailAvatarFallback extends StatelessWidget {
+  const _DetailAvatarFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 72,
+      height: 72,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        color: Colors.black,
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(Icons.person_outline, color: Colors.white, size: 36),
     );
   }
 }
