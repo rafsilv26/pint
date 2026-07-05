@@ -402,3 +402,11 @@ export async function exportarRelatorio(formato = 'excel') {
   URL.revokeObjectURL(url)
   return { ok: true }
 }
+
+export async function updateConsultant(id, data) {
+  // Ajusta a rota '/consultores' para a rota correta do teu backend (pode ser '/users' ou '/consultants')
+  return await http(`/consultores/${id}`, {
+    method: 'PUT', // ou 'PATCH' dependendo da tua API
+    body: JSON.stringify(data),
+  })
+}
