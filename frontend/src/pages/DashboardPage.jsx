@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import { Card, Spinner, StatusPill, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
+import { useTranslation } from 'react-i18next'
 import * as api from '../services/api'
 
 const STAT_ICONS = [TrendingUp, Award, Clock, Trophy]
@@ -44,7 +45,9 @@ function StatCard({ icon: Icon, label, value, delta, tint, deltaTint }) {
 }
 
 export default function DashboardPage() {
+  const { t } = useTranslation()
   const { data, loading, error, reload } = useAsync(() => api.getDashboard())
+
   if (error) return <ErrorState onRetry={reload} />
   if (loading || !data) return <Spinner />
 
@@ -56,7 +59,7 @@ export default function DashboardPage() {
           {data.greeting}, {data.userName}! <span className="align-middle">👋</span>
         </h1>
         <p className="mt-1 text-sm text-muted">
-          Continua a tua jornada de aprendizagem e desenvolvimento profissional
+          {t('dashboard.jornada')}
         </p>
       </div>
 
@@ -68,14 +71,15 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* ===== Coluna principal ===== */}
+        {/* Coluna principal */}
         <div className="space-y-6 lg:col-span-2">
+
           {/* Badges Recentes */}
           <Card>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-semibold text-ink">Badges Recentes</h2>
+              <h2 className="font-semibold text-ink">{t('dashboard.badgesRecentes')}</h2>
               <Link to="/candidaturas" className="text-sm font-medium text-brand hover:underline">
-                Ver todos
+                {t('dashboard.verTodos')}
               </Link>
             </div>
             <div className="space-y-3">
@@ -105,15 +109,15 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          {/* Recomendados para Si */}
+          {/* Recomendados */}
           <Card>
             <div className="mb-1 flex items-center justify-between">
-              <h2 className="font-semibold text-ink">Recomendados para Si</h2>
+              <h2 className="font-semibold text-ink">{t('dashboard.recomendados')}</h2>
               <Link to="/catalogo" className="text-sm font-medium text-brand hover:underline">
-                Explorar
+                {t('dashboard.explorar')}
               </Link>
             </div>
-            <p className="mb-4 text-sm text-muted">Baseado no seu perfil e interesses</p>
+            <p className="mb-4 text-sm text-muted">{t('dashboard.baseadoPerfil')}</p>
             <div className="grid gap-4 sm:grid-cols-3">
               {data.recomendados.map((r) => (
                 <Link
@@ -132,16 +136,17 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* ===== Coluna lateral ===== */}
+        {/* Coluna lateral */}
         <div className="space-y-6">
+
           {/* Ações Rápidas */}
           <div className="rounded-xl bg-gradient-to-br from-brand to-brand-accent p-5 text-white shadow-sm">
-            <h2 className="mb-4 font-semibold">Ações Rápidas</h2>
+            <h2 className="mb-4 font-semibold">{t('dashboard.acoesRapidas')}</h2>
             <div className="space-y-2">
               {[
-                { to: '/notificacoes', icon: Bell, label: 'Ver Notificações' },
-                { to: '/perfil/publico', icon: UserCircle, label: 'Ver o seu Perfil Público' },
-                { to: '/catalogo', icon: Compass, label: 'Ver Diretório' },
+                { to: '/notificacoes', icon: Bell, label: t('dashboard.verNotificacoes') },
+                { to: '/perfil/publico', icon: UserCircle, label: t('dashboard.verPerfilPublico') },
+                { to: '/catalogo', icon: Compass, label: t('dashboard.verDiretorio') },
               ].map(({ to, icon: Icon, label }) => (
                 <Link
                   key={label}
@@ -168,15 +173,15 @@ export default function DashboardPage() {
             </div>
             <dl className="mt-4 space-y-2 border-t border-gray-100 pt-4 text-sm">
               <div className="flex justify-between">
-                <dt className="text-muted">Nível</dt>
+                <dt className="text-muted">{t('dashboard.nivel')}</dt>
                 <dd className="font-semibold text-ink">{data.perfil.nivel}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted">Pontos Conquistados</dt>
+                <dt className="text-muted">{t('dashboard.pontosConquistados')}</dt>
                 <dd className="font-semibold text-ink">{data.perfil.pontos} pts</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted">Posição</dt>
+                <dt className="text-muted">{t('dashboard.posicao')}</dt>
                 <dd className="font-semibold text-brand">#{data.perfil.posicao}</dd>
               </div>
             </dl>
@@ -184,13 +189,13 @@ export default function DashboardPage() {
               to="/perfil"
               className="mt-4 flex items-center justify-center gap-1 text-sm font-medium text-brand hover:underline"
             >
-              Ver Perfil Completo <ChevronRight size={16} />
+              {t('dashboard.verPerfilCompleto')} <ChevronRight size={16} />
             </Link>
           </Card>
 
           {/* Próximos Eventos */}
           <Card>
-            <h2 className="mb-3 font-semibold text-ink">Próximos Eventos</h2>
+            <h2 className="mb-3 font-semibold text-ink">{t('dashboard.proximosEventos')}</h2>
             <div className="space-y-2">
               {data.eventos.map((e) => (
                 <div key={e.id} className={`rounded-r-lg border-l-4 bg-gray-50 px-3 py-2 ${EVENTO_CORES[e.cor]}`}>

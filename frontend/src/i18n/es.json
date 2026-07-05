@@ -1,0 +1,123 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "badges": "Insignias",
+    "candidaturas": "Candidaturas",
+    "perfil": "Perfil",
+    "logout": "Cerrar Sesión"
+  },
+  "perfil": {
+    "titulo": "Perfil y Configuración",
+    "subtitulo": "Gestiona tu cuenta y preferencias",
+    "nome": "Nombre Completo",
+    "email": "Correo Electrónico",
+    "biografia": "Biografía",
+    "serviceLine": "Línea de Servicio",
+    "guardar": "Guardar Cambios",
+    "aguardar": "Guardando…",
+    "sucesso": "¡Perfil actualizado con éxito!",
+    "erro": "No se pudieron guardar los cambios.",
+    "pontos": "Puntos",
+    "badges": "Insignias",
+    "verPerfil": "Ver Perfil Público"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "entrar": "Entrar",
+    "recuperar": "¿Olvidaste tu contraseña?"
+  },
+  "common": {
+    "guardar": "Guardar",
+    "cancelar": "Cancelar",
+    "confirmar": "Confirmar",
+    "carregando": "Cargando…",
+    "erro": "Ocurrió un error",
+    "sucesso": "Operación realizada con éxito"
+  },
+
+  "preferencias": {
+    "titulo": "Preferencias",
+    "subtitulo": "Personaliza tu experiencia en la plataforma",
+    "voltar": "Volver al Perfil",
+    "guardar": "Guardar Preferencias",
+    "guardado": "Preferencias guardadas ✓",
+    "notificacoes": {
+      "titulo": "Notificaciones",
+      "email": "Notificaciones por Email",
+      "emailDesc": "Recibe notificaciones en tu email",
+      "aprovado": "Insignia Aprobada",
+      "aprovadoDesc": "Cuando una candidatura es aprobada",
+      "rejeitado": "Insignia Rechazada o Devuelta",
+      "rejeitadoDesc": "Cuando una candidatura es rechazada o devuelta",
+      "novos": "Nuevas Insignias Disponibles",
+      "novosDesc": "Cuando hay nuevas insignias para candidatarte",
+      "ranking": "Actualizaciones de Ranking",
+      "rankingDesc": "Cambios significativos en tu posición",
+      "semanal": "Resumen Semanal",
+      "semanalDesc": "Email semanal con tu progreso",
+      "mensal": "Informe Mensual",
+      "mensalDesc": "Informe detallado de tus logros"
+    },
+    "visualizacao": {
+      "titulo": "Visualización",
+      "idioma": "Idioma",
+      "tema": "Tema",
+      "claro": "Claro",
+      "escuro": "Oscuro",
+      "automatico": "Automático",
+      "badgesPorPagina": "Insignias por Página",
+      "mostrarImagens": "Mostrar imágenes de Insignias"
+    },
+    "privacidade": {
+      "titulo": "Privacidad",
+      "perfilPublico": "Perfil Público",
+      "perfilPublicoDesc": "Permite que otros consultores vean tu perfil",
+      "diretorio": "Aparecer en el Directorio",
+      "diretorioDesc": "Aparece en la lista de consultores",
+      "badges": "Mostrar Insignias Públicamente",
+      "badgesDesc": "Muestra tus insignias en tu perfil público",
+      "pontos": "Mostrar Puntos Públicamente",
+      "pontosDesc": "Muestra tu puntuación en el ranking"
+    },
+    "resumo": {
+      "titulo": "Resumen de Configuración",
+      "notifEmail": "Notificaciones Email",
+      "ativadas": "Activadas",
+      "desativadas": "Desactivadas",
+      "idioma": "Idioma",
+      "tema": "Tema",
+      "perfilPublico": "Perfil Público",
+      "sim": "Sí",
+      "nao": "No"
+    },
+    "estatisticas": {
+      "titulo": "Tus Estadísticas",
+      "pontos": "Puntos",
+      "badges": "Insignias",
+      "ranking": "Ranking"
+    },
+    "dica": {
+      "titulo": "Consejo",
+      "texto": "Las preferencias se guardan y aplican en todos los dispositivos donde accedas a la plataforma."
+    }
+  },
+    "dashboard": {
+    "jornada": "Continúa tu jornada de aprendizaje y desarrollo profesional",
+    "badgesRecentes": "Insignias Recientes",
+    "verTodos": "Ver todos",
+    "recomendados": "Recomendados para Ti",
+    "explorar": "Explorar",
+    "baseadoPerfil": "Basado en tu perfil e intereses",
+    "acoesRapidas": "Acciones Rápidas",
+    "verNotificacoes": "Ver Notificaciones",
+    "verPerfilPublico": "Ver tu Perfil Público",
+    "verDiretorio": "Ver Directorio",
+    "nivel": "Nivel",
+    "pontosConquistados": "Puntos Obtenidos",
+    "posicao": "Posición",
+    "verPerfilCompleto": "Ver Perfil Completo",
+    "proximosEventos": "Próximos Eventos"
+  }
+}

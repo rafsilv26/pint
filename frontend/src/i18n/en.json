@@ -1,0 +1,122 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "badges": "Badges",
+    "candidaturas": "Applications",
+    "perfil": "Profile",
+    "logout": "Sign Out"
+  },
+  "perfil": {
+    "titulo": "Profile & Settings",
+    "subtitulo": "Manage your account and preferences",
+    "nome": "Full Name",
+    "email": "Email",
+    "biografia": "Biography",
+    "serviceLine": "Service Line",
+    "guardar": "Save Changes",
+    "aguardar": "Saving…",
+    "sucesso": "Profile updated successfully!",
+    "erro": "Could not save changes.",
+    "pontos": "Points",
+    "badges": "Badges",
+    "verPerfil": "View Public Profile"
+  },
+  "auth": {
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "entrar": "Sign In",
+    "recuperar": "Forgot your password?"
+  },
+  "common": {
+    "guardar": "Save",
+    "cancelar": "Cancel",
+    "confirmar": "Confirm",
+    "carregando": "Loading…",
+    "erro": "An error occurred",
+    "sucesso": "Operation completed successfully"
+  },
+  "preferencias": {
+    "titulo": "Preferences",
+    "subtitulo": "Customize your experience on the platform",
+    "voltar": "Back to Profile",
+    "guardar": "Save Preferences",
+    "guardado": "Preferences saved ✓",
+    "notificacoes": {
+      "titulo": "Notifications",
+      "email": "Email Notifications",
+      "emailDesc": "Receive notifications in your email",
+      "aprovado": "Badge Approved",
+      "aprovadoDesc": "When an application is approved",
+      "rejeitado": "Badge Rejected or Sent Back",
+      "rejeitadoDesc": "When an application is rejected or returned",
+      "novos": "New Badges Available",
+      "novosDesc": "When there are new badges to apply for",
+      "ranking": "Ranking Updates",
+      "rankingDesc": "Significant changes in your position",
+      "semanal": "Weekly Summary",
+      "semanalDesc": "Weekly email with your progress",
+      "mensal": "Monthly Report",
+      "mensalDesc": "Detailed report of your achievements"
+    },
+    "visualizacao": {
+      "titulo": "Display",
+      "idioma": "Language",
+      "tema": "Theme",
+      "claro": "Light",
+      "escuro": "Dark",
+      "automatico": "Automatic",
+      "badgesPorPagina": "Badges per Page",
+      "mostrarImagens": "Show Badge Images"
+    },
+    "privacidade": {
+      "titulo": "Privacy",
+      "perfilPublico": "Public Profile",
+      "perfilPublicoDesc": "Allow other consultants to see your profile",
+      "diretorio": "Appear in Directory",
+      "diretorioDesc": "Show up in the consultants list",
+      "badges": "Show Badges Publicly",
+      "badgesDesc": "Display your badges on your public profile",
+      "pontos": "Show Points Publicly",
+      "pontosDesc": "Display your score in the ranking"
+    },
+    "resumo": {
+      "titulo": "Settings Summary",
+      "notifEmail": "Email Notifications",
+      "ativadas": "Enabled",
+      "desativadas": "Disabled",
+      "idioma": "Language",
+      "tema": "Theme",
+      "perfilPublico": "Public Profile",
+      "sim": "Yes",
+      "nao": "No"
+    },
+    "estatisticas": {
+      "titulo": "Your Statistics",
+      "pontos": "Points",
+      "badges": "Badges",
+      "ranking": "Ranking"
+    },
+    "dica": {
+      "titulo": "Tip",
+      "texto": "Preferences are saved and applied on all devices where you access the platform."
+    }
+  },
+    "dashboard": {
+    "jornada": "Continue your learning and professional development journey",
+    "badgesRecentes": "Recent Badges",
+    "verTodos": "View all",
+    "recomendados": "Recommended for You",
+    "explorar": "Explore",
+    "baseadoPerfil": "Based on your profile and interests",
+    "acoesRapidas": "Quick Actions",
+    "verNotificacoes": "View Notifications",
+    "verPerfilPublico": "View your Public Profile",
+    "verDiretorio": "View Directory",
+    "nivel": "Level",
+    "pontosConquistados": "Points Earned",
+    "posicao": "Position",
+    "verPerfilCompleto": "View Full Profile",
+    "proximosEventos": "Upcoming Events"
+  }
+}

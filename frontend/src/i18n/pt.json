@@ -1,0 +1,123 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "badges": "Badges",
+    "candidaturas": "Candidaturas",
+    "perfil": "Perfil",
+    "logout": "Terminar Sessão"
+  },
+  "perfil": {
+    "titulo": "Perfil e Configurações",
+    "subtitulo": "Gere a tua conta e preferências",
+    "nome": "Nome Completo",
+    "email": "Email",
+    "biografia": "Biografia",
+    "serviceLine": "Service Line",
+    "guardar": "Guardar Alterações",
+    "aguardar": "A guardar…",
+    "sucesso": "Perfil atualizado com sucesso!",
+    "erro": "Não foi possível guardar as alterações.",
+    "pontos": "Pontos",
+    "badges": "Badges",
+    "verPerfil": "Ver Perfil Público"
+  },
+  "auth": {
+    "login": "Entrar",
+    "email": "Email",
+    "password": "Palavra-passe",
+    "entrar": "Entrar",
+    "recuperar": "Esqueceu a palavra-passe?"
+  },
+  "common": {
+    "guardar": "Guardar",
+    "cancelar": "Cancelar",
+    "confirmar": "Confirmar",
+    "carregando": "A carregar…",
+    "erro": "Ocorreu um erro",
+    "sucesso": "Operação realizada com sucesso"
+  },
+
+  "preferencias": {
+    "titulo": "Preferências",
+    "subtitulo": "Personaliza a tua experiência na plataforma",
+    "voltar": "Voltar ao Perfil",
+    "guardar": "Guardar Preferências",
+    "guardado": "Preferências guardadas ✓",
+    "notificacoes": {
+      "titulo": "Notificações",
+      "email": "Notificações por Email",
+      "emailDesc": "Recebe notificações no teu email",
+      "aprovado": "Badge Aprovado",
+      "aprovadoDesc": "Quando uma candidatura é aprovada",
+      "rejeitado": "Badge Rejeitado ou Send Back",
+      "rejeitadoDesc": "Quando uma candidatura é rejeitada ou devolvida",
+      "novos": "Novos Badges Disponíveis",
+      "novosDesc": "Quando há novos badges para te candidatares",
+      "ranking": "Atualizações de Ranking",
+      "rankingDesc": "Mudanças significativas na tua posição",
+      "semanal": "Resumo Semanal",
+      "semanalDesc": "Email semanal com o teu progresso",
+      "mensal": "Relatório Mensal",
+      "mensalDesc": "Relatório detalhado das tuas conquistas"
+    },
+    "visualizacao": {
+      "titulo": "Visualização",
+      "idioma": "Idioma",
+      "tema": "Tema",
+      "claro": "Claro",
+      "escuro": "Escuro",
+      "automatico": "Automático",
+      "badgesPorPagina": "Badges por Página",
+      "mostrarImagens": "Mostrar imagens dos Badges"
+    },
+    "privacidade": {
+      "titulo": "Privacidade",
+      "perfilPublico": "Perfil Público",
+      "perfilPublicoDesc": "Permite que outros consultores vejam o teu perfil",
+      "diretorio": "Aparecer no Diretório",
+      "diretorioDesc": "Surge na lista de consultores",
+      "badges": "Mostrar Badges Publicamente",
+      "badgesDesc": "Exibe os teus badges no perfil público",
+      "pontos": "Mostrar Pontos Publicamente",
+      "pontosDesc": "Exibe a tua pontuação no ranking"
+    },
+    "resumo": {
+      "titulo": "Resumo das Configurações",
+      "notifEmail": "Notificações Email",
+      "ativadas": "Ativadas",
+      "desativadas": "Desativadas",
+      "idioma": "Idioma",
+      "tema": "Tema",
+      "perfilPublico": "Perfil Público",
+      "sim": "Sim",
+      "nao": "Não"
+    },
+    "estatisticas": {
+      "titulo": "As tuas Estatísticas",
+      "pontos": "Pontos",
+      "badges": "Badges",
+      "ranking": "Ranking"
+    },
+    "dica": {
+      "titulo": "Dica",
+      "texto": "As preferências são guardadas e aplicadas em todos os dispositivos onde acederes à plataforma."
+    }
+  },
+    "dashboard": {
+    "jornada": "Continua a tua jornada de aprendizagem e desenvolvimento profissional",
+    "badgesRecentes": "Badges Recentes",
+    "verTodos": "Ver todos",
+    "recomendados": "Recomendados para Si",
+    "explorar": "Explorar",
+    "baseadoPerfil": "Baseado no seu perfil e interesses",
+    "acoesRapidas": "Ações Rápidas",
+    "verNotificacoes": "Ver Notificações",
+    "verPerfilPublico": "Ver o seu Perfil Público",
+    "verDiretorio": "Ver Diretório",
+    "nivel": "Nível",
+    "pontosConquistados": "Pontos Conquistados",
+    "posicao": "Posição",
+    "verPerfilCompleto": "Ver Perfil Completo",
+    "proximosEventos": "Próximos Eventos"
+  }
+}
