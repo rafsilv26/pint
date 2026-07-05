@@ -42,6 +42,7 @@ export const markAllNotificationsRead = impl.markAllNotificationsRead
 export const getGamification = impl.getGamification
 export const getConsultants = impl.getConsultants
 export const getConsultant = impl.getConsultant
+export const updateConsultant = impl.updateConsultant
 
 // Assinatura de email
 export const getEmailSignature = impl.getEmailSignature

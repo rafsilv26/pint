@@ -98,3 +98,38 @@ exports.getConsultant = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao obter consultor.', details: error.message });
   }
 };
+
+
+exports.updateConsultant = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, biography, linkedinUrl } = req.body;
+
+    // Verifica se é o próprio utilizador
+    if (req.user.id !== parseInt(id)) {
+      return res.status(403).json({ erro: 'Não tens permissão para editar este perfil' });
+    }
+
+    // Atualiza o nome na tabela User
+    await User.update(
+      { nome: name },
+      { where: { id } }
+    );
+
+    // Atualiza ou cria o registo na tabela Consultant
+    const [consultor, criado] = await Consultant.findOrCreate({
+      where: { consultorId: id },
+      defaults: { biography, linkedinUrl }
+    });
+
+    if (!criado) {
+      await consultor.update({ biography, linkedinUrl });
+    }
+
+    res.json({ mensagem: 'Perfil atualizado com sucesso!' });
+
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ erro: 'Erro ao atualizar perfil' });
+  }
+};

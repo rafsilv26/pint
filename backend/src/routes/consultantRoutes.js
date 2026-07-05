@@ -4,5 +4,6 @@ const consultantController = require('../controllers/consultantController');
 
 router.get('/', consultantController.listConsultants);
 router.get('/:id', consultantController.getConsultant);
+router.put('/:id', consultantController.updateConsultant);
 
 module.exports = router;

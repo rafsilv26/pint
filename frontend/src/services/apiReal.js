@@ -235,6 +235,10 @@ export async function getConsultant(id) {
   return http(`/consultants/${id}`)
 }
 
+export async function updateConsultant(id, body) {
+  return http(`/consultants/${id}`, { method: 'PUT', body })
+}
+
 // ---------- Talent Manager ----------
 export async function getTalentDashboard() {
   const [consultants, badges, slines, pendentes] = await Promise.all([
@@ -403,10 +407,3 @@ export async function exportarRelatorio(formato = 'excel') {
   return { ok: true }
 }
 
-export async function updateConsultant(id, data) {
-  // Ajusta a rota '/consultores' para a rota correta do teu backend (pode ser '/users' ou '/consultants')
-  return await http(`/consultores/${id}`, {
-    method: 'PUT', // ou 'PATCH' dependendo da tua API
-    body: JSON.stringify(data),
-  })
-}
