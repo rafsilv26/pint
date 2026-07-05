@@ -1,38 +1,82 @@
 import { useState } from 'react'
 import { FileSpreadsheet, FileText } from 'lucide-react'
-import * as api from '../services/api'
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
 
-// Botões de exportação Excel/PDF (descarregam de /relatorios/* na API real,
-// ou um CSV de demonstração em mock).
-export default function ExportButtons() {
+export default function ExportButtons({ data }) {
   const [busy, setBusy] = useState(null)
 
-  async function exportar(formato) {
-    setBusy(formato)
-    try {
-      await api.exportarRelatorio(formato)
-    } catch (e) {
-      alert(e.message || 'Não foi possível exportar.')
-    } finally {
-      setBusy(null)
-    }
+  // Função para exportar como CSV (Excel)
+  const exportarExcel = () => {
+    if (!data || data.length === 0) return alert("Sem dados para exportar.")
+    
+    setBusy('excel')
+    
+    // Preparar cabeçalhos e linhas
+    const headers = ['Nome', 'Email', 'Papel', 'Estado']
+    const csvContent = [
+      headers.join(','),
+      ...data.map(u => [
+        `"${u.nome}"`,
+        `"${u.email}"`,
+        `"${(u.roles || []).join(', ')}"`,
+        `"${u.ativo ? 'Ativo' : 'Inativo'}"`
+      ].join(','))
+    ].join('\n')
+
+    // Criar e descarregar o ficheiro
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement("a")
+    link.href = URL.createObjectURL(blob)
+    link.download = "utilizadores.csv"
+    link.click()
+    
+    setBusy(null)
+  }
+
+  // Função para exportar como PDF
+  const exportarPDF = () => {
+    if (!data || data.length === 0) return alert("Sem dados para exportar.")
+    
+    setBusy('pdf')
+    
+    const doc = new jsPDF()
+    doc.text("Relatório de Utilizadores", 14, 15)
+    
+    doc.autoTable({
+      head: [['Nome', 'Email', 'Papel', 'Estado']],
+      body: data.map(u => [
+        u.nome, 
+        u.email, 
+        (u.roles || []).join(', '), 
+        u.ativo ? 'Ativo' : 'Inativo'
+      ]),
+      startY: 25,
+      theme: 'striped',
+    })
+    
+    doc.save('utilizadores.pdf')
+    setBusy(null)
   }
 
   return (
     <div className="flex gap-2">
       <button
-        onClick={() => exportar('excel')}
+        onClick={exportarExcel}
         disabled={busy}
         className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:bg-gray-50 disabled:opacity-60"
       >
-        <FileSpreadsheet size={16} className="text-green-600" /> {busy === 'excel' ? 'A exportar…' : 'Excel'}
+        <FileSpreadsheet size={16} className="text-green-600" /> 
+        {busy === 'excel' ? 'A processar…' : 'Excel'}
       </button>
+
       <button
-        onClick={() => exportar('pdf')}
+        onClick={exportarPDF}
         disabled={busy}
         className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:bg-gray-50 disabled:opacity-60"
       >
-        <FileText size={16} className="text-red-600" /> {busy === 'pdf' ? 'A exportar…' : 'PDF'}
+        <FileText size={16} className="text-red-600" /> 
+        {busy === 'pdf' ? 'A processar…' : 'PDF'}
       </button>
     </div>
   )

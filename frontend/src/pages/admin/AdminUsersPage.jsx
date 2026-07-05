@@ -57,7 +57,7 @@ export default function AdminUsersPage() {
     <div>
       <PageHeader
         title="Utilizadores"
-        action={<div className="flex gap-2"><ExportButtons /><Button onClick={() => abrir(null)}><Plus size={16} /> Adicionar</Button></div>}
+        action={<div className="flex gap-2"><ExportButtons data={rows} /><Button onClick={() => abrir(null)}><Plus size={16} /> Adicionar</Button></div>}
       />
 
       <Card className="overflow-hidden p-0">
