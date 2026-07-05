@@ -135,5 +135,12 @@
     "posicao": "Position",
     "verPerfilCompleto": "View Full Profile",
     "proximosEventos": "Upcoming Events"
+  },
+  "catalogo": {
+    "procurar": "Search Badges",
+    "vazioTitulo": "No badges found",
+    "vazioDesc": "Try another search.",
+    "nivel": "Level",
+    "pontos": "points"
   }
 }

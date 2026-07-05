@@ -135,5 +135,12 @@
     "posicao": "Posición",
     "verPerfilCompleto": "Ver Perfil Completo",
     "proximosEventos": "Próximos Eventos"
+  },
+  "catalogo": {
+    "procurar": "Buscar Insignias",
+    "vazioTitulo": "No se encontraron insignias",
+    "vazioDesc": "Intenta otra búsqueda.",
+    "nivel": "Nivel",
+    "pontos": "puntos"
   }
 }

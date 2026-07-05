@@ -4,6 +4,7 @@ import { Search, Coins, Award, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Spinner, EmptyState, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
+import { useTranslation } from 'react-i18next' // <-- Importa o hook
 
 const TECH_TINTS = {
   salmon: 'from-red-100 to-orange-50',
@@ -15,6 +16,7 @@ const TECH_TINTS = {
 const POR_PAGINA = 12
 
 export default function CatalogPage() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
   const { data: badges, loading, error, reload } = useAsync(() => api.getBadges())
   const [pesquisa, setPesquisa] = useState('')
   const [pagina, setPagina] = useState(1)
@@ -40,7 +42,7 @@ export default function CatalogPage() {
               setPesquisa(e.target.value)
               setPagina(1)
             }}
-            placeholder="Procurar Badges"
+            placeholder={t('catalogo.procurar')} // <-- Tradução aqui
             className="w-full rounded-full border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
         </div>
@@ -48,7 +50,11 @@ export default function CatalogPage() {
       </div>
 
       {visiveis.length === 0 ? (
-        <EmptyState icon={Award} title="Nenhum badge encontrado" description="Tenta outra pesquisa." />
+        <EmptyState 
+          icon={Award} 
+          title={t('catalogo.vazioTitulo')} // <-- Tradução aqui
+          description={t('catalogo.vazioDesc')} // <-- Tradução aqui
+        />
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {visiveis.map((b) => (
@@ -64,10 +70,10 @@ export default function CatalogPage() {
               </div>
               <div className="p-4 text-center">
                 <p className="font-semibold text-ink">
-                  {b.nome} - Nível {b.nivel}
+                  {b.nome} - {t('catalogo.nivel')} {b.nivel} {/* <-- Tradução aqui */}
                 </p>
                 <p className="mt-1 flex items-center justify-center gap-1 text-sm font-medium text-amber-600">
-                  <Coins size={14} /> {b.ponto} pontos
+                  <Coins size={14} /> {b.ponto} {t('catalogo.pontos')} {/* <-- Tradução aqui */}
                 </p>
               </div>
             </Link>
