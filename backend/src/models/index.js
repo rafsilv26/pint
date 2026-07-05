@@ -93,8 +93,14 @@ Requirement.hasMany(Evidencia, { foreignKey: 'requisitoId', as: 'evidencias' });
 Evidencia.belongsTo(Requirement, { foreignKey: 'requisitoId' });
 
 // Candidature history
-Candidatura.hasMany(HistoricoCandidatura, { foreignKey: 'candidaturaId', as: 'history' });
-HistoricoCandidatura.belongsTo(Candidatura, { foreignKey: 'candidaturaId' });
+Candidatura.hasMany(HistoricoCandidatura, { 
+    foreignKey: { name: 'candidaturaId', field: 'CANDIDATURAID' }, 
+    as: 'history' 
+});
+
+HistoricoCandidatura.belongsTo(Candidatura, { 
+    foreignKey: { name: 'candidaturaId', field: 'CANDIDATURAID' } 
+});
 
 User.hasMany(HistoricoCandidatura, { foreignKey: 'userId' });
 HistoricoCandidatura.belongsTo(User, { foreignKey: 'userId', as: 'responsavel' });
