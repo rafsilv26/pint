@@ -1,30 +1,28 @@
 import { useState } from 'react'
 import { FileSpreadsheet, FileText } from 'lucide-react'
 import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import autoTable from 'jspdf-autotable'
 
 export default function ExportButtons({ data }) {
   const [busy, setBusy] = useState(null)
 
-  // Função para exportar como CSV (Excel)
+  // 1. Exportação Excel (CSV)
   const exportarExcel = () => {
     if (!data || data.length === 0) return alert("Sem dados para exportar.")
     
     setBusy('excel')
     
-    // Preparar cabeçalhos e linhas
     const headers = ['Nome', 'Email', 'Papel', 'Estado']
     const csvContent = [
       headers.join(','),
       ...data.map(u => [
-        `"${u.nome}"`,
-        `"${u.email}"`,
+        `"${u.nome || ''}"`,
+        `"${u.email || ''}"`,
         `"${(u.roles || []).join(', ')}"`,
         `"${u.ativo ? 'Ativo' : 'Inativo'}"`
       ].join(','))
     ].join('\n')
 
-    // Criar e descarregar o ficheiro
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement("a")
     link.href = URL.createObjectURL(blob)
@@ -34,7 +32,7 @@ export default function ExportButtons({ data }) {
     setBusy(null)
   }
 
-  // Função para exportar como PDF
+  // 2. Exportação PDF
   const exportarPDF = () => {
     if (!data || data.length === 0) return alert("Sem dados para exportar.")
     
@@ -43,11 +41,12 @@ export default function ExportButtons({ data }) {
     const doc = new jsPDF()
     doc.text("Relatório de Utilizadores", 14, 15)
     
-    doc.autoTable({
+    // Usar a função autoTable importada
+    autoTable(doc, {
       head: [['Nome', 'Email', 'Papel', 'Estado']],
       body: data.map(u => [
-        u.nome, 
-        u.email, 
+        u.nome || '', 
+        u.email || '', 
         (u.roles || []).join(', '), 
         u.ativo ? 'Ativo' : 'Inativo'
       ]),
