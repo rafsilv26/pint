@@ -34,6 +34,7 @@ function safeJson(text) {
 export async function http(path, { method = 'GET', body, auth = true, isForm = false } = {}) {
   const headers = {}
   const token = getToken()
+  console.log("Token que vai para o backend:", token);
   if (auth && token) headers.Authorization = `Bearer ${token}`
 
   let payload
