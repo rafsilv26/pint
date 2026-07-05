@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { LogOut, KeyRound, Mail, Users, Settings, ExternalLink } from 'lucide-react'
 import { Card } from '../components/ui'
@@ -17,19 +18,57 @@ export default function ProfilePage() {
   const navigate = useNavigate()
 
   // Dados reais do consultor (pontos, badges, área, biografia, …)
-  const { data: consultor, loading } = useAsync(
+  const { data: consultor, loading, reload } = useAsync(
     () => api.getConsultant(user.id).catch(() => null),
     [user?.id]
   )
 
-  const nome = consultor?.name || user?.nome || 'Consultor'
-  const email = user?.email || consultor?.email || ''
+  // 1. Estado controlado para gerir os campos do formulário
+  const [form, setForm] = useState({
+    nome: '',
+    email: '',
+    biografia: '',
+    serviceLine: ''
+  })
+  const [saving, setSaving] = useState(false)
+
+  // 2. Sincronizar os dados da API assim que o carregamento terminar
+  useEffect(() => {
+    if (consultor || user) {
+      setForm({
+        nome: consultor?.name || user?.nome || '',
+        email: user?.email || consultor?.email || '',
+        biografia: consultor?.biography || '',
+        serviceLine: consultor?.serviceLine || ''
+      })
+    }
+  }, [consultor, user])
+
+  const nomeExibicao = form.nome || 'Consultor'
   const pontos = consultor?.points ?? 0
   const badges = consultor?.badges ?? 0
-  const biografia = consultor?.biography || ''
-  const serviceLine = consultor?.serviceLine || ''
-  const tags = [consultor?.area, consultor?.serviceLine].filter(Boolean)
-  const iniciais = nome.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
+  const tags = [consultor?.area, form.serviceLine].filter(Boolean)
+  const iniciais = nomeExibicao.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
+
+  // 3. Função assíncrona para enviar as alterações para a base de dados
+  async function guardarAlteracoes(e) {
+    e.preventDefault()
+    setSaving(true)
+    try {
+      // Garante que a tua api.js tem esta rota configurada para receber o ID e o corpo com os dados
+      await api.updateConsultant(user.id, {
+        name: form.nome,
+        biography: form.biografia,
+        serviceLine: form.serviceLine
+      })
+      alert('Perfil atualizado com sucesso!')
+      reload() // Recarrega a query do useAsync para trazer os dados novos e limpos
+    } catch (err) {
+      alert(err.message || 'Não foi possível guardar as alterações.')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -44,8 +83,8 @@ export default function ProfilePage() {
           <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-brand-light text-2xl font-bold text-brand">
             {iniciais}
           </div>
-          <p className="mt-3 font-semibold text-ink">{nome}</p>
-          <p className="text-sm text-muted">{email}</p>
+          <p className="mt-3 font-semibold text-ink">{nomeExibicao}</p>
+          <p className="text-sm text-muted">{form.email}</p>
           {tags.length > 0 && (
             <div className="mt-3 flex flex-wrap justify-center gap-1.5">
               {tags.map((t) => (
@@ -69,6 +108,7 @@ export default function ProfilePage() {
           </div>
 
           <button
+            type="button"
             onClick={() => { logout(); navigate('/login') }}
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50"
           >
@@ -76,40 +116,67 @@ export default function ProfilePage() {
           </button>
         </Card>
 
-        {/* Informações da conta (key força os campos a recarregar com os dados reais) */}
-        <Card key={loading ? 'loading' : 'loaded'} className="lg:col-span-2">
-          <h2 className="mb-4 font-semibold text-ink">Informações da Conta</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+        {/* Informações da conta dentro de um Form estruturado */}
+        <Card className="lg:col-span-2">
+          <form onSubmit={guardarAlteracoes} className="space-y-4">
+            <h2 className="mb-2 font-semibold text-ink">Informações da Conta</h2>
+            
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-ink">Nome Completo</span>
+                <input 
+                  value={form.nome} 
+                  onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                  required
+                  className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" 
+                />
+              </label>
+              
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium text-ink">Email</span>
+                <input 
+                  type="email"
+                  value={form.email} 
+                  disabled
+                  className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-sm text-muted outline-none cursor-not-allowed border-dashed" 
+                />
+              </label>
+            </div>
+            
             <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-ink">Nome Completo</span>
-              <input defaultValue={nome} className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
+              <span className="mb-1.5 block text-sm font-medium text-ink">Biografia</span>
+              <textarea
+                rows={3}
+                value={form.biografia}
+                onChange={(e) => setForm({ ...form, biografia: e.target.value })}
+                placeholder="Escreve uma breve biografia profissional…"
+                className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              />
             </label>
+            
             <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-ink">Email</span>
-              <input defaultValue={email} className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
+              <span className="mb-1.5 flex items-center justify-between text-sm font-medium text-ink">
+                Service Line
+                <Link to="/escolher-area" className="text-xs font-normal text-brand hover:underline">Selecionar área</Link>
+              </span>
+              <input 
+                value={form.serviceLine} 
+                onChange={(e) => setForm({ ...form, serviceLine: e.target.value })}
+                placeholder="Sem service line atribuída" 
+                className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" 
+              />
             </label>
-          </div>
-          <label className="mt-4 block">
-            <span className="mb-1.5 block text-sm font-medium text-ink">Biografia</span>
-            <textarea
-              rows={3}
-              defaultValue={biografia}
-              placeholder="Escreve uma breve biografia…"
-              className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-            />
-          </label>
-          <label className="mt-4 block">
-            <span className="mb-1.5 flex items-center justify-between text-sm font-medium text-ink">
-              Service Line
-              <Link to="/escolher-area" className="text-xs font-normal text-brand hover:underline">Selecionar área</Link>
-            </span>
-            <input defaultValue={serviceLine} placeholder="Sem service line atribuída" className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
-          </label>
-          <div className="mt-5 flex justify-end">
-            <button className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark">
-              Guardar Alterações
-            </button>
-          </div>
+            
+            <div className="mt-5 flex justify-end">
+              <button 
+                type="submit"
+                disabled={saving || loading}
+                className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? 'A guardar…' : 'Guardar Alterações'}
+              </button>
+            </div>
+          </form>
         </Card>
       </div>
 
