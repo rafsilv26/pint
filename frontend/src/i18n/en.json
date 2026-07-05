@@ -10,16 +10,33 @@
     "titulo": "Profile & Settings",
     "subtitulo": "Manage your account and preferences",
     "nome": "Full Name",
+    "nomeCompleto": "Full Name",
     "email": "Email",
     "biografia": "Biography",
+    "biografiaPlaceholder": "Write a brief professional biography…",
     "serviceLine": "Service Line",
+    "linkedin": "LinkedIn",
+    "linkedinPlaceholder": "https://linkedin.com/in/your-profile",
     "guardar": "Save Changes",
     "aguardar": "Saving…",
     "sucesso": "Profile updated successfully!",
     "erro": "Could not save changes.",
     "pontos": "Points",
     "badges": "Badges",
-    "verPerfil": "View Public Profile"
+    "verPerfil": "View Public Profile",
+    "verPerfilPublico": "View Public Profile",
+    "terminarSessao": "Sign Out",
+    "informacoesConta": "Account Information",
+    "acoes": {
+      "alterarPassword": "Change Password",
+      "alterarPasswordDesc": "Update your access password",
+      "assinatura": "Email Signature",
+      "assinaturaDesc": "Configure your professional signature",
+      "diretorio": "Consultants Directory",
+      "diretorioDesc": "Explore your colleagues' profiles",
+      "preferencias": "Preferences",
+      "preferenciasDesc": "Notifications and language"
+    }
   },
   "auth": {
     "login": "Login",
@@ -102,7 +119,7 @@
       "texto": "Preferences are saved and applied on all devices where you access the platform."
     }
   },
-    "dashboard": {
+  "dashboard": {
     "jornada": "Continue your learning and professional development journey",
     "badgesRecentes": "Recent Badges",
     "verTodos": "View all",

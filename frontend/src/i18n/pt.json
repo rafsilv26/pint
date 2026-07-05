@@ -10,16 +10,33 @@
     "titulo": "Perfil e Configurações",
     "subtitulo": "Gere a tua conta e preferências",
     "nome": "Nome Completo",
+    "nomeCompleto": "Nome Completo",
     "email": "Email",
     "biografia": "Biografia",
+    "biografiaPlaceholder": "Escreve uma breve biografia profissional…",
     "serviceLine": "Service Line",
+    "linkedin": "LinkedIn",
+    "linkedinPlaceholder": "https://linkedin.com/in/o-teu-perfil",
     "guardar": "Guardar Alterações",
     "aguardar": "A guardar…",
     "sucesso": "Perfil atualizado com sucesso!",
     "erro": "Não foi possível guardar as alterações.",
     "pontos": "Pontos",
     "badges": "Badges",
-    "verPerfil": "Ver Perfil Público"
+    "verPerfil": "Ver Perfil Público",
+    "verPerfilPublico": "Ver Perfil Público",
+    "terminarSessao": "Terminar Sessão",
+    "informacoesConta": "Informações da Conta",
+    "acoes": {
+      "alterarPassword": "Alterar Palavra-passe",
+      "alterarPasswordDesc": "Atualiza a tua palavra-passe de acesso",
+      "assinatura": "Assinatura de Email",
+      "assinaturaDesc": "Configura a tua assinatura profissional",
+      "diretorio": "Diretório de Consultores",
+      "diretorioDesc": "Explora os perfis dos teus colegas",
+      "preferencias": "Preferências",
+      "preferenciasDesc": "Notificações e idioma"
+    }
   },
   "auth": {
     "login": "Entrar",
@@ -36,7 +53,6 @@
     "erro": "Ocorreu um erro",
     "sucesso": "Operação realizada com sucesso"
   },
-
   "preferencias": {
     "titulo": "Preferências",
     "subtitulo": "Personaliza a tua experiência na plataforma",
@@ -103,7 +119,7 @@
       "texto": "As preferências são guardadas e aplicadas em todos os dispositivos onde acederes à plataforma."
     }
   },
-    "dashboard": {
+  "dashboard": {
     "jornada": "Continua a tua jornada de aprendizagem e desenvolvimento profissional",
     "badgesRecentes": "Badges Recentes",
     "verTodos": "Ver todos",
