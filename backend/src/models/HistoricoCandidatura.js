@@ -3,9 +3,10 @@ const sequelize = require('../config/database');
 
 const HistoricoCandidatura = sequelize.define('HistoricoCandidatura', {
   id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+          field: 'logwf_id' 
   },
   candidaturaId: {
     type: DataTypes.INTEGER,
