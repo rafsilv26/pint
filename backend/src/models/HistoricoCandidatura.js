@@ -6,12 +6,12 @@ const HistoricoCandidatura = sequelize.define('HistoricoCandidatura', {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
-    field: 'LOGWF_ID' // MAIÚSCULAS EXATAS DA BASE DE DADOS
+    field: 'LOGWF_ID'
   },
   candidaturaId: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    field: 'CANDIDATURAID'
+    field: 'CANDIDATURAID' // Isto trava o erro atual!
   },
   userId: {
     type: DataTypes.INTEGER,
