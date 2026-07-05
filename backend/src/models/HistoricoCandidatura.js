@@ -6,41 +6,41 @@ const HistoricoCandidatura = sequelize.define('HistoricoCandidatura', {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
-    field: 'logwf_id' // Traduz 'id' no JS para 'logwf_id' na BD
+    field: 'LOGWF_ID' // MAIÚSCULAS EXATAS DA BASE DE DADOS
   },
   candidaturaId: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    field: 'candidaturaid'
+    field: 'CANDIDATURAID'
   },
   userId: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    field: 'userid'
+    field: 'USERID'
   },
   estadoAnterior: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    field: 'antigo_estadoid' // Traduz 'estadoAnterior' no JS para 'antigo_estadoid' na BD
+    field: 'ANTIGO_ESTADOID'
   },
   estadoNovo: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    field: 'novo_estadoid' // Traduz 'estadoNovo' no JS para 'novo_estadoid' na BD
+    field: 'NOVO_ESTADOID'
   },
   motivo: {
     type: DataTypes.STRING(500),
     allowNull: true,
-    field: 'motivo'
+    field: 'MOTIVO'
   },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
-    field: 'created_at'
+    field: 'CREATED_AT'
   }
 }, {
   tableName: 'LOGSWORKFLOW_CANDIDATURABADGE',
-  timestamps: false // Desligamos os timestamps automáticos porque já mapeámos o createdAt acima
+  timestamps: false 
 });
 
 module.exports = HistoricoCandidatura;
