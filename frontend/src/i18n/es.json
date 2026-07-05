@@ -142,5 +142,150 @@
     "vazioDesc": "Intenta otra búsqueda.",
     "nivel": "Nivel",
     "pontos": "puntos"
+  },
+  "candidaturas": {
+    "titulo": "Mis Insignias",
+    "nova": "Nueva Candidatura",
+    "pesquisar": "Buscar Candidaturas...",
+    "vazioTitulo": "Sin candidaturas",
+    "vazioDesc": "Explora el catálogo y postúlate para tu primera insignia.",
+    "progresso": "Progreso de Evaluación",
+    "meta": {
+      "submetido": "Enviado:",
+      "diasAnalise": "días en revisión",
+      "evidencias": "evidencias"
+    },
+    "feedback": {
+      "de": "Comentarios de"
+    },
+    "acoes": {
+      "verDetalhes": "Ver Detalles de la Insignia",
+      "partilhar": "Compartir en LinkedIn",
+      "reenviar": "Reenviar Candidatura",
+      "adicionarEvidencias": "Añadir Evidencias"
+    }
+  },
+  "badgeDetail": {
+    "voltar": "Volver al catálogo",
+    "naoEncontrado": "Insignia no encontrada.",
+    "pontos": "puntos",
+    "frequencia": "Frecuencia",
+    "anos": "año(s)",
+    "badgeDe": "Insignia de",
+    "candidatar": "Postularse a la Insignia",
+    "descricao": "Descripción",
+    "descTextoExtra": "Esta insignia reconoce habilidades prácticas y se valida en función de la evidencia enviada, de acuerdo con los requisitos de certificación de Softinsa.",
+    "requisitos": "Requisitos",
+    "semRequisitos": "No hay requisitos específicos definidos para esta insignia.",
+    "requisitoTextoExtra": "Para cumplir con este requisito, debes enviar evidencia que demuestre claramente la competencia indicada."
+  },
+  "certificado": {
+    "gerando": "Generando certificado…",
+    "naoEncontrado": "Certificado no encontrado.",
+    "voltarInicio": "Volver",
+    "voltar": "Volver",
+    "imprimir": "Descargar / Imprimir",
+    "titulo": "CERTIFICADO",
+    "texto1": {
+      "inicio": "Certificamos que",
+      "meio": "ha completado la insignia",
+      "fim": "el día"
+    },
+    "texto2": "Además, certificamos que ha demostrado poseer las competencias necesarias para actuar en esta área, de acuerdo con los requisitos de certificación, los cuales son validados y aplicados en base a la evidencia enviada."
+  },
+  "mudarPassword": {
+    "voltar": "Volver al Perfil",
+    "titulo": "Cambiar Contraseña",
+    "subtitulo": "Actualiza tu contraseña de acceso",
+    "sucesso": "¡Contraseña cambiada!",
+    "erroComprimento": "La nueva contraseña debe tener al menos 8 caracteres.",
+    "erroCoincidem": "Las contraseñas no coinciden.",
+    "atual": "Contraseña Actual",
+    "nova": "Nueva Contraseña",
+    "confirmar": "Confirmar Nueva Contraseña",
+    "boasPraticas": "Buenas prácticas",
+    "botao": "Cambiar Contraseña",
+    "regras": {
+      "minimo": "Mínimo de 8 caracteres",
+      "maiuscula": "Al menos una letra mayúscula",
+      "numero": "Al menos un número",
+      "especial": "Al menos un carácter especial"
+    }
+  },
+  "diretorio": {
+    "titulo": "Directorio de Consultores",
+    "subtitulo": "Explora los perfiles de tus colegas.",
+    "pesquisar": "Buscar consultores…",
+    "vazioTitulo": "No se encontraron consultores",
+    "vazioDesc": "Intenta otra búsqueda.",
+    "tu": "(tú)",
+    "consultorDefault": "Consultor"
+  },
+  "assinatura": {
+    "voltar": "Volver al Perfil",
+    "titulo": "Firma de Email",
+    "subtitulo": "Crea tu firma profesional con insignias",
+    "infoPessoais": "Información Personal",
+    "campos": {
+      "nome": "Nombre Completo",
+      "cargo": "Cargo",
+      "consultorDefault": "Consultor",
+      "email": "Correo Electrónico",
+      "telefone": "Teléfono",
+      "localizacao": "Ubicación"
+    },
+    "badgesTitulo": "Insignias y Certificaciones",
+    "badgesDesc": "Mostrar las insignias obtenidas en la firma",
+    "exportarTitulo": "Exportar Firma",
+    "copiado": "Copiado ✓",
+    "copiar": "Copiar HTML",
+    "baixar": "Descargar Archivo",
+    "dicaCopia": "Copia el HTML y pégalo en la configuración de firma de tu cliente de correo (Gmail, Outlook, etc.).",
+    "preview": "Vista Previa",
+    "instrucoes": {
+      "titulo": "Cómo añadirla a tu email",
+      "passoCopiar": "Haz clic en \"Copiar HTML\" arriba",
+      "out1": "Abre Outlook → Archivo → Opciones → Correo → Firmas",
+      "out2": "Crea una nueva y pega (Ctrl+V)",
+      "out3": "Haz clic en \"Aceptar\" para guardar",
+      "gm1": "Abre Gmail → Configuración → Ver todos los ajustes",
+      "gm2": "En la sección \"Firma\", crea una nueva y pega",
+      "gm3": "Guarda los cambios en la parte inferior"
+    }
+  },
+  "escolhaArea": {
+    "voltar": "Volver al Perfil",
+    "titulo": "Selecciona tu Área",
+    "subtitulo": "Vamos a personalizar tu experiencia con insignias relevantes para tu área",
+    "dica": "Elige el área donde deseas enfocar tu desarrollo. Esto personalizará tus recomendaciones de insignias.",
+    "botao": "Confirmar Área",
+    "badgesCount": "insignias",
+    "areas": {
+      "net": "C#, .NET Core, ASP.NET",
+      "python": "Django, Flask, FastAPI",
+      "node": "Express, NestJS, backend JavaScript",
+      "outsystems": "Plataforma de desarrollo low-code",
+      "microservices": "Diseño e implementación de microservicios"
+    },
+    "tags": {
+      "pilares4": "4 Pilares",
+      "pilares3": "3 Pilares",
+      "iniciante": "Principiante",
+      "intermedio": "Intermedio",
+      "avancado": "Avanzado"
+    }
+  },
+  "historico": {
+    "titulo": "Historial de Insignias",
+    "subtitulo": "Las insignias que ya has obtenido.",
+    "vazioTitulo": "Aún no tienes insignias",
+    "vazioDesc": "¡Consigue tu primera insignia!",
+    "valido": "Válido",
+    "obtidoA": "Obtenida el",
+    "expiraA": "expira el",
+    "naoExpira": "no expira",
+    "pontos": "pts",
+    "certificado": "Certificado",
+    "paginaPublica": "Página pública"
   }
 }

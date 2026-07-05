@@ -4,6 +4,7 @@ import { Search, Calendar, Clock, FileText, Award, Plus, RefreshCw, Share2 } fro
 import { Spinner, EmptyState, StatusPill, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 const CARD_TINT = {
   blue: 'bg-blue-50/60',
@@ -23,12 +24,14 @@ const BAR = {
 }
 
 function Acoes({ c }) {
+  const { t } = useTranslation() // <-- Inicializa no componente auxiliar
+
   const detalhes = (
     <Link
       to={`/catalogo/${c.badge.id}`}
       className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-ink transition hover:bg-gray-50"
     >
-      Ver Detalhes do Badge
+      {t('candidaturas.acoes.verDetalhes')}
     </Link>
   )
 
@@ -37,7 +40,7 @@ function Acoes({ c }) {
       <>
         {detalhes}
         <button className="flex items-center gap-1.5 rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white transition hover:bg-brand-dark">
-          <Share2 size={14} /> Partilhar no LinkedIn
+          <Share2 size={14} /> {t('candidaturas.acoes.partilhar')}
         </button>
       </>
     )
@@ -50,7 +53,7 @@ function Acoes({ c }) {
           to={`/candidaturas/nova?badge=${c.badge.id}`}
           className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700"
         >
-          <RefreshCw size={14} /> Reenviar Candidatura
+          <RefreshCw size={14} /> {t('candidaturas.acoes.reenviar')}
         </Link>
       </>
     )
@@ -62,13 +65,14 @@ function Acoes({ c }) {
         to={`/candidaturas/nova?badge=${c.badge.id}`}
         className="flex items-center gap-1.5 rounded-lg border border-brand px-3 py-2 text-xs font-semibold text-brand transition hover:bg-brand-light"
       >
-        <Plus size={14} /> Adicionar Evidências
+        <Plus size={14} /> {t('candidaturas.acoes.adicionarEvidencias')}
       </Link>
     </>
   )
 }
 
 export default function ApplicationsPage() {
+  const { t } = useTranslation() // <-- Inicializa no componente principal
   const { data: candidaturas, loading, error, reload } = useAsync(() => api.getMinhasCandidaturas())
   const [pesquisa, setPesquisa] = useState('')
 
@@ -79,12 +83,12 @@ export default function ApplicationsPage() {
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-ink">Meus Badges</h1>
+        <h1 className="text-2xl font-bold text-ink">{t('candidaturas.titulo')}</h1>
         <Link
           to="/candidaturas/nova"
           className="flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
         >
-          <Plus size={16} /> Nova Candidatura
+          <Plus size={16} /> {t('candidaturas.nova')}
         </Link>
       </div>
 
@@ -93,7 +97,7 @@ export default function ApplicationsPage() {
         <input
           value={pesquisa}
           onChange={(e) => setPesquisa(e.target.value)}
-          placeholder="Pesquisar Candidaturas..."
+          placeholder={t('candidaturas.pesquisar')}
           className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
         />
       </div>
@@ -105,8 +109,8 @@ export default function ApplicationsPage() {
       ) : filtradas.length === 0 ? (
         <EmptyState
           icon={Award}
-          title="Sem candidaturas"
-          description="Explora o catálogo e candidata-te ao teu primeiro badge."
+          title={t('candidaturas.vazioTitulo')}
+          description={t('candidaturas.vazioDesc')}
         />
       ) : (
         <div className="space-y-4">
@@ -136,7 +140,7 @@ export default function ApplicationsPage() {
               {/* Progresso de avaliação */}
               <div className="mt-4">
                 <div className="mb-1 flex items-center justify-between text-xs text-muted">
-                  <span>Progresso de Avaliação</span>
+                  <span>{t('candidaturas.progresso')}</span>
                   <span className="font-semibold">{c.progresso}%</span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-white">
@@ -146,15 +150,15 @@ export default function ApplicationsPage() {
 
               {/* Meta */}
               <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
-                <span className="flex items-center gap-1"><Calendar size={13} /> Submetido: {c.submittedDate}</span>
-                <span className="flex items-center gap-1"><Clock size={13} /> {c.diasAnalise} dias em análise</span>
-                <span className="flex items-center gap-1"><FileText size={13} /> {c.evidencias} evidências</span>
+                <span className="flex items-center gap-1"><Calendar size={13} /> {t('candidaturas.meta.submetido')} {c.submittedDate}</span>
+                <span className="flex items-center gap-1"><Clock size={13} /> {c.diasAnalise} {t('candidaturas.meta.diasAnalise')}</span>
+                <span className="flex items-center gap-1"><FileText size={13} /> {c.evidencias} {t('candidaturas.meta.evidencias')}</span>
               </div>
 
               {/* Feedback (rejeitada) */}
               {c.feedback && (
                 <div className="mt-3 rounded-lg bg-red-50 p-3 ring-1 ring-red-100">
-                  <p className="text-xs font-semibold text-red-700">Feedback de {c.feedback.papel}</p>
+                  <p className="text-xs font-semibold text-red-700">{t('candidaturas.feedback.de')} {c.feedback.papel}</p>
                   <p className="mt-1 text-xs text-red-800/80">{c.feedback.texto}</p>
                   <p className="mt-1 text-xs text-muted">— {c.feedback.autor}</p>
                 </div>

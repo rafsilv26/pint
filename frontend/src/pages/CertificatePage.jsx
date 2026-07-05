@@ -2,23 +2,33 @@ import { useParams, Link } from 'react-router-dom'
 import { Download, ArrowLeft, Award } from 'lucide-react'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
-function formatar(d) {
-  return d ? new Date(d).toLocaleDateString('pt-PT') : '—'
+// Modificámos a função para aceitar o idioma e formatar a data de acordo com a região
+function formatar(d, locale = 'pt-PT') {
+  return d ? new Date(d).toLocaleDateString(locale) : '—'
 }
 
-// Página PÚBLICA — certificado de um badge conquistado.
 export default function CertificatePage() {
+  const { t, i18n } = useTranslation() // <-- Inicializamos a tradução e o i18n (para a data)
   const { token } = useParams()
   const { data, loading } = useAsync(() => api.verificarBadge(token), [token])
 
+  // Mapear o idioma atual do i18n para o formato de data correto
+  const localeMap = {
+    pt: 'pt-PT',
+    en: 'en-US',
+    es: 'es-ES'
+  }
+  const currentLocale = localeMap[i18n.language?.substring(0, 2)] || 'pt-PT'
+
   if (loading) {
-    return <div className="grid min-h-screen place-items-center text-muted">A gerar certificado…</div>
+    return <div className="grid min-h-screen place-items-center text-muted">{t('certificado.gerando')}</div>
   }
   if (!data) {
     return (
       <div className="grid min-h-screen place-items-center text-muted">
-        Certificado não encontrado. <Link to="/" className="ml-1 text-brand hover:underline">Voltar</Link>
+        {t('certificado.naoEncontrado')} <Link to="/" className="ml-1 text-brand hover:underline">{t('certificado.voltarInicio')}</Link>
       </div>
     )
   }
@@ -28,13 +38,13 @@ export default function CertificatePage() {
       <div className="mx-auto max-w-3xl">
         <div className="mb-4 flex items-center justify-between print:hidden">
           <Link to="/historico" className="inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
-            <ArrowLeft size={16} /> Voltar
+            <ArrowLeft size={16} /> {t('certificado.voltar')}
           </Link>
           <button
             onClick={() => window.print()}
             className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
           >
-            <Download size={16} /> Descarregar / Imprimir
+            <Download size={16} /> {t('certificado.imprimir')}
           </button>
         </div>
 
@@ -46,18 +56,16 @@ export default function CertificatePage() {
 
           <div className="relative">
             <p className="text-3xl font-extrabold tracking-tight text-ink">
-              CERTIFICADO <span className="text-brand">SOFTINSA</span>
+              {t('certificado.titulo')} <span className="text-brand">SOFTINSA</span>
             </p>
 
             <p className="mt-8 max-w-xl text-sm leading-relaxed text-muted">
-              Certificamos que <strong className="text-ink">{data.consultor?.nome}</strong> concluiu o badge{' '}
-              <strong className="text-ink">{data.badge?.nome}</strong> ({data.badge?.fornecedor}) no dia{' '}
-              <strong className="text-ink">{formatar(data.dataAtribuicao)}</strong>.
+              {t('certificado.texto1.inicio')} <strong className="text-ink">{data.consultor?.nome}</strong> {t('certificado.texto1.meio')}{' '}
+              <strong className="text-ink">{data.badge?.nome}</strong> ({data.badge?.fornecedor}) {t('certificado.texto1.fim')}{' '}
+              <strong className="text-ink">{formatar(data.dataAtribuicao, currentLocale)}</strong>.
             </p>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-              Certificamos ainda que demonstrou possuir as competências necessárias para atuar nesta área,
-              de acordo com os requisitos de certificação, sendo estes validados e aplicados com base nas
-              evidências submetidas.
+              {t('certificado.texto2')}
             </p>
 
             <div className="mt-10 flex items-end justify-between">

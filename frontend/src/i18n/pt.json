@@ -142,5 +142,150 @@
     "vazioDesc": "Tenta outra pesquisa.",
     "nivel": "Nível",
     "pontos": "pontos"
+  },
+  "candidaturas": {
+    "titulo": "Meus Badges",
+    "nova": "Nova Candidatura",
+    "pesquisar": "Pesquisar Candidaturas...",
+    "vazioTitulo": "Sem candidaturas",
+    "vazioDesc": "Explora o catálogo e candidata-te ao teu primeiro badge.",
+    "progresso": "Progresso de Avaliação",
+    "meta": {
+      "submetido": "Submetido:",
+      "diasAnalise": "dias em análise",
+      "evidencias": "evidências"
+    },
+    "feedback": {
+      "de": "Feedback de"
+    },
+    "acoes": {
+      "verDetalhes": "Ver Detalhes do Badge",
+      "partilhar": "Partilhar no LinkedIn",
+      "reenviar": "Reenviar Candidatura",
+      "adicionarEvidencias": "Adicionar Evidências"
+    }
+  },
+  "badgeDetail": {
+    "voltar": "Voltar ao catálogo",
+    "naoEncontrado": "Badge não encontrado.",
+    "pontos": "pontos",
+    "frequencia": "Frequência",
+    "anos": "ano(s)",
+    "badgeDe": "Badge de",
+    "candidatar": "Candidatar ao Badge",
+    "descricao": "Descrição",
+    "descTextoExtra": "Este badge reconhece competências práticas e é validado com base nas evidências submetidas, de acordo com os requisitos de certificação da Softinsa.",
+    "requisitos": "Requisitos",
+    "semRequisitos": "Sem requisitos específicos definidos para este badge.",
+    "requisitoTextoExtra": "Para cumprir este requisito deves submeter evidências que demonstrem, de forma clara, a competência indicada."
+  },
+  "certificado": {
+    "gerando": "A gerar certificado…",
+    "naoEncontrado": "Certificado não encontrado.",
+    "voltarInicio": "Voltar",
+    "voltar": "Voltar",
+    "imprimir": "Descarregar / Imprimir",
+    "titulo": "CERTIFICADO",
+    "texto1": {
+      "inicio": "Certificamos que",
+      "meio": "concluiu o badge",
+      "fim": "no dia"
+    },
+    "texto2": "Certificamos ainda que demonstrou possuir as competências necessárias para atuar nesta área, de acordo com os requisitos de certificação, sendo estes validados e aplicados com base nas evidências submetidas."
+  },
+  "mudarPassword": {
+    "voltar": "Voltar ao Perfil",
+    "titulo": "Alterar Palavra-passe",
+    "subtitulo": "Atualiza a tua palavra-passe de acesso",
+    "sucesso": "Palavra-passe alterada!",
+    "erroComprimento": "A nova palavra-passe deve ter pelo menos 8 caracteres.",
+    "erroCoincidem": "As palavras-passe não coincidem.",
+    "atual": "Palavra-passe Atual",
+    "nova": "Nova Palavra-passe",
+    "confirmar": "Confirmar Nova Palavra-passe",
+    "boasPraticas": "Boas práticas",
+    "botao": "Alterar Palavra-passe",
+    "regras": {
+      "minimo": "Mínimo de 8 caracteres",
+      "maiuscula": "Pelo menos uma letra maiúscula",
+      "numero": "Pelo menos um número",
+      "especial": "Pelo menos um caráter especial"
+    }
+  },
+  "diretorio": {
+    "titulo": "Diretório de Consultores",
+    "subtitulo": "Explora os perfis dos teus colegas.",
+    "pesquisar": "Pesquisar consultores…",
+    "vazioTitulo": "Nenhum consultor encontrado",
+    "vazioDesc": "Tenta outra pesquisa.",
+    "tu": "(tu)",
+    "consultorDefault": "Consultor"
+  },
+  "assinatura": {
+    "voltar": "Voltar ao Perfil",
+    "titulo": "Assinatura de Email",
+    "subtitulo": "Cria a tua assinatura profissional com badges",
+    "infoPessoais": "Informações Pessoais",
+    "campos": {
+      "nome": "Nome Completo",
+      "cargo": "Cargo",
+      "consultorDefault": "Consultor",
+      "email": "Email",
+      "telefone": "Telefone",
+      "localizacao": "Localização"
+    },
+    "badgesTitulo": "Badges e Certificações",
+    "badgesDesc": "Mostrar os badges conquistados na assinatura",
+    "exportarTitulo": "Exportar Assinatura",
+    "copiado": "Copiado ✓",
+    "copiar": "Copiar HTML",
+    "baixar": "Baixar Ficheiro",
+    "dicaCopia": "Copia o HTML e cola-o na configuração de assinatura do teu cliente de email (Gmail, Outlook, etc.).",
+    "preview": "Pré-visualização",
+    "instrucoes": {
+      "titulo": "Como adicionar ao teu email",
+      "passoCopiar": "Clica em \"Copiar HTML\" acima",
+      "out1": "Abre Outlook → Ficheiro → Opções → Email → Assinaturas",
+      "out2": "Cria uma nova e cola (Ctrl+V)",
+      "out3": "Clica em \"OK\" para guardar",
+      "gm1": "Abre Gmail → Definições → Ver todas as definições",
+      "gm2": "Na secção \"Assinatura\", cria uma nova e cola",
+      "gm3": "Guarda as alterações ao fundo"
+    }
+  },
+  "escolhaArea": {
+    "voltar": "Voltar ao Perfil",
+    "titulo": "Selecione a sua Área",
+    "subtitulo": "Vamos personalizar a sua experiência com badges relevantes para a sua área",
+    "dica": "Escolhe a área onde desejas focar o teu desenvolvimento. Isto vai personalizar as tuas recomendações de badges.",
+    "botao": "Confirmar Área",
+    "badgesCount": "badges",
+    "areas": {
+      "net": "C#, .NET Core, ASP.NET",
+      "python": "Django, Flask, FastAPI",
+      "node": "Express, NestJS, backend JavaScript",
+      "outsystems": "Plataforma de desenvolvimento low-code",
+      "microservices": "Design e implementação de microsserviços"
+    },
+    "tags": {
+      "pilares4": "4 Pilares",
+      "pilares3": "3 Pilares",
+      "iniciante": "Iniciante",
+      "intermedio": "Intermédio",
+      "avancado": "Avançado"
+    }
+  },
+  "historico": {
+    "titulo": "Histórico de Badges",
+    "subtitulo": "Os badges que já conquistaste.",
+    "vazioTitulo": "Ainda não tens badges",
+    "vazioDesc": "Conquista o teu primeiro badge!",
+    "valido": "Válido",
+    "obtidoA": "Obtido a",
+    "expiraA": "expira a",
+    "naoExpira": "não expira",
+    "pontos": "pts",
+    "certificado": "Certificado",
+    "paginaPublica": "Página pública"
   }
 }

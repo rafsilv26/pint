@@ -142,5 +142,150 @@
     "vazioDesc": "Try another search.",
     "nivel": "Level",
     "pontos": "points"
+  },
+  "candidaturas": {
+    "titulo": "My Badges",
+    "nova": "New Application",
+    "pesquisar": "Search Applications...",
+    "vazioTitulo": "No applications",
+    "vazioDesc": "Explore the catalog and apply for your first badge.",
+    "progresso": "Evaluation Progress",
+    "meta": {
+      "submetido": "Submitted:",
+      "diasAnalise": "days in review",
+      "evidencias": "evidences"
+    },
+    "feedback": {
+      "de": "Feedback from"
+    },
+    "acoes": {
+      "verDetalhes": "View Badge Details",
+      "partilhar": "Share on LinkedIn",
+      "reenviar": "Resubmit Application",
+      "adicionarEvidencias": "Add Evidences"
+    }
+  },
+  "badgeDetail": {
+    "voltar": "Back to catalog",
+    "naoEncontrado": "Badge not found.",
+    "pontos": "points",
+    "frequencia": "Frequency",
+    "anos": "year(s)",
+    "badgeDe": "Badge for",
+    "candidatar": "Apply for Badge",
+    "descricao": "Description",
+    "descTextoExtra": "This badge recognizes practical skills and is validated based on submitted evidence, according to Softinsa's certification requirements.",
+    "requisitos": "Requirements",
+    "semRequisitos": "No specific requirements defined for this badge.",
+    "requisitoTextoExtra": "To meet this requirement, you must submit evidence that clearly demonstrates the indicated competence."
+  },
+  "certificado": {
+    "gerando": "Generating certificate…",
+    "naoEncontrado": "Certificate not found.",
+    "voltarInicio": "Go back",
+    "voltar": "Go back",
+    "imprimir": "Download / Print",
+    "titulo": "CERTIFICATE",
+    "texto1": {
+      "inicio": "This certifies that",
+      "meio": "has completed the badge",
+      "fim": "on"
+    },
+    "texto2": "We further certify that they have demonstrated the necessary skills to act in this area, in accordance with the certification requirements, which are validated and applied based on the submitted evidence."
+  },
+  "mudarPassword": {
+    "voltar": "Back to Profile",
+    "titulo": "Change Password",
+    "subtitulo": "Update your access password",
+    "sucesso": "Password changed!",
+    "erroComprimento": "The new password must be at least 8 characters long.",
+    "erroCoincidem": "Passwords do not match.",
+    "atual": "Current Password",
+    "nova": "New Password",
+    "confirmar": "Confirm New Password",
+    "boasPraticas": "Best practices",
+    "botao": "Change Password",
+    "regras": {
+      "minimo": "Minimum of 8 characters",
+      "maiuscula": "At least one uppercase letter",
+      "numero": "At least one number",
+      "especial": "At least one special character"
+    }
+  },
+  "diretorio": {
+    "titulo": "Consultants Directory",
+    "subtitulo": "Explore your colleagues' profiles.",
+    "pesquisar": "Search consultants…",
+    "vazioTitulo": "No consultants found",
+    "vazioDesc": "Try another search.",
+    "tu": "(you)",
+    "consultorDefault": "Consultant"
+  },
+  "assinatura": {
+    "voltar": "Back to Profile",
+    "titulo": "Email Signature",
+    "subtitulo": "Create your professional signature with badges",
+    "infoPessoais": "Personal Information",
+    "campos": {
+      "nome": "Full Name",
+      "cargo": "Role",
+      "consultorDefault": "Consultant",
+      "email": "Email",
+      "telefone": "Phone",
+      "localizacao": "Location"
+    },
+    "badgesTitulo": "Badges and Certifications",
+    "badgesDesc": "Show earned badges in the signature",
+    "exportarTitulo": "Export Signature",
+    "copiado": "Copied ✓",
+    "copiar": "Copy HTML",
+    "baixar": "Download File",
+    "dicaCopia": "Copy the HTML and paste it into your email client's signature settings (Gmail, Outlook, etc.).",
+    "preview": "Preview",
+    "instrucoes": {
+      "titulo": "How to add it to your email",
+      "passoCopiar": "Click on \"Copy HTML\" above",
+      "out1": "Open Outlook → File → Options → Mail → Signatures",
+      "out2": "Create a new one and paste (Ctrl+V)",
+      "out3": "Click \"OK\" to save",
+      "gm1": "Open Gmail → Settings → See all settings",
+      "gm2": "In the \"Signature\" section, create a new one and paste",
+      "gm3": "Save changes at the bottom"
+    }
+  },
+  "escolhaArea": {
+    "voltar": "Back to Profile",
+    "titulo": "Select your Area",
+    "subtitulo": "Let's personalize your experience with badges relevant to your area",
+    "dica": "Choose the area where you want to focus your development. This will personalize your badge recommendations.",
+    "botao": "Confirm Area",
+    "badgesCount": "badges",
+    "areas": {
+      "net": "C#, .NET Core, ASP.NET",
+      "python": "Django, Flask, FastAPI",
+      "node": "Express, NestJS, JavaScript backend",
+      "outsystems": "Low-code development platform",
+      "microservices": "Microservices design and implementation"
+    },
+    "tags": {
+      "pilares4": "4 Pillars",
+      "pilares3": "3 Pillars",
+      "iniciante": "Beginner",
+      "intermedio": "Intermediate",
+      "avancado": "Advanced"
+    }
+  },
+  "historico": {
+    "titulo": "Badge History",
+    "subtitulo": "The badges you have already earned.",
+    "vazioTitulo": "You don't have any badges yet",
+    "vazioDesc": "Earn your first badge!",
+    "valido": "Valid",
+    "obtidoA": "Earned on",
+    "expiraA": "expires on",
+    "naoExpira": "does not expire",
+    "pontos": "pts",
+    "certificado": "Certificate",
+    "paginaPublica": "Public page"
   }
 }

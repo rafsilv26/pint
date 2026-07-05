@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Mail, ArrowLeft, Copy, Download, Award, Phone, MapPin, Info } from 'lucide-react'
 import { Card, Toggle } from '../components/ui'
 import * as api from '../services/api'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 function gerarHTML(d) {
   return `<table style="font-family:Arial,sans-serif;color:#1f2330">
@@ -34,9 +35,11 @@ function Campo({ label, value, onChange }) {
 }
 
 export default function EmailSignaturePage() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
+
   const [d, setD] = useState({
     nome: '',
-    cargo: 'Consultor',
+    cargo: t('assinatura.campos.consultorDefault'), // Tradução aplicada ao valor por defeito
     email: '',
     telefone: '',
     localizacao: '',
@@ -76,54 +79,54 @@ export default function EmailSignaturePage() {
   return (
     <div>
       <Link to="/perfil" className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
-        <ArrowLeft size={16} /> Voltar ao Perfil
+        <ArrowLeft size={16} /> {t('assinatura.voltar')}
       </Link>
 
       <div className="mb-6">
         <h1 className="flex items-center gap-2 text-2xl font-bold text-ink">
-          <Mail className="text-brand" /> Assinatura de Email
+          <Mail className="text-brand" /> {t('assinatura.titulo')}
         </h1>
-        <p className="mt-1 text-sm text-muted">Cria a tua assinatura profissional com badges</p>
+        <p className="mt-1 text-sm text-muted">{t('assinatura.subtitulo')}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Esquerda — formulário */}
         <div className="space-y-6">
           <Card>
-            <h2 className="mb-4 font-semibold text-ink">Informações Pessoais</h2>
+            <h2 className="mb-4 font-semibold text-ink">{t('assinatura.infoPessoais')}</h2>
             <div className="space-y-4">
-              <Campo label="Nome Completo" value={d.nome} onChange={set('nome')} />
-              <Campo label="Cargo" value={d.cargo} onChange={set('cargo')} />
-              <Campo label="Email" value={d.email} onChange={set('email')} />
-              <Campo label="Telefone" value={d.telefone} onChange={set('telefone')} />
-              <Campo label="Localização" value={d.localizacao} onChange={set('localizacao')} />
+              <Campo label={t('assinatura.campos.nome')} value={d.nome} onChange={set('nome')} />
+              <Campo label={t('assinatura.campos.cargo')} value={d.cargo} onChange={set('cargo')} />
+              <Campo label={t('assinatura.campos.email')} value={d.email} onChange={set('email')} />
+              <Campo label={t('assinatura.campos.telefone')} value={d.telefone} onChange={set('telefone')} />
+              <Campo label={t('assinatura.campos.localizacao')} value={d.localizacao} onChange={set('localizacao')} />
             </div>
           </Card>
 
           <Card>
             <div className="flex items-center justify-between">
               <h2 className="flex items-center gap-2 font-semibold text-ink">
-                <Award size={18} className="text-brand" /> Badges e Certificações
+                <Award size={18} className="text-brand" /> {t('assinatura.badgesTitulo')}
               </h2>
               <Toggle checked={mostrarBadges} onChange={setMostrarBadges} />
             </div>
-            <p className="mt-1 text-sm text-muted">Mostrar os badges conquistados na assinatura</p>
+            <p className="mt-1 text-sm text-muted">{t('assinatura.badgesDesc')}</p>
           </Card>
 
           <Card>
-            <h2 className="mb-4 font-semibold text-ink">Exportar Assinatura</h2>
+            <h2 className="mb-4 font-semibold text-ink">{t('assinatura.exportarTitulo')}</h2>
             <button
               onClick={copiarHTML}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
             >
-              <Copy size={16} /> {copiado ? 'Copiado ✓' : 'Copiar HTML'}
+              <Copy size={16} /> {copiado ? t('assinatura.copiado') : t('assinatura.copiar')}
             </button>
             <button className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 py-2.5 text-sm font-semibold text-ink transition hover:bg-gray-50">
-              <Download size={16} /> Baixar Ficheiro
+              <Download size={16} /> {t('assinatura.baixar')}
             </button>
             <div className="mt-3 flex items-start gap-2 rounded-lg bg-brand-50 p-3 text-xs text-muted">
               <Info size={14} className="mt-0.5 shrink-0 text-brand" />
-              Copia o HTML e cola-o na configuração de assinatura do teu cliente de email (Gmail, Outlook, etc.).
+              {t('assinatura.dicaCopia')}
             </div>
           </Card>
         </div>
@@ -131,7 +134,7 @@ export default function EmailSignaturePage() {
         {/* Direita — pré-visualização + instruções */}
         <div className="space-y-6">
           <Card>
-            <h2 className="mb-4 font-semibold text-ink">Pré-visualização</h2>
+            <h2 className="mb-4 font-semibold text-ink">{t('assinatura.preview')}</h2>
             <div className="flex items-start gap-4 rounded-xl border border-gray-200 p-4">
               <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-brand text-2xl font-bold text-white">
                 {iniciais}
@@ -154,24 +157,24 @@ export default function EmailSignaturePage() {
           </Card>
 
           <Card>
-            <h2 className="mb-3 font-semibold text-ink">Como adicionar ao teu email</h2>
+            <h2 className="mb-3 font-semibold text-ink">{t('assinatura.instrucoes.titulo')}</h2>
             <div className="space-y-4 text-sm">
               <div>
                 <p className="font-semibold text-ink">Outlook</p>
                 <ol className="mt-1 list-inside list-decimal space-y-0.5 text-xs text-muted">
-                  <li>Clica em "Copiar HTML" acima</li>
-                  <li>Abre Outlook → Ficheiro → Opções → Email → Assinaturas</li>
-                  <li>Cria uma nova e cola (Ctrl+V)</li>
-                  <li>Clica em "OK" para guardar</li>
+                  <li>{t('assinatura.instrucoes.passoCopiar')}</li>
+                  <li>{t('assinatura.instrucoes.out1')}</li>
+                  <li>{t('assinatura.instrucoes.out2')}</li>
+                  <li>{t('assinatura.instrucoes.out3')}</li>
                 </ol>
               </div>
               <div>
                 <p className="font-semibold text-ink">Gmail</p>
                 <ol className="mt-1 list-inside list-decimal space-y-0.5 text-xs text-muted">
-                  <li>Clica em "Copiar HTML" acima</li>
-                  <li>Abre Gmail → Definições → Ver todas as definições</li>
-                  <li>Na secção "Assinatura", cria uma nova e cola</li>
-                  <li>Guarda as alterações ao fundo</li>
+                  <li>{t('assinatura.instrucoes.passoCopiar')}</li>
+                  <li>{t('assinatura.instrucoes.gm1')}</li>
+                  <li>{t('assinatura.instrucoes.gm2')}</li>
+                  <li>{t('assinatura.instrucoes.gm3')}</li>
                 </ol>
               </div>
             </div>

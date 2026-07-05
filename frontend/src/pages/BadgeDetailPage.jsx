@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronDown, Coins } from 'lucide-react'
 import { Spinner, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 const HERO_TINTS = {
   salmon: 'from-orange-200 to-red-200',
@@ -13,20 +14,21 @@ const HERO_TINTS = {
 }
 
 export default function BadgeDetailPage() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
   const { id } = useParams()
   const { data: badge, loading, error, reload } = useAsync(() => api.getBadge(id), [id])
   const [aberto, setAberto] = useState(0)
 
   const voltar = (
     <Link to="/catalogo" className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
-      <ArrowLeft size={16} /> Voltar ao catálogo
+      <ArrowLeft size={16} /> {t('badgeDetail.voltar')}
     </Link>
   )
 
   if (loading) return <Spinner />
   if (error) return <div>{voltar}<ErrorState onRetry={reload} /></div>
   if (!badge) {
-    return <div>{voltar}<p className="mt-4 text-muted">Badge não encontrado.</p></div>
+    return <div>{voltar}<p className="mt-4 text-muted">{t('badgeDetail.naoEncontrado')}</p></div>
   }
 
   return (
@@ -40,20 +42,20 @@ export default function BadgeDetailPage() {
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full bg-white/70 px-2.5 py-0.5 text-xs font-semibold text-ink">{badge.nivel}</span>
               <span className="flex items-center gap-1 rounded-full bg-white/70 px-2.5 py-0.5 text-xs font-semibold text-ink">
-                <Coins size={12} /> {badge.ponto} pontos
+                <Coins size={12} /> {badge.ponto} {t('badgeDetail.pontos')}
               </span>
               {badge.duracaoMeses && (
                 <span className="rounded-full bg-white/70 px-2.5 py-0.5 text-xs font-semibold text-ink">
-                  Frequência: {Math.round(badge.duracaoMeses / 12)} ano(s)
+                  {t('badgeDetail.frequencia')}: {Math.round(badge.duracaoMeses / 12)} {t('badgeDetail.anos')}
                 </span>
               )}
             </div>
-            <h1 className="mt-3 text-2xl font-bold text-ink sm:text-3xl">Badge de {badge.nome}</h1>
+            <h1 className="mt-3 text-2xl font-bold text-ink sm:text-3xl">{t('badgeDetail.badgeDe')} {badge.nome}</h1>
             <Link
               to={`/candidaturas/nova?badge=${badge.id}`}
               className="mt-5 inline-block rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
             >
-              Candidatar ao Badge
+              {t('badgeDetail.candidatar')}
             </Link>
           </div>
           <div className="hidden shrink-0 text-center sm:block">
@@ -68,19 +70,18 @@ export default function BadgeDetailPage() {
       {/* Descrição + Requisitos */}
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <section>
-          <h2 className="mb-3 font-semibold text-ink">Descrição</h2>
+          <h2 className="mb-3 font-semibold text-ink">{t('badgeDetail.descricao')}</h2>
           <p className="text-sm leading-relaxed text-muted">{badge.descricao}</p>
           <p className="mt-3 text-sm leading-relaxed text-muted">
-            Este badge reconhece competências práticas e é validado com base nas evidências submetidas,
-            de acordo com os requisitos de certificação da Softinsa.
+            {t('badgeDetail.descTextoExtra')}
           </p>
         </section>
 
         <section>
-          <h2 className="mb-3 font-semibold text-ink">Requisitos</h2>
+          <h2 className="mb-3 font-semibold text-ink">{t('badgeDetail.requisitos')}</h2>
           {badge.requisitos.length === 0 ? (
             <p className="rounded-xl border border-dashed border-gray-200 p-4 text-sm text-muted">
-              Sem requisitos específicos definidos para este badge.
+              {t('badgeDetail.semRequisitos')}
             </p>
           ) : (
             <div className="space-y-2">
@@ -95,8 +96,7 @@ export default function BadgeDetailPage() {
                   </button>
                   {aberto === i && (
                     <p className="border-t border-gray-100 px-4 py-3 text-sm text-muted">
-                      Para cumprir este requisito deves submeter evidências que demonstrem,
-                      de forma clara, a competência indicada.
+                      {t('badgeDetail.requisitoTextoExtra')}
                     </p>
                   )}
                 </div>
