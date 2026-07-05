@@ -318,3 +318,7 @@ export async function exportarRelatorio() {
   URL.revokeObjectURL(url)
   return { ok: true }
 }
+
+export async function updateConsultant(id, body) {
+  return { mensagem: 'Perfil atualizado com sucesso!' }
+}
