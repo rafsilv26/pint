@@ -3,14 +3,20 @@ import { PageHeader, Card, Spinner, ErrorState, EmptyState, StatusPill } from '.
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import ExportButtons from '../../components/ExportButtons'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 export default function AdminPedidosPage() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
   const { data, loading, error, reload } = useAsync(() => api.getAdminPedidos())
   const lista = data || []
 
   return (
     <div>
-      <PageHeader title="Pedido de Badges" subtitle="Todas as candidaturas a badges." action={<ExportButtons />} />
+      <PageHeader 
+        title={t('adminPedidos.titulo')} 
+        subtitle={t('adminPedidos.subtitulo')} 
+        action={<ExportButtons />} 
+      />
 
       <Card className="overflow-hidden p-0">
         {loading ? (
@@ -18,19 +24,25 @@ export default function AdminPedidosPage() {
         ) : error ? (
           <div className="p-6"><ErrorState onRetry={reload} /></div>
         ) : lista.length === 0 ? (
-          <div className="p-6"><EmptyState icon={FileText} title="Sem pedidos" description="Não há candidaturas registadas." /></div>
+          <div className="p-6">
+            <EmptyState 
+              icon={FileText} 
+              title={t('adminPedidos.vazioTitulo')} 
+              description={t('adminPedidos.vazioDesc')} 
+            />
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b border-gray-100 bg-gray-50 text-left text-xs font-medium text-muted">
                 <tr>
-                  <th className="px-4 py-3">Tracking ID</th>
-                  <th className="px-4 py-3">Consultor</th>
-                  <th className="px-4 py-3">Badge</th>
-                  <th className="px-4 py-3">Nível</th>
-                  <th className="px-4 py-3">Pontos</th>
-                  <th className="px-4 py-3">Data</th>
-                  <th className="px-4 py-3">Estado</th>
+                  <th className="px-4 py-3">{t('adminPedidos.tabela.trackingId')}</th>
+                  <th className="px-4 py-3">{t('adminPedidos.tabela.consultor')}</th>
+                  <th className="px-4 py-3">{t('adminPedidos.tabela.badge')}</th>
+                  <th className="px-4 py-3">{t('adminPedidos.tabela.nivel')}</th>
+                  <th className="px-4 py-3">{t('adminPedidos.tabela.pontos')}</th>
+                  <th className="px-4 py-3">{t('adminPedidos.tabela.data')}</th>
+                  <th className="px-4 py-3">{t('adminPedidos.tabela.estado')}</th>
                 </tr>
               </thead>
               <tbody>

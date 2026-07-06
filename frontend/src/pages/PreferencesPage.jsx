@@ -102,7 +102,7 @@ export default function PreferencesPage() {
                 { value: 'en', label: '🇬🇧 English' },
                 { value: 'es', label: '🇪🇸 Español' },
               ]}
-              value={i18n.language}
+              value={i18n.language.substring(0, 2)}
               onChange={mudarIdioma}
             />
 
@@ -112,7 +112,7 @@ export default function PreferencesPage() {
               options={[
                 { value: 'claro', label: t('preferencias.visualizacao.claro'), icon: Sun },
                 { value: 'escuro', label: t('preferencias.visualizacao.escuro'), icon: Moon },
-                { value: 'auto', label: t('preferencias.visualizacao.automatico'), icon: Monitor },
+                { value: 'auto', label: t('preferencias.visualizacao.auto'), icon: Monitor },
               ]}
               value={tema}
               onChange={setTema}
@@ -166,12 +166,15 @@ export default function PreferencesPage() {
               <div className="flex justify-between">
                 <dt className="text-muted">{t('preferencias.resumo.idioma')}</dt>
                 <dd className="font-medium text-ink">
-                  {i18n.language === 'pt' ? '🇵🇹 Português' : i18n.language === 'en' ? '🇬🇧 English' : '🇪🇸 Español'}
+                  {i18n.language.startsWith('pt') ? '🇵🇹 Português' : i18n.language.startsWith('en') ? '🇬🇧 English' : '🇪🇸 Español'}
                 </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted">{t('preferencias.resumo.tema')}</dt>
-                <dd className="font-medium text-ink capitalize">{tema}</dd>
+                <dd className="font-medium text-ink capitalize">
+                  {/* Busca a tradução do tema atual dinamicamente */}
+                  {t(`preferencias.visualizacao.${tema}`)}
+                </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted">{t('preferencias.resumo.perfilPublico')}</dt>

@@ -4,10 +4,12 @@ import { Lock } from 'lucide-react'
 import { Field } from './ui'
 import { useAuth } from '../context/AuthContext'
 import * as api from '../services/api'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 // Pop-up de primeira-troca de password (mostrado por cima da app quando
 // mustChangePassword está ativo). Bloqueia a app até estar trocada.
 export default function ChangePasswordModal() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
   const navigate = useNavigate()
   const { markPasswordChanged, logout } = useAuth()
   const [atual, setAtual] = useState('')
@@ -19,8 +21,11 @@ export default function ChangePasswordModal() {
   async function handleSubmit(e) {
     e.preventDefault()
     setErro(null)
-    if (nova.length < 8) return setErro('A nova palavra-passe deve ter pelo menos 8 caracteres.')
-    if (nova !== confirmar) return setErro('As palavras-passe não coincidem.')
+    
+    // Validações traduzidas
+    if (nova.length < 8) return setErro(t('changePasswordModal.erros.comprimento'))
+    if (nova !== confirmar) return setErro(t('changePasswordModal.erros.coincidem'))
+    
     setLoading(true)
     try {
       await api.changePassword({ currentPassword: atual, newPassword: nova })
@@ -39,34 +44,34 @@ export default function ChangePasswordModal() {
           <div className="grid h-9 w-9 place-items-center rounded-lg bg-brand-light text-brand">
             <Lock size={18} />
           </div>
-          <h2 className="text-lg font-bold text-ink">Definir nova palavra-passe</h2>
+          <h2 className="text-lg font-bold text-ink">{t('changePasswordModal.titulo')}</h2>
         </div>
         <p className="mb-4 text-sm text-muted">
-          É o teu primeiro acesso — define uma palavra-passe pessoal para continuar.
+          {t('changePasswordModal.descricao')}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3">
           {erro && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</div>}
           <Field
-            label="Palavra-passe atual (a que recebeste)"
+            label={t('changePasswordModal.campos.atualLabel')}
             type="password"
             icon={Lock}
             value={atual}
             onChange={(e) => setAtual(e.target.value)}
-            placeholder="Palavra-passe temporária"
+            placeholder={t('changePasswordModal.campos.atualPlaceholder')}
             required
           />
           <Field
-            label="Nova palavra-passe"
+            label={t('changePasswordModal.campos.novaLabel')}
             type="password"
             icon={Lock}
             value={nova}
             onChange={(e) => setNova(e.target.value)}
-            hint="Mínimo 8 caracteres."
+            hint={t('changePasswordModal.campos.novaHint')}
             required
           />
           <Field
-            label="Confirmar nova palavra-passe"
+            label={t('changePasswordModal.campos.confirmarLabel')}
             type="password"
             icon={Lock}
             value={confirmar}
@@ -78,7 +83,7 @@ export default function ChangePasswordModal() {
             disabled={loading}
             className="w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
           >
-            {loading ? 'A guardar…' : 'Definir e entrar'}
+            {loading ? t('changePasswordModal.botoes.guardando') : t('changePasswordModal.botoes.guardar')}
           </button>
         </form>
 
@@ -86,7 +91,7 @@ export default function ChangePasswordModal() {
           onClick={() => { logout(); navigate('/login') }}
           className="mt-3 w-full text-center text-sm text-muted transition hover:text-brand"
         >
-          Não és tu? Terminar sessão
+          {t('changePasswordModal.botoes.sair')}
         </button>
       </div>
     </div>

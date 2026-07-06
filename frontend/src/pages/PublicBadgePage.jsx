@@ -2,15 +2,26 @@ import { useParams } from 'react-router-dom'
 import { Award, ShieldCheck, ShieldX } from 'lucide-react'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
-function formatarData(d) {
-  return d ? new Date(d).toLocaleDateString('pt-PT') : null
+// Função adaptada para receber o idioma atual (locale)
+function formatarData(d, locale = 'pt-PT') {
+  return d ? new Date(d).toLocaleDateString(locale) : null
 }
 
 // Página PÚBLICA (sem login) — verificação de um badge por link único.
 export default function PublicBadgePage() {
+  const { t, i18n } = useTranslation() // <-- Inicializa a tradução e o i18n
   const { token } = useParams()
   const { data, loading } = useAsync(() => api.verificarBadge(token), [token])
+
+  // Mapear o idioma atual para o formato de data correto
+  const localeMap = {
+    pt: 'pt-PT',
+    en: 'en-US',
+    es: 'es-ES'
+  }
+  const currentLocale = localeMap[i18n.language?.substring(0, 2)] || 'pt-PT'
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6">
@@ -20,12 +31,12 @@ export default function PublicBadgePage() {
       </div>
 
       {loading ? (
-        <p className="text-muted">A verificar badge…</p>
+        <p className="text-muted">{t('publicBadge.verificando')}</p>
       ) : !data ? (
         <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
           <ShieldX size={48} className="mx-auto text-red-500" />
-          <h1 className="mt-4 text-lg font-bold text-ink">Badge não encontrado</h1>
-          <p className="mt-1 text-sm text-muted">Este link de verificação não é válido.</p>
+          <h1 className="mt-4 text-lg font-bold text-ink">{t('publicBadge.naoEncontradoTitulo')}</h1>
+          <p className="mt-1 text-sm text-muted">{t('publicBadge.naoEncontradoDesc')}</p>
         </div>
       ) : (
         <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
@@ -41,33 +52,33 @@ export default function PublicBadgePage() {
             }`}
           >
             {data.valido ? <ShieldCheck size={16} /> : <ShieldX size={16} />}
-            {data.valido ? 'Badge válido' : 'Badge expirado'}
+            {data.valido ? t('publicBadge.valido') : t('publicBadge.expirado')}
           </div>
 
           <dl className="mt-6 space-y-3 border-t border-gray-100 pt-6 text-left text-sm">
             <div className="flex justify-between">
-              <dt className="text-muted">Atribuído a</dt>
+              <dt className="text-muted">{t('publicBadge.atribuidoA')}</dt>
               <dd className="font-semibold text-ink">{data.consultor?.nome}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted">Emissor</dt>
+              <dt className="text-muted">{t('publicBadge.emissor')}</dt>
               <dd className="font-semibold text-ink">{data.badge.fornecedor}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted">Data de atribuição</dt>
-              <dd className="font-semibold text-ink">{formatarData(data.dataAtribuicao)}</dd>
+              <dt className="text-muted">{t('publicBadge.dataAtribuicao')}</dt>
+              <dd className="font-semibold text-ink">{formatarData(data.dataAtribuicao, currentLocale)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted">Validade</dt>
+              <dt className="text-muted">{t('publicBadge.validade')}</dt>
               <dd className="font-semibold text-ink">
-                {formatarData(data.dataExpiracao) || 'Não expira'}
+                {formatarData(data.dataExpiracao, currentLocale) || t('publicBadge.naoExpira')}
               </dd>
             </div>
           </dl>
         </div>
       )}
 
-      <p className="mt-6 text-xs text-gray-400">Verificado por Softinsa · Plataforma de Badges</p>
+      <p className="mt-6 text-xs text-gray-400">{t('publicBadge.footer')}</p>
     </div>
   )
 }

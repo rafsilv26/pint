@@ -287,5 +287,402 @@
     "pontos": "pts",
     "certificado": "Certificado",
     "paginaPublica": "Página pública"
+  },
+  "managerBadge": {
+    "naoEncontrado": "Insignia no encontrada.",
+    "voltar": "Volver",
+    "pontos": "puntos",
+    "badgeDe": "Insignia de",
+    "descricao": "Descripción",
+    "requisitos": "Requisitos",
+    "semRequisitos": "Sin requisitos específicos.",
+    "requisitoTextoExtra": "Requisito necesario para obtener esta insignia."
+  },
+  "managerBadge": {
+    "naoEncontrado": "Insignia no encontrada.",
+    "voltar": "Volver",
+    "pontos": "puntos",
+    "badgeDe": "Insignia de",
+    "descricao": "Descripción",
+    "requisitos": "Requisitos",
+    "semRequisitos": "Sin requisitos específicos.",
+    "requisitoTextoExtra": "Requisito necesario para obtener esta insignia."
+  },
+  "managerConsultor": {
+    "naoEncontrado": "Consultor no encontrado.",
+    "voltar": "Volver",
+    "defaultRole": "Consultor",
+    "sobre": "Sobre",
+    "stats": {
+      "badges": "Insignias",
+      "pontos": "Puntos",
+      "conquistas": "Logros Especiales",
+      "desde": "Consultor desde"
+    }
+  },
+  "managerConta": {
+    "titulo": "Configuración de Cuenta",
+    "subtitulo": "Gestiona tu cuenta.",
+    "erroComprimento": "La nueva contraseña debe tener al menos 8 caracteres.",
+    "erroCoincidem": "Las contraseñas no coinciden.",
+    "sucessoMsg": "Contraseña cambiada con éxito.",
+    "alterarPassword": "Cambiar Contraseña",
+    "labels": {
+      "atual": "Contraseña actual",
+      "nova": "Nueva contraseña",
+      "dicaMinimo": "Mínimo 8 caracteres.",
+      "confirmar": "Confirmar nueva contraseña"
+    },
+    "botoes": {
+      "guardando": "Guardando…",
+      "alterar": "Cambiar Contraseña",
+      "terminarSessao": "Cerrar Sesión"
+    }
+  },
+  "notificacoes": {
+    "titulo": "Notificaciones",
+    "pesquisar": "Buscar…",
+    "marcarTodas": "Marcar todas como leídas",
+    "vazioTitulo": "Sin notificaciones",
+    "vazioDesc": "¡Estás al día! 🎉",
+    "apagar": "Borrar",
+    "filtros": {
+      "todas": "Todas",
+      "naoLidas": "No leídas"
+    },
+    "tags": {
+      "info": "INFO",
+      "aviso": "AVISO",
+      "sucesso": "ÉXITO"
+    }
+  },
+  "preferencias": {
+    "titulo": "Preferencias",
+    "subtitulo": "Personaliza tu experiencia en la plataforma",
+    "voltar": "Volver al Perfil",
+    "guardar": "Guardar Preferencias",
+    "guardado": "Preferencias guardadas ✓",
+    "notificacoes": {
+      "titulo": "Notificaciones",
+      "email": "Notificaciones por Email",
+      "emailDesc": "Recibe notificaciones en tu email",
+      "aprovado": "Insignia Aprobada",
+      "aprovadoDesc": "Cuando una candidatura es aprobada",
+      "rejeitado": "Insignia Rechazada o Devuelta",
+      "rejeitadoDesc": "Cuando una candidatura es rechazada o devuelta",
+      "novos": "Nuevas Insignias Disponibles",
+      "novosDesc": "Cuando hay nuevas insignias para candidatarte",
+      "ranking": "Actualizaciones de Ranking",
+      "rankingDesc": "Cambios significativos en tu posición",
+      "semanal": "Resumen Semanal",
+      "semanalDesc": "Email semanal con tu progreso",
+      "mensal": "Informe Mensual",
+      "mensalDesc": "Informe detallado de tus logros"
+    },
+    "visualizacao": {
+      "titulo": "Visualización",
+      "idioma": "Idioma",
+      "tema": "Tema",
+      "claro": "Claro",
+      "escuro": "Oscuro",
+      "auto": "Automático",
+      "badgesPorPagina": "Insignias por Página",
+      "mostrarImagens": "Mostrar imágenes de Insignias"
+    },
+    "privacidade": {
+      "titulo": "Privacidad",
+      "perfilPublico": "Perfil Público",
+      "perfilPublicoDesc": "Permite que otros consultores vean tu perfil",
+      "diretorio": "Aparecer en el Directorio",
+      "diretorioDesc": "Aparece en la lista de consultores",
+      "badges": "Mostrar Insignias Públicamente",
+      "badgesDesc": "Muestra tus insignias en tu perfil público",
+      "pontos": "Mostrar Puntos Públicamente",
+      "pontosDesc": "Muestra tu puntuación en el ranking"
+    },
+    "resumo": {
+      "titulo": "Resumen de Configuración",
+      "notifEmail": "Notificaciones Email",
+      "ativadas": "Activadas",
+      "desativadas": "Desactivadas",
+      "idioma": "Idioma",
+      "tema": "Tema",
+      "perfilPublico": "Perfil Público",
+      "sim": "Sí",
+      "nao": "No"
+    },
+    "estatisticas": {
+      "titulo": "Tus Estadísticas",
+      "pontos": "Puntos",
+      "badges": "Insignias",
+      "ranking": "Ranking"
+    },
+    "dica": {
+      "titulo": "Consejo",
+      "texto": "Las preferencias se guardan y aplican en todos los dispositivos donde accedas a la plataforma."
+    }
+  },
+  "publicBadge": {
+    "verificando": "Verificando insignia…",
+    "naoEncontradoTitulo": "Insignia no encontrada",
+    "naoEncontradoDesc": "Este enlace de verificación no es válido.",
+    "valido": "Insignia válida",
+    "expirado": "Insignia expirada",
+    "atribuidoA": "Otorgada a",
+    "emissor": "Emisor",
+    "dataAtribuicao": "Fecha de obtención",
+    "validade": "Validez",
+    "naoExpira": "No expira",
+    "footer": "Verificado por Softinsa · Plataforma de Insignias"
+  },
+  "perfilPublico": {
+    "voltar": "Volver al Perfil",
+    "defaultRole": "Consultor",
+    "semBio": "Sin biografía definida.",
+    "tabs": {
+      "sobre": "Sobre",
+      "badges": "Insignias Obtenidas",
+      "conquistas": "Logros Especiales"
+    },
+    "stats": {
+      "badges": "Insignias Completadas",
+      "pontos": "Puntos Totales",
+      "conquistas": "Logros Especiales",
+      "desde": "Consultor desde"
+    },
+    "vazioBadgesTitulo": "Sin insignias obtenidas",
+    "vazioBadgesDesc": "Aún no hay insignias para mostrar.",
+    "vazioEspecialTitulo": "Sin logros especiales",
+    "vazioEspecialDesc": "Los logros especiales aparecerán aquí cuando los desbloquees.",
+    "conquistasCount": "logro(s) especial(es)",
+    "pts": "pts"
+  },
+  "ranking": {
+    "titulo": "Clasificación",
+    "subtitulo": "Compite con los mejores consultores de Softinsa",
+    "periodos": {
+      "semana": "Semana",
+      "mes": "Mes",
+      "ano": "Año",
+      "total": "Total"
+    },
+    "categorias": {
+      "pontos": "Puntos",
+      "badges": "Insignias",
+      "dias": "Días"
+    },
+    "stats": {
+      "posicao": "Posición",
+      "pontos": "Puntos",
+      "badges": "Insignias",
+      "percentil": "Percentil",
+      "evolucao": "Evolución",
+      "em": "de",
+      "consultores": "consultores",
+      "posicoesMes": "posiciones este mes"
+    },
+    "completos": "Clasificaciones Completas",
+    "consultorDefault": "Consultor",
+    "top3": "Top 3 Consultores",
+    "pts": "pts"
+  },
+  "submeterCandidatura": {
+    "voltar": "Volver a la Insignia",
+    "tituloHero": "Añadir Evidencia",
+    "badgeLabel": "Insignia:",
+    "selecionaBadge": "Selecciona una insignia…",
+    "dicaHero": "Añade múltiples evidencias para aumentar las posibilidades de aprobación. Completa la documentación y luego envía todo para su validación.",
+    "prontasTitulo": "Evidencias Listas",
+    "vazioProntas": "No se ha añadido ninguna evidencia",
+    "botaoSubmetendo": "Enviando…",
+    "botaoSubmeter": "Enviar",
+    "novaTitulo": "Nueva Evidencia",
+    "tipoLabel": "Tipo de Evidencia",
+    "tipos": {
+      "Ficheiro": "Archivo",
+      "Imagem": "Imagen",
+      "Vídeo": "Video",
+      "Link": "Enlace"
+    },
+    "urlLabel": "URL",
+    "arrasteLabel": "Arrastra el archivo aquí o haz clic para seleccionar",
+    "suportaLabel": "Soporta PDF, DOCX, PNG, JPG, MP4 (máx. 50MB)",
+    "escolherFicheiro": "Elegir Archivo",
+    "tituloLabel": "Título de la Evidencia",
+    "tituloPlaceholder": "Ej: Certificado de finalización del curso",
+    "selecionarRequisito": "Seleccionar requisito",
+    "descricaoLabel": "Descripción (Opcional)",
+    "descricaoPlaceholder": "Describe cómo esta evidencia demuestra las habilidades requeridas…",
+    "botaoAdicionar": "Añadir Evidencia",
+    "dicasTitulo": "Consejos para Evidencias de Calidad",
+    "dica1": "Añade múltiples evidencias para aumentar las posibilidades de aprobación.",
+    "dica2": "Asegúrate de que el archivo sea claro y legible.",
+    "dica3": "Describe cómo cada evidencia demuestra la habilidad de la insignia.",
+    "dica4": "Para proyectos, incluye enlaces que representen tu trabajo.",
+    "sucessoTitulo": "¡Candidatura enviada!",
+    "sucessoDesc": "Redirigiendo a tus insignias…"
+  },
+  "adminDefinicoes": {
+    "titulo": "Configuraciones",
+    "subtitulo": "Configuraciones generales de la plataforma.",
+    "sla": {
+      "titulo": "SLA",
+      "dias": "Días de respuesta",
+      "alertasLabel": "Alertas de SLA",
+      "alertasDesc": "Enviar avisos cuando una solicitud se acerca a la fecha límite"
+    },
+    "notificacoes": {
+      "titulo": "Notificaciones de la plataforma",
+      "email": "Notificaciones por Email",
+      "push": "Notificaciones Push"
+    },
+    "botoes": {
+      "guardado": "Configuraciones guardadas ✓",
+      "guardar": "Guardar Configuraciones"
+    }
+  },
+  "adminPedidos": {
+    "titulo": "Solicitudes de Insignias",
+    "subtitulo": "Todas las candidaturas a insignias.",
+    "vazioTitulo": "Sin solicitudes",
+    "vazioDesc": "No hay candidaturas registradas.",
+    "tabela": {
+      "trackingId": "Tracking ID",
+      "consultor": "Consultor",
+      "badge": "Insignia",
+      "nivel": "Nivel",
+      "pontos": "Puntos",
+      "data": "Fecha",
+      "estado": "Estado"
+    }
+  },
+  "adminResource": {
+    "adicionar": "Añadir {{singular}}",
+    "semRegistos": "Sin {{titulo}}",
+    "adicionaPrimeiro": "Añade el primer registro.",
+    "acoes": "Acciones",
+    "editar": "Editar {{singular}}",
+    "cancelar": "Cancelar",
+    "guardando": "Guardando…",
+    "guardar": "Guardar",
+    "eliminarTitulo": "¿Eliminar registro?",
+    "eliminarAviso": "Esta acción no se puede deshacer.",
+    "eliminar": "Eliminar",
+    "ariaEditar": "Editar",
+    "ariaEliminar": "Eliminar"
+  },
+  "adminUsers": {
+    "titulo": "Utilizadores",
+    "adicionar": "Adicionar",
+    "vazioTitulo": "Sem utilizadores",
+    "vazioDesc": "Adiciona o primeiro utilizador.",
+    "tabela": {
+      "nome": "Nome",
+      "email": "Email",
+      "papel": "Papel",
+      "estado": "Estado",
+      "acoes": "Ações"
+    },
+    "estado": {
+      "ativo": "Ativo",
+      "inativo": "Inativo"
+    },
+    "ariaEditar": "Editar",
+    "ariaDesativar": "Desativar",
+    "modal": {
+      "editar": "Editar Utilizador",
+      "adicionar": "Adicionar Utilizador",
+      "nome": "Nome",
+      "email": "Email",
+      "password": "Password temporária",
+      "papel": "Papel",
+      "ativo": "Ativo",
+      "cancelar": "Cancelar",
+      "guardando": "A guardar…",
+      "guardar": "Guardar"
+    },
+    "desativar": {
+      "titulo": "Desativar {{nome}}?",
+      "desc": "O utilizador deixa de ter acesso.",
+      "botao": "Desativar"
+    },
+    "roles": {
+      "consultor": "Consultor",
+      "talentManager": "Talent Manager",
+      "serviceLineLeader": "Service Line Leader",
+      "admin": "Administrador"
+    }
+  },
+  "badgesGrid": {
+    "tituloDefault": "Catálogo de Insignias",
+    "pesquisar": "Buscar insignias…",
+    "vazioTitulo": "No se encontraron insignias",
+    "vazioDesc": "Intenta otra búsqueda.",
+    "nivel": "Nivel",
+    "pontos": "puntos"
+  },
+  "changePasswordModal": {
+    "titulo": "Establecer nueva contraseña",
+    "descricao": "Es tu primer acceso — establece una contraseña personal para continuar.",
+    "erros": {
+      "comprimento": "La nueva contraseña debe tener al menos 8 caracteres.",
+      "coincidem": "Las contraseñas no coinciden."
+    },
+    "campos": {
+      "atualLabel": "Contraseña actual (la que recibiste)",
+      "atualPlaceholder": "Contraseña temporal",
+      "novaLabel": "Nueva contraseña",
+      "novaHint": "Mínimo 8 caracteres.",
+      "confirmarLabel": "Confirmar nueva contraseña"
+    },
+    "botoes": {
+      "guardando": "Guardando…",
+      "guardar": "Establecer y entrar",
+      "sair": "¿No eres tú? Cerrar sesión"
+    }
+  },
+  "exportButtons": {
+    "semDados": "No hay datos para exportar.",
+    "processando": "Procesando…",
+    "excel": "Excel",
+    "pdf": "PDF",
+    "tituloRelatorio": "Informe de Usuarios",
+    "nomeFicheiro": "usuarios",
+    "colunas": {
+      "nome": "Nombre",
+      "email": "Correo",
+      "papel": "Rol",
+      "estado": "Estado"
+    },
+    "ativo": "Activo",
+    "inativo": "Inactivo"
+  },
+  "notificationsBell": {
+    "ariaLabel": "Notificaciones"
+  },
+  "protectedRoute": {
+    "carregando": "Cargando…"
+  },
+  "ui": {
+    "error": {
+      "defaultMessage": "No se pudieron cargar los datos.",
+      "hint": "Comprueba tu conexión e inténtalo de nuevo.",
+      "retry": "Reintentar"
+    },
+    "spinner": {
+      "loading": "Cargando…"
+    }
+  },
+  "admin": {
+    "generic": { "nome": "Nombre", "titulo": "Título", "descricao": "Descripción", "mensagem": "Mensaje" },
+    "badges": { "titulo": "Insignias", "singular": "Insignia", "campos": { "nivel": "Nivel", "pontos": "Puntos" } },
+    "learningPaths": { "titulo": "Rutas de aprendizaje", "singular": "Ruta de aprendizaje" },
+    "policies": { "titulo": "Políticas RGPD", "singular": "Política", "campos": { "versao": "Versión" } },
+    "notices": { "titulo": "Avisos", "singular": "Aviso" },
+    "information": { "titulo": "Información", "singular": "Información" },
+    "serviceLines": { "titulo": "Líneas de servicio", "singular": "Línea de servicio" },
+    "areas": { "titulo": "Áreas", "singular": "Área" },
+    "levels": { "titulo": "Niveles", "singular": "Nivel", "campos": { "codigo": "Código", "ordem": "Orden" } },
+    "requirements": { "titulo": "Requisitos", "singular": "Requisito" }
   }
 }

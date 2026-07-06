@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronDown, Coins } from 'lucide-react'
 import { Spinner, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 const HERO_TINTS = {
   salmon: 'from-orange-200 to-red-200',
@@ -14,6 +15,7 @@ const HERO_TINTS = {
 
 // Página de um badge vista por um perfil de gestão (só-leitura, sem candidatar).
 export default function ManagerBadgeDetailPage() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
   const { id } = useParams()
   const navigate = useNavigate()
   const { data: badge, loading, error, reload } = useAsync(() => api.getBadge(id), [id])
@@ -21,12 +23,12 @@ export default function ManagerBadgeDetailPage() {
 
   if (loading) return <Spinner />
   if (error) return <ErrorState onRetry={reload} />
-  if (!badge) return <p className="text-muted">Badge não encontrado.</p>
+  if (!badge) return <p className="text-muted">{t('managerBadge.naoEncontrado')}</p>
 
   return (
     <div>
       <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
-        <ArrowLeft size={16} /> Voltar
+        <ArrowLeft size={16} /> {t('managerBadge.voltar')}
       </button>
 
       <div className={`overflow-hidden rounded-2xl bg-gradient-to-br ${HERO_TINTS[badge.tint] || HERO_TINTS.sky} p-6 sm:p-8`}>
@@ -34,9 +36,11 @@ export default function ManagerBadgeDetailPage() {
           <div>
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full bg-white/70 px-2.5 py-0.5 text-xs font-semibold text-ink">{badge.nivel}</span>
-              <span className="flex items-center gap-1 rounded-full bg-white/70 px-2.5 py-0.5 text-xs font-semibold text-ink"><Coins size={12} /> {badge.ponto} pontos</span>
+              <span className="flex items-center gap-1 rounded-full bg-white/70 px-2.5 py-0.5 text-xs font-semibold text-ink">
+                <Coins size={12} /> {badge.ponto} {t('managerBadge.pontos')}
+              </span>
             </div>
-            <h1 className="mt-3 text-2xl font-bold text-ink sm:text-3xl">Badge de {badge.nome}</h1>
+            <h1 className="mt-3 text-2xl font-bold text-ink sm:text-3xl">{t('managerBadge.badgeDe')} {badge.nome}</h1>
           </div>
           <div className="hidden shrink-0 text-center sm:block">
             <div className="grid h-24 w-24 place-items-center rounded-full bg-white text-4xl font-bold text-ink shadow">{badge.nome[0]}</div>
@@ -47,13 +51,13 @@ export default function ManagerBadgeDetailPage() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <section>
-          <h2 className="mb-3 font-semibold text-ink">Descrição</h2>
+          <h2 className="mb-3 font-semibold text-ink">{t('managerBadge.descricao')}</h2>
           <p className="text-sm leading-relaxed text-muted">{badge.descricao}</p>
         </section>
         <section>
-          <h2 className="mb-3 font-semibold text-ink">Requisitos</h2>
+          <h2 className="mb-3 font-semibold text-ink">{t('managerBadge.requisitos')}</h2>
           {badge.requisitos.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-gray-200 p-4 text-sm text-muted">Sem requisitos específicos.</p>
+            <p className="rounded-xl border border-dashed border-gray-200 p-4 text-sm text-muted">{t('managerBadge.semRequisitos')}</p>
           ) : (
             <div className="space-y-2">
               {badge.requisitos.map((req, i) => (
@@ -64,7 +68,7 @@ export default function ManagerBadgeDetailPage() {
                   </button>
                   {aberto === i && (
                     <p className="border-t border-gray-100 px-4 py-3 text-sm text-muted">
-                      Requisito necessário para conquistar este badge.
+                      {t('managerBadge.requisitoTextoExtra')}
                     </p>
                   )}
                 </div>

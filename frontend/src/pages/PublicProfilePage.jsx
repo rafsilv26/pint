@@ -5,10 +5,10 @@ import { Card, Spinner, EmptyState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import { useAuth } from '../context/AuthContext'
 import * as api from '../services/api'
-
-const TABS = ['Sobre', 'Badges Conquistados', 'Conquistas Especiais']
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 export default function PublicProfilePage() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
   const { user } = useAuth()
   const { data, loading } = useAsync(async () => {
     const [consultor, badges] = await Promise.all([
@@ -17,27 +17,35 @@ export default function PublicProfilePage() {
     ])
     return { consultor, badges }
   }, [user?.id])
-  const [tab, setTab] = useState('Sobre')
+  
+  // Usar IDs para as tabs para a lógica não quebrar ao mudar o idioma
+  const [tab, setTab] = useState('sobre')
+  
+  const TABS = [
+    { id: 'sobre', label: t('perfilPublico.tabs.sobre') },
+    { id: 'badges', label: t('perfilPublico.tabs.badges') },
+    { id: 'conquistas', label: t('perfilPublico.tabs.conquistas') },
+  ]
 
   const consultor = data?.consultor
   const badges = data?.badges || []
 
   const nome = consultor?.name || user?.nome || 'Consultor'
-  const cargo = consultor?.role || user?.role || 'Consultor'
-  const bio = consultor?.biography || 'Sem biografia definida.'
+  const cargo = consultor?.role || user?.role || t('perfilPublico.defaultRole')
+  const bio = consultor?.biography || t('perfilPublico.semBio')
   const iniciais = nome.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
 
   const stats = [
-    { icon: Award, label: 'Badges Completados', value: consultor?.badges ?? badges.length },
-    { icon: Star, label: 'Pontos Totais', value: consultor?.points ?? 0 },
-    { icon: Sparkles, label: 'Conquistas Especiais', value: consultor?.specials ?? 0 },
-    { icon: Calendar, label: 'Consultor desde', value: consultor?.startDate || '—' },
+    { icon: Award, label: t('perfilPublico.stats.badges'), value: consultor?.badges ?? badges.length },
+    { icon: Star, label: t('perfilPublico.stats.pontos'), value: consultor?.points ?? 0 },
+    { icon: Sparkles, label: t('perfilPublico.stats.conquistas'), value: consultor?.specials ?? 0 },
+    { icon: Calendar, label: t('perfilPublico.stats.desde'), value: consultor?.startDate || '—' },
   ]
 
   return (
     <div>
       <Link to="/perfil" className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
-        <ArrowLeft size={16} /> Voltar ao Perfil
+        <ArrowLeft size={16} /> {t('perfilPublico.voltar')}
       </Link>
 
       {/* Cabeçalho */}
@@ -65,36 +73,36 @@ export default function PublicProfilePage() {
         {/* Conteúdo */}
         <div className="lg:col-span-2">
           <div className="mb-4 flex gap-1 border-b border-gray-200">
-            {TABS.map((t) => (
+            {TABS.map((tItem) => (
               <button
-                key={t}
-                onClick={() => setTab(t)}
+                key={tItem.id}
+                onClick={() => setTab(tItem.id)}
                 className={`border-b-2 px-4 py-2.5 text-sm font-medium transition ${
-                  tab === t ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-ink'
+                  tab === tItem.id ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-ink'
                 }`}
               >
-                {t}
+                {tItem.label}
               </button>
             ))}
           </div>
 
           {loading ? (
             <Spinner />
-          ) : tab === 'Sobre' ? (
+          ) : tab === 'sobre' ? (
             <Card>
               <h2 className="font-semibold text-ink">{nome}</h2>
               {(consultor?.area || consultor?.serviceLine) && (
                 <div className="mt-1 flex flex-wrap gap-1.5">
-                  {[consultor?.area, consultor?.serviceLine].filter(Boolean).map((t) => (
-                    <span key={t} className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-600">{t}</span>
+                  {[consultor?.area, consultor?.serviceLine].filter(Boolean).map((tItem) => (
+                    <span key={tItem} className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-600">{tItem}</span>
                   ))}
                 </div>
               )}
               <p className="mt-3 text-sm leading-relaxed text-muted">{bio}</p>
             </Card>
-          ) : tab === 'Badges Conquistados' ? (
+          ) : tab === 'badges' ? (
             badges.length === 0 ? (
-              <EmptyState icon={Award} title="Sem badges conquistados" description="Ainda não há badges para mostrar." />
+              <EmptyState icon={Award} title={t('perfilPublico.vazioBadgesTitulo')} description={t('perfilPublico.vazioBadgesDesc')} />
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
                 {badges.map((b) => (
@@ -102,7 +110,7 @@ export default function PublicProfilePage() {
                     <div className="grid h-12 w-12 place-items-center rounded-xl bg-brand-light text-brand"><Award size={22} /></div>
                     <div>
                       <p className="font-semibold text-ink">{b.nome}</p>
-                      <p className="text-xs text-muted">{b.fornecedor} · {b.pontos} pts</p>
+                      <p className="text-xs text-muted">{b.fornecedor} · {b.pontos} {t('perfilPublico.pts')}</p>
                     </div>
                   </Card>
                 ))}
@@ -110,11 +118,11 @@ export default function PublicProfilePage() {
             )
           ) : (
             (consultor?.specials ?? 0) === 0 ? (
-              <EmptyState icon={Sparkles} title="Sem conquistas especiais" description="As conquistas especiais aparecem aqui quando as desbloqueares." />
+              <EmptyState icon={Sparkles} title={t('perfilPublico.vazioEspecialTitulo')} description={t('perfilPublico.vazioEspecialDesc')} />
             ) : (
               <Card className="flex items-center gap-3">
                 <div className="grid h-12 w-12 place-items-center rounded-xl bg-amber-100 text-amber-600"><Sparkles size={22} /></div>
-                <p className="font-semibold text-ink">{consultor.specials} conquista(s) especial(is)</p>
+                <p className="font-semibold text-ink">{consultor.specials} {t('perfilPublico.conquistasCount')}</p>
               </Card>
             )
           )}

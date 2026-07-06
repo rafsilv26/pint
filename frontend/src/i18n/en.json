@@ -287,5 +287,402 @@
     "pontos": "pts",
     "certificado": "Certificate",
     "paginaPublica": "Public page"
+  },
+  "managerBadge": {
+    "naoEncontrado": "Badge not found.",
+    "voltar": "Go back",
+    "pontos": "points",
+    "badgeDe": "Badge for",
+    "descricao": "Description",
+    "requisitos": "Requirements",
+    "semRequisitos": "No specific requirements.",
+    "requisitoTextoExtra": "Requirement necessary to earn this badge."
+  },
+  "managerBadge": {
+    "naoEncontrado": "Badge not found.",
+    "voltar": "Go back",
+    "pontos": "points",
+    "badgeDe": "Badge for",
+    "descricao": "Description",
+    "requisitos": "Requirements",
+    "semRequisitos": "No specific requirements.",
+    "requisitoTextoExtra": "Requirement necessary to earn this badge."
+  },
+  "managerConsultor": {
+    "naoEncontrado": "Consultant not found.",
+    "voltar": "Go back",
+    "defaultRole": "Consultant",
+    "sobre": "About",
+    "stats": {
+      "badges": "Badges",
+      "pontos": "Points",
+      "conquistas": "Special Achievements",
+      "desde": "Consultant since"
+    }
+  },
+  "managerConta": {
+    "titulo": "Account Settings",
+    "subtitulo": "Manage your account.",
+    "erroComprimento": "The new password must be at least 8 characters long.",
+    "erroCoincidem": "Passwords do not match.",
+    "sucessoMsg": "Password successfully changed.",
+    "alterarPassword": "Change Password",
+    "labels": {
+      "atual": "Current password",
+      "nova": "New password",
+      "dicaMinimo": "Minimum 8 characters.",
+      "confirmar": "Confirm new password"
+    },
+    "botoes": {
+      "guardando": "Saving…",
+      "alterar": "Change Password",
+      "terminarSessao": "Sign Out"
+    }
+  },
+  "notificacoes": {
+    "titulo": "Notifications",
+    "pesquisar": "Search…",
+    "marcarTodas": "Mark all as read",
+    "vazioTitulo": "No notifications",
+    "vazioDesc": "You're all caught up! 🎉",
+    "apagar": "Delete",
+    "filtros": {
+      "todas": "All",
+      "naoLidas": "Unread"
+    },
+    "tags": {
+      "info": "INFO",
+      "aviso": "WARNING",
+      "sucesso": "SUCCESS"
+    }
+  },
+  "preferencias": {
+    "titulo": "Preferences",
+    "subtitulo": "Customize your experience on the platform",
+    "voltar": "Back to Profile",
+    "guardar": "Save Preferences",
+    "guardado": "Preferences saved ✓",
+    "notificacoes": {
+      "titulo": "Notifications",
+      "email": "Email Notifications",
+      "emailDesc": "Receive notifications in your email",
+      "aprovado": "Badge Approved",
+      "aprovadoDesc": "When an application is approved",
+      "rejeitado": "Badge Rejected or Sent Back",
+      "rejeitadoDesc": "When an application is rejected or returned",
+      "novos": "New Badges Available",
+      "novosDesc": "When there are new badges to apply for",
+      "ranking": "Ranking Updates",
+      "rankingDesc": "Significant changes in your position",
+      "semanal": "Weekly Summary",
+      "semanalDesc": "Weekly email with your progress",
+      "mensal": "Monthly Report",
+      "mensalDesc": "Detailed report of your achievements"
+    },
+    "visualizacao": {
+      "titulo": "Display",
+      "idioma": "Language",
+      "tema": "Theme",
+      "claro": "Light",
+      "escuro": "Dark",
+      "auto": "Automatic",
+      "badgesPorPagina": "Badges per Page",
+      "mostrarImagens": "Show Badge Images"
+    },
+    "privacidade": {
+      "titulo": "Privacy",
+      "perfilPublico": "Public Profile",
+      "perfilPublicoDesc": "Allow other consultants to see your profile",
+      "diretorio": "Appear in Directory",
+      "diretorioDesc": "Show up in the consultants list",
+      "badges": "Show Badges Publicly",
+      "badgesDesc": "Display your badges on your public profile",
+      "pontos": "Show Points Publicly",
+      "pontosDesc": "Display your score in the ranking"
+    },
+    "resumo": {
+      "titulo": "Settings Summary",
+      "notifEmail": "Email Notifications",
+      "ativadas": "Enabled",
+      "desativadas": "Disabled",
+      "idioma": "Language",
+      "tema": "Theme",
+      "perfilPublico": "Public Profile",
+      "sim": "Yes",
+      "nao": "No"
+    },
+    "estatisticas": {
+      "titulo": "Your Statistics",
+      "pontos": "Points",
+      "badges": "Badges",
+      "ranking": "Ranking"
+    },
+    "dica": {
+      "titulo": "Tip",
+      "texto": "Preferences are saved and applied on all devices where you access the platform."
+    }
+  },
+  "publicBadge": {
+    "verificando": "Verifying badge…",
+    "naoEncontradoTitulo": "Badge not found",
+    "naoEncontradoDesc": "This verification link is not valid.",
+    "valido": "Valid badge",
+    "expirado": "Expired badge",
+    "atribuidoA": "Awarded to",
+    "emissor": "Issuer",
+    "dataAtribuicao": "Award date",
+    "validade": "Valid until",
+    "naoExpira": "Does not expire",
+    "footer": "Verified by Softinsa · Badges Platform"
+  },
+  "perfilPublico": {
+    "voltar": "Back to Profile",
+    "defaultRole": "Consultant",
+    "semBio": "No biography defined.",
+    "tabs": {
+      "sobre": "About",
+      "badges": "Earned Badges",
+      "conquistas": "Special Achievements"
+    },
+    "stats": {
+      "badges": "Completed Badges",
+      "pontos": "Total Points",
+      "conquistas": "Special Achievements",
+      "desde": "Consultant since"
+    },
+    "vazioBadgesTitulo": "No badges earned",
+    "vazioBadgesDesc": "There are no badges to show yet.",
+    "vazioEspecialTitulo": "No special achievements",
+    "vazioEspecialDesc": "Special achievements will appear here when you unlock them.",
+    "conquistasCount": "special achievement(s)",
+    "pts": "pts"
+  },
+  "ranking": {
+    "titulo": "Ranking",
+    "subtitulo": "Compete with the best Softinsa consultants",
+    "periodos": {
+      "semana": "Week",
+      "mes": "Month",
+      "ano": "Year",
+      "total": "Total"
+    },
+    "categorias": {
+      "pontos": "Points",
+      "badges": "Badges",
+      "dias": "Days"
+    },
+    "stats": {
+      "posicao": "Position",
+      "pontos": "Points",
+      "badges": "Badges",
+      "percentil": "Percentile",
+      "evolucao": "Evolution",
+      "em": "out of",
+      "consultores": "consultants",
+      "posicoesMes": "positions this month"
+    },
+    "completos": "Full Rankings",
+    "consultorDefault": "Consultant",
+    "top3": "Top 3 Consultants",
+    "pts": "pts"
+  },
+  "submeterCandidatura": {
+    "voltar": "Back to Badge",
+    "tituloHero": "Add Evidence",
+    "badgeLabel": "Badge:",
+    "selecionaBadge": "Select a badge…",
+    "dicaHero": "Add multiple pieces of evidence to increase approval chances. Complete the documentation and submit everything for validation.",
+    "prontasTitulo": "Ready Evidence",
+    "vazioProntas": "No evidence added",
+    "botaoSubmetendo": "Submitting…",
+    "botaoSubmeter": "Submit",
+    "novaTitulo": "New Evidence",
+    "tipoLabel": "Evidence Type",
+    "tipos": {
+      "Ficheiro": "File",
+      "Imagem": "Image",
+      "Vídeo": "Video",
+      "Link": "Link"
+    },
+    "urlLabel": "URL",
+    "arrasteLabel": "Drag the file here or click to select",
+    "suportaLabel": "Supports PDF, DOCX, PNG, JPG, MP4 (max. 50MB)",
+    "escolherFicheiro": "Choose File",
+    "tituloLabel": "Evidence Title",
+    "tituloPlaceholder": "Ex: Course completion certificate",
+    "selecionarRequisito": "Select requirement",
+    "descricaoLabel": "Description (Optional)",
+    "descricaoPlaceholder": "Describe how this evidence demonstrates the required skills…",
+    "botaoAdicionar": "Add Evidence",
+    "dicasTitulo": "Tips for Quality Evidence",
+    "dica1": "Add multiple pieces of evidence to increase approval chances.",
+    "dica2": "Ensure the file is clear and readable.",
+    "dica3": "Describe how each piece of evidence demonstrates the badge's skill.",
+    "dica4": "For projects, include links that represent your work.",
+    "sucessoTitulo": "Application submitted!",
+    "sucessoDesc": "Redirecting to your badges…"
+  },
+  "adminDefinicoes": {
+    "titulo": "Settings",
+    "subtitulo": "General platform configurations.",
+    "sla": {
+      "titulo": "SLA",
+      "dias": "Response days",
+      "alertasLabel": "SLA Alerts",
+      "alertasDesc": "Send warnings when a request approaches the deadline"
+    },
+    "notificacoes": {
+      "titulo": "Platform notifications",
+      "email": "Email Notifications",
+      "push": "Push Notifications"
+    },
+    "botoes": {
+      "guardado": "Settings saved ✓",
+      "guardar": "Save Settings"
+    }
+  },
+  "adminPedidos": {
+    "titulo": "Badge Requests",
+    "subtitulo": "All badge applications.",
+    "vazioTitulo": "No requests",
+    "vazioDesc": "There are no registered applications.",
+    "tabela": {
+      "trackingId": "Tracking ID",
+      "consultor": "Consultant",
+      "badge": "Badge",
+      "nivel": "Level",
+      "pontos": "Points",
+      "data": "Date",
+      "estado": "Status"
+    }
+  },
+  "adminResource": {
+    "adicionar": "Add {{singular}}",
+    "semRegistos": "No {{titulo}}",
+    "adicionaPrimeiro": "Add the first record.",
+    "acoes": "Actions",
+    "editar": "Edit {{singular}}",
+    "cancelar": "Cancel",
+    "guardando": "Saving…",
+    "guardar": "Save",
+    "eliminarTitulo": "Delete record?",
+    "eliminarAviso": "This action cannot be undone.",
+    "eliminar": "Delete",
+    "ariaEditar": "Edit",
+    "ariaEliminar": "Delete"
+  },
+  "adminUsers": {
+    "titulo": "Utilizadores",
+    "adicionar": "Adicionar",
+    "vazioTitulo": "Sem utilizadores",
+    "vazioDesc": "Adiciona o primeiro utilizador.",
+    "tabela": {
+      "nome": "Nome",
+      "email": "Email",
+      "papel": "Papel",
+      "estado": "Estado",
+      "acoes": "Ações"
+    },
+    "estado": {
+      "ativo": "Ativo",
+      "inativo": "Inativo"
+    },
+    "ariaEditar": "Editar",
+    "ariaDesativar": "Desativar",
+    "modal": {
+      "editar": "Editar Utilizador",
+      "adicionar": "Adicionar Utilizador",
+      "nome": "Nome",
+      "email": "Email",
+      "password": "Password temporária",
+      "papel": "Papel",
+      "ativo": "Ativo",
+      "cancelar": "Cancelar",
+      "guardando": "A guardar…",
+      "guardar": "Guardar"
+    },
+    "desativar": {
+      "titulo": "Desativar {{nome}}?",
+      "desc": "O utilizador deixa de ter acesso.",
+      "botao": "Desativar"
+    },
+    "roles": {
+      "consultor": "Consultor",
+      "talentManager": "Talent Manager",
+      "serviceLineLeader": "Service Line Leader",
+      "admin": "Administrador"
+    }
+  },
+  "badgesGrid": {
+    "tituloDefault": "Badge Catalog",
+    "pesquisar": "Search badges…",
+    "vazioTitulo": "No badges found",
+    "vazioDesc": "Try another search.",
+    "nivel": "Level",
+    "pontos": "points"
+  },
+  "changePasswordModal": {
+    "titulo": "Set new password",
+    "descricao": "This is your first login — set a personal password to continue.",
+    "erros": {
+      "comprimento": "The new password must be at least 8 characters long.",
+      "coincidem": "Passwords do not match."
+    },
+    "campos": {
+      "atualLabel": "Current password (the one you received)",
+      "atualPlaceholder": "Temporary password",
+      "novaLabel": "New password",
+      "novaHint": "Minimum 8 characters.",
+      "confirmarLabel": "Confirm new password"
+    },
+    "botoes": {
+      "guardando": "Saving…",
+      "guardar": "Set and enter",
+      "sair": "Not you? Sign out"
+    }
+  },
+  "exportButtons": {
+    "semDados": "No data to export.",
+    "processando": "Processing…",
+    "excel": "Excel",
+    "pdf": "PDF",
+    "tituloRelatorio": "Users Report",
+    "nomeFicheiro": "users",
+    "colunas": {
+      "nome": "Name",
+      "email": "Email",
+      "papel": "Role",
+      "estado": "Status"
+    },
+    "ativo": "Active",
+    "inativo": "Inactive"
+  },
+  "notificationsBell": {
+    "ariaLabel": "Notifications"
+  },
+  "protectedRoute": {
+    "carregando": "Loading…"
+  },
+  "ui": {
+    "error": {
+      "defaultMessage": "Unable to load data.",
+      "hint": "Check your connection and try again.",
+      "retry": "Try again"
+    },
+    "spinner": {
+      "loading": "Loading…"
+    }
+  },
+  "admin": {
+    "generic": { "nome": "Name", "titulo": "Title", "descricao": "Description", "mensagem": "Message" },
+    "badges": { "titulo": "Badges", "singular": "Badge", "campos": { "nivel": "Level", "pontos": "Points" } },
+    "learningPaths": { "titulo": "Learning Paths", "singular": "Learning Path" },
+    "policies": { "titulo": "GDPR Policies", "singular": "Policy", "campos": { "versao": "Version" } },
+    "notices": { "titulo": "Notices", "singular": "Notice" },
+    "information": { "titulo": "Information", "singular": "Information" },
+    "serviceLines": { "titulo": "Service Lines", "singular": "Service Line" },
+    "areas": { "titulo": "Areas", "singular": "Area" },
+    "levels": { "titulo": "Levels", "singular": "Level", "campos": { "codigo": "Code", "ordem": "Order" } },
+    "requirements": { "titulo": "Requirements", "singular": "Requirement" }
   }
 }

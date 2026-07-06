@@ -287,5 +287,392 @@
     "pontos": "pts",
     "certificado": "Certificado",
     "paginaPublica": "Página pública"
+  },
+  "managerBadge": {
+    "naoEncontrado": "Badge não encontrado.",
+    "voltar": "Voltar",
+    "pontos": "pontos",
+    "badgeDe": "Badge de",
+    "descricao": "Descrição",
+    "requisitos": "Requisitos",
+    "semRequisitos": "Sem requisitos específicos.",
+    "requisitoTextoExtra": "Requisito necessário para conquistar este badge."
+  },
+  "managerConsultor": {
+    "naoEncontrado": "Consultor não encontrado.",
+    "voltar": "Voltar",
+    "defaultRole": "Consultor",
+    "sobre": "Sobre",
+    "stats": {
+      "badges": "Badges",
+      "pontos": "Pontos",
+      "conquistas": "Conquistas Especiais",
+      "desde": "Consultor desde"
+    }
+  },
+  "managerConta": {
+    "titulo": "Definições de Conta",
+    "subtitulo": "Gere a tua conta.",
+    "erroComprimento": "A nova palavra-passe deve ter pelo menos 8 caracteres.",
+    "erroCoincidem": "As palavras-passe não coincidem.",
+    "sucessoMsg": "Palavra-passe alterada com sucesso.",
+    "alterarPassword": "Alterar Palavra-passe",
+    "labels": {
+      "atual": "Palavra-passe atual",
+      "nova": "Nova palavra-passe",
+      "dicaMinimo": "Mínimo 8 caracteres.",
+      "confirmar": "Confirmar nova palavra-passe"
+    },
+    "botoes": {
+      "guardando": "A guardar…",
+      "alterar": "Alterar Palavra-passe",
+      "terminarSessao": "Terminar Sessão"
+    }
+  },
+  "notificacoes": {
+    "titulo": "Notificações",
+    "pesquisar": "Procurar…",
+    "marcarTodas": "Marcar todas como lidas",
+    "vazioTitulo": "Sem notificações",
+    "vazioDesc": "Estás em dia! 🎉",
+    "apagar": "Apagar",
+    "filtros": {
+      "todas": "Todas",
+      "naoLidas": "Não lidas"
+    },
+    "tags": {
+      "info": "INFO",
+      "aviso": "AVISO",
+      "sucesso": "SUCESSO"
+    }
+  },
+  "preferencias": {
+    "titulo": "Preferências",
+    "subtitulo": "Personaliza a tua experiência na plataforma",
+    "voltar": "Voltar ao Perfil",
+    "guardar": "Guardar Preferências",
+    "guardado": "Preferências guardadas ✓",
+    "notificacoes": {
+      "titulo": "Notificações",
+      "email": "Notificações por Email",
+      "emailDesc": "Recebe notificações no teu email",
+      "aprovado": "Badge Aprovado",
+      "aprovadoDesc": "Quando uma candidatura é aprovada",
+      "rejeitado": "Badge Rejeitado ou Send Back",
+      "rejeitadoDesc": "Quando uma candidatura é rejeitada ou devolvida",
+      "novos": "Novos Badges Disponíveis",
+      "novosDesc": "Quando há novos badges para te candidatares",
+      "ranking": "Atualizações de Ranking",
+      "rankingDesc": "Mudanças significativas na tua posição",
+      "semanal": "Resumo Semanal",
+      "semanalDesc": "Email semanal com o teu progresso",
+      "mensal": "Relatório Mensal",
+      "mensalDesc": "Relatório detalhado das tuas conquistas"
+    },
+    "visualizacao": {
+      "titulo": "Visualização",
+      "idioma": "Idioma",
+      "tema": "Tema",
+      "claro": "Claro",
+      "escuro": "Escuro",
+      "auto": "Automático",
+      "badgesPorPagina": "Badges por Página",
+      "mostrarImagens": "Mostrar imagens dos Badges"
+    },
+    "privacidade": {
+      "titulo": "Privacidade",
+      "perfilPublico": "Perfil Público",
+      "perfilPublicoDesc": "Permite que outros consultores vejam o teu perfil",
+      "diretorio": "Aparecer no Diretório",
+      "diretorioDesc": "Surge na lista de consultores",
+      "badges": "Mostrar Badges Publicamente",
+      "badgesDesc": "Exibe os teus badges no perfil público",
+      "pontos": "Mostrar Pontos Publicamente",
+      "pontosDesc": "Exibe a tua pontuação no ranking"
+    },
+    "resumo": {
+      "titulo": "Resumo das Configurações",
+      "notifEmail": "Notificações Email",
+      "ativadas": "Ativadas",
+      "desativadas": "Desativadas",
+      "idioma": "Idioma",
+      "tema": "Tema",
+      "perfilPublico": "Perfil Público",
+      "sim": "Sim",
+      "nao": "Não"
+    },
+    "estatisticas": {
+      "titulo": "As tuas Estatísticas",
+      "pontos": "Pontos",
+      "badges": "Badges",
+      "ranking": "Ranking"
+    },
+    "dica": {
+      "titulo": "Dica",
+      "texto": "As preferências são guardadas e aplicadas em todos os dispositivos onde acederes à plataforma."
+    }
+  },
+  "publicBadge": {
+    "verificando": "A verificar badge…",
+    "naoEncontradoTitulo": "Badge não encontrado",
+    "naoEncontradoDesc": "Este link de verificação não é válido.",
+    "valido": "Badge válido",
+    "expirado": "Badge expirado",
+    "atribuidoA": "Atribuído a",
+    "emissor": "Emissor",
+    "dataAtribuicao": "Data de atribuição",
+    "validade": "Validade",
+    "naoExpira": "Não expira",
+    "footer": "Verificado por Softinsa · Plataforma de Badges"
+  },
+  "perfilPublico": {
+    "voltar": "Voltar ao Perfil",
+    "defaultRole": "Consultor",
+    "semBio": "Sem biografia definida.",
+    "tabs": {
+      "sobre": "Sobre",
+      "badges": "Badges Conquistados",
+      "conquistas": "Conquistas Especiais"
+    },
+    "stats": {
+      "badges": "Badges Completados",
+      "pontos": "Pontos Totais",
+      "conquistas": "Conquistas Especiais",
+      "desde": "Consultor desde"
+    },
+    "vazioBadgesTitulo": "Sem badges conquistados",
+    "vazioBadgesDesc": "Ainda não há badges para mostrar.",
+    "vazioEspecialTitulo": "Sem conquistas especiais",
+    "vazioEspecialDesc": "As conquistas especiais aparecem aqui quando as desbloqueares.",
+    "conquistasCount": "conquista(s) especial(is)",
+    "pts": "pts"
+  },
+  "ranking": {
+    "titulo": "Ranking",
+    "subtitulo": "Compete com os melhores consultores da Softinsa",
+    "periodos": {
+      "semana": "Semana",
+      "mes": "Mês",
+      "ano": "Ano",
+      "total": "Total"
+    },
+    "categorias": {
+      "pontos": "Pontos",
+      "badges": "Badges",
+      "dias": "Dias"
+    },
+    "stats": {
+      "posicao": "Posição",
+      "pontos": "Pontos",
+      "badges": "Badges",
+      "percentil": "Percentil",
+      "evolucao": "Evolução",
+      "em": "em",
+      "consultores": "consultores",
+      "posicoesMes": "posições este mês"
+    },
+    "completos": "Rankings Completos",
+    "consultorDefault": "Consultor",
+    "top3": "Top 3 Consultores",
+    "pts": "pts"
+  },
+  "submeterCandidatura": {
+    "voltar": "Voltar ao Badge",
+    "tituloHero": "Adicionar Evidências",
+    "badgeLabel": "Badge:",
+    "selecionaBadge": "Seleciona um badge…",
+    "dicaHero": "Adiciona múltiplas evidências para aumentar a hipótese de aprovação. Conclui a documentação e depois submete tudo para validação.",
+    "prontasTitulo": "Evidências Prontas",
+    "vazioProntas": "Nenhuma evidência adicionada",
+    "botaoSubmetendo": "A submeter…",
+    "botaoSubmeter": "Submeter",
+    "novaTitulo": "Nova Evidência",
+    "tipoLabel": "Tipo de Evidência",
+    "tipos": {
+      "Ficheiro": "Ficheiro",
+      "Imagem": "Imagem",
+      "Vídeo": "Vídeo",
+      "Link": "Link"
+    },
+    "urlLabel": "URL",
+    "arrasteLabel": "Arraste o ficheiro aqui ou clique para selecionar",
+    "suportaLabel": "Suporta PDF, DOCX, PNG, JPG, MP4 (máx. 50MB)",
+    "escolherFicheiro": "Escolher Ficheiro",
+    "tituloLabel": "Título da Evidência",
+    "tituloPlaceholder": "Ex: Certificado de conclusão do curso",
+    "selecionarRequisito": "Selecionar requisito",
+    "descricaoLabel": "Descrição (Opcional)",
+    "descricaoPlaceholder": "Descreve como esta evidência demonstra as competências requeridas…",
+    "botaoAdicionar": "Adicionar Evidência",
+    "dicasTitulo": "Dicas para Evidências de Qualidade",
+    "dica1": "Adiciona múltiplas evidências para aumentar a hipótese de aprovação.",
+    "dica2": "Certifica-te de que o ficheiro está claro e legível.",
+    "dica3": "Descreve como cada evidência demonstra a competência do badge.",
+    "dica4": "Para projetos, inclui links que representem o teu trabalho.",
+    "sucessoTitulo": "Candidatura submetida!",
+    "sucessoDesc": "A redirecionar para os teus badges…"
+  },
+  "adminDefinicoes": {
+    "titulo": "Definições",
+    "subtitulo": "Configurações gerais da plataforma.",
+    "sla": {
+      "titulo": "SLA",
+      "dias": "Dias de resposta",
+      "alertasLabel": "Alertas de SLA",
+      "alertasDesc": "Enviar avisos quando um pedido se aproxima do prazo"
+    },
+    "notificacoes": {
+      "titulo": "Notificações da plataforma",
+      "email": "Notificações por Email",
+      "push": "Notificações Push"
+    },
+    "botoes": {
+      "guardado": "Definições guardadas ✓",
+      "guardar": "Guardar Definições"
+    }
+  },
+  "adminPedidos": {
+    "titulo": "Pedido de Badges",
+    "subtitulo": "Todas as candidaturas a badges.",
+    "vazioTitulo": "Sem pedidos",
+    "vazioDesc": "Não há candidaturas registadas.",
+    "tabela": {
+      "trackingId": "Tracking ID",
+      "consultor": "Consultor",
+      "badge": "Badge",
+      "nivel": "Nível",
+      "pontos": "Pontos",
+      "data": "Data",
+      "estado": "Estado"
+    }
+  },
+  "adminResource": {
+    "adicionar": "Adicionar {{singular}}",
+    "semRegistos": "Sem {{titulo}}",
+    "adicionaPrimeiro": "Adiciona o primeiro registo.",
+    "acoes": "Ações",
+    "editar": "Editar {{singular}}",
+    "cancelar": "Cancelar",
+    "guardando": "A guardar…",
+    "guardar": "Guardar",
+    "eliminarTitulo": "Eliminar registo?",
+    "eliminarAviso": "Esta ação não pode ser desfeita.",
+    "eliminar": "Eliminar",
+    "ariaEditar": "Editar",
+    "ariaEliminar": "Eliminar"
+  },
+  "adminUsers": {
+    "titulo": "Utilizadores",
+    "adicionar": "Adicionar",
+    "vazioTitulo": "Sem utilizadores",
+    "vazioDesc": "Adiciona o primeiro utilizador.",
+    "tabela": {
+      "nome": "Nome",
+      "email": "Email",
+      "papel": "Papel",
+      "estado": "Estado",
+      "acoes": "Ações"
+    },
+    "estado": {
+      "ativo": "Ativo",
+      "inativo": "Inativo"
+    },
+    "ariaEditar": "Editar",
+    "ariaDesativar": "Desativar",
+    "modal": {
+      "editar": "Editar Utilizador",
+      "adicionar": "Adicionar Utilizador",
+      "nome": "Nome",
+      "email": "Email",
+      "password": "Password temporária",
+      "papel": "Papel",
+      "ativo": "Ativo",
+      "cancelar": "Cancelar",
+      "guardando": "A guardar…",
+      "guardar": "Guardar"
+    },
+    "desativar": {
+      "titulo": "Desativar {{nome}}?",
+      "desc": "O utilizador deixa de ter acesso.",
+      "botao": "Desativar"
+    },
+    "roles": {
+      "consultor": "Consultor",
+      "talentManager": "Talent Manager",
+      "serviceLineLeader": "Service Line Leader",
+      "admin": "Administrador"
+    }
+  },
+  "badgesGrid": {
+    "tituloDefault": "Catálogo de Badges",
+    "pesquisar": "Procurar badges…",
+    "vazioTitulo": "Nenhum badge encontrado",
+    "vazioDesc": "Tenta outra pesquisa.",
+    "nivel": "Nível",
+    "pontos": "pontos"
+  },
+  "changePasswordModal": {
+    "titulo": "Definir nova palavra-passe",
+    "descricao": "É o teu primeiro acesso — define uma palavra-passe pessoal para continuar.",
+    "erros": {
+      "comprimento": "A nova palavra-passe deve ter pelo menos 8 caracteres.",
+      "coincidem": "As palavras-passe não coincidem."
+    },
+    "campos": {
+      "atualLabel": "Palavra-passe atual (a que recebeste)",
+      "atualPlaceholder": "Palavra-passe temporária",
+      "novaLabel": "Nova palavra-passe",
+      "novaHint": "Mínimo 8 caracteres.",
+      "confirmarLabel": "Confirmar nova palavra-passe"
+    },
+    "botoes": {
+      "guardando": "A guardar…",
+      "guardar": "Definir e entrar",
+      "sair": "Não és tu? Terminar sessão"
+    }
+  },
+  "exportButtons": {
+    "semDados": "Sem dados para exportar.",
+    "processando": "A processar…",
+    "excel": "Excel",
+    "pdf": "PDF",
+    "tituloRelatorio": "Relatório de Utilizadores",
+    "nomeFicheiro": "utilizadores",
+    "colunas": {
+      "nome": "Nome",
+      "email": "Email",
+      "papel": "Papel",
+      "estado": "Estado"
+    },
+    "ativo": "Ativo",
+    "inativo": "Inativo"
+  },
+  "notificationsBell": {
+    "ariaLabel": "Notificações"
+  },
+  "protectedRoute": {
+    "carregando": "A carregar…"
+  },
+  "ui": {
+    "error": {
+      "defaultMessage": "Não foi possível carregar os dados.",
+      "hint": "Verifica a ligação e tenta novamente.",
+      "retry": "Tentar de novo"
+    },
+    "spinner": {
+      "loading": "A carregar…"
+    }
+  },
+  "admin": {
+    "generic": { "nome": "Nome", "titulo": "Título", "descricao": "Descrição", "mensagem": "Mensagem" },
+    "badges": { "titulo": "Badges", "singular": "Badge", "campos": { "nivel": "Nível", "pontos": "Pontos" } },
+    "learningPaths": { "titulo": "Learning Paths", "singular": "Learning Path" },
+    "policies": { "titulo": "Políticas RGPD", "singular": "Política", "campos": { "versao": "Versão" } },
+    "notices": { "titulo": "Avisos", "singular": "Aviso" },
+    "information": { "titulo": "Informações", "singular": "Informação" },
+    "serviceLines": { "titulo": "Service Lines", "singular": "Service Line" },
+    "areas": { "titulo": "Áreas", "singular": "Área" },
+    "levels": { "titulo": "Níveis", "singular": "Nível", "campos": { "codigo": "Código", "ordem": "Ordem" } },
+    "requirements": { "titulo": "Requisitos", "singular": "Requisito" }
   }
 }
