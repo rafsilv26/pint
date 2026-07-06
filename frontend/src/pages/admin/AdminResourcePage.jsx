@@ -5,12 +5,16 @@ import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import { ADMIN_RESOURCES } from '../../config/adminResources'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { getAdminResources } from '../../config/adminResources'; 
+import { useTranslation } from 'react-i18next'; // Garante que tens o hook aqui
 
-// Página genérica de gestão (lista + adicionar/editar + eliminar) para os
-// recursos do catálogo. Configurada por ADMIN_RESOURCES[resourceKey].
+// 2. Dentro do componente, inicializa a função com t()
 export default function AdminResourcePage({ resourceKey, readOnly = false }) {
-  const { t } = useTranslation() // <-- Inicializa a tradução
-  const cfg = ADMIN_RESOURCES[resourceKey]
+  const { t } = useTranslation();
+  
+  // Agora inicializamos o objeto de configuração chamando a função
+  const allResources = getAdminResources(t);
+  const cfg = allResources[resourceKey];
   const { data, loading, error, reload } = useAsync(() => api.listResource(cfg.resource), [resourceKey])
 
   const [editing, setEditing] = useState(null) // row em edição, ou {} para novo
