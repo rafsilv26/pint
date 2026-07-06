@@ -3,8 +3,6 @@ import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { PageHeader, Card, Spinner, ErrorState, EmptyState, Button } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
-import { ADMIN_RESOURCES } from '../../config/adminResources'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
 import { getAdminResources } from '../../config/adminResources'; 
 import { useTranslation } from 'react-i18next'; // Garante que tens o hook aqui
 
