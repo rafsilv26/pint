@@ -52,6 +52,13 @@ export async function http(path, { method = 'GET', body, auth = true, isForm = f
   const data = text ? safeJson(text) : null
 
   if (!res.ok) {
+    // --- ADICIONA ESTAS LINHAS AQUI ---
+    console.error("DEBUG - Resposta do Servidor (Erro):", {
+      status: res.status,
+      data: data
+    });
+    // ----------------------------------
+
     const msg = data?.message || data?.erro || data?.error || `Erro ${res.status}`
     throw new Error(msg)
   }
