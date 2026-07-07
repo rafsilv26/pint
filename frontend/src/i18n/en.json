@@ -684,5 +684,287 @@
     "areas": { "titulo": "Areas", "singular": "Area" },
     "levels": { "titulo": "Levels", "singular": "Level", "campos": { "codigo": "Code", "ordem": "Order" } },
     "requirements": { "titulo": "Requirements", "singular": "Requirement" }
+  },
+  "nav": {
+    "consultor": {
+      "inicio": "Home",
+      "catalogo": "Badge Catalog",
+      "meusBadges": "My Badges",
+      "ranking": "Ranking",
+      "perfil": "Profile"
+    },
+    "tm": {
+      "dashboard": "Dashboard",
+      "candidaturas": "Badge Applications",
+      "catalogo": "Badge Catalog",
+      "learningPaths": "Learning Paths",
+      "consultores": "Consultants"
+    },
+    "sll": {
+      "dashboard": "Dashboard",
+      "consultores": "Consultants",
+      "badges": "Badges",
+      "pedidos": "Requests",
+      "relatorios": "Reports",
+      "notificacoes": "Notifications"
+    },
+    "admin": {
+      "dashboard": "Dashboard",
+      "utilizadores": "Users",
+      "badges": "Badges",
+      "pedidos": "Badge Requests",
+      "learningPaths": "Learning Paths",
+      "serviceLines": "Service Lines",
+      "areas": "Areas",
+      "niveis": "Levels",
+      "requisitos": "Requirements",
+      "politicas": "GDPR Policies",
+      "avisos": "Notices",
+      "informacoes": "Information",
+      "definicoes": "Settings"
+    },
+    "roles": {
+      "admin": "Administrator"
+    },
+    "painelDefault": "Panel"
+  },
+  "atualizarPassword": {
+    "titulo": "Update Password",
+    "subtitulo": "Enter your new access password",
+    "campos": {
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter new password"
+    },
+    "botoes": {
+      "guardando": "Saving…",
+      "entrar": "Enter"
+    }
+  },
+  "forgotPassword": {
+    "titulo": "Recover Password",
+    "subtitulo": "Enter your account email",
+    "campos": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email"
+    },
+    "botoes": {
+      "voltar": "Back",
+      "enviando": "Sending…",
+      "enviar": "Send"
+    }
+  },
+  "login": {
+    "titulo": "Login",
+    "subtitulo": "Enter your access credentials",
+    "campos": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password"
+    },
+    "lembrarMe": "Remember me",
+    "esqueceuPassword": "Forgot your password?",
+    "botoes": {
+      "entrando": "Logging in…",
+      "entrar": "Login"
+    }
+  },
+  "sllDashboard": {
+    "titulo": "Dashboard",
+    "pontuacaoMensal": "Monthly Score",
+    "tabela": {
+      "posicao": "#",
+      "nome": "Name",
+      "badges": "Badges",
+      "pontos": "Points"
+    },
+    "badgesAtribuidos": "Badges Awarded",
+    "semDados": "No data for the period.",
+    "diasSemana": ["M", "T", "W", "T", "F", "S", "S"],
+    "atividadeRecente": "Recent Activity"
+  },
+  "sllPedidoDetail": {
+    "voltar": "Back",
+    "naoEncontrado": "Request not found.",
+    "candidatura": "Application {{numero}}",
+    "submissao": "Submitted",
+    "iniciarAprovacao": "Start Approval",
+    "aprovar": "Approve",
+    "rejeitar": "Reject",
+    "devolver": "Send Back",
+    "labels": {
+      "motivoRejeicao": "Reason for rejection",
+      "comentarioDevolucao": "Comment for consultant (send back)"
+    },
+    "placeholders": {
+      "motivoRejeicao": "Indicate the reason for rejection…",
+      "comentarioDevolucao": "Indicate what the consultant should fix…"
+    },
+    "cancelar": "Cancel",
+    "confirmarRejeicao": "Confirm Rejection",
+    "confirmarDevolucao": "Confirm Send Back",
+    "evidenciaTab": "Evidence #{{numero}}",
+    "historicoTab": "History",
+    "historicoTitulo": "History",
+    "semHistorico": "No history.",
+    "evidenciaTitulo": "Evidence",
+    "requisitoAssociado": "Associated Requirement",
+    "semEvidencias": "No evidence in this request."
+  },
+  "sllPedidos": {
+    "titulo": "Requests",
+    "resumo": {
+      "pendentes": "Pending",
+      "aprovados": "Approved",
+      "rejeitados": "Rejected"
+    },
+    "empty": {
+      "titulo": "No requests",
+      "descricao": "There are no requests for final approval."
+    },
+    "tabela": {
+      "trackingId": "Tracking ID",
+      "badge": "Badge",
+      "consultor": "Consultant",
+      "data": "Date",
+      "nivel": "Level",
+      "pontos": "Points",
+      "estado": "Status"
+    }
+  },
+  "sllPedidos": {
+    "titulo": "Requests",
+    "resumo": {
+      "pendentes": "Pending",
+      "aprovados": "Approved",
+      "rejeitados": "Rejected"
+    },
+    "empty": {
+      "titulo": "No requests",
+      "descricao": "There are no requests for final approval."
+    },
+    "tabela": {
+      "trackingId": "Tracking ID",
+      "badge": "Badge",
+      "consultor": "Consultant",
+      "data": "Date",
+      "nivel": "Level",
+      "pontos": "Points",
+      "estado": "Status"
+    }
+  },
+  "talentCandidaturaDetail": {
+    "voltar": "Back",
+    "naoEncontrada": "Application not found.",
+    "titulo": "Application {{numero}}",
+    "submissao": "Submitted",
+    "botoes": {
+      "iniciarValidacao": "Start Validation",
+      "validar": "Validate Application",
+      "rejeitarCand": "Reject Application",
+      "cancelar": "Cancel",
+      "confirmarRejeicao": "Confirm Rejection",
+      "rejeitar": "Reject",
+      "aprovar": "Approve"
+    },
+    "labels": {
+      "motivoRejeicao": "Reason for rejection"
+    },
+    "placeholders": {
+      "motivoRejeicao": "Indicate the reason so the consultant can fix it…"
+    },
+    "tabs": {
+      "evidencia": "Evidence #{{numero}}",
+      "historico": "History"
+    },
+    "secoes": {
+      "historicoTitulo": "History",
+      "semHistorico": "No history.",
+      "evidenciaTitulo": "Evidence",
+      "requisitoAssociado": "Associated Requirement",
+      "semEvidencias": "No evidence in this application."
+    }
+  },
+  "talentCandidaturas": {
+    "tabs": {
+      "pendentes": "Pending",
+      "validadas": "Validated",
+      "relatorios": "Reports"
+    },
+    "empty": {
+      "titulo": "No applications",
+      "descricao": "There are no applications in this tab."
+    },
+    "tabela": {
+      "trackingId": "Tracking ID",
+      "consultor": "Consultant",
+      "badge": "Badge",
+      "nivel": "Level",
+      "data": "Date",
+      "estado": "Status",
+      "verCandidatura": "View Application"
+    }
+  },
+  "talentDashboard": {
+    "titulo": "Dashboard",
+    "pontuacaoGlobal": "Global Score",
+    "tabela": {
+      "posicao": "#",
+      "nome": "Name",
+      "pontos": "Points"
+    },
+    "pedidosFechados": "Closed requests",
+    "semDados": "No data for the period.",
+    "diasSemana": ["M", "T", "W", "T", "F", "S", "S"],
+    "atividadeRecente": "Recent Activity"
+  },
+  "api": {
+    "recuperacaoIndisponivel": "Password recovery not yet available on the server.",
+    "dashboard": {
+      "ola": "Hello",
+      "pontosTotais": "Total Points",
+      "badgesConquistados": "Badges Won",
+      "emProgresso": "In Progress",
+      "ranking": "Ranking"
+    },
+    "generic": {
+      "nivel": "Level {{nivel}}",
+      "certificacao": "Certification",
+      "badgeId": "Badge #{{id}}",
+      "consultorId": "Consultant #{{id}}",
+      "consultor": "Consultant",
+      "evidencia": "Evidence"
+    },
+    "status": {
+      "submetido": "Submitted",
+      "validada": "Validated"
+    },
+    "tm": {
+      "stats": {
+        "consultores": "Consultants",
+        "badges": "Badges",
+        "candidaturas": "Applications",
+        "serviceLines": "Service Lines"
+      },
+      "atividade": "Submitted the badge \"{{nome}}\""
+    },
+    "sll": {
+      "stats": {
+        "consultoresLowCode": "LowCode Consultants",
+        "badgesAtribuidos": "Badges awarded",
+        "pedidosBadges": "Badge requests",
+        "pontosAtribuidos": "Points awarded"
+      },
+      "atividade": "Request \"{{nome}}\" in approval"
+    },
+    "erros": {
+      "exportacao": "Could not export."
+    }
+  },
+  "app": {
+    "rotas": {
+      "catalogoBadges": "Badge Catalog",
+      "badges": "Badges"
+    }
   }
 }

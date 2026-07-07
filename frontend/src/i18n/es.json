@@ -684,5 +684,287 @@
     "areas": { "titulo": "Áreas", "singular": "Área" },
     "levels": { "titulo": "Niveles", "singular": "Nivel", "campos": { "codigo": "Código", "ordem": "Orden" } },
     "requirements": { "titulo": "Requisitos", "singular": "Requisito" }
+  },
+  "nav": {
+    "consultor": {
+      "inicio": "Inicio",
+      "catalogo": "Catálogo de Insignias",
+      "meusBadges": "Mis Insignias",
+      "ranking": "Clasificación",
+      "perfil": "Perfil"
+    },
+    "tm": {
+      "dashboard": "Panel de Control",
+      "candidaturas": "Candidaturas a Insignias",
+      "catalogo": "Catálogo de Insignias",
+      "learningPaths": "Rutas de Aprendizaje",
+      "consultores": "Consultores"
+    },
+    "sll": {
+      "dashboard": "Panel de Control",
+      "consultores": "Consultores",
+      "badges": "Insignias",
+      "pedidos": "Solicitudes",
+      "relatorios": "Informes",
+      "notificacoes": "Notificaciones"
+    },
+    "admin": {
+      "dashboard": "Panel de Control",
+      "utilizadores": "Usuarios",
+      "badges": "Insignias",
+      "pedidos": "Solicitudes de Insignias",
+      "learningPaths": "Rutas de Aprendizaje",
+      "serviceLines": "Líneas de Servicio",
+      "areas": "Áreas",
+      "niveis": "Niveles",
+      "requisitos": "Requisitos",
+      "politicas": "Políticas RGPD",
+      "avisos": "Avisos",
+      "informacoes": "Información",
+      "definicoes": "Configuración"
+    },
+    "roles": {
+      "admin": "Administrador"
+    },
+    "painelDefault": "Panel"
+  },
+  "atualizarPassword": {
+    "titulo": "Actualizar Contraseña",
+    "subtitulo": "Introduce la nueva contraseña de acceso",
+    "campos": {
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Introducir nueva contraseña"
+    },
+    "botoes": {
+      "guardando": "Guardando…",
+      "entrar": "Entrar"
+    }
+  },
+  "forgotPassword": {
+    "titulo": "Recuperar Contraseña",
+    "subtitulo": "Introduce el correo de tu cuenta de acceso",
+    "campos": {
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "Introducir correo electrónico"
+    },
+    "botoes": {
+      "voltar": "Volver",
+      "enviando": "Enviando…",
+      "enviar": "Enviar"
+    }
+  },
+  "login": {
+    "titulo": "Iniciar sesión",
+    "subtitulo": "Introduce tus credenciales de acceso",
+    "campos": {
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "Introducir correo electrónico",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Introducir contraseña"
+    },
+    "lembrarMe": "Recuérdame",
+    "esqueceuPassword": "¿Has olvidado tu contraseña?",
+    "botoes": {
+      "entrando": "Entrando…",
+      "entrar": "Entrar"
+    }
+  },
+  "sllDashboard": {
+    "titulo": "Panel de Control",
+    "pontuacaoMensal": "Puntuación Mensual",
+    "tabela": {
+      "posicao": "#",
+      "nome": "Nombre",
+      "badges": "Insignias",
+      "pontos": "Puntos"
+    },
+    "badgesAtribuidos": "Insignias Otorgadas",
+    "semDados": "No hay datos para el período.",
+    "diasSemana": ["L", "M", "X", "J", "V", "S", "D"],
+    "atividadeRecente": "Actividad Reciente"
+  },
+  "sllPedidoDetail": {
+    "voltar": "Volver",
+    "naoEncontrado": "Solicitud no encontrada.",
+    "candidatura": "Candidatura {{numero}}",
+    "submissao": "Enviado",
+    "iniciarAprovacao": "Iniciar Aprobación",
+    "aprovar": "Aprobar",
+    "rejeitar": "Rechazar",
+    "devolver": "Devolver",
+    "labels": {
+      "motivoRejeicao": "Motivo del rechazo",
+      "comentarioDevolucao": "Comentario para el consultor (devolución)"
+    },
+    "placeholders": {
+      "motivoRejeicao": "Indica el motivo del rechazo…",
+      "comentarioDevolucao": "Indica qué debe corregir el consultor…"
+    },
+    "cancelar": "Cancelar",
+    "confirmarRejeicao": "Confirmar Rechazo",
+    "confirmarDevolucao": "Confirmar Devolución",
+    "evidenciaTab": "Evidencia #{{numero}}",
+    "historicoTab": "Historial",
+    "historicoTitulo": "Historial",
+    "semHistorico": "Sin historial.",
+    "evidenciaTitulo": "Evidencia",
+    "requisitoAssociado": "Requisito Asociado",
+    "semEvidencias": "Sin evidencias en esta solicitud."
+  },
+  "sllPedidos": {
+    "titulo": "Solicitudes",
+    "resumo": {
+      "pendentes": "Pendientes",
+      "aprovados": "Aprobados",
+      "rejeitados": "Rechazados"
+    },
+    "empty": {
+      "titulo": "Sin solicitudes",
+      "descricao": "No hay solicitudes para aprobación final."
+    },
+    "tabela": {
+      "trackingId": "ID de seguimiento",
+      "badge": "Insignia",
+      "consultor": "Consultor",
+      "data": "Fecha",
+      "nivel": "Nivel",
+      "pontos": "Puntos",
+      "estado": "Estado"
+    }
+  },
+  "sllPedidos": {
+    "titulo": "Solicitudes",
+    "resumo": {
+      "pendentes": "Pendientes",
+      "aprovados": "Aprobados",
+      "rejeitados": "Rechazados"
+    },
+    "empty": {
+      "titulo": "Sin solicitudes",
+      "descricao": "No hay solicitudes para aprobación final."
+    },
+    "tabela": {
+      "trackingId": "ID de seguimiento",
+      "badge": "Insignia",
+      "consultor": "Consultor",
+      "data": "Fecha",
+      "nivel": "Nivel",
+      "pontos": "Puntos",
+      "estado": "Estado"
+    }
+  },
+  "talentCandidaturaDetail": {
+    "voltar": "Volver",
+    "naoEncontrada": "Candidatura no encontrada.",
+    "titulo": "Candidatura {{numero}}",
+    "submissao": "Enviado",
+    "botoes": {
+      "iniciarValidacao": "Iniciar Validación",
+      "validar": "Validar Candidatura",
+      "rejeitarCand": "Rechazar Candidatura",
+      "cancelar": "Cancelar",
+      "confirmarRejeicao": "Confirmar Rechazo",
+      "rejeitar": "Rechazar",
+      "aprovar": "Aprobar"
+    },
+    "labels": {
+      "motivoRejeicao": "Motivo del rechazo"
+    },
+    "placeholders": {
+      "motivoRejeicao": "Indica el motivo para que el consultor pueda corregirlo…"
+    },
+    "tabs": {
+      "evidencia": "Evidencia #{{numero}}",
+      "historico": "Historial"
+    },
+    "secoes": {
+      "historicoTitulo": "Historial",
+      "semHistorico": "Sin historial.",
+      "evidenciaTitulo": "Evidencia",
+      "requisitoAssociado": "Requisito Asociado",
+      "semEvidencias": "Sin evidencias en esta candidatura."
+    }
+  },
+  "talentCandidaturas": {
+    "tabs": {
+      "pendentes": "Pendientes",
+      "validadas": "Validadas",
+      "relatorios": "Informes"
+    },
+    "empty": {
+      "titulo": "Sin candidaturas",
+      "descricao": "No hay candidaturas en esta pestaña."
+    },
+    "tabela": {
+      "trackingId": "ID de seguimiento",
+      "consultor": "Consultor",
+      "badge": "Insignia",
+      "nivel": "Nivel",
+      "data": "Fecha",
+      "estado": "Estado",
+      "verCandidatura": "Ver Candidatura"
+    }
+  },
+  "talentDashboard": {
+    "titulo": "Panel de Control",
+    "pontuacaoGlobal": "Puntuación Global",
+    "tabela": {
+      "posicao": "#",
+      "nome": "Nombre",
+      "pontos": "Puntos"
+    },
+    "pedidosFechados": "Solicitudes cerradas",
+    "semDados": "No hay datos para el período.",
+    "diasSemana": ["L", "M", "X", "J", "V", "S", "D"],
+    "atividadeRecente": "Actividad Reciente"
+  },
+  "api": {
+    "recuperacaoIndisponivel": "Recuperación de contraseña aún no disponible en el servidor.",
+    "dashboard": {
+      "ola": "Hola",
+      "pontosTotais": "Puntos Totales",
+      "badgesConquistados": "Insignias Obtenidas",
+      "emProgresso": "En Progreso",
+      "ranking": "Clasificación"
+    },
+    "generic": {
+      "nivel": "Nivel {{nivel}}",
+      "certificacao": "Certificación",
+      "badgeId": "Insignia #{{id}}",
+      "consultorId": "Consultor #{{id}}",
+      "consultor": "Consultor",
+      "evidencia": "Evidencia"
+    },
+    "status": {
+      "submetido": "Enviado",
+      "validada": "Validada"
+    },
+    "tm": {
+      "stats": {
+        "consultores": "Consultores",
+        "badges": "Insignias",
+        "candidaturas": "Candidaturas",
+        "serviceLines": "Líneas de Servicio"
+      },
+      "atividade": "Envió la insignia \"{{nome}}\""
+    },
+    "sll": {
+      "stats": {
+        "consultoresLowCode": "Consultores LowCode",
+        "badgesAtribuidos": "Insignias otorgadas",
+        "pedidosBadges": "Solicitudes de insignias",
+        "pontosAtribuidos": "Puntos otorgados"
+      },
+      "atividade": "Solicitud \"{{nome}}\" en aprobación"
+    },
+    "erros": {
+      "exportacao": "No se pudo exportar."
+    }
+  },
+  "app": {
+    "rotas": {
+      "catalogoBadges": "Catálogo de Insignias",
+      "badges": "Insignias"
+    }
   }
 }

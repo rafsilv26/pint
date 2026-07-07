@@ -5,8 +5,10 @@ import AuthShell from '../../components/layout/AuthShell'
 import { Field } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { homeForRole } from '../../config/navigation'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 export default function LoginPage() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
   const { login } = useAuth()
   const navigate = useNavigate()
 
@@ -31,39 +33,39 @@ export default function LoginPage() {
 
   return (
     <AuthShell
-      title="Login"
-      subtitle="Introduzir as credenciais de acesso"
+      title={t('login.titulo')}
+      subtitle={t('login.subtitulo')}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {erro && (
           <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</div>
         )}
         <Field
-          label="Email"
+          label={t('login.campos.emailLabel')}
           type="email"
           icon={Mail}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Introduzir o email"
+          placeholder={t('login.campos.emailPlaceholder')}
           required
         />
         <Field
-          label="Password"
+          label={t('login.campos.passwordLabel')}
           type="password"
           icon={Lock}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Introduzir password"
+          placeholder={t('login.campos.passwordPlaceholder')}
           required
         />
 
         <div className="flex items-center justify-between text-sm">
           <label className="flex items-center gap-2 text-muted">
             <input type="checkbox" className="rounded border-gray-300 text-brand focus:ring-brand" />
-            Lembrar-me
+            {t('login.lembrarMe')}
           </label>
           <Link to="/recuperar-password" className="text-brand hover:underline">
-            Esqueceu-se da password?
+            {t('login.esqueceuPassword')}
           </Link>
         </div>
 
@@ -72,7 +74,7 @@ export default function LoginPage() {
           disabled={loading}
           className="mx-auto block rounded-full bg-brand px-12 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? 'A entrar…' : 'Entrar'}
+          {loading ? t('login.botoes.entrando') : t('login.botoes.entrar')}
         </button>
       </form>
     </AuthShell>

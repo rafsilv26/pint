@@ -5,55 +5,55 @@ import {
 } from 'lucide-react'
 
 // ===== Navbar de topo do Consultor =====
-export const navItems = [
-  { to: '/', label: 'Início', icon: Home, end: true },
-  { to: '/catalogo', label: 'Catálogo de Badges', icon: LayoutGrid },
-  { to: '/candidaturas', label: 'Meus Badges', icon: Medal },
-  { to: '/ranking', label: 'Ranking', icon: Trophy },
-  { to: '/perfil', label: 'Perfil', icon: User },
+export const getNavItems = (t) => [
+  { to: '/', label: t('nav.consultor.inicio'), icon: Home, end: true },
+  { to: '/catalogo', label: t('nav.consultor.catalogo'), icon: LayoutGrid },
+  { to: '/candidaturas', label: t('nav.consultor.meusBadges'), icon: Medal },
+  { to: '/ranking', label: t('nav.consultor.ranking'), icon: Trophy },
+  { to: '/perfil', label: t('nav.consultor.perfil'), icon: User },
 ]
 
 // ===== Sidebar do Talent Manager =====
-export const talentNav = [
-  { to: '/tm', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/tm/candidaturas', label: 'Candidaturas de Badge', icon: ClipboardCheck },
-  { to: '/tm/catalogo', label: 'Catálogo de Badges', icon: LayoutGrid },
-  { to: '/tm/learning-paths', label: 'Learning Paths', icon: Route },
-  { to: '/tm/consultores', label: 'Consultores', icon: Users },
+export const getTalentNav = (t) => [
+  { to: '/tm', label: t('nav.tm.dashboard'), icon: LayoutDashboard, end: true },
+  { to: '/tm/candidaturas', label: t('nav.tm.candidaturas'), icon: ClipboardCheck },
+  { to: '/tm/catalogo', label: t('nav.tm.catalogo'), icon: LayoutGrid },
+  { to: '/tm/learning-paths', label: t('nav.tm.learningPaths'), icon: Route },
+  { to: '/tm/consultores', label: t('nav.tm.consultores'), icon: Users },
 ]
 
 // ===== Sidebar do Service Line Leader =====
-export const sllNav = [
-  { to: '/sll', label: 'Painel de Controlo', icon: LayoutDashboard, end: true },
-  { to: '/sll/consultores', label: 'Consultores', icon: Users },
-  { to: '/sll/badges', label: 'Badges', icon: Award },
-  { to: '/sll/pedidos', label: 'Pedidos', icon: ClipboardCheck },
-  { to: '/sll/relatorios', label: 'Relatórios', icon: FileBarChart },
-  { to: '/sll/notificacoes', label: 'Notificações', icon: Bell },
+export const getSllNav = (t) => [
+  { to: '/sll', label: t('nav.sll.dashboard'), icon: LayoutDashboard, end: true },
+  { to: '/sll/consultores', label: t('nav.sll.consultores'), icon: Users },
+  { to: '/sll/badges', label: t('nav.sll.badges'), icon: Award },
+  { to: '/sll/pedidos', label: t('nav.sll.pedidos'), icon: ClipboardCheck },
+  { to: '/sll/relatorios', label: t('nav.sll.relatorios'), icon: FileBarChart },
+  { to: '/sll/notificacoes', label: t('nav.sll.notificacoes'), icon: Bell },
 ]
 
 // ===== Sidebar do Administrador =====
-export const adminNav = [
-  { to: '/admin', label: 'Painel de Controlo', icon: LayoutDashboard, end: true },
-  { to: '/admin/utilizadores', label: 'Utilizadores', icon: Users },
-  { to: '/admin/badges', label: 'Badges', icon: Award },
-  { to: '/admin/pedidos', label: 'Pedido de Badges', icon: ClipboardCheck },
-  { to: '/admin/learning-paths', label: 'Learning Paths', icon: Route },
-  { to: '/admin/service-lines', label: 'Service Lines', icon: Network },
-  { to: '/admin/areas', label: 'Áreas', icon: Boxes },
-  { to: '/admin/niveis', label: 'Níveis', icon: BarChart3 },
-  { to: '/admin/requisitos', label: 'Requisitos', icon: ListChecks },
-  { to: '/admin/politicas', label: 'Políticas RGPD', icon: ShieldCheck },
-  { to: '/admin/avisos', label: 'Avisos', icon: Bell },
-  { to: '/admin/informacoes', label: 'Informações', icon: Info },
-  { to: '/admin/definicoes', label: 'Definições', icon: Settings },
+export const getAdminNav = (t) => [
+  { to: '/admin', label: t('nav.admin.dashboard'), icon: LayoutDashboard, end: true },
+  { to: '/admin/utilizadores', label: t('nav.admin.utilizadores'), icon: Users },
+  { to: '/admin/badges', label: t('nav.admin.badges'), icon: Award },
+  { to: '/admin/pedidos', label: t('nav.admin.pedidos'), icon: ClipboardCheck },
+  { to: '/admin/learning-paths', label: t('nav.admin.learningPaths'), icon: Route },
+  { to: '/admin/service-lines', label: t('nav.admin.serviceLines'), icon: Network },
+  { to: '/admin/areas', label: t('nav.admin.areas'), icon: Boxes },
+  { to: '/admin/niveis', label: t('nav.admin.niveis'), icon: BarChart3 },
+  { to: '/admin/requisitos', label: t('nav.admin.requisitos'), icon: ListChecks },
+  { to: '/admin/politicas', label: t('nav.admin.politicas'), icon: ShieldCheck },
+  { to: '/admin/avisos', label: t('nav.admin.avisos'), icon: Bell },
+  { to: '/admin/informacoes', label: t('nav.admin.informacoes'), icon: Info },
+  { to: '/admin/definicoes', label: t('nav.admin.definicoes'), icon: Settings },
 ]
 
-export const ROLE_PANELS = {
-  TalentManager: { label: 'Talent Manager', home: '/tm', nav: talentNav },
-  ServiceLineLeader: { label: 'Service Line Leader', home: '/sll', nav: sllNav },
-  Admin: { label: 'Administrador', home: '/admin', nav: adminNav },
-}
+export const getRolePanels = (t) => ({
+  TalentManager: { label: 'Talent Manager', home: '/tm', nav: getTalentNav(t) },
+  ServiceLineLeader: { label: 'Service Line Leader', home: '/sll', nav: getSllNav(t) },
+  Admin: { label: t('nav.roles.admin'), home: '/admin', nav: getAdminNav(t) },
+})
 
 export const ROLE_HOME = {
   Consultor: '/',
@@ -66,9 +66,10 @@ export const primaryRole = (user) => (user?.roles && user.roles[0]) || user?.rol
 export const homeForRole = (user) => ROLE_HOME[primaryRole(user)] || '/'
 
 // O painel (sidebar) é escolhido pelo caminho — fácil de pré-visualizar.
-export const panelForPath = (pathname = '') => {
-  if (pathname.startsWith('/tm')) return ROLE_PANELS.TalentManager
-  if (pathname.startsWith('/sll')) return ROLE_PANELS.ServiceLineLeader
-  if (pathname.startsWith('/admin')) return ROLE_PANELS.Admin
-  return { label: 'Painel', nav: [] }
+export const getPanelForPath = (pathname = '', t) => {
+  const panels = getRolePanels(t)
+  if (pathname.startsWith('/tm')) return panels.TalentManager
+  if (pathname.startsWith('/sll')) return panels.ServiceLineLeader
+  if (pathname.startsWith('/admin')) return panels.Admin
+  return { label: t('nav.painelDefault'), nav: [] }
 }

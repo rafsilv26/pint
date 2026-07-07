@@ -674,5 +674,299 @@
     "areas": { "titulo": "Áreas", "singular": "Área" },
     "levels": { "titulo": "Níveis", "singular": "Nível", "campos": { "codigo": "Código", "ordem": "Ordem" } },
     "requirements": { "titulo": "Requisitos", "singular": "Requisito" }
+  },
+  "nav": {
+    "consultor": {
+      "inicio": "Início",
+      "catalogo": "Catálogo de Badges",
+      "meusBadges": "Meus Badges",
+      "ranking": "Ranking",
+      "perfil": "Perfil"
+    },
+    "tm": {
+      "dashboard": "Dashboard",
+      "candidaturas": "Candidaturas de Badge",
+      "catalogo": "Catálogo de Badges",
+      "learningPaths": "Learning Paths",
+      "consultores": "Consultores"
+    },
+    "sll": {
+      "dashboard": "Painel de Controlo",
+      "consultores": "Consultores",
+      "badges": "Badges",
+      "pedidos": "Pedidos",
+      "relatorios": "Relatórios",
+      "notificacoes": "Notificações"
+    },
+    "admin": {
+      "dashboard": "Painel de Controlo",
+      "utilizadores": "Utilizadores",
+      "badges": "Badges",
+      "pedidos": "Pedido de Badges",
+      "learningPaths": "Learning Paths",
+      "serviceLines": "Service Lines",
+      "areas": "Áreas",
+      "niveis": "Níveis",
+      "requisitos": "Requisitos",
+      "politicas": "Políticas RGPD",
+      "avisos": "Avisos",
+      "informacoes": "Informações",
+      "definicoes": "Definições"
+    },
+    "roles": {
+      "admin": "Administrador"
+    },
+    "painelDefault": "Painel"
+  },
+  "atualizarPassword": {
+    "titulo": "Atualizar Password",
+    "subtitulo": "Introduzir a nova password de acesso",
+    "campos": {
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Introduzir nova password"
+    },
+    "botoes": {
+      "guardando": "A guardar…",
+      "entrar": "Entrar"
+    }
+  },
+  "atualizarPassword": {
+    "titulo": "Atualizar Password",
+    "subtitulo": "Introduzir a nova password de acesso",
+    "campos": {
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Introduzir nova password"
+    },
+    "botoes": {
+      "guardando": "A guardar…",
+      "entrar": "Entrar"
+    }
+  },
+  "forgotPassword": {
+    "titulo": "Recuperar Password",
+    "subtitulo": "Introduzir o email da conta de acesso",
+    "campos": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Introduzir o email"
+    },
+    "botoes": {
+      "voltar": "Voltar",
+      "enviando": "A enviar…",
+      "enviar": "Enviar"
+    }
+  },
+  "login": {
+    "titulo": "Login",
+    "subtitulo": "Introduzir as credenciais de acesso",
+    "campos": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "Introduzir o email",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Introduzir password"
+    },
+    "lembrarMe": "Lembrar-me",
+    "esqueceuPassword": "Esqueceu-se da password?",
+    "botoes": {
+      "entrando": "A entrar…",
+      "entrar": "Entrar"
+    }
+  },
+  "sllDashboard": {
+    "titulo": "Painel de Controlo",
+    "pontuacaoMensal": "Pontuação Mensal",
+    "tabela": {
+      "posicao": "#",
+      "nome": "Nome",
+      "badges": "Badges",
+      "pontos": "Pontos"
+    },
+    "badgesAtribuidos": "Badges Atribuídos",
+    "semDados": "Sem dados para o período.",
+    "diasSemana": ["S", "T", "Q", "Q", "S", "S", "D"],
+    "atividadeRecente": "Atividade Recente"
+  },
+  "sllPedidoDetail": {
+    "voltar": "Voltar",
+    "naoEncontrado": "Pedido não encontrado.",
+    "candidatura": "Candidatura {{numero}}",
+    "submissao": "Submissão",
+    "iniciarAprovacao": "Iniciar Aprovação",
+    "aprovar": "Aprovar",
+    "rejeitar": "Rejeitar",
+    "devolver": "Devolver",
+    "labels": {
+      "motivoRejeicao": "Motivo da rejeição",
+      "comentarioDevolucao": "Comentário para o consultor (devolução)"
+    },
+    "placeholders": {
+      "motivoRejeicao": "Indica o motivo da rejeição…",
+      "comentarioDevolucao": "Indica o que o consultor deve corrigir…"
+    },
+    "cancelar": "Cancelar",
+    "confirmarRejeicao": "Confirmar Rejeição",
+    "confirmarDevolucao": "Confirmar Devolução",
+    "evidenciaTab": "Evidência #{{numero}}",
+    "historicoTab": "Histórico",
+    "historicoTitulo": "Histórico",
+    "semHistorico": "Sem histórico.",
+    "evidenciaTitulo": "Evidência",
+    "requisitoAssociado": "Requisito Associado",
+    "semEvidencias": "Sem evidências neste pedido."
+  },
+  "sllPedidos": {
+    "titulo": "Pedidos",
+    "resumo": {
+      "pendentes": "Pendentes",
+      "aprovados": "Aprovados",
+      "rejeitados": "Rejeitados"
+    },
+    "empty": {
+      "titulo": "Sem pedidos",
+      "descricao": "Não há pedidos para aprovação final."
+    },
+    "tabela": {
+      "trackingId": "Tracking ID",
+      "badge": "Badge",
+      "consultor": "Consultor",
+      "data": "Data",
+      "nivel": "Nível",
+      "pontos": "Pontos",
+      "estado": "Estado"
+    }
+  },
+  "sllPedidos": {
+    "titulo": "Pedidos",
+    "resumo": {
+      "pendentes": "Pendentes",
+      "aprovados": "Aprovados",
+      "rejeitados": "Rejeitados"
+    },
+    "empty": {
+      "titulo": "Sem pedidos",
+      "descricao": "Não há pedidos para aprovação final."
+    },
+    "tabela": {
+      "trackingId": "Tracking ID",
+      "badge": "Badge",
+      "consultor": "Consultor",
+      "data": "Data",
+      "nivel": "Nível",
+      "pontos": "Pontos",
+      "estado": "Estado"
+    }
+  },
+  "talentCandidaturaDetail": {
+    "voltar": "Voltar",
+    "naoEncontrada": "Candidatura não encontrada.",
+    "titulo": "Candidatura {{numero}}",
+    "submissao": "Submissão",
+    "botoes": {
+      "iniciarValidacao": "Iniciar Validação",
+      "validar": "Validar Candidatura",
+      "rejeitarCand": "Rejeitar Candidatura",
+      "cancelar": "Cancelar",
+      "confirmarRejeicao": "Confirmar Rejeição",
+      "rejeitar": "Rejeitar",
+      "aprovar": "Aprovar"
+    },
+    "labels": {
+      "motivoRejeicao": "Motivo da rejeição"
+    },
+    "placeholders": {
+      "motivoRejeicao": "Indica o motivo para o consultor poder corrigir…"
+    },
+    "tabs": {
+      "evidencia": "Evidência #{{numero}}",
+      "historico": "Histórico"
+    },
+    "secoes": {
+      "historicoTitulo": "Histórico",
+      "semHistorico": "Sem histórico.",
+      "evidenciaTitulo": "Evidência",
+      "requisitoAssociado": "Requisito Associado",
+      "semEvidencias": "Sem evidências nesta candidatura."
+    }
+  },
+  "talentCandidaturas": {
+    "tabs": {
+      "pendentes": "Pendentes",
+      "validadas": "Validadas",
+      "relatorios": "Relatórios"
+    },
+    "empty": {
+      "titulo": "Sem candidaturas",
+      "descricao": "Não há candidaturas neste separador."
+    },
+    "tabela": {
+      "trackingId": "Tracking ID",
+      "consultor": "Consultor",
+      "badge": "Badge",
+      "nivel": "Nível",
+      "data": "Data",
+      "estado": "Estado",
+      "verCandidatura": "Ver Candidatura"
+    }
+  },
+  "talentDashboard": {
+    "titulo": "Dashboard",
+    "pontuacaoGlobal": "Pontuação Global",
+    "tabela": {
+      "posicao": "#",
+      "nome": "Nome",
+      "pontos": "Pontos"
+    },
+    "pedidosFechados": "Pedidos fechados",
+    "semDados": "Sem dados para o período.",
+    "diasSemana": ["S", "T", "Q", "Q", "S", "S", "D"],
+    "atividadeRecente": "Atividade Recente"
+  },
+  "api": {
+    "recuperacaoIndisponivel": "Recuperação de password ainda não disponível no servidor.",
+    "dashboard": {
+      "ola": "Olá",
+      "pontosTotais": "Pontos Totais",
+      "badgesConquistados": "Badges Conquistados",
+      "emProgresso": "Em Progresso",
+      "ranking": "Ranking"
+    },
+    "generic": {
+      "nivel": "Nível {{nivel}}",
+      "certificacao": "Certificação",
+      "badgeId": "Badge #{{id}}",
+      "consultorId": "Consultor #{{id}}",
+      "consultor": "Consultor",
+      "evidencia": "Evidência"
+    },
+    "status": {
+      "submetido": "Submetido",
+      "validada": "Validada"
+    },
+    "tm": {
+      "stats": {
+        "consultores": "Consultores",
+        "badges": "Badges",
+        "candidaturas": "Candidaturas",
+        "serviceLines": "Service Lines"
+      },
+      "atividade": "Submeteu o badge \"{{nome}}\""
+    },
+    "sll": {
+      "stats": {
+        "consultoresLowCode": "Consultores LowCode",
+        "badgesAtribuidos": "Badges atribuídos",
+        "pedidosBadges": "Pedidos de badges",
+        "pontosAtribuidos": "Pontos atribuídos"
+      },
+      "atividade": "Pedido \"{{nome}}\" em aprovação"
+    },
+    "erros": {
+      "exportacao": "Não foi possível exportar."
+    }
+  },
+  "app": {
+    "rotas": {
+      "catalogoBadges": "Catálogo de Badges",
+      "badges": "Badges"
+    }
   }
 }

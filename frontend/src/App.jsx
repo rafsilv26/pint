@@ -1,4 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
+
 import ProtectedRoute from './components/ProtectedRoute'
 import AppLayout from './components/layout/AppLayout'
 import ManagerLayout from './components/layout/ManagerLayout'
@@ -49,6 +51,8 @@ import ManagerBadgeDetailPage from './pages/ManagerBadgeDetailPage'
 import ManagerContaPage from './pages/ManagerContaPage'
 
 export default function App() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
+
   return (
     <Routes>
       {/* ---- Rotas públicas ---- */}
@@ -94,7 +98,7 @@ export default function App() {
         <Route path="/tm" element={<TalentDashboardPage />} />
         <Route path="/tm/candidaturas" element={<TalentCandidaturasPage />} />
         <Route path="/tm/candidaturas/:id" element={<TalentCandidaturaDetailPage />} />
-        <Route path="/tm/catalogo" element={<BadgesGridView titulo="Catálogo de Badges" linkBase="/tm/catalogo" />} />
+        <Route path="/tm/catalogo" element={<BadgesGridView titulo={t('app.rotas.catalogoBadges')} linkBase="/tm/catalogo" />} />
         <Route path="/tm/catalogo/:id" element={<ManagerBadgeDetailPage />} />
         <Route path="/tm/learning-paths" element={<AdminResourcePage resourceKey="learning-paths" readOnly />} />
         <Route path="/tm/consultores" element={<ConsultoresPage linkBase="/tm/consultores" />} />
@@ -107,7 +111,7 @@ export default function App() {
         <Route path="/sll/pedidos/:id" element={<SLLPedidoDetailPage />} />
         <Route path="/sll/consultores" element={<ConsultoresPage linkBase="/sll/consultores" />} />
         <Route path="/sll/consultores/:id" element={<ManagerConsultorDetailPage />} />
-        <Route path="/sll/badges" element={<BadgesGridView titulo="Badges" linkBase="/sll/badges" />} />
+        <Route path="/sll/badges" element={<BadgesGridView titulo={t('app.rotas.badges')} linkBase="/sll/badges" />} />
         <Route path="/sll/badges/:id" element={<ManagerBadgeDetailPage />} />
         <Route path="/sll/relatorios" element={<SLLRelatoriosPage />} />
         <Route path="/sll/notificacoes" element={<NotificationsPage />} />

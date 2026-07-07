@@ -4,6 +4,7 @@ import { ArrowLeft, FileText, Download, Check, X } from 'lucide-react'
 import { Card, Spinner, ErrorState, StatusPill } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 const TINT = {
   salmon: 'bg-gradient-to-br from-orange-200 to-red-200',
@@ -13,6 +14,7 @@ const TINT = {
 }
 
 export default function TalentCandidaturaDetailPage() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
   const { id } = useParams()
   const navigate = useNavigate()
   const { data: c, loading, error, reload } = useAsync(() => api.getCandidatura(id), [id])
@@ -26,7 +28,7 @@ export default function TalentCandidaturaDetailPage() {
 
   if (loading) return <Spinner />
   if (error) return <ErrorState onRetry={reload} />
-  if (!c) return <p className="text-muted">Candidatura não encontrada.</p>
+  if (!c) return <p className="text-muted">{t('talentCandidaturaDetail.naoEncontrada')}</p>
 
   async function decidir(decisao) {
     setSubmitting(true)
@@ -46,20 +48,22 @@ export default function TalentCandidaturaDetailPage() {
   return (
     <div>
       <Link to="/tm/candidaturas" className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
-        <ArrowLeft size={16} /> Voltar
+        <ArrowLeft size={16} /> {t('talentCandidaturaDetail.voltar')}
       </Link>
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-ink">Candidatura {c.numero}</h1>
+            <h1 className="text-2xl font-bold text-ink">
+              {t('talentCandidaturaDetail.titulo', { numero: c.numero })}
+            </h1>
             <StatusPill status={c.estado} />
           </div>
           <p className="mt-1 flex items-center gap-2 text-sm text-muted">
             <span className="grid h-6 w-6 place-items-center rounded-full bg-brand-light text-[10px] font-semibold text-brand">
               {(c.consultor || 'C')[0]}
             </span>
-            {c.consultor} · Submissão: {c.submissao}
+            {c.consultor} · {t('talentCandidaturaDetail.submissao')}: {c.submissao}
           </p>
 
           {!validando ? (
@@ -67,7 +71,7 @@ export default function TalentCandidaturaDetailPage() {
               onClick={() => setValidando(true)}
               className="mt-4 rounded-lg bg-amber-400 px-5 py-2.5 text-sm font-semibold text-amber-950 transition hover:bg-amber-500"
             >
-              Iniciar Validação
+              {t('talentCandidaturaDetail.botoes.iniciarValidacao')}
             </button>
           ) : (
             <div className="mt-4 flex gap-2">
@@ -76,14 +80,14 @@ export default function TalentCandidaturaDetailPage() {
                 disabled={submitting}
                 className="rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:opacity-60"
               >
-                Validar Candidatura
+                {t('talentCandidaturaDetail.botoes.validar')}
               </button>
               <button
                 onClick={() => setAcao('rejeitar')}
                 disabled={submitting}
                 className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
               >
-                Rejeitar Candidatura
+                {t('talentCandidaturaDetail.botoes.rejeitarCand')}
               </button>
             </div>
           )}
@@ -102,22 +106,26 @@ export default function TalentCandidaturaDetailPage() {
 
       {acao === 'rejeitar' && (
         <Card className="mt-4 border-red-200 bg-red-50">
-          <label className="block text-sm font-medium text-ink">Motivo da rejeição</label>
+          <label className="block text-sm font-medium text-ink">
+            {t('talentCandidaturaDetail.labels.motivoRejeicao')}
+          </label>
           <textarea
             value={comentario}
             onChange={(e) => setComentario(e.target.value)}
             rows={2}
-            placeholder="Indica o motivo para o consultor poder corrigir…"
+            placeholder={t('talentCandidaturaDetail.placeholders.motivoRejeicao')}
             className="mt-1.5 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
           <div className="mt-2 flex justify-end gap-2">
-            <button onClick={() => setAcao(null)} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm">Cancelar</button>
+            <button onClick={() => setAcao(null)} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm">
+              {t('talentCandidaturaDetail.botoes.cancelar')}
+            </button>
             <button
               onClick={() => decidir('REJEITAR')}
               disabled={submitting}
               className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-60"
             >
-              Confirmar Rejeição
+              {t('talentCandidaturaDetail.botoes.confirmarRejeicao')}
             </button>
           </div>
         </Card>
@@ -131,22 +139,22 @@ export default function TalentCandidaturaDetailPage() {
             onClick={() => setTab(i)}
             className={`rounded-t-lg px-3 py-2 text-sm font-medium ${tab === i ? 'bg-white text-brand ring-1 ring-gray-200' : 'text-muted hover:text-ink'}`}
           >
-            Evidência #{i + 1}
+            {t('talentCandidaturaDetail.tabs.evidencia', { numero: i + 1 })}
           </button>
         ))}
         <button
           onClick={() => setTab('hist')}
           className={`rounded-t-lg px-3 py-2 text-sm font-medium ${tab === 'hist' ? 'bg-white text-brand ring-1 ring-gray-200' : 'text-muted hover:text-ink'}`}
         >
-          Histórico
+          {t('talentCandidaturaDetail.tabs.historico')}
         </button>
       </div>
 
       {tab === 'hist' ? (
         <Card className="mt-4">
-          <h2 className="mb-3 font-semibold text-ink">Histórico</h2>
+          <h2 className="mb-3 font-semibold text-ink">{t('talentCandidaturaDetail.secoes.historicoTitulo')}</h2>
           {c.historico.length === 0 ? (
-            <p className="text-sm text-muted">Sem histórico.</p>
+            <p className="text-sm text-muted">{t('talentCandidaturaDetail.secoes.semHistorico')}</p>
           ) : (
             <ol className="space-y-3">
               {c.historico.map((h, i) => (
@@ -164,7 +172,7 @@ export default function TalentCandidaturaDetailPage() {
       ) : evid ? (
         <div className="mt-4 grid gap-6 lg:grid-cols-2">
           <div>
-            <h2 className="mb-2 font-semibold text-ink">Evidência</h2>
+            <h2 className="mb-2 font-semibold text-ink">{t('talentCandidaturaDetail.secoes.evidenciaTitulo')}</h2>
             <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4">
               <span className="flex items-center gap-3 text-sm text-ink">
                 <span className="grid h-10 w-10 place-items-center rounded-lg bg-gray-100 text-gray-500"><FileText size={20} /></span>
@@ -174,18 +182,22 @@ export default function TalentCandidaturaDetailPage() {
             </div>
             {validando && (
               <div className="mt-3 flex justify-center gap-2">
-                <button className="flex items-center gap-1 rounded-full bg-red-500 px-4 py-1.5 text-xs font-semibold text-white"><X size={13} /> Rejeitar</button>
-                <button className="flex items-center gap-1 rounded-full bg-green-600 px-4 py-1.5 text-xs font-semibold text-white"><Check size={13} /> Aprovar</button>
+                <button className="flex items-center gap-1 rounded-full bg-red-500 px-4 py-1.5 text-xs font-semibold text-white">
+                  <X size={13} /> {t('talentCandidaturaDetail.botoes.rejeitar')}
+                </button>
+                <button className="flex items-center gap-1 rounded-full bg-green-600 px-4 py-1.5 text-xs font-semibold text-white">
+                  <Check size={13} /> {t('talentCandidaturaDetail.botoes.aprovar')}
+                </button>
               </div>
             )}
           </div>
           <div>
-            <h2 className="mb-2 font-semibold text-ink">Requisito Associado</h2>
+            <h2 className="mb-2 font-semibold text-ink">{t('talentCandidaturaDetail.secoes.requisitoAssociado')}</h2>
             <div className="rounded-xl border border-gray-200 bg-white p-4 text-sm leading-relaxed text-muted">{evid.requisito}</div>
           </div>
         </div>
       ) : (
-        <p className="mt-4 text-sm text-muted">Sem evidências nesta candidatura.</p>
+        <p className="mt-4 text-sm text-muted">{t('talentCandidaturaDetail.secoes.semEvidencias')}</p>
       )}
     </div>
   )

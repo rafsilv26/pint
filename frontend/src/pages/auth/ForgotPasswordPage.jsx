@@ -4,8 +4,10 @@ import { Mail } from 'lucide-react'
 import AuthShell from '../../components/layout/AuthShell'
 import { Field } from '../../components/ui'
 import * as api from '../../services/api'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [mensagem, setMensagem] = useState(null)
@@ -19,7 +21,7 @@ export default function ForgotPasswordPage() {
     setLoading(true)
     try {
       const res = await api.recuperarPassword({ email })
-      setMensagem(res.message)
+      setMensagem(res.message) // Nota: Se a API devolver a mensagem fixa, podes querer traduzi-la no backend ou usar uma chave aqui
     } catch (err) {
       setErro(err.message)
     } finally {
@@ -28,19 +30,22 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <AuthShell title="Recuperar Password" subtitle="Introduzir o email da conta de acesso">
+    <AuthShell 
+      title={t('forgotPassword.titulo')} 
+      subtitle={t('forgotPassword.subtitulo')}
+    >
       <form onSubmit={handleSubmit} className="space-y-5">
         {erro && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</div>}
         {mensagem && (
           <div className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700">{mensagem}</div>
         )}
         <Field
-          label="Email"
+          label={t('forgotPassword.campos.emailLabel')}
           type="email"
           icon={Mail}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Introduzir o email"
+          placeholder={t('forgotPassword.campos.emailPlaceholder')}
           required
         />
         <div className="flex justify-center gap-3">
@@ -49,14 +54,14 @@ export default function ForgotPasswordPage() {
             onClick={() => navigate('/login')}
             className="rounded-full border border-gray-300 px-8 py-2.5 text-sm font-semibold text-ink transition hover:bg-gray-50"
           >
-            Voltar
+            {t('forgotPassword.botoes.voltar')}
           </button>
           <button
             type="submit"
             disabled={loading}
             className="rounded-full bg-brand px-8 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
           >
-            {loading ? 'A enviar…' : 'Enviar'}
+            {loading ? t('forgotPassword.botoes.enviando') : t('forgotPassword.botoes.enviar')}
           </button>
         </div>
       </form>

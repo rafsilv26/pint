@@ -4,23 +4,26 @@ import { Card, Spinner, ErrorState, EmptyState, StatusPill } from '../../compone
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import ExportButtons from '../../components/ExportButtons'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 export default function SLLPedidosPage() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
   const navigate = useNavigate()
   const { data, loading, error, reload } = useAsync(() => api.getServiceLinePedidos())
   const lista = data || []
   const cont = (code) => lista.filter((c) => c.status.code === code).length
 
+  // Agora que o resumo está dentro do componente, podemos usar o t() para traduzir as labels
   const resumo = [
-    { label: 'Pendentes', value: cont('VALIDATED'), icon: Clock, tint: 'bg-amber-100 text-amber-600' },
-    { label: 'Aprovados', value: cont('APPROVED'), icon: CheckCircle2, tint: 'bg-green-100 text-green-600' },
-    { label: 'Rejeitados', value: cont('REJECTED'), icon: XCircle, tint: 'bg-red-100 text-red-600' },
+    { label: t('sllPedidos.resumo.pendentes'), value: cont('VALIDATED'), icon: Clock, tint: 'bg-amber-100 text-amber-600' },
+    { label: t('sllPedidos.resumo.aprovados'), value: cont('APPROVED'), icon: CheckCircle2, tint: 'bg-green-100 text-green-600' },
+    { label: t('sllPedidos.resumo.rejeitados'), value: cont('REJECTED'), icon: XCircle, tint: 'bg-red-100 text-red-600' },
   ]
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-ink">Pedidos</h1>
+        <h1 className="text-2xl font-bold text-ink">{t('sllPedidos.titulo')}</h1>
         <ExportButtons />
       </div>
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
@@ -41,19 +44,25 @@ export default function SLLPedidosPage() {
         ) : error ? (
           <div className="p-6"><ErrorState onRetry={reload} /></div>
         ) : lista.length === 0 ? (
-          <div className="p-6"><EmptyState icon={FileText} title="Sem pedidos" description="Não há pedidos para aprovação final." /></div>
+          <div className="p-6">
+            <EmptyState 
+              icon={FileText} 
+              title={t('sllPedidos.empty.titulo')} 
+              description={t('sllPedidos.empty.descricao')} 
+            />
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b border-gray-100 bg-gray-50 text-left text-xs font-medium text-muted">
                 <tr>
-                  <th className="px-4 py-3">Tracking ID</th>
-                  <th className="px-4 py-3">Badge</th>
-                  <th className="px-4 py-3">Consultor</th>
-                  <th className="px-4 py-3">Data</th>
-                  <th className="px-4 py-3">Nível</th>
-                  <th className="px-4 py-3">Pontos</th>
-                  <th className="px-4 py-3">Estado</th>
+                  <th className="px-4 py-3">{t('sllPedidos.tabela.trackingId')}</th>
+                  <th className="px-4 py-3">{t('sllPedidos.tabela.badge')}</th>
+                  <th className="px-4 py-3">{t('sllPedidos.tabela.consultor')}</th>
+                  <th className="px-4 py-3">{t('sllPedidos.tabela.data')}</th>
+                  <th className="px-4 py-3">{t('sllPedidos.tabela.nivel')}</th>
+                  <th className="px-4 py-3">{t('sllPedidos.tabela.pontos')}</th>
+                  <th className="px-4 py-3">{t('sllPedidos.tabela.estado')}</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
