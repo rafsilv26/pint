@@ -42,8 +42,9 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
       else await api.createResource(cfg.resource, form)
       fechar()
       reload()
-    } catch (err) {
-      setErroForm(err.message)
+      } catch (err) {
+      console.log("ERRO COMPLETO DA API:", err); // <-- Isto vai mostrar o objeto detalhado
+      setErroForm(err.response?.data?.message || err.message || "Erro ao guardar")
     } finally {
       setSaving(false)
     }
