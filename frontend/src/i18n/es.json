@@ -966,5 +966,12 @@
       "catalogoBadges": "Catálogo de Insignias",
       "badges": "Insignias"
     }
+  },
+  "managerLayout": {
+    "procurar": "Buscar…",
+    "terminarSessao": "Cerrar sesión"
+  },
+  "authShell": {
+    "plataforma": "Plataforma de Insignias"
   }
 }

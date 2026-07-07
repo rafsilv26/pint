@@ -966,5 +966,12 @@
       "catalogoBadges": "Badge Catalog",
       "badges": "Badges"
     }
+  },
+  "managerLayout": {
+    "procurar": "Search…",
+    "terminarSessao": "Log out"
+  },
+  "authShell": {
+    "plataforma": "Badges Platform"
   }
 }

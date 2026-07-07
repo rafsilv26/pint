@@ -968,5 +968,12 @@
       "catalogoBadges": "Catálogo de Badges",
       "badges": "Badges"
     }
+  },
+  "managerLayout": {
+    "procurar": "Procurar…",
+    "terminarSessao": "Terminar sessão"
+  },
+  "authShell": {
+    "plataforma": "Plataforma de Badges"
   }
 }

@@ -1,18 +1,22 @@
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Search, LogOut } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import { panelForPath } from '../../config/navigation'
+import { getPanelForPath } from '../../config/navigation' // <-- Import da função atualizada
 import Logo from '../Logo'
 import ChangePasswordModal from '../ChangePasswordModal'
+import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 // Layout dos painéis de gestão (Admin / Talent Manager / Service Line Leader):
 // sidebar azul à esquerda + barra de pesquisa no topo + conteúdo.
 export default function ManagerLayout() {
+  const { t } = useTranslation() // <-- Inicializa a tradução
   const { user, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const bloqueado = Boolean(user?.mustChangePassword)
-  const panel = panelForPath(location.pathname)
+  
+  // Obter o painel dinâmico já com os labels traduzidos
+  const panel = getPanelForPath(location.pathname, t)
   const base = '/' + (location.pathname.split('/')[1] || '')
 
   const iniciais = (user?.nome || 'U')
@@ -57,7 +61,7 @@ export default function ManagerLayout() {
             onClick={() => { logout(); navigate('/login') }}
             className="mt-1 flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm text-white/80 transition hover:bg-white/10"
           >
-            <LogOut size={18} /> Terminar sessão
+            <LogOut size={18} /> {t('managerLayout.terminarSessao')}
           </button>
         </div>
       </aside>
@@ -68,7 +72,7 @@ export default function ManagerLayout() {
           <div className="relative w-full max-w-md">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
-              placeholder="Procurar…"
+              placeholder={t('managerLayout.procurar')}
               className="w-full rounded-full border border-gray-300 py-2 pl-10 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
           </div>
