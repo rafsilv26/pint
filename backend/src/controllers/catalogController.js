@@ -100,6 +100,10 @@ exports.createResource = async (req, res) => {
       payload.effectiveDate = payload.effectiveDate || new Date();
       payload.createdBy = req.user?.id || 1; // Se não houver user, força 1
     }
+    if (req.params.resource === 'notices') {
+      payload.userId = req.user?.id || 1; // Atribui o ID do utilizador logado
+      payload.type = payload.type || 'info'; // Define um tipo padrão se não for enviado
+    }
 
     const row = await config.model.create(payload);
     res.status(201).json(row);
