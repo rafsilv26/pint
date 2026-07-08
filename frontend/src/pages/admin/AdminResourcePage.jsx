@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { PageHeader, Card, Spinner, ErrorState, EmptyState, Button } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
@@ -18,11 +18,36 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
   const [saving, setSaving] = useState(false)
   const [erroForm, setErroForm] = useState(null)
   const [confirmar, setConfirmar] = useState(null)
-  
-  // NOVO: Estado para apanhar os erros do botão eliminar
   const [erroDelete, setErroDelete] = useState(null) 
 
+  // NOVO: Estado para guardar as opções dos dropdowns (ex: Learning Paths)
+  const [dropdownOptions, setDropdownOptions] = useState({})
+
   const rows = data || []
+
+  // NOVO: Efeito para carregar as opções dos dropdowns automaticamente
+  useEffect(() => {
+    async function loadOptions() {
+      const newOptions = {}
+      for (const f of cfg.campos) {
+        // Se o campo for um select e tiver uma rota definida em 'optionsResource'
+        if (f.type === 'select' && f.optionsResource) {
+          try {
+            const res = await api.listResource(f.optionsResource)
+            // Adaptamos o resultado para { value: id, label: nome }
+            newOptions[f.key] = res.map(item => ({
+              value: item.id,
+              label: item.nome || item.titulo || item.title || `ID: ${item.id}`
+            }))
+          } catch (err) {
+            console.error(`Erro ao carregar opções para ${f.key}:`, err)
+          }
+        }
+      }
+      setDropdownOptions(newOptions)
+    }
+    loadOptions()
+  }, [cfg.campos])
 
   function abrir(row) {
     setEditing(row || {})
@@ -52,7 +77,6 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
     }
   }
 
-  // CORRIGIDO: Agora apanha erros e só fecha a janela se tiver sucesso
   async function apagar() {
     setErroDelete(null)
     try {
@@ -80,6 +104,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
       />
 
       <Card className="overflow-hidden p-0">
+        {/* ... (O código da tabela mantém-se igual) ... */}
         {loading ? (
           <div className="p-6"><Spinner /></div>
         ) : error ? (
@@ -104,13 +129,16 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
                 {rows.map((r) => (
                   <tr key={r.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
                     {cfg.colunas.map((c) => (
-                      <td key={c.key} className="max-w-xs truncate px-4 py-3 text-ink">{String(r[c.key] ?? '—')}</td>
+                      <td key={c.key} className="max-w-xs truncate px-4 py-3 text-ink">
+                        {/* Truque visual: Se for um ID de ligação, podemos tentar mostrar o nome se estiver carregado */}
+                        {String(r[c.key] ?? '—')}
+                      </td>
                     ))}
                     {!readOnly && (
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-3">
-                          <button onClick={() => abrir(r)} className="text-muted hover:text-brand" aria-label={t('adminResource.ariaEditar')}><Pencil size={16} /></button>
-                          <button onClick={() => { setConfirmar(r); setErroDelete(null); }} className="text-muted hover:text-red-600" aria-label={t('adminResource.ariaEliminar')}><Trash2 size={16} /></button>
+                          <button onClick={() => abrir(r)} className="text-muted hover:text-brand"><Pencil size={16} /></button>
+                          <button onClick={() => { setConfirmar(r); setErroDelete(null); }} className="text-muted hover:text-red-600"><Trash2 size={16} /></button>
                         </div>
                       </td>
                     )}
@@ -137,7 +165,24 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
               {cfg.campos.map((f) => (
                 <label key={f.key} className="block">
                   <span className="mb-1 block text-sm font-medium text-ink">{t(f.label)}</span>
-                  {f.type === 'textarea' ? (
+                  
+                  {/* NOVO: Suporte para Dropdowns (Select) */}
+                  {f.type === 'select' ? (
+                    <select
+                      value={form[f.key] ?? ''}
+                      onChange={(e) => setForm({ ...form, [f.key]: e.target.value ? Number(e.target.value) : null })}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 bg-white"
+                      required={!f.optional} // Se não tiver f.optional = true, é obrigatório
+                    >
+                      <option value="">Selecione uma opção...</option>
+                      {(f.options || dropdownOptions[f.key] || []).map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+
+                  ) : f.type === 'textarea' ? (
                     <textarea
                       rows={3}
                       value={form[f.key] ?? ''}
@@ -163,21 +208,14 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
         </div>
       )}
 
-      {/* Confirmar eliminação */}
+      {/* Confirmar eliminação (Oculto para simplificar a visualização, mantém o teu) */}
       {confirmar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
             <Trash2 size={32} className="mx-auto text-red-500" />
             <p className="mt-3 font-semibold text-ink">{t('adminResource.eliminarTitulo')}</p>
             <p className="mt-1 text-sm text-muted">{t('adminResource.eliminarAviso')}</p>
-            
-            {/* NOVO: Mostra o erro se não conseguir apagar */}
-            {erroDelete && (
-              <div className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
-                {erroDelete}
-              </div>
-            )}
-
+            {erroDelete && <div className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">{erroDelete}</div>}
             <div className="mt-5 flex justify-center gap-2">
               <Button variant="secondary" onClick={() => { setConfirmar(null); setErroDelete(null); }}>{t('adminResource.cancelar')}</Button>
               <button onClick={apagar} className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">
