@@ -139,39 +139,42 @@ export const getAdminResources = (t) => ({
         { key: 'ordem', label: t('admin.levels.campos.ordem') },
       ],
     },
-  requirements: {
-      resource: 'requirements',
-      titulo: t('admin.requirements.titulo'),
-      singular: t('admin.requirements.singular'),
-      colunas: [
-        { key: 'nivelId', label: t('admin.levels.singular') },
-        { key: 'titulo', label: t('admin.generic.titulo') },
-        { key: 'obrigatorio', label: 'Obrigatório' },
-      ],
-      campos: [
-        { 
-          key: 'nivelId', 
-          label: t('admin.levels.singular'), 
-          type: 'select', 
-          optionsResource: 'levels',
-          // Aqui distinguimos os níveis mostrando o nome + o ID da área a que pertencem
-          optionLabel: (item) => `${item.nome || 'Nível'} (Área ID: ${item.areaId})` 
-        },
-        
-        { key: 'titulo', label: t('admin.generic.titulo') },
-        { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
-        
-        { 
-          key: 'obrigatorio', 
-          label: 'Obrigatório?', 
-          type: 'select', 
-          options: [
-            { value: true, label: 'Sim' },
-            { value: false, label: 'Não' }
-          ],
-          optional: true 
-        },
-        { key: 'ordem', label: 'Ordem', type: 'number', optional: true },
-      ],
-    },
+requirements: {
+    resource: 'requirements',
+    titulo: t('admin.requirements.titulo'),
+    singular: t('admin.requirements.singular'),
+    colunas: [
+      { key: 'nivelId', label: t('admin.levels.singular') },
+      { key: 'titulo', label: t('admin.generic.titulo') },
+      { key: 'obrigatorio', label: 'Obrigatório' },
+    ],
+    campos: [
+      { 
+        key: 'nivelId', 
+        label: t('admin.levels.singular'), 
+        type: 'select', 
+        optionsResource: 'levels',
+        // Usa o mapa de áreas injetado pelo componente para mostrar "Nome da Área"
+        optionLabel: (item, areasMap) => {
+          const nomeArea = areasMap[item.areaId] || 'Área Desconhecida';
+          return `${item.nome || 'Nível'} (${nomeArea})`;
+        }
+      },
+      
+      { key: 'titulo', label: t('admin.generic.titulo') },
+      { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
+      
+      { 
+        key: 'obrigatorio', 
+        label: 'Obrigatório?', 
+        type: 'select', 
+        options: [
+          { value: true, label: 'Sim' },
+          { value: false, label: 'Não' }
+        ],
+        optional: true 
+      },
+      { key: 'ordem', label: 'Ordem', type: 'number', optional: true },
+    ],
+  },
 });

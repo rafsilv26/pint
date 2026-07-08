@@ -29,30 +29,33 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
   useEffect(() => {
       async function loadOptions() {
         const newOptions = {}
+        
+        // 1. Carregamos as Áreas num mapa para consulta rápida { id: nome }
+        let areasMap = {};
+        try {
+          const areas = await api.listResource('areas');
+          areas.forEach(a => areasMap[a.id] = a.nome);
+        } catch (e) { console.error("Erro ao carregar áreas"); }
+
+        // 2. Processamos os outros selects
         for (const f of cfg.campos) {
           if (f.type === 'select' && f.optionsResource) {
             try {
-              const res = await api.listResource(f.optionsResource)
+              const res = await api.listResource(f.optionsResource);
               newOptions[f.key] = res.map(item => ({
                 value: item.id,
-                
-                // A MAGIA NOVA ESTÁ AQUI:
-                // Se a configuração tiver um 'optionLabel' feito por nós, usa-o.
-                // Caso contrário, tenta adivinhar o nome como fazia antes.
-                label: f.optionLabel 
-                  ? f.optionLabel(item) 
-                  : (item.nome || item.titulo || item.title || `ID: ${item.id}`)
-                  
-              }))
+                // Aqui usamos a função personalizada se existir, passando o mapa de áreas
+                label: f.optionLabel ? f.optionLabel(item, areasMap) : (item.nome || item.titulo || `ID: ${item.id}`)
+              }));
             } catch (err) {
-              console.error(`Erro ao carregar opções para ${f.key}:`, err)
+              console.error(`Erro ao carregar opções para ${f.key}:`, err);
             }
           }
         }
-        setDropdownOptions(newOptions)
+        setDropdownOptions(newOptions);
       }
-      loadOptions()
-    }, [resourceKey])
+      loadOptions();
+    }, [resourceKey]);
 
   function abrir(row) {
     setEditing(row || {})
