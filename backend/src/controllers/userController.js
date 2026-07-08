@@ -87,6 +87,7 @@ exports.updateUser = async (req, res) => {
     }
 };
 
+// CORRIGIDO: Agora faz Hard Delete em vez de Soft Delete
 exports.deleteUser = async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id);
@@ -94,12 +95,12 @@ exports.deleteUser = async (req, res) => {
             return res.status(404).json({ message: 'Utilizador não encontrado.' });
         }
 
-        user.ativo = false;
-        user.deletedAt = new Date();
-        await user.save();
+        // Destrói o registo DEFINITIVAMENTE da base de dados (Hard Delete)
+        await user.destroy({ force: true });
 
-        res.json({ message: 'Utilizador desativado com sucesso.' });
+        res.json({ message: 'Utilizador removido definitivamente com sucesso.' });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao desativar utilizador.', details: error.message });
+        console.error("Erro ao eliminar utilizador:", error);
+        res.status(500).json({ error: 'Erro ao remover utilizador.', details: error.message });
     }
 };
