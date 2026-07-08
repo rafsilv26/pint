@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 import ProtectedRoute from './components/ProtectedRoute'
+import RoleGuard from './components/RoleGuard' // <-- Import do RoleGuard
 import AppLayout from './components/layout/AppLayout'
 import ManagerLayout from './components/layout/ManagerLayout'
 
@@ -9,6 +10,7 @@ import LoginPage from './pages/auth/LoginPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import AtualizarPasswordPage from './pages/auth/AtualizarPasswordPage'
 
+// Consultor
 import DashboardPage from './pages/DashboardPage'
 import CatalogPage from './pages/CatalogPage'
 import BadgeDetailPage from './pages/BadgeDetailPage'
@@ -37,13 +39,13 @@ import BadgesGridView from './components/BadgesGridView'
 import SLLDashboardPage from './pages/sll/SLLDashboardPage'
 import SLLPedidosPage from './pages/sll/SLLPedidosPage'
 import SLLPedidoDetailPage from './pages/sll/SLLPedidoDetailPage'
+import SLLRelatoriosPage from './pages/sll/SLLRelatoriosPage'
 
 // Admin
 import AdminResourcePage from './pages/admin/AdminResourcePage'
 import AdminUsersPage from './pages/admin/AdminUsersPage'
 import AdminPedidosPage from './pages/admin/AdminPedidosPage'
 import AdminDefinicoesPage from './pages/admin/AdminDefinicoesPage'
-import SLLRelatoriosPage from './pages/sll/SLLRelatoriosPage'
 
 // Páginas partilhadas pelos perfis de gestão
 import ManagerConsultorDetailPage from './pages/ManagerConsultorDetailPage'
@@ -51,7 +53,7 @@ import ManagerBadgeDetailPage from './pages/ManagerBadgeDetailPage'
 import ManagerContaPage from './pages/ManagerContaPage'
 
 export default function App() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
 
   return (
     <Routes>
@@ -62,32 +64,39 @@ export default function App() {
       <Route path="/badge/:token" element={<PublicBadgePage />} />
       <Route path="/certificado/:token" element={<CertificatePage />} />
 
-      {/* ---- Rotas privadas (perfil Consultor) ---- */}
+      {/* ========================================================= */}
+      {/* ROTAS: CONSULTOR (Envolvidas pelo AppLayout)              */}
+      {/* ========================================================= */}
       <Route
         element={
           <ProtectedRoute>
-            <AppLayout />
+            {/* Ajusta os roles permitidos consoante a tua base de dados */}
+            <RoleGuard allowedRoles={['consultor', 'admin']} />
           </ProtectedRoute>
         }
       >
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/catalogo" element={<CatalogPage />} />
-        <Route path="/catalogo/:id" element={<BadgeDetailPage />} />
-        <Route path="/candidaturas" element={<ApplicationsPage />} />
-        <Route path="/candidaturas/nova" element={<SubmitApplicationPage />} />
-        <Route path="/historico" element={<HistoryPage />} />
-        <Route path="/notificacoes" element={<NotificationsPage />} />
-        <Route path="/ranking" element={<RankingPage />} />
-        <Route path="/perfil" element={<ProfilePage />} />
-        <Route path="/perfil/preferencias" element={<PreferencesPage />} />
-        <Route path="/perfil/assinatura" element={<EmailSignaturePage />} />
-        <Route path="/perfil/alterar-password" element={<ChangePasswordPage />} />
-        <Route path="/perfil/publico" element={<PublicProfilePage />} />
-        <Route path="/escolher-area" element={<EscolhaAreaPage />} />
-        <Route path="/consultores" element={<ConsultoresPage />} />
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/catalogo" element={<CatalogPage />} />
+          <Route path="/catalogo/:id" element={<BadgeDetailPage />} />
+          <Route path="/candidaturas" element={<ApplicationsPage />} />
+          <Route path="/candidaturas/nova" element={<SubmitApplicationPage />} />
+          <Route path="/historico" element={<HistoryPage />} />
+          <Route path="/notificacoes" element={<NotificationsPage />} />
+          <Route path="/ranking" element={<RankingPage />} />
+          <Route path="/perfil" element={<ProfilePage />} />
+          <Route path="/perfil/preferencias" element={<PreferencesPage />} />
+          <Route path="/perfil/assinatura" element={<EmailSignaturePage />} />
+          <Route path="/perfil/alterar-password" element={<ChangePasswordPage />} />
+          <Route path="/perfil/publico" element={<PublicProfilePage />} />
+          <Route path="/escolher-area" element={<EscolhaAreaPage />} />
+          <Route path="/consultores" element={<ConsultoresPage />} />
+        </Route>
       </Route>
 
-      {/* ---- Talent Manager (sidebar) ---- */}
+      {/* ========================================================= */}
+      {/* ROTAS: GESTÃO (Envolvidas pelo ManagerLayout)             */}
+      {/* ========================================================= */}
       <Route
         element={
           <ProtectedRoute>
@@ -95,45 +104,53 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/tm" element={<TalentDashboardPage />} />
-        <Route path="/tm/candidaturas" element={<TalentCandidaturasPage />} />
-        <Route path="/tm/candidaturas/:id" element={<TalentCandidaturaDetailPage />} />
-        <Route path="/tm/catalogo" element={<BadgesGridView titulo={t('app.rotas.catalogoBadges')} linkBase="/tm/catalogo" />} />
-        <Route path="/tm/catalogo/:id" element={<ManagerBadgeDetailPage />} />
-        <Route path="/tm/learning-paths" element={<AdminResourcePage resourceKey="learning-paths" readOnly />} />
-        <Route path="/tm/consultores" element={<ConsultoresPage linkBase="/tm/consultores" />} />
-        <Route path="/tm/consultores/:id" element={<ManagerConsultorDetailPage />} />
-        <Route path="/tm/conta" element={<ManagerContaPage />} />
+        {/* ---- Talent Manager ---- */}
+        <Route element={<RoleGuard allowedRoles={['tm', 'admin']} />}>
+          <Route path="/tm" element={<TalentDashboardPage />} />
+          <Route path="/tm/candidaturas" element={<TalentCandidaturasPage />} />
+          <Route path="/tm/candidaturas/:id" element={<TalentCandidaturaDetailPage />} />
+          <Route path="/tm/catalogo" element={<BadgesGridView titulo={t('app.rotas.catalogoBadges')} linkBase="/tm/catalogo" />} />
+          <Route path="/tm/catalogo/:id" element={<ManagerBadgeDetailPage />} />
+          <Route path="/tm/learning-paths" element={<AdminResourcePage resourceKey="learning-paths" readOnly />} />
+          <Route path="/tm/consultores" element={<ConsultoresPage linkBase="/tm/consultores" />} />
+          <Route path="/tm/consultores/:id" element={<ManagerConsultorDetailPage />} />
+          <Route path="/tm/conta" element={<ManagerContaPage />} />
+        </Route>
 
-        {/* Service Line Leader */}
-        <Route path="/sll" element={<SLLDashboardPage />} />
-        <Route path="/sll/pedidos" element={<SLLPedidosPage />} />
-        <Route path="/sll/pedidos/:id" element={<SLLPedidoDetailPage />} />
-        <Route path="/sll/consultores" element={<ConsultoresPage linkBase="/sll/consultores" />} />
-        <Route path="/sll/consultores/:id" element={<ManagerConsultorDetailPage />} />
-        <Route path="/sll/badges" element={<BadgesGridView titulo={t('app.rotas.badges')} linkBase="/sll/badges" />} />
-        <Route path="/sll/badges/:id" element={<ManagerBadgeDetailPage />} />
-        <Route path="/sll/relatorios" element={<SLLRelatoriosPage />} />
-        <Route path="/sll/notificacoes" element={<NotificationsPage />} />
-        <Route path="/sll/conta" element={<ManagerContaPage />} />
+        {/* ---- Service Line Leader ---- */}
+        <Route element={<RoleGuard allowedRoles={['sll', 'admin']} />}>
+          <Route path="/sll" element={<SLLDashboardPage />} />
+          <Route path="/sll/pedidos" element={<SLLPedidosPage />} />
+          <Route path="/sll/pedidos/:id" element={<SLLPedidoDetailPage />} />
+          <Route path="/sll/consultores" element={<ConsultoresPage linkBase="/sll/consultores" />} />
+          <Route path="/sll/consultores/:id" element={<ManagerConsultorDetailPage />} />
+          <Route path="/sll/badges" element={<BadgesGridView titulo={t('app.rotas.badges')} linkBase="/sll/badges" />} />
+          <Route path="/sll/badges/:id" element={<ManagerBadgeDetailPage />} />
+          <Route path="/sll/relatorios" element={<SLLRelatoriosPage />} />
+          <Route path="/sll/notificacoes" element={<NotificationsPage />} />
+          <Route path="/sll/conta" element={<ManagerContaPage />} />
+        </Route>
 
-        {/* Admin */}
-        <Route path="/admin" element={<TalentDashboardPage />} />
-        <Route path="/admin/badges" element={<AdminResourcePage resourceKey="badges" />} />
-        <Route path="/admin/learning-paths" element={<AdminResourcePage resourceKey="learning-paths" />} />
-        <Route path="/admin/service-lines" element={<AdminResourcePage resourceKey="service-lines" />} />
-        <Route path="/admin/areas" element={<AdminResourcePage resourceKey="areas" />} />
-        <Route path="/admin/niveis" element={<AdminResourcePage resourceKey="levels" />} />
-        <Route path="/admin/requisitos" element={<AdminResourcePage resourceKey="requirements" />} />
-        <Route path="/admin/politicas" element={<AdminResourcePage resourceKey="policies" />} />
-        <Route path="/admin/avisos" element={<AdminResourcePage resourceKey="notices" />} />
-        <Route path="/admin/informacoes" element={<AdminResourcePage resourceKey="information" />} />
-        <Route path="/admin/utilizadores" element={<AdminUsersPage />} />
-        <Route path="/admin/pedidos" element={<AdminPedidosPage />} />
-        <Route path="/admin/definicoes" element={<AdminDefinicoesPage />} />
-        <Route path="/admin/conta" element={<ManagerContaPage />} />
+        {/* ---- Admin ---- */}
+        <Route element={<RoleGuard allowedRoles={['admin']} />}>
+          <Route path="/admin" element={<TalentDashboardPage />} />
+          <Route path="/admin/badges" element={<AdminResourcePage resourceKey="badges" />} />
+          <Route path="/admin/learning-paths" element={<AdminResourcePage resourceKey="learning-paths" />} />
+          <Route path="/admin/service-lines" element={<AdminResourcePage resourceKey="service-lines" />} />
+          <Route path="/admin/areas" element={<AdminResourcePage resourceKey="areas" />} />
+          <Route path="/admin/niveis" element={<AdminResourcePage resourceKey="levels" />} />
+          <Route path="/admin/requisitos" element={<AdminResourcePage resourceKey="requirements" />} />
+          <Route path="/admin/politicas" element={<AdminResourcePage resourceKey="policies" />} />
+          <Route path="/admin/avisos" element={<AdminResourcePage resourceKey="notices" />} />
+          <Route path="/admin/informacoes" element={<AdminResourcePage resourceKey="information" />} />
+          <Route path="/admin/utilizadores" element={<AdminUsersPage />} />
+          <Route path="/admin/pedidos" element={<AdminPedidosPage />} />
+          <Route path="/admin/definicoes" element={<AdminDefinicoesPage />} />
+          <Route path="/admin/conta" element={<ManagerContaPage />} />
+        </Route>
       </Route>
 
+      {/* Rota de segurança para apanhar URLs perdidos */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
