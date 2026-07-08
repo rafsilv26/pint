@@ -92,44 +92,86 @@ export const getAdminResources = (t) => ({
     ],
   },
   areas: {
-    resource: 'areas',
-    titulo: t('admin.areas.titulo'),
-    singular: t('admin.areas.singular'),
-    colunas: [
-      { key: 'nome', label: t('admin.generic.nome') },
-      { key: 'descricao', label: t('admin.generic.descricao') },
-    ],
-    campos: [
-      { key: 'nome', label: t('admin.generic.nome') },
-      { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea' },
-    ],
-  },
+      resource: 'areas',
+      titulo: t('admin.areas.titulo'),
+      singular: t('admin.areas.singular'),
+      colunas: [
+        { key: 'nome', label: t('admin.generic.nome') },
+        // Opcional: Adicionar a coluna para veres o ID na tabela
+        { key: 'serviceLineId', label: t('admin.serviceLines.singular') }, 
+        { key: 'descricao', label: t('admin.generic.descricao') },
+      ],
+      campos: [
+        { key: 'nome', label: t('admin.generic.nome') },
+        
+        // O NOVO DROPDOWN PARA A SERVICE LINE:
+        { 
+          key: 'serviceLineId', 
+          label: t('admin.serviceLines.singular'), 
+          type: 'select', 
+          optionsResource: 'service-lines' // Vai buscar a lista à API das service lines
+        },
+        
+        { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
+      ],
+    },
   levels: {
-    resource: 'levels',
-    titulo: t('admin.levels.titulo'),
-    singular: t('admin.levels.singular'),
-    colunas: [
-      { key: 'codigo', label: t('admin.levels.campos.codigo') },
-      { key: 'nome', label: t('admin.generic.nome') },
-      { key: 'ordem', label: t('admin.levels.campos.ordem') },
-    ],
-    campos: [
-      { key: 'codigo', label: t('admin.levels.campos.codigo') },
-      { key: 'nome', label: t('admin.generic.nome') },
-      { key: 'ordem', label: t('admin.levels.campos.ordem'), type: 'number' },
-    ],
-  },
-  requirements: {
+      resource: 'levels',
+      titulo: t('admin.levels.titulo'),
+      singular: t('admin.levels.singular'),
+      colunas: [
+        { key: 'areaId', label: t('admin.areas.singular') }, // Adicionado para veres a Área na tabela
+        { key: 'nome', label: t('admin.generic.nome') },
+        { key: 'ordem', label: t('admin.levels.campos.ordem') },
+      ],
+      campos: [
+        // 1. O Dropdown mágico para a Área
+        { 
+          key: 'areaId', 
+          label: t('admin.areas.singular'), 
+          type: 'select', 
+          optionsResource: 'areas' 
+        },
+        
+        { key: 'nome', label: t('admin.generic.nome'), optional: true },
+        
+        // Como na BD é CHAR(1) (ex: 'A', 'B', 'C'), tirei o type: 'number' para permitir letras
+        { key: 'ordem', label: t('admin.levels.campos.ordem') },
+      ],
+    },
+requirements: {
     resource: 'requirements',
     titulo: t('admin.requirements.titulo'),
     singular: t('admin.requirements.singular'),
     colunas: [
+      { key: 'nivelId', label: t('admin.levels.singular') }, // Adicionado para veres o Nível na tabela
       { key: 'titulo', label: t('admin.generic.titulo') },
-      { key: 'descricao', label: t('admin.generic.descricao') },
+      { key: 'obrigatorio', label: 'Obrigatório' }, // É sempre útil ver se é obrigatório na tabela
     ],
     campos: [
+      // 2. O Dropdown mágico para o Nível
+      { 
+        key: 'nivelId', 
+        label: t('admin.levels.singular'), 
+        type: 'select', 
+        optionsResource: 'levels' 
+      },
+      
       { key: 'titulo', label: t('admin.generic.titulo') },
-      { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea' },
+      { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
+      
+      // Bónus: Adicionei os outros campos que tens na base de dados para o formulário ficar completo!
+      { 
+        key: 'obrigatorio', 
+        label: 'Obrigatório?', 
+        type: 'select', 
+        options: [
+          { value: true, label: 'Sim' },
+          { value: false, label: 'Não' }
+        ],
+        optional: true 
+      },
+      { key: 'ordem', label: 'Ordem', type: 'number', optional: true },
     ],
   },
 });
