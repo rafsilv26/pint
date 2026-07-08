@@ -92,24 +92,20 @@ exports.createResource = async (req, res) => {
     const config = getConfig(req, res);
     if (!config) return;
 
-    // 1. Preparamos os dados base
     let payload = config.beforeCreate ? config.beforeCreate(req.body) : req.body;
 
-    // 2. Injeção automática de auditoria: 
-    // Se o modelo tiver o campo 'createdBy', preenchemos com o ID do user logado
-    if (config.model.rawAttributes.createdBy && req.user) {
-      payload.createdBy = req.user.id;
+    // --- AUTOMATIZAÇÃO ---
+    if (req.params.resource === 'policies') {
+      payload.version = payload.version || '1.0'; // Default se vazio
+      payload.effectiveDate = payload.effectiveDate || new Date(); // Data de hoje
+      payload.title = payload.title || payload.titulo; // Mapeamento
+      payload.createdBy = req.user?.id || 1; // ID do user ou default
     }
-    
-    // 3. Caso especial para as policies: Mapear 'titulo' para 'title' se necessário
-    if (req.params.resource === 'policies' && payload.titulo && !payload.title) {
-      payload.title = payload.titulo;
-    }
+    // ----------------------
 
     const row = await config.model.create(payload);
     res.status(201).json(row);
   } catch (error) {
-    // Agora o erro vai mostrar exatamente qual campo falta
     res.status(500).json({ erro: 'Erro ao criar recurso.', details: error.message });
   }
 };

@@ -178,19 +178,17 @@ requirements: {
     ],
   },
   policies: {
-    resource: 'policies',
-    titulo: t('admin.policies.titulo'),
-    singular: t('admin.policies.singular'),
-    colunas: [
-      { key: 'titulo', label: t('admin.generic.titulo') }, // Nota: Verifica se é 'titulo' ou 'title' na tua BD
-      { key: 'versao', label: t('admin.policies.campos.versao') },
-    ],
-    campos: [
-      { key: 'titulo', label: t('admin.generic.titulo') },
-      { key: 'versao', label: t('admin.policies.campos.versao') },
-      { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea' },
-      // Adiciona estes campos para satisfazer o NOT NULL da base de dados:
-      { key: 'title', label: 'Título' }, 
-    ],
-  },
+      resource: 'policies',
+      titulo: t('admin.policies.titulo'),
+      singular: t('admin.policies.singular'),
+      colunas: [
+        { key: 'titulo', label: t('admin.generic.titulo') },
+        { key: 'versao', label: t('admin.policies.campos.versao') },
+      ],
+      campos: [
+        { key: 'titulo', label: t('admin.generic.titulo') },
+        { key: 'versao', label: t('admin.policies.campos.versao') },
+        { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea' }
+      ],
+    },
 });
