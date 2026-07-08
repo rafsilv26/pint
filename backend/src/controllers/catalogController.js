@@ -51,8 +51,16 @@ exports.listResources = async (req, res) => {
     const config = getConfig(req, res);
     if (!config) return;
 
+    const whereClause = buildWhere(req.query);
+
+    // CORREÇÃO APLICADA AQUI: 
+    // Se a tabela tiver a coluna 'deletedAt', filtra para listar APENAS os não apagados.
+    if (config.model.rawAttributes.deletedAt) {
+      whereClause.deletedAt = null;
+    }
+
     const rows = await config.model.findAll({
-      where: buildWhere(req.query),
+      where: whereClause,
       limit: req.query.limit ? Number(req.query.limit) : undefined,
       offset: req.query.offset ? Number(req.query.offset) : undefined
     });
