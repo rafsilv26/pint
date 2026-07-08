@@ -135,7 +135,9 @@ exports.updateResource = async (req, res) => {
     await row.update({ ...req.body, updatedAt: new Date() });
     res.json(row);
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao atualizar recurso.', details: error.message });
+    // Isto vai mostrar exatamente qual é o erro de validação detalhado
+    const message = error.errors ? error.errors.map(e => e.message).join(', ') : error.message;
+    res.status(500).json({ erro: 'Erro ao processar recurso.', details: message });
   }
 };
 
