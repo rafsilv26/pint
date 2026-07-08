@@ -35,7 +35,14 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
               const res = await api.listResource(f.optionsResource)
               newOptions[f.key] = res.map(item => ({
                 value: item.id,
-                label: item.nome || item.titulo || item.title || `ID: ${item.id}`
+                
+                // A MAGIA NOVA ESTÁ AQUI:
+                // Se a configuração tiver um 'optionLabel' feito por nós, usa-o.
+                // Caso contrário, tenta adivinhar o nome como fazia antes.
+                label: f.optionLabel 
+                  ? f.optionLabel(item) 
+                  : (item.nome || item.titulo || item.title || `ID: ${item.id}`)
+                  
               }))
             } catch (err) {
               console.error(`Erro ao carregar opções para ${f.key}:`, err)
@@ -45,8 +52,6 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
         setDropdownOptions(newOptions)
       }
       loadOptions()
-      
-    // CORREÇÃO: Usar o 'resourceKey' em vez do 'cfg.campos' para evitar o loop infinito!
     }, [resourceKey])
 
   function abrir(row) {

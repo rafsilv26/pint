@@ -139,39 +139,39 @@ export const getAdminResources = (t) => ({
         { key: 'ordem', label: t('admin.levels.campos.ordem') },
       ],
     },
-requirements: {
-    resource: 'requirements',
-    titulo: t('admin.requirements.titulo'),
-    singular: t('admin.requirements.singular'),
-    colunas: [
-      { key: 'nivelId', label: t('admin.levels.singular') }, // Adicionado para veres o Nível na tabela
-      { key: 'titulo', label: t('admin.generic.titulo') },
-      { key: 'obrigatorio', label: 'Obrigatório' }, // É sempre útil ver se é obrigatório na tabela
-    ],
-    campos: [
-      // 2. O Dropdown mágico para o Nível
-      { 
-        key: 'nivelId', 
-        label: t('admin.levels.singular'), 
-        type: 'select', 
-        optionsResource: 'levels' 
-      },
-      
-      { key: 'titulo', label: t('admin.generic.titulo') },
-      { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
-      
-      // Bónus: Adicionei os outros campos que tens na base de dados para o formulário ficar completo!
-      { 
-        key: 'obrigatorio', 
-        label: 'Obrigatório?', 
-        type: 'select', 
-        options: [
-          { value: true, label: 'Sim' },
-          { value: false, label: 'Não' }
-        ],
-        optional: true 
-      },
-      { key: 'ordem', label: 'Ordem', type: 'number', optional: true },
-    ],
-  },
+  requirements: {
+      resource: 'requirements',
+      titulo: t('admin.requirements.titulo'),
+      singular: t('admin.requirements.singular'),
+      colunas: [
+        { key: 'nivelId', label: t('admin.levels.singular') },
+        { key: 'titulo', label: t('admin.generic.titulo') },
+        { key: 'obrigatorio', label: 'Obrigatório' },
+      ],
+      campos: [
+        { 
+          key: 'nivelId', 
+          label: t('admin.levels.singular'), 
+          type: 'select', 
+          optionsResource: 'levels',
+          // Aqui distinguimos os níveis mostrando o nome + o ID da área a que pertencem
+          optionLabel: (item) => `${item.nome || 'Nível'} (Área ID: ${item.areaId})` 
+        },
+        
+        { key: 'titulo', label: t('admin.generic.titulo') },
+        { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
+        
+        { 
+          key: 'obrigatorio', 
+          label: 'Obrigatório?', 
+          type: 'select', 
+          options: [
+            { value: true, label: 'Sim' },
+            { value: false, label: 'Não' }
+          ],
+          optional: true 
+        },
+        { key: 'ordem', label: 'Ordem', type: 'number', optional: true },
+      ],
+    },
 });
