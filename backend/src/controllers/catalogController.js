@@ -135,10 +135,17 @@ exports.updateResource = async (req, res) => {
     await row.update({ ...payload, updatedAt: new Date() });
     
     res.json(row);
-  } catch (error) {
-    // Isto vai mostrar exatamente qual é o erro de validação detalhado
-    const message = error.errors ? error.errors.map(e => e.message).join(', ') : error.message;
-    console.error("ERRO DETALHADO NO UPDATE:", message); // Adicionado log para ser mais fácil ver no terminal
+} catch (error) {
+    // Isto irá imprimir o erro detalhado no terminal do teu servidor (Render)
+    console.error("--- ERRO SEQUELIZE ---");
+    if (error.errors) {
+      error.errors.forEach(err => console.error(`Campo: ${err.path}, Erro: ${err.message}`));
+    } else {
+      console.error(error);
+    }
+    
+    // Isto envia o erro detalhado para o frontend
+    const message = error.errors ? error.errors.map(e => `${e.path}: ${e.message}`).join(', ') : error.message;
     res.status(500).json({ erro: 'Erro ao processar recurso.', details: message });
   }
 };
