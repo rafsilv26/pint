@@ -27,26 +27,27 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
 
   // EFEITO MÁGICO: Carrega as opções dos dropdowns automaticamente da API
   useEffect(() => {
-    async function loadOptions() {
-      const newOptions = {}
-      for (const f of cfg.campos) {
-        if (f.type === 'select' && f.optionsResource) {
-          try {
-            const res = await api.listResource(f.optionsResource)
-            // Converte o que vem da API para um formato que o dropdown entenda { value, label }
-            newOptions[f.key] = res.map(item => ({
-              value: item.id,
-              label: item.nome || item.titulo || item.title || `ID: ${item.id}`
-            }))
-          } catch (err) {
-            console.error(`Erro ao carregar opções para ${f.key}:`, err)
+      async function loadOptions() {
+        const newOptions = {}
+        for (const f of cfg.campos) {
+          if (f.type === 'select' && f.optionsResource) {
+            try {
+              const res = await api.listResource(f.optionsResource)
+              newOptions[f.key] = res.map(item => ({
+                value: item.id,
+                label: item.nome || item.titulo || item.title || `ID: ${item.id}`
+              }))
+            } catch (err) {
+              console.error(`Erro ao carregar opções para ${f.key}:`, err)
+            }
           }
         }
+        setDropdownOptions(newOptions)
       }
-      setDropdownOptions(newOptions)
-    }
-    loadOptions()
-  }, [cfg.campos])
+      loadOptions()
+      
+    // CORREÇÃO: Usar o 'resourceKey' em vez do 'cfg.campos' para evitar o loop infinito!
+    }, [resourceKey])
 
   function abrir(row) {
     setEditing(row || {})
