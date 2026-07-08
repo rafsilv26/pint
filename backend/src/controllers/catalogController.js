@@ -122,21 +122,23 @@ exports.updateResource = async (req, res) => {
       return res.status(404).json({ erro: 'Registo não encontrado.' });
     }
 
-    // Preparamos o payload
+    // 1. Criamos o payload com o que vem do formulário
     let payload = { ...req.body };
 
-    // Se for um Aviso, garantimos que não tentamos remover o userId ou tipo
+    // 2. Garantimos integridade para Avisos (e outros se precisares)
     if (req.params.resource === 'notices') {
-        // Se o frontend não enviar estes campos, mantemos o valor original da BD
         payload.userId = payload.userId || row.userId;
-        payload.type = payload.type || row.type;
+        payload.type = payload.type || row.type || 'info';
     }
 
-    await row.update({ ...req.body, updatedAt: new Date() });
+    // 3. ATENÇÃO AQUI: Passamos o PAYLOAD, não o req.body
+    await row.update({ ...payload, updatedAt: new Date() });
+    
     res.json(row);
   } catch (error) {
     // Isto vai mostrar exatamente qual é o erro de validação detalhado
     const message = error.errors ? error.errors.map(e => e.message).join(', ') : error.message;
+    console.error("ERRO DETALHADO NO UPDATE:", message); // Adicionado log para ser mais fácil ver no terminal
     res.status(500).json({ erro: 'Erro ao processar recurso.', details: message });
   }
 };
