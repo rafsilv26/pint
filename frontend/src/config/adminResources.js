@@ -191,7 +191,6 @@ requirements: {
       { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea' },
       // Adiciona estes campos para satisfazer o NOT NULL da base de dados:
       { key: 'title', label: 'Título' }, 
-      { key: 'createdBy', label: 'Criado por (ID do utilizador)' } 
     ],
   },
 });
