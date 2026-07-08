@@ -19,54 +19,47 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
   const [erroForm, setErroForm] = useState(null)
   const [confirmar, setConfirmar] = useState(null)
   const [erroDelete, setErroDelete] = useState(null) 
-
-  // Estado para guardar as opções dos dropdowns (ex: listas de Learning Paths)
   const [dropdownOptions, setDropdownOptions] = useState({})
 
   const rows = data || []
 
-  // EFEITO MÁGICO: Carrega as opções dos dropdowns automaticamente da API
-  useEffect(() => {
-      async function loadOptions() {
-        const newOptions = {}
-        
-        // 1. Carregamos as Áreas num mapa para consulta rápida { id: nome }
-        let areasMap = {};
-        try {
-          const areas = await api.listResource('areas');
-          areas.forEach(a => areasMap[a.id] = a.nome);
-        } catch (e) { console.error("Erro ao carregar áreas"); }
+  // Função auxiliar para detetar a chave primária real
+  const getPrimaryKey = (row) => row?.policyId ?? row?.id ?? row?.areaId ?? null;
 
-        // 2. Processamos os outros selects
-        for (const f of cfg.campos) {
-          if (f.type === 'select' && f.optionsResource) {
-            try {
-              const res = await api.listResource(f.optionsResource);
-              newOptions[f.key] = res.map(item => ({
-                value: item.id,
-                // Aqui usamos a função personalizada se existir, passando o mapa de áreas
-                label: f.optionLabel ? f.optionLabel(item, areasMap) : (item.nome || item.titulo || `ID: ${item.id}`)
-              }));
-            } catch (err) {
-              console.error(`Erro ao carregar opções para ${f.key}:`, err);
-            }
-          }
+  useEffect(() => {
+    async function loadOptions() {
+      const newOptions = {}
+      
+      let areasMap = {};
+      try {
+        const areas = await api.listResource('areas');
+        areas.forEach(a => areasMap[a.id] = a.nome);
+      } catch (e) { console.error("Erro ao carregar áreas para dropdown"); }
+
+      for (const f of cfg.campos) {
+        if (f.type === 'select' && f.optionsResource) {
+          try {
+            const res = await api.listResource(f.optionsResource);
+            newOptions[f.key] = res.map(item => ({
+              value: item.id ?? item.policyId ?? item.areaId,
+              label: f.optionLabel ? f.optionLabel(item, areasMap) : (item.nome || item.titulo || item.title || `ID: ${item.id}`)
+            }));
+          } catch (err) { console.error(`Erro ao carregar opções para ${f.key}:`, err); }
         }
-        setDropdownOptions(newOptions);
       }
-      loadOptions();
-    }, [resourceKey]);
+      setDropdownOptions(newOptions);
+    }
+    loadOptions();
+  }, [resourceKey, cfg.campos]);
 
   function abrir(row) {
-    setEditing(row || {})
+    const id = row ? getPrimaryKey(row) : null;
+    setEditing(row ? { ...row, id } : {})
     setForm(row ? { ...row } : {})
     setErroForm(null)
   }
   
-  function fechar() {
-    setEditing(null)
-    setForm({})
-  }
+  function fechar() { setEditing(null); setForm({}); }
 
   async function guardar(e) {
     e.preventDefault()
@@ -78,11 +71,9 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
       fechar()
       reload()
     } catch (err) {
-      console.log("ERRO COMPLETO DA API:", err);
-      setErroForm(err.response?.data?.message || err.message || "Erro ao guardar")
-    } finally {
-      setSaving(false)
-    }
+      const msg = err.response?.data?.details || err.response?.data?.message || err.message;
+      setErroForm(msg);
+    } finally { setSaving(false) }
   }
 
   async function apagar() {
@@ -92,8 +83,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
       setConfirmar(null)
       reload()
     } catch (err) {
-      console.error("ERRO COMPLETO AO APAGAR:", err);
-      setErroDelete(err.response?.data?.message || err.message || "Não foi possível eliminar este registo.")
+      setErroDelete("Não foi possível eliminar este registo.")
     }
   }
 
@@ -112,17 +102,8 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
       />
 
       <Card className="overflow-hidden p-0">
-        {loading ? (
-          <div className="p-6"><Spinner /></div>
-        ) : error ? (
-          <div className="p-6"><ErrorState onRetry={reload} /></div>
-        ) : rows.length === 0 ? (
-          <div className="p-6">
-            <EmptyState 
-              title={t('adminResource.semRegistos', { titulo: tituloTraduzido.toLowerCase() })} 
-              description={t('adminResource.adicionaPrimeiro')} 
-            />
-          </div>
+        {loading ? <div className="p-6"><Spinner /></div> : error ? <div className="p-6"><ErrorState onRetry={reload} /></div> : rows.length === 0 ? (
+          <div className="p-6"><EmptyState title={t('adminResource.semRegistos', { titulo: tituloTraduzido.toLowerCase() })} description={t('adminResource.adicionaPrimeiro')} /></div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -134,18 +115,14 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr key={getPrimaryKey(r)} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
                     {cfg.colunas.map((c) => (
-                      <td key={c.key} className="max-w-xs truncate px-4 py-3 text-ink">
-                        {String(r[c.key] ?? '—')}
-                      </td>
+                      <td key={c.key} className="max-w-xs truncate px-4 py-3 text-ink">{String(r[c.key] ?? '—')}</td>
                     ))}
                     {!readOnly && (
-                      <td className="px-4 py-3">
-                        <div className="flex justify-end gap-3">
-                          <button onClick={() => abrir(r)} className="text-muted hover:text-brand" aria-label="Editar"><Pencil size={16} /></button>
-                          <button onClick={() => { setConfirmar(r); setErroDelete(null); }} className="text-muted hover:text-red-600" aria-label="Eliminar"><Trash2 size={16} /></button>
-                        </div>
+                      <td className="px-4 py-3 text-right">
+                        <button onClick={() => abrir(r)} className="mr-3 text-muted hover:text-brand"><Pencil size={16} /></button>
+                        <button onClick={() => setConfirmar({ id: getPrimaryKey(r) })} className="text-muted hover:text-red-600"><Trash2 size={16} /></button>
                       </td>
                     )}
                   </tr>
@@ -156,90 +133,42 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
         )}
       </Card>
 
-      {/* MODAL ADICIONAR/EDITAR */}
+      {/* Modal Edição */}
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <form onSubmit={guardar} className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
-            <h2 className="mb-4 text-lg font-bold text-ink">
-              {editing.id 
-                ? t('adminResource.editar', { singular: singularTraduzido }) 
-                : t('adminResource.adicionar', { singular: singularTraduzido })
-              }
-            </h2>
+            <h2 className="mb-4 text-lg font-bold">{editing.id ? t('adminResource.editar', { singular: singularTraduzido }) : t('adminResource.adicionar', { singular: singularTraduzido })}</h2>
             {erroForm && <div className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erroForm}</div>}
-            
-            <div className="space-y-3">
-              {cfg.campos.map((f) => (
-                <label key={f.key} className="block">
-                  <span className="mb-1 block text-sm font-medium text-ink">{t(f.label)}</span>
-                  
-                  {/* === LÓGICA DO DROPDOWN (SELECT) === */}
-                  {f.type === 'select' ? (
-                    <select
-                      value={form[f.key] ?? ''}
-                      onChange={(e) => setForm({ ...form, [f.key]: e.target.value ? Number(e.target.value) : null })}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 bg-white"
-                      required={!f.optional}
-                    >
-                      <option value="">Selecione uma opção...</option>
-                      {(f.options || dropdownOptions[f.key] || []).map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-
-                  /* === LÓGICA DA TEXTAREA === */
-                  ) : f.type === 'textarea' ? (
-                    <textarea
-                      rows={3}
-                      value={form[f.key] ?? ''}
-                      onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-                      required={!f.optional}
-                    />
-                    
-                  /* === LÓGICA DO INPUT NORMAL === */
-                  ) : (
-                    <input
-                      type={f.type || 'text'}
-                      value={form[f.key] ?? ''}
-                      onChange={(e) => setForm({ ...form, [f.key]: f.type === 'number' ? Number(e.target.value) : e.target.value })}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-                      required={!f.optional}
-                    />
-                  )}
-                </label>
-              ))}
-            </div>
-
-            <div className="mt-5 flex justify-end gap-2">
-              <Button type="button" variant="secondary" onClick={fechar}>{t('adminResource.cancelar')}</Button>
-              <Button type="submit" disabled={saving}>{saving ? t('adminResource.guardando') : t('adminResource.guardar')}</Button>
+            {cfg.campos.map((f) => (
+              <label key={f.key} className="block mb-3">
+                <span className="block text-sm font-medium mb-1">{t(f.label)}</span>
+                {f.type === 'select' ? (
+                  <select value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="w-full border p-2 rounded-lg">
+                    <option value="">Selecione...</option>
+                    {(f.options || dropdownOptions[f.key] || []).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                ) : (
+                  <input type={f.type || 'text'} value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="w-full border p-2 rounded-lg" />
+                )}
+              </label>
+            ))}
+            <div className="flex justify-end gap-2 mt-5">
+              <Button variant="secondary" onClick={fechar}>Cancelar</Button>
+              <Button type="submit">{saving ? "Guardando..." : "Guardar"}</Button>
             </div>
           </form>
         </div>
       )}
 
-      {/* MODAL ELIMINAR */}
+      {/* Modal Confirmar Eliminar */}
       {confirmar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
-            <Trash2 size={32} className="mx-auto text-red-500" />
-            <p className="mt-3 font-semibold text-ink">{t('adminResource.eliminarTitulo')}</p>
-            <p className="mt-1 text-sm text-muted">{t('adminResource.eliminarAviso')}</p>
-            
-            {erroDelete && (
-              <div className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
-                {erroDelete}
-              </div>
-            )}
-
-            <div className="mt-5 flex justify-center gap-2">
-              <Button variant="secondary" onClick={() => { setConfirmar(null); setErroDelete(null); }}>{t('adminResource.cancelar')}</Button>
-              <button onClick={apagar} className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">
-                {t('adminResource.eliminar')}
-              </button>
+          <div className="bg-white p-6 rounded-2xl w-full max-w-sm text-center">
+            <p>Confirmar eliminação?</p>
+            {erroDelete && <p className="text-red-600 text-sm mt-2">{erroDelete}</p>}
+            <div className="flex justify-center gap-2 mt-4">
+              <Button variant="secondary" onClick={() => setConfirmar(null)}>Cancelar</Button>
+              <button onClick={apagar} className="bg-red-600 text-white px-4 py-2 rounded-lg">Eliminar</button>
             </div>
           </div>
         </div>

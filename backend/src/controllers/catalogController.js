@@ -94,14 +94,12 @@ exports.createResource = async (req, res) => {
 
     let payload = config.beforeCreate ? config.beforeCreate(req.body) : req.body;
 
-    // --- AUTOMATIZAÇÃO ---
+    // Garante que campos obrigatórios de políticas não ficam vazios
     if (req.params.resource === 'policies') {
-      payload.version = payload.version || '1.0'; // Default se vazio
-      payload.effectiveDate = payload.effectiveDate || new Date(); // Data de hoje
-      payload.title = payload.title || payload.titulo; // Mapeamento
-      payload.createdBy = req.user?.id || 1; // ID do user ou default
+      payload.version = payload.version || '1.0';
+      payload.effectiveDate = payload.effectiveDate || new Date();
+      payload.createdBy = req.user?.id || 1; // Se não houver user, força 1
     }
-    // ----------------------
 
     const row = await config.model.create(payload);
     res.status(201).json(row);
