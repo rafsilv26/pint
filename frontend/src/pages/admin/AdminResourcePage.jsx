@@ -4,22 +4,23 @@ import { PageHeader, Card, Spinner, ErrorState, EmptyState, Button } from '../..
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import { getAdminResources } from '../../config/adminResources'; 
-import { useTranslation } from 'react-i18next'; // Garante que tens o hook aqui
+import { useTranslation } from 'react-i18next';
 
-// 2. Dentro do componente, inicializa a função com t()
 export default function AdminResourcePage({ resourceKey, readOnly = false }) {
   const { t } = useTranslation();
   
-  // Agora inicializamos o objeto de configuração chamando a função
   const allResources = getAdminResources(t);
   const cfg = allResources[resourceKey];
   const { data, loading, error, reload } = useAsync(() => api.listResource(cfg.resource), [resourceKey])
 
-  const [editing, setEditing] = useState(null) // row em edição, ou {} para novo
+  const [editing, setEditing] = useState(null)
   const [form, setForm] = useState({})
   const [saving, setSaving] = useState(false)
   const [erroForm, setErroForm] = useState(null)
-  const [confirmar, setConfirmar] = useState(null) // row a eliminar
+  const [confirmar, setConfirmar] = useState(null)
+  
+  // NOVO: Estado para apanhar os erros do botão eliminar
+  const [erroDelete, setErroDelete] = useState(null) 
 
   const rows = data || []
 
@@ -28,6 +29,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
     setForm(row ? { ...row } : {})
     setErroForm(null)
   }
+  
   function fechar() {
     setEditing(null)
     setForm({})
@@ -42,24 +44,27 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
       else await api.createResource(cfg.resource, form)
       fechar()
       reload()
-      } catch (err) {
-      console.log("ERRO COMPLETO DA API:", err); // <-- Isto vai mostrar o objeto detalhado
+    } catch (err) {
+      console.log("ERRO COMPLETO DA API:", err);
       setErroForm(err.response?.data?.message || err.message || "Erro ao guardar")
     } finally {
       setSaving(false)
     }
   }
 
+  // CORRIGIDO: Agora apanha erros e só fecha a janela se tiver sucesso
   async function apagar() {
+    setErroDelete(null)
     try {
       await api.deleteResource(cfg.resource, confirmar.id)
-    } finally {
       setConfirmar(null)
       reload()
+    } catch (err) {
+      console.error("ERRO COMPLETO AO APAGAR:", err);
+      setErroDelete(err.response?.data?.message || err.message || "Não foi possível eliminar este registo. Pode estar associado a outros dados.")
     }
   }
 
-  // Traduz o título dinamicamente (fallback para a string original se não existir no JSON)
   const tituloTraduzido = t(cfg.titulo)
   const singularTraduzido = t(cfg.singular)
 
@@ -105,7 +110,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-3">
                           <button onClick={() => abrir(r)} className="text-muted hover:text-brand" aria-label={t('adminResource.ariaEditar')}><Pencil size={16} /></button>
-                          <button onClick={() => setConfirmar(r)} className="text-muted hover:text-red-600" aria-label={t('adminResource.ariaEliminar')}><Trash2 size={16} /></button>
+                          <button onClick={() => { setConfirmar(r); setErroDelete(null); }} className="text-muted hover:text-red-600" aria-label={t('adminResource.ariaEliminar')}><Trash2 size={16} /></button>
                         </div>
                       </td>
                     )}
@@ -165,8 +170,16 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
             <Trash2 size={32} className="mx-auto text-red-500" />
             <p className="mt-3 font-semibold text-ink">{t('adminResource.eliminarTitulo')}</p>
             <p className="mt-1 text-sm text-muted">{t('adminResource.eliminarAviso')}</p>
+            
+            {/* NOVO: Mostra o erro se não conseguir apagar */}
+            {erroDelete && (
+              <div className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+                {erroDelete}
+              </div>
+            )}
+
             <div className="mt-5 flex justify-center gap-2">
-              <Button variant="secondary" onClick={() => setConfirmar(null)}>{t('adminResource.cancelar')}</Button>
+              <Button variant="secondary" onClick={() => { setConfirmar(null); setErroDelete(null); }}>{t('adminResource.cancelar')}</Button>
               <button onClick={apagar} className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">
                 {t('adminResource.eliminar')}
               </button>
