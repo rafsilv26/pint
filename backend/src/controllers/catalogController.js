@@ -122,6 +122,16 @@ exports.updateResource = async (req, res) => {
       return res.status(404).json({ erro: 'Registo não encontrado.' });
     }
 
+    // Preparamos o payload
+    let payload = { ...req.body };
+
+    // Se for um Aviso, garantimos que não tentamos remover o userId ou tipo
+    if (req.params.resource === 'notices') {
+        // Se o frontend não enviar estes campos, mantemos o valor original da BD
+        payload.userId = payload.userId || row.userId;
+        payload.type = payload.type || row.type;
+    }
+
     await row.update({ ...req.body, updatedAt: new Date() });
     res.json(row);
   } catch (error) {
