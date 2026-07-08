@@ -74,11 +74,21 @@ export const getAdminResources = (t) => ({
     singular: t('admin.serviceLines.singular'),
     colunas: [
       { key: 'nome', label: t('admin.generic.nome') },
+      { key: 'learningPathId', label: t('admin.learningPaths.singular') }, // Adicionado à tabela
       { key: 'descricao', label: t('admin.generic.descricao') },
     ],
     campos: [
       { key: 'nome', label: t('admin.generic.nome') },
-      { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea' },
+      
+      // AQUI ESTÁ A MAGIA DO DROPDOWN:
+      { 
+        key: 'learningPathId', 
+        label: t('admin.learningPaths.singular'), 
+        type: 'select', 
+        optionsResource: 'learning-paths' // Liga diretamente à API dos learning-paths
+      },
+      
+      { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
     ],
   },
   areas: {
@@ -122,4 +132,4 @@ export const getAdminResources = (t) => ({
       { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea' },
     ],
   },
-})
+});
