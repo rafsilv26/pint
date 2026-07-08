@@ -117,32 +117,34 @@ exports.updateResource = async (req, res) => {
     const config = getConfig(req, res);
     if (!config) return;
 
+    // 1. Vai buscar o registo atual à base de dados
     const row = await config.model.findByPk(req.params.id);
     if (!row) {
       return res.status(404).json({ erro: 'Registo não encontrado.' });
     }
 
-    // 1. Criamos o payload com o que vem do formulário
+    // 2. Prepara o payload com o que vem do formulário
     let payload = { ...req.body };
 
-    // 2. Garantimos integridade para Avisos (e outros se precisares)
+    // 3. SE FOR AVISO, GARANTIMOS QUE OS CAMPOS OBRIGATÓRIOS TÊM VALOR
     if (req.params.resource === 'notices') {
+        // Se o formulário não enviou o campo, usa o que já existe na BD (row.campo)
         payload.userId = payload.userId || row.userId;
-        payload.type = payload.type || row.type || 'info';
+        payload.type = payload.type || row.type || 'info'; 
+        
+        // Remove campos que não devem ser alterados, se necessário
+        delete payload.createdAt;
     }
 
-    // 3. ATENÇÃO AQUI: Passamos o PAYLOAD, não o req.body
+    // 4. ATUALIZA USANDO O PAYLOAD TRATADO (NÃO O REQ.BODY)
     await row.update({ ...payload, updatedAt: new Date() });
     
     res.json(row);
   } catch (error) {
-    // Se for erro de validação do Sequelize, extraímos cada detalhe
-    const message = error.name === 'SequelizeValidationError' 
-      ? error.errors.map(e => `${e.path}: ${e.message}`).join(' | ') 
-      : error.message;
-      
-    console.error("ERRO COMPLETO:", error); // Isto aparece nos logs do Render
-    res.status(500).json({ erro: 'Erro ao processar.', details: message });
+    // Agora o erro que aparece no navegador vai ser muito mais específico
+    const message = error.errors ? error.errors.map(e => `${e.path}: ${e.message}`).join(' | ') : error.message;
+    console.error("ERRO NO UPDATE:", error); 
+    res.status(500).json({ erro: 'Erro ao atualizar.', details: message });
   }
 };
 
