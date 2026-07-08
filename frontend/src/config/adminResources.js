@@ -182,13 +182,16 @@ requirements: {
       titulo: t('admin.policies.titulo'),
       singular: t('admin.policies.singular'),
       colunas: [
-        { key: 'titulo', label: t('admin.generic.titulo') },
-        { key: 'versao', label: t('admin.policies.campos.versao') },
+        // Usa os nomes exatos que estão no JSON:
+        { key: 'title', label: t('admin.generic.titulo') }, 
+        { key: 'version', label: 'Versão' },
+        { key: 'effectiveDate', label: 'Data de Eficácia' },
       ],
       campos: [
-        { key: 'titulo', label: t('admin.generic.titulo') },
-        { key: 'versao', label: t('admin.policies.campos.versao') },
-        { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea' }
+        { key: 'title', label: t('admin.generic.titulo') },
+        { key: 'version', label: 'Versão' },
+        { key: 'description', label: t('admin.generic.descricao'), type: 'textarea' }, // O JSON chama-lhe 'description'
+        { key: 'effectiveDate', label: 'Data de Eficácia', type: 'date' }
       ],
     },
 });
