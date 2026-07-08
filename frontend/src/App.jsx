@@ -67,22 +67,34 @@ export default function App() {
       {/* ========================================================= */}
       {/* ROTAS: CONSULTOR / BASE (Sem RoleGuard, apenas Protegido) */}
       {/* ========================================================= */}
-      <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/catalogo" element={<CatalogPage />} />
-        <Route path="/catalogo/:id" element={<BadgeDetailPage />} />
-        <Route path="/candidaturas" element={<ApplicationsPage />} />
-        <Route path="/candidaturas/nova" element={<SubmitApplicationPage />} />
-        <Route path="/historico" element={<HistoryPage />} />
-        <Route path="/notificacoes" element={<NotificationsPage />} />
-        <Route path="/ranking" element={<RankingPage />} />
-        <Route path="/perfil" element={<ProfilePage />} />
-        <Route path="/perfil/preferencias" element={<PreferencesPage />} />
-        <Route path="/perfil/assinatura" element={<EmailSignaturePage />} />
-        <Route path="/perfil/alterar-password" element={<ChangePasswordPage />} />
-        <Route path="/perfil/publico" element={<PublicProfilePage />} />
-        <Route path="/escolher-area" element={<EscolhaAreaPage />} />
-        <Route path="/consultores" element={<ConsultoresPage />} />
+{/* ========================================================= */}
+      {/* ROTAS: CONSULTOR                                          */}
+      {/* ========================================================= */}
+      <Route
+        element={
+          <ProtectedRoute>
+            {/* Agora sim, apenas os consultores entram aqui! */}
+            <RoleGuard allowedRoles={['consultor']} />
+          </ProtectedRoute>
+        }
+      >
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/catalogo" element={<CatalogPage />} />
+          <Route path="/catalogo/:id" element={<BadgeDetailPage />} />
+          <Route path="/candidaturas" element={<ApplicationsPage />} />
+          <Route path="/candidaturas/nova" element={<SubmitApplicationPage />} />
+          <Route path="/historico" element={<HistoryPage />} />
+          <Route path="/notificacoes" element={<NotificationsPage />} />
+          <Route path="/ranking" element={<RankingPage />} />
+          <Route path="/perfil" element={<ProfilePage />} />
+          <Route path="/perfil/preferencias" element={<PreferencesPage />} />
+          <Route path="/perfil/assinatura" element={<EmailSignaturePage />} />
+          <Route path="/perfil/alterar-password" element={<ChangePasswordPage />} />
+          <Route path="/perfil/publico" element={<PublicProfilePage />} />
+          <Route path="/escolher-area" element={<EscolhaAreaPage />} />
+          <Route path="/consultores" element={<ConsultoresPage />} />
+        </Route>
       </Route>
 
       {/* ========================================================= */}

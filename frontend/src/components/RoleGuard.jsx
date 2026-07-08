@@ -8,10 +8,24 @@ export default function RoleGuard({ allowedRoles }) {
     return <Navigate to="/login" replace />
   }
 
-  // Se o utilizador não tiver permissão para esta área, volta à segurança do Dashboard
+  // Se o utilizador não tiver permissão para a página atual...
   if (!allowedRoles.includes(user.role)) {
-    return <Navigate to="/" replace /> 
+    
+    // ...descobrimos qual é a "página inicial" correta para o perfil dele
+    let fallback = '/' // Por defeito (Consultor) vai para a raiz
+    
+    if (user.role === 'admin') {
+      fallback = '/admin'
+    } else if (user.role === 'tm') {
+      fallback = '/tm'
+    } else if (user.role === 'sll') {
+      fallback = '/sll'
+    }
+
+    // E redirecionamos para lá!
+    return <Navigate to={fallback} replace /> 
   }
 
+  // Se tiver permissão, deixa passar
   return <Outlet />
 }
