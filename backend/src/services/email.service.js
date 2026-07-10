@@ -1,3 +1,27 @@
+const os = require('os');
+
+// O nodemailer resolve SEMPRE o host tanto em IPv4 como em IPv6 e escolhe
+// um endereço aleatório dos dois (ver nodemailer/lib/shared/index.js). O
+// Render tem uma interface de rede "IPv6" local mas sem rota real para a
+// internet — por isso o nodemailer, de vez em quando, tenta ligar por
+// IPv6 e falha com ENETUNREACH, mesmo com `dns.setDefaultResultOrder`
+// definido (esse ajuste não tem efeito aqui porque o nodemailer não usa
+// dns.lookup para isto, faz a sua própria resolução).
+// Corrigir na fonte: o nodemailer só considera IPv6 "suportado" se
+// detetar uma interface de rede local desse tipo (os.networkInterfaces).
+// Filtramos essas entradas ANTES do nodemailer ser importado, para ele
+// nunca sequer tentar IPv6.
+const originalNetworkInterfaces = os.networkInterfaces;
+os.networkInterfaces = function ipv4OnlyNetworkInterfaces(...args) {
+  const interfaces = originalNetworkInterfaces.apply(this, args) || {};
+  const filtered = {};
+  for (const [nome, enderecos] of Object.entries(interfaces)) {
+    const apenasIpv4 = (enderecos || []).filter((a) => a.family === 'IPv4' || a.family === 4);
+    if (apenasIpv4.length) filtered[nome] = apenasIpv4;
+  }
+  return filtered;
+};
+
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
