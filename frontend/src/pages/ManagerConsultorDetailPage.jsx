@@ -1,5 +1,5 @@
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
-import { ArrowLeft, Award, Star, Sparkles, Calendar, Mail, Linkedin, Network, Trophy, FileText, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Award, Star, Sparkles, Calendar, Mail, ExternalLink, Network, Trophy, FileText, ChevronRight } from 'lucide-react'
 import { Card, Spinner, ErrorState, EmptyState, StatusPill } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
@@ -72,7 +72,7 @@ export default function ManagerConsultorDetailPage() {
                   rel="noreferrer"
                   className="flex items-center gap-1 text-brand hover:underline"
                 >
-                  <Linkedin size={14} /> {t('managerConsultor.linkedin')}
+                  <ExternalLink size={14} /> {t('managerConsultor.linkedin')}
                 </a>
               )}
               {c.email && <p className="flex items-center gap-1"><Mail size={14} /> {c.email}</p>}
