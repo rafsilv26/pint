@@ -313,11 +313,33 @@
     "voltar": "Go back",
     "defaultRole": "Consultant",
     "sobre": "About",
+    "ranking": "#{{posicao}} on the ranking",
+    "linkedin": "LinkedIn",
     "stats": {
       "badges": "Badges",
       "pontos": "Points",
       "conquistas": "Special Achievements",
       "desde": "Consultant since"
+    },
+    "badgesConquistados": {
+      "titulo": "Badges Earned",
+      "vazioTitulo": "No badges yet",
+      "vazioDesc": "This consultant hasn't earned any badges yet.",
+      "pontos": "{{pontos}} points",
+      "expirado": "Expired"
+    },
+    "historico": {
+      "titulo": "Application History",
+      "vazioTitulo": "No applications",
+      "vazioDesc": "This consultant hasn't submitted any applications yet.",
+      "ver": "View",
+      "tabela": {
+        "trackingId": "No.",
+        "badge": "Badge",
+        "nivel": "Level",
+        "data": "Date",
+        "estado": "Status"
+      }
     }
   },
   "managerConta": {

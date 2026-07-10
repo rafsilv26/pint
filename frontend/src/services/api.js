@@ -43,6 +43,7 @@ export const getGamification = impl.getGamification
 export const getConsultants = impl.getConsultants
 export const getConsultant = impl.getConsultant
 export const updateConsultant = impl.updateConsultant
+export const getConsultantCandidaturas = impl.getConsultantCandidaturas
 
 // Assinatura de email
 export const getEmailSignature = impl.getEmailSignature

@@ -38,7 +38,22 @@ const serialize = (consultant, rank, currentUserId) => ({
   imagePath: consultant.User?.fotoPerfil || '',
   biography: consultant.biography,
   linkedinUrl: consultant.linkedinUrl,
-  isCurrentUser: consultant.consultorId === currentUserId
+  isCurrentUser: consultant.consultorId === currentUserId,
+  // Lista detalhada dos badges conquistados (usada na página de perfil do
+  // consultor vista pelo TM/SLL/Admin, para além da simples contagem acima).
+  badgesConquistados: (consultant.acquiredBadges || [])
+    .slice()
+    .sort((a, b) => new Date(b.obtainedDate || b.createdAt) - new Date(a.obtainedDate || a.createdAt))
+    .map((award) => ({
+      id: award.Badge?.id ?? award.badgeId,
+      nome: award.Badge?.nome || '',
+      nivelId: award.Badge?.nivelId ?? null,
+      pontos: Number(award.pointsObtained ?? award.Badge?.ponto ?? 0),
+      fornecedor: award.Badge?.fornecedor || '',
+      obtidoEm: award.obtainedDate,
+      expiraEm: award.expirationDate,
+      valido: award.valid !== false
+    }))
 });
 
 const loadRankedConsultants = async () => {

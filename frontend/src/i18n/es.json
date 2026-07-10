@@ -313,11 +313,33 @@
     "voltar": "Volver",
     "defaultRole": "Consultor",
     "sobre": "Sobre",
+    "ranking": "#{{posicao}} en el ranking",
+    "linkedin": "LinkedIn",
     "stats": {
       "badges": "Insignias",
       "pontos": "Puntos",
       "conquistas": "Logros Especiales",
       "desde": "Consultor desde"
+    },
+    "badgesConquistados": {
+      "titulo": "Insignias Obtenidas",
+      "vazioTitulo": "Aún sin insignias",
+      "vazioDesc": "Este consultor todavía no ha obtenido ninguna insignia.",
+      "pontos": "{{pontos}} puntos",
+      "expirado": "Caducada"
+    },
+    "historico": {
+      "titulo": "Historial de Solicitudes",
+      "vazioTitulo": "Sin solicitudes",
+      "vazioDesc": "Este consultor todavía no ha enviado ninguna solicitud.",
+      "ver": "Ver",
+      "tabela": {
+        "trackingId": "Nº",
+        "badge": "Insignia",
+        "nivel": "Nivel",
+        "data": "Fecha",
+        "estado": "Estado"
+      }
     }
   },
   "managerConta": {

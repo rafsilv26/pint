@@ -17,6 +17,12 @@ router.put('/talent/:id/validar', authorize('TalentManager', 'Admin'), candidatu
 router.get('/serviceline/pendentes', authorize('ServiceLineLeader', 'Admin', 'TalentManager'), candidaturaController.listarCandidaturasServiceLine);
 router.put('/serviceline/:id/validar', authorize('ServiceLineLeader', 'Admin'), candidaturaController.validarServiceLine);
 
+// Estatística para o gráfico "Pedidos Fechados" do painel de controlo
+router.get('/fechadas-semana', authorize('TalentManager', 'ServiceLineLeader', 'Admin'), candidaturaController.getFechadasPorSemana);
+
+// Histórico de candidaturas de um consultor (o próprio, ou TM/SLL/Admin)
+router.get('/consultor/:id', candidaturaController.listarCandidaturasPorConsultor);
+
 router.get('/:id', candidaturaController.detalhesCandidatura);
 
 module.exports = router;

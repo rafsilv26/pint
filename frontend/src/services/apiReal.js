@@ -238,13 +238,30 @@ export async function updateConsultant(id, body) {
   return http(`/consultants/${id}`, { method: 'PUT', body })
 }
 
+// Histórico de candidaturas de um consultor (visto pelo TM/SLL/Admin, ou pelo próprio)
+export async function getConsultantCandidaturas(id) {
+  const rows = await http(`/candidaturas/consultor/${id}`).catch(() => [])
+  return (rows || []).map((c) => {
+    const code = c.status?.code
+    return {
+      id: c.id,
+      trackingId: `#${String(c.id).padStart(5, '0')}`,
+      badge: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }),
+      nivel: c.Badge?.nivelId != null ? i18next.t('api.generic.nivel', { nivel: c.Badge.nivelId }) : '—',
+      data: dataPT(c.dataSubmicao),
+      status: { code, name: c.status?.name || code || '—', cor: CODE_COR[code] || 'gray' },
+    }
+  })
+}
+
 // ---------- Talent Manager ----------
 export async function getTalentDashboard() {
-  const [consultants, badges, slines, pendentes] = await Promise.all([
+  const [consultants, badges, slines, pendentes, fechadas] = await Promise.all([
     http('/consultants').catch(() => ({ data: [], total: 0 })),
     http('/catalog/badges').catch(() => []),
     http('/catalog/service-lines').catch(() => []),
     http('/candidaturas/talent/pendentes').catch(() => []),
+    http('/candidaturas/fechadas-semana').catch(() => [0, 0, 0, 0, 0, 0, 0]),
   ])
   const cons = consultants?.data || []
   return {
@@ -255,7 +272,7 @@ export async function getTalentDashboard() {
       { label: i18next.t('api.tm.stats.serviceLines'), value: String((slines || []).length), delta: '', tint: 'emerald' },
     ],
     pontuacaoGlobal: cons.slice(0, 8).map((c, i) => ({ rank: i + 1, nome: c.name, pontos: c.points })),
-    pedidosFechados: [],
+    pedidosFechados: Array.isArray(fechadas) && fechadas.length === 7 ? fechadas : [0, 0, 0, 0, 0, 0, 0],
     atividadeRecente: (pendentes || []).slice(0, 3).map((c) => ({
       nome: c.Consultant?.User?.nome || i18next.t('api.generic.consultor'),
       texto: i18next.t('api.tm.atividade', { nome: c.Badge?.nome || '' }),

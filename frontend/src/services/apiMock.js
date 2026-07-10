@@ -132,15 +132,28 @@ export async function changePassword({ currentPassword, newPassword }) {
 export async function getConsultants() {
   await delay()
   return [
-    { id: 7, name: 'Maria Costa', area: 'Cloud & Infrastructure', serviceLine: 'Technology', points: 480, badges: 8, rank: 1, isCurrentUser: false },
-    { id: 9, name: 'João Pereira', area: 'Data & AI', serviceLine: 'Technology', points: 410, badges: 7, rank: 2, isCurrentUser: false },
-    { id: 1, name: 'Rafael Silva', area: 'Cloud & Infrastructure', serviceLine: 'Technology', points: 320, badges: 5, rank: 3, isCurrentUser: true },
-    { id: 4, name: 'Ana Martins', area: 'Custom Development', serviceLine: 'Technology', points: 250, badges: 4, rank: 4, isCurrentUser: false },
+    {
+      id: 7, name: 'Maria Costa', area: 'Cloud & Infrastructure', serviceLine: 'Technology', points: 480, badges: 8, specials: 1, rank: 1, isCurrentUser: false,
+      email: 'maria.costa@softinsa.pt', biography: 'Especialista em Cloud & Infraestrutura, focada em AWS e Kubernetes.', linkedinUrl: 'https://linkedin.com/in/maria-costa', startDate: '03/2021',
+      badgesConquistados: [
+        { id: 1, nome: 'OutSystems', nivelId: 3, pontos: 150, fornecedor: 'OutSystems', obtidoEm: '2024-11-02', valido: true },
+        { id: 3, nome: 'MongoDB', nivelId: 2, pontos: 120, fornecedor: 'MongoDB', obtidoEm: '2024-06-15', valido: true },
+      ],
+    },
+    { id: 9, name: 'João Pereira', area: 'Data & AI', serviceLine: 'Technology', points: 410, badges: 7, specials: 0, rank: 2, isCurrentUser: false, email: 'joao.pereira@softinsa.pt', startDate: '09/2021', badgesConquistados: [] },
+    { id: 1, name: 'Rafael Silva', area: 'Cloud & Infrastructure', serviceLine: 'Technology', points: 320, badges: 5, specials: 0, rank: 3, isCurrentUser: true, email: 'rafael@softinsa.pt', startDate: '01/2022', badgesConquistados: [] },
+    { id: 4, name: 'Ana Martins', area: 'Custom Development', serviceLine: 'Technology', points: 250, badges: 4, specials: 0, rank: 4, isCurrentUser: false, email: 'ana.martins@softinsa.pt', startDate: '05/2022', badgesConquistados: [] },
   ]
 }
 export async function getConsultant(id) {
   const all = await getConsultants()
   return all.find((c) => c.id === Number(id)) || null
+}
+export async function getConsultantCandidaturas(id) {
+  await delay()
+  return mockTalentCandidaturas
+    .filter((c) => Number(id) === 7)
+    .map((c) => ({ ...c }))
 }
 
 // ---------- Sessão ----------

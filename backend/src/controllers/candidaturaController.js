@@ -207,6 +207,67 @@ exports.detalhesCandidatura = async (req, res) => {
   }
 };
 
+// Histórico completo de candidaturas de um consultor específico (usado na
+// página de perfil do consultor, vista pelo TM/SLL/Admin, ou pelo próprio).
+exports.listarCandidaturasPorConsultor = async (req, res) => {
+  try {
+    const consultorId = Number(req.params.id);
+    const isOwner = consultorId === req.user.id;
+    const canReview = req.user.roles.some((role) => ['Admin', 'TalentManager', 'ServiceLineLeader'].includes(role));
+    if (!isOwner && !canReview) {
+      return res.status(403).json({ erro: 'Sem permissões para consultar candidaturas deste consultor.' });
+    }
+
+    const candidaturas = await Candidatura.findAll({
+      where: { consultorId },
+      include: candidaturaInclude,
+      order: [['dataSubmicao', 'DESC']]
+    });
+
+    res.json(candidaturas);
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao listar candidaturas do consultor.', details: erro.message });
+  }
+};
+
+// Nº de candidaturas fechadas (aprovadas ou rejeitadas) por dia da semana
+// corrente (Segunda a Domingo), para o gráfico "Pedidos Fechados" do painel
+// de controlo do TM/Admin. Usa o histórico de workflow como fonte da data
+// real de fecho (a Candidatura em si não guarda uma única "data de fecho").
+exports.getFechadasPorSemana = async (_req, res) => {
+  try {
+    const statuses = await getStatuses([STATUS.APPROVED, STATUS.REJECTED]);
+    const idsFechados = Object.values(statuses).map((s) => s.statusId);
+
+    const hoje = new Date();
+    const diaSemana = hoje.getDay(); // 0 = Domingo ... 6 = Sábado
+    const offsetSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
+    const inicioSemana = new Date(hoje);
+    inicioSemana.setHours(0, 0, 0, 0);
+    inicioSemana.setDate(hoje.getDate() - offsetSegunda);
+    const fimSemana = new Date(inicioSemana);
+    fimSemana.setDate(inicioSemana.getDate() + 7);
+
+    const logs = await HistoricoCandidatura.findAll({
+      where: {
+        estadoNovo: { [Op.in]: idsFechados },
+        createdAt: { [Op.gte]: inicioSemana, [Op.lt]: fimSemana }
+      },
+      attributes: ['createdAt']
+    });
+
+    const contagem = [0, 0, 0, 0, 0, 0, 0]; // Segunda .. Domingo
+    logs.forEach((log) => {
+      const dias = Math.floor((new Date(log.createdAt) - inicioSemana) / 86400000);
+      if (dias >= 0 && dias < 7) contagem[dias] += 1;
+    });
+
+    res.json(contagem);
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao calcular candidaturas fechadas.', details: erro.message });
+  }
+};
+
 exports.listarCandidaturasTalent = async (_req, res) => {
   // Listar candidaturas com estado SUBMITTED para validação do Talent Manager
   try {
