@@ -54,6 +54,18 @@ const candidaturaInclude = [
   { model: HistoricoCandidatura, as: 'history' }
 ];
 
+// Includes reduzidos para os endpoints de decisão (validar/aprovar/rejeitar):
+// não precisam do histórico nem do requisito aninhado em cada evidência,
+// o que torna o pedido mais rápido a responder.
+const candidaturaIncludeMinimo = [
+  { model: Badge },
+  { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] }
+];
+const candidaturaIncludeTalentManager = [
+  ...candidaturaIncludeMinimo,
+  { model: Evidencia, as: 'evidencias' }
+];
+
 const sendEmail = async (fn, ...args) => {
   try {
     await fn(...args);
@@ -151,20 +163,28 @@ exports.submeterCandidatura = async (req, res) => {
       motivo: 'Candidatura submetida'
     });
 
-    // Enviar email de notificação
-    const consultor = await User.findByPk(consultorId);
-    await sendEmail(emailCandidaturaSubmetida, consultor, badge);
-
-    // Notificar Talent Managers sobre nova candidatura
-    const talentManagers = await User.findAll({
-      include: [{ association: User.associations.TalentManager, required: true }]
-    }).catch(() => []);
-    await Promise.all(talentManagers.map((tm) => sendEmail(emailNovaSubmissao, tm, consultor, badge)));
-
+    // Responder já ao consultor — os emails de notificação são lentos (SMTP)
+    // e não devem atrasar a resposta ao pedido.
     res.status(201).json({
       mensagem: 'Candidatura submetida com sucesso.',
       candidaturaId: candidatura.id
     });
+
+    // Notificações por email em background (não bloqueiam a resposta)
+    (async () => {
+      try {
+        const consultor = await User.findByPk(consultorId);
+        if (!consultor) return;
+        await sendEmail(emailCandidaturaSubmetida, consultor, badge);
+
+        const talentManagers = await User.findAll({
+          include: [{ association: User.associations.TalentManager, required: true }]
+        }).catch(() => []);
+        await Promise.all(talentManagers.map((tm) => sendEmail(emailNovaSubmissao, tm, consultor, badge)));
+      } catch (erroEmail) {
+        console.error('Erro ao enviar notificações de submissão:', erroEmail.message);
+      }
+    })();
   } catch (erro) {
     console.error(erro);
     res.status(500).json({ erro: 'Erro ao submeter candidatura.', details: erro.message });
@@ -315,7 +335,7 @@ exports.validarTalentManager = async (req, res) => {
   // Validar ou rejeitar candidatura pelo Talent Manager
   try {
     const { decisao, comentario } = req.body;
-    const candidatura = await Candidatura.findByPk(req.params.id, { include: candidaturaInclude });
+    const candidatura = await Candidatura.findByPk(req.params.id, { include: candidaturaIncludeTalentManager });
     if (!candidatura) {
       return res.status(404).json({ erro: 'Candidatura não encontrada.' });
     }
@@ -356,16 +376,18 @@ exports.validarTalentManager = async (req, res) => {
       motivo: comentario || decisao
     });
 
-    // Enviar email de notificação ao consultor sobre decisão do Talent Manager
+    // Responder já — o email de notificação ao consultor é lento (SMTP) e
+    // não deve atrasar a resposta ao Talent Manager.
     const consultor = candidatura.Consultant?.User;
     if (decisao === 'APROVAR') {
-      await sendEmail(emailEnviadoParaServiceLine, consultor, candidatura.Badge);
-      return res.json({ mensagem: 'Candidatura validada e enviada para aprovação final.' });
+      res.json({ mensagem: 'Candidatura validada e enviada para aprovação final.' });
+      sendEmail(emailEnviadoParaServiceLine, consultor, candidatura.Badge);
+      return;
     }
 
-    // Se a decisão for rejeitar, enviar email de rejeição
-    await sendEmail(emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
-    return res.json({ mensagem: 'Candidatura rejeitada pelo Talent Manager.' });
+    // Se a decisão for rejeitar, enviar email de rejeição (em background)
+    res.json({ mensagem: 'Candidatura rejeitada pelo Talent Manager.' });
+    sendEmail(emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
   } catch (erro) {
     console.error(erro);
     res.status(500).json({ erro: 'Erro ao validar candidatura.', details: erro.message });
@@ -391,7 +413,7 @@ exports.listarCandidaturasServiceLine = async (_req, res) => {
 exports.validarServiceLine = async (req, res) => {
   try {
     const { decisao, comentario } = req.body;
-    const candidatura = await Candidatura.findByPk(req.params.id, { include: candidaturaInclude });
+    const candidatura = await Candidatura.findByPk(req.params.id, { include: candidaturaIncludeMinimo });
     if (!candidatura) {
       return res.status(404).json({ erro: 'Candidatura não encontrada.' });
     }
@@ -442,20 +464,22 @@ exports.validarServiceLine = async (req, res) => {
         valid: true,
         pointsObtained: candidatura.Badge.ponto
       });
-      // Enviar email de notificação ao consultor sobre decisão do Service Line Leader
-      await sendEmail(emailBadgeAprovado, consultor, candidatura.Badge, candidatura.Badge.publicToken);
-      return res.json({ mensagem: 'Badge aprovada e atribuída ao consultor.' });
+      // Responder já — o email (SMTP) é lento e vai em background
+      res.json({ mensagem: 'Badge aprovada e atribuída ao consultor.' });
+      sendEmail(emailBadgeAprovado, consultor, candidatura.Badge, candidatura.Badge.publicToken);
+      return;
     }
 
-    // Se a decisão for enviar de volta para o consultor, enviar email de notificação para o consultor corrigir a candidatura
+    // Se a decisão for enviar de volta para o consultor, notificação em background
     if (decisao === 'SEND_BACK') {
-      await sendEmail(emailSendBack, consultor, candidatura.Badge, comentario);
-      return res.json({ mensagem: 'Candidatura devolvida ao consultor.' });
+      res.json({ mensagem: 'Candidatura devolvida ao consultor.' });
+      sendEmail(emailSendBack, consultor, candidatura.Badge, comentario);
+      return;
     }
 
-    // Se a decisão for rejeitar, enviar email de rejeição para o consultor
-    await sendEmail(emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
-    return res.json({ mensagem: 'Candidatura rejeitada.' });
+    // Se a decisão for rejeitar, notificação em background
+    res.json({ mensagem: 'Candidatura rejeitada.' });
+    sendEmail(emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
   } catch (erro) {
     console.error(erro);
     res.status(500).json({ erro: 'Erro na aprovação final.', details: erro.message });
