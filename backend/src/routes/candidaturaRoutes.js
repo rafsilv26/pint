@@ -12,8 +12,9 @@ router.get('/minhas', candidaturaController.listarMinhasCandidaturas);
 router.get('/talent/pendentes', authorize('TalentManager', 'Admin'), candidaturaController.listarCandidaturasTalent);
 router.put('/talent/:id/validar', authorize('TalentManager', 'Admin'), candidaturaController.validarTalentManager);
 
-// SERVICE LINE LEADER (Admin também pode consultar/gerir)
-router.get('/serviceline/pendentes', authorize('ServiceLineLeader', 'Admin'), candidaturaController.listarCandidaturasServiceLine);
+// SERVICE LINE LEADER (Admin também pode consultar/gerir; TalentManager pode
+// consultar em modo leitura as candidaturas que já validou, ex: tab "Validadas")
+router.get('/serviceline/pendentes', authorize('ServiceLineLeader', 'Admin', 'TalentManager'), candidaturaController.listarCandidaturasServiceLine);
 router.put('/serviceline/:id/validar', authorize('ServiceLineLeader', 'Admin'), candidaturaController.validarServiceLine);
 
 router.get('/:id', candidaturaController.detalhesCandidatura);

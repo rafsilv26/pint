@@ -281,8 +281,12 @@ export async function getAdminDashboard() {
 }
 
 export async function getTalentCandidaturas(estado = 'pendentes') {
-  if (estado !== 'pendentes') return []
-  const rows = await http('/candidaturas/talent/pendentes').catch(() => [])
+  // 'pendentes' -> aguardam validação do TM (SUBMITTED)
+  // 'validadas' -> já validadas pelo TM, aguardam aprovação final do SLL (VALIDATED)
+  // 'relatorios' -> ainda não implementado nesta página
+  if (estado === 'relatorios') return []
+  const path = estado === 'validadas' ? '/candidaturas/serviceline/pendentes' : '/candidaturas/talent/pendentes'
+  const rows = await http(path).catch(() => [])
   return (rows || []).map((c) => ({
     id: c.id,
     trackingId: `#${String(c.id).padStart(5, '0')}`,
@@ -290,7 +294,11 @@ export async function getTalentCandidaturas(estado = 'pendentes') {
     badge: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }),
     nivel: c.Badge?.nivelId != null ? String(c.Badge.nivelId) : '—',
     data: c.dataSubmicao ? new Date(c.dataSubmicao).toLocaleDateString('pt-PT') : '—',
-    status: { code: c.status?.code || 'SUBMITTED', name: c.status?.name || i18next.t('api.status.submetido'), cor: 'amber' },
+    status: c.status
+      ? { code: c.status.code, name: c.status.name, cor: CODE_COR[c.status.code] || 'gray' }
+      : (estado === 'validadas'
+        ? { code: 'VALIDATED', name: i18next.t('api.status.validada'), cor: 'indigo' }
+        : { code: 'SUBMITTED', name: i18next.t('api.status.submetido'), cor: 'amber' }),
   }))
 }
 export async function getCandidatura(id) {
@@ -308,7 +316,8 @@ export async function getCandidatura(id) {
       tint: tintFor(c.Badge?.fornecedor || c.Badge?.nome || ''),
     },
     evidencias: (c.evidencias || []).map((e) => ({
-      id: e.id, nome: e.nomeFicheiro || i18next.t('api.generic.evidencia'), url: e.url || '#', requisito: e.descricao || '—',
+      id: e.id, nome: e.nomeFicheiro || i18next.t('api.generic.evidencia'), url: e.url || '#',
+      requisito: e.Requirement?.titulo || e.Requirement?.descricao || e.descricao || '—',
     })),
     historico: (c.history || []).map((h) => ({
       estado: '—', data: dataPT(h.createdAt), motivo: h.motivo || h.reason || '',

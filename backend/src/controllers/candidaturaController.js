@@ -7,7 +7,8 @@ const {
   Consultant,
   User,
   HistoricoCandidatura,
-  ConsultorBadge
+  ConsultorBadge,
+  Requirement
 } = require('../models');
 const { uploadFicheiro } = require('../services/cloudinary.service');
 const {
@@ -48,7 +49,7 @@ const getStatuses = async (codes) => {
 const candidaturaInclude = [
   { model: Badge },
   { model: BadgeStatus, as: 'status' },
-  { model: Evidencia, as: 'evidencias' },
+  { model: Evidencia, as: 'evidencias', include: [{ model: Requirement }] },
   { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] },
   { model: HistoricoCandidatura, as: 'history' }
 ];
