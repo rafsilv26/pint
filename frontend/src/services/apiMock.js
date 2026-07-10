@@ -217,7 +217,7 @@ const adminStore = {
     { id: 1, title: 'Manutenção programada', message: 'A plataforma estará offline dia 20/06.' },
   ],
   information: [
-    { id: 1, titulo: 'Nova época de candidaturas', mensagem: 'Candidaturas abertas até 30 de junho.' },
+    { id: 1, title: 'Nova época de candidaturas', message: 'Candidaturas abertas até 30 de junho.' },
   ],
   'service-lines': [
     { id: 1, nome: 'Technology', descricao: 'Service line de tecnologia.' },

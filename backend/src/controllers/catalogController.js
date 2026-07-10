@@ -104,6 +104,9 @@ exports.createResource = async (req, res) => {
       payload.userId = req.user?.id || 1; // Atribui o ID do utilizador logado
       payload.type = payload.type || 'info'; // Define um tipo padrão se não for enviado
     }
+    if (req.params.resource === 'information') {
+      payload.createdBy = req.user?.id || 1; // Campo obrigatório no modelo Information
+    }
 
     const row = await config.model.create(payload);
     res.status(201).json(row);

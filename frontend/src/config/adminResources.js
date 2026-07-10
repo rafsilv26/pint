@@ -60,12 +60,14 @@ export const getAdminResources = (t) => ({
     titulo: t('admin.information.titulo'),
     singular: t('admin.information.singular'),
     colunas: [
-      { key: 'titulo', label: t('admin.generic.titulo') },
-      { key: 'mensagem', label: t('admin.generic.mensagem') },
+      { key: 'title', label: t('admin.generic.titulo') },
+      { key: 'message', label: t('admin.generic.mensagem') },
     ],
     campos: [
-      { key: 'titulo', label: t('admin.generic.titulo') },
-      { key: 'mensagem', label: t('admin.generic.mensagem'), type: 'textarea' },
+      { key: 'title', label: t('admin.generic.titulo') },
+      { key: 'message', label: t('admin.generic.mensagem'), type: 'textarea' },
+      { key: 'startDate', label: 'Data de início', type: 'date', optional: true },
+      { key: 'endDate', label: 'Data de fim', type: 'date', optional: true },
     ],
   },
   'service-lines': {

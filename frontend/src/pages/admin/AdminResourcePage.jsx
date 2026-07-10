@@ -24,7 +24,8 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
   const rows = data || []
 
   // Função auxiliar para detetar a chave primária real
-  const getPrimaryKey = (row) => row?.policyId ?? row?.id ?? row?.areaId ?? null;
+  const getPrimaryKey = (row) =>
+    row?.policyId ?? row?.noticeId ?? row?.infoId ?? row?.areaId ?? row?.id ?? null;
 
   useEffect(() => {
     async function loadOptions() {
