@@ -9,6 +9,7 @@ const {
   LearningPath,
   Level,
   Notice,
+  PolicyRGPD,
   Requirement,
   ServiceLine,
   User
@@ -192,5 +193,106 @@ exports.getDashboard = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ erro: 'Erro ao carregar dashboard.', details: error.message });
+  }
+};
+
+// Atividade recente agregada de várias entidades, para o painel de controlo do Admin.
+// Junta as criações mais recentes de utilizadores, badges, candidaturas, badges
+// atribuídos, avisos e políticas RGPD, ordenadas da mais recente para a mais antiga.
+exports.getAtividadeAdmin = async (req, res) => {
+  try {
+    const porTipo = Number(req.query.limitePorTipo) || 5;
+    const limiteTotal = Number(req.query.limite) || 12;
+
+    const [users, badges, candidaturas, badgesAtribuidos, notices, policies] = await Promise.all([
+      User.findAll({
+        where: { ativo: true },
+        order: [['createdAt', 'DESC']],
+        limit: porTipo,
+        attributes: ['id', 'nome', 'createdAt']
+      }),
+      Badge.findAll({
+        where: { deletedAt: null },
+        order: [['createdAt', 'DESC']],
+        limit: porTipo,
+        attributes: ['id', 'nome', 'createdAt']
+      }),
+      Candidatura.findAll({
+        order: [['dataSubmicao', 'DESC']],
+        limit: porTipo,
+        include: [
+          { model: Consultant, include: [{ model: User, attributes: ['nome'] }] },
+          { model: Badge, attributes: ['nome'] }
+        ]
+      }),
+      ConsultorBadge.findAll({
+        order: [['obtainedDate', 'DESC']],
+        limit: porTipo,
+        include: [
+          { model: Consultant, include: [{ model: User, attributes: ['nome'] }] },
+          { model: Badge, attributes: ['nome'] }
+        ]
+      }),
+      Notice.findAll({
+        order: [['createdAt', 'DESC']],
+        limit: porTipo,
+        attributes: ['noticeId', 'title', 'createdAt']
+      }).catch(() => []),
+      PolicyRGPD.findAll({
+        order: [['createdAt', 'DESC']],
+        limit: porTipo,
+        attributes: ['policyId', 'title', 'createdAt']
+      }).catch(() => [])
+    ]);
+
+    const items = [];
+
+    users.forEach((u) => items.push({
+      tipo: 'user',
+      nome: u.nome,
+      texto: 'Nova conta criada',
+      data: u.createdAt
+    }));
+
+    badges.forEach((b) => items.push({
+      tipo: 'badge',
+      nome: b.nome,
+      texto: 'Novo badge criado',
+      data: b.createdAt
+    }));
+
+    candidaturas.forEach((c) => items.push({
+      tipo: 'candidatura',
+      nome: c.Consultant?.User?.nome || 'Consultor',
+      texto: `Submeteu candidatura para ${c.Badge?.nome || 'um badge'}`,
+      data: c.dataSubmicao || c.createdAt
+    }));
+
+    badgesAtribuidos.forEach((cb) => items.push({
+      tipo: 'badge-atribuido',
+      nome: cb.Consultant?.User?.nome || 'Consultor',
+      texto: `Conquistou o badge ${cb.Badge?.nome || ''}`.trim(),
+      data: cb.obtainedDate || cb.createdAt
+    }));
+
+    notices.forEach((n) => items.push({
+      tipo: 'aviso',
+      nome: n.title,
+      texto: 'Novo aviso publicado',
+      data: n.createdAt
+    }));
+
+    policies.forEach((p) => items.push({
+      tipo: 'politica',
+      nome: p.title,
+      texto: 'Nova política RGPD criada',
+      data: p.createdAt
+    }));
+
+    items.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+    res.json(items.slice(0, limiteTotal));
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao carregar atividade recente.', details: error.message });
   }
 };

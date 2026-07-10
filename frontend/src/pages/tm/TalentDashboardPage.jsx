@@ -13,9 +13,15 @@ const TINTS = {
 }
 const iniciais = (n = '') => n.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
 
-export default function TalentDashboardPage() {
+// Quando usada em /admin (usarDadosAdmin), busca a mesma estrutura de dados mas
+// com a "Atividade Recente" a vir do feed real e transversal da app (utilizadores,
+// badges, candidaturas, avisos, políticas...) em vez de só candidaturas pendentes.
+export default function TalentDashboardPage({ usarDadosAdmin = false }) {
   const { t } = useTranslation() // <-- Inicializa a tradução
-  const { data, loading, error, reload } = useAsync(() => api.getTalentDashboard())
+  const { data, loading, error, reload } = useAsync(
+    () => (usarDadosAdmin ? api.getAdminDashboard() : api.getTalentDashboard()),
+    [usarDadosAdmin]
+  )
   
   if (error) return <ErrorState onRetry={reload} />
   if (loading || !data) return <Spinner />

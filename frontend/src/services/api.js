@@ -74,4 +74,5 @@ export const createUser = impl.createUser
 export const updateUser = impl.updateUser
 export const deleteUser = impl.deleteUser
 export const getAdminPedidos = impl.getAdminPedidos
+export const getAdminDashboard = impl.getAdminDashboard
 export const exportarRelatorio = impl.exportarRelatorio

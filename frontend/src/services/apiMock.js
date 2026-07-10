@@ -154,6 +154,10 @@ export async function getTalentDashboard() {
   await delay()
   return clone(mockTalentDashboard)
 }
+export async function getAdminDashboard() {
+  await delay()
+  return clone(mockTalentDashboard)
+}
 export async function getTalentCandidaturas(estado = 'pendentes') {
   await delay()
   if (estado === 'validadas') {

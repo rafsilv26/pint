@@ -262,6 +262,24 @@ export async function getTalentDashboard() {
     })),
   }
 }
+// ---------- Admin: Dashboard (painel de controlo) ----------
+// Reutiliza as mesmas estatísticas/leaderboard do TM, mas troca a
+// "Atividade Recente" pelo feed real e transversal (utilizadores,
+// badges, candidaturas, avisos, políticas...) vindo de /dashboard/atividade.
+export async function getAdminDashboard() {
+  const [base, atividade] = await Promise.all([
+    getTalentDashboard(),
+    http('/dashboard/atividade').catch(() => [])
+  ])
+  return {
+    ...base,
+    atividadeRecente: (atividade || []).map((a) => ({
+      nome: a.nome || i18next.t('api.generic.consultor'),
+      texto: a.texto || '',
+    })),
+  }
+}
+
 export async function getTalentCandidaturas(estado = 'pendentes') {
   if (estado !== 'pendentes') return []
   const rows = await http('/candidaturas/talent/pendentes').catch(() => [])
