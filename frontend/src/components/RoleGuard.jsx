@@ -1,9 +1,11 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 
 export default function RoleGuard({ allowedRoles }) {
   const { user } = useAuth()
   const location = useLocation()
+  const { t } = useTranslation()
 
   if (!user) {
     return <Navigate to="/login" replace />
@@ -28,15 +30,15 @@ export default function RoleGuard({ allowedRoles }) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-gray-50 p-6 text-center">
           <div className="max-w-md rounded-2xl bg-white p-8 shadow-xl">
-            <h1 className="text-2xl font-bold text-red-600">Acesso Negado</h1>
+            <h1 className="text-2xl font-bold text-red-600">{t('roleGuard.acessoNegado')}</h1>
             <p className="mt-4 text-gray-600">
-              A tentar aceder a: <strong>{location.pathname}</strong>
+              {t('roleGuard.aTentarAceder')} <strong>{location.pathname}</strong>
             </p>
             <p className="mt-2 text-gray-600">
-              O teu perfil atual no sistema é: <strong className="text-brand">{userRole}</strong>
+              {t('roleGuard.perfilAtual')} <strong className="text-brand">{userRole}</strong>
             </p>
             <p className="mt-2 text-sm text-gray-400">
-              Perfis permitidos nesta página: {allowedRoles.join(', ')}.
+              {t('roleGuard.perfisPermitidos', { perfis: allowedRoles.join(', ') })}
             </p>
           </div>
         </div>

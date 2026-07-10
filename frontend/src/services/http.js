@@ -1,3 +1,5 @@
+import i18next from 'i18next' // <-- Import da instância global para ficheiros JS puros
+
 // Wrapper de fetch para o backend Softinsa.
 // - prefixa o API_URL
 // - junta o token JWT (guardado pelo AuthContext em localStorage)
@@ -59,7 +61,7 @@ export async function http(path, { method = 'GET', body, auth = true, isForm = f
     });
     // ----------------------------------
 
-    const msg = data?.message || data?.erro || data?.error || `Erro ${res.status}`
+    const msg = data?.message || data?.erro || data?.error || i18next.t('api.erros.generico', { status: res.status })
     throw new Error(msg)
   }
   return data

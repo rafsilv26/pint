@@ -569,7 +569,9 @@
     "eliminarAviso": "This action cannot be undone.",
     "eliminar": "Delete",
     "ariaEditar": "Edit",
-    "ariaEliminar": "Delete"
+    "ariaEliminar": "Delete",
+    "selecione": "Select…",
+    "erroEliminar": "Could not delete this record."
   },
   "adminUsers": {
     "titulo": "Utilizadores",
@@ -958,7 +960,24 @@
       "atividade": "Request \"{{nome}}\" in approval"
     },
     "erros": {
-      "exportacao": "Could not export."
+      "exportacao": "Could not export.",
+      "generico": "Error {{status}}"
+    },
+    "validacao": {
+      "emailPassword": "Enter your email and password.",
+      "registoCampos": "Fill in name, email and password.",
+      "indicaEmail": "Enter your email.",
+      "selecionaBadge": "Select a badge.",
+      "preencheCampos": "Fill in the fields."
+    },
+    "mensagens": {
+      "contaCriada": "Account created successfully! You can now sign in.",
+      "recuperacaoEnviada": "If the email exists, we've sent a recovery link.",
+      "candidaturaSubmetida": "Application submitted successfully.",
+      "assinaturaGuardada": "Signature saved.",
+      "passwordAlterada": "Password changed successfully.",
+      "decisaoRegistada": "Decision recorded.",
+      "perfilAtualizado": "Profile updated successfully!"
     }
   },
   "app": {
@@ -973,5 +992,14 @@
   },
   "authShell": {
     "plataforma": "Badges Platform"
+  },
+  "roleGuard": {
+    "acessoNegado": "Access Denied",
+    "aTentarAceder": "Trying to access:",
+    "perfilAtual": "Your current role in the system is:",
+    "perfisPermitidos": "Roles allowed on this page: {{perfis}}."
+  },
+  "hooks": {
+    "erroGenerico": "An error occurred."
   }
 }

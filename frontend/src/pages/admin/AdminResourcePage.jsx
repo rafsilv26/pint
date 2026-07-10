@@ -84,7 +84,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
       setConfirmar(null)
       reload()
     } catch (err) {
-      setErroDelete("Não foi possível eliminar este registo.")
+      setErroDelete(t('adminResource.erroEliminar'))
     }
   }
 
@@ -145,7 +145,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
                 <span className="block text-sm font-medium mb-1">{t(f.label)}</span>
                 {f.type === 'select' ? (
                   <select value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="w-full border p-2 rounded-lg">
-                    <option value="">Selecione...</option>
+                    <option value="">{t('adminResource.selecione')}</option>
                     {(f.options || dropdownOptions[f.key] || []).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 ) : (
@@ -154,8 +154,8 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
               </label>
             ))}
             <div className="flex justify-end gap-2 mt-5">
-              <Button variant="secondary" onClick={fechar}>Cancelar</Button>
-              <Button type="submit">{saving ? "Guardando..." : "Guardar"}</Button>
+              <Button variant="secondary" onClick={fechar}>{t('adminResource.cancelar')}</Button>
+              <Button type="submit">{saving ? t('adminResource.guardando') : t('adminResource.guardar')}</Button>
             </div>
           </form>
         </div>
@@ -165,11 +165,12 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
       {confirmar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white p-6 rounded-2xl w-full max-w-sm text-center">
-            <p>Confirmar eliminação?</p>
+            <p>{t('adminResource.eliminarTitulo')}</p>
+            <p className="text-sm text-muted mt-1">{t('adminResource.eliminarAviso')}</p>
             {erroDelete && <p className="text-red-600 text-sm mt-2">{erroDelete}</p>}
             <div className="flex justify-center gap-2 mt-4">
-              <Button variant="secondary" onClick={() => setConfirmar(null)}>Cancelar</Button>
-              <button onClick={apagar} className="bg-red-600 text-white px-4 py-2 rounded-lg">Eliminar</button>
+              <Button variant="secondary" onClick={() => setConfirmar(null)}>{t('adminResource.cancelar')}</Button>
+              <button onClick={apagar} className="bg-red-600 text-white px-4 py-2 rounded-lg">{t('adminResource.eliminar')}</button>
             </div>
           </div>
         </div>

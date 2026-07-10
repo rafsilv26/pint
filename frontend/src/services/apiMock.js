@@ -3,6 +3,7 @@
 //  Devolve dados estáticos (de ../data/mockData) com latência simulada.
 //  Usada quando VITE_USE_REAL_API !== 'true' (ver api.js).
 // =============================================================
+import i18next from 'i18next' // <-- Import da instância global para ficheiros JS puros
 import {
   mockUser,
   mockBadges,
@@ -24,20 +25,20 @@ const clone = (data) => JSON.parse(JSON.stringify(data))
 // ---------- Autenticação ----------
 export async function login({ email, password }) {
   await delay()
-  if (!email || !password) throw new Error('Indica o email e a password.')
+  if (!email || !password) throw new Error(i18next.t('api.validacao.emailPassword'))
   return { token: 'mock-token-' + Date.now(), user: { ...clone(mockUser), email } }
 }
 
 export async function register(dados) {
   await delay()
-  if (!dados?.nome || !dados?.email || !dados?.password) throw new Error('Preenche nome, email e password.')
-  return { message: 'Conta criada com sucesso! Já podes iniciar sessão.' }
+  if (!dados?.nome || !dados?.email || !dados?.password) throw new Error(i18next.t('api.validacao.registoCampos'))
+  return { message: i18next.t('api.mensagens.contaCriada') }
 }
 
 export async function recuperarPassword({ email }) {
   await delay()
-  if (!email) throw new Error('Indica o teu email.')
-  return { message: 'Se o email existir, enviámos um link de recuperação.' }
+  if (!email) throw new Error(i18next.t('api.validacao.indicaEmail'))
+  return { message: i18next.t('api.mensagens.recuperacaoEnviada') }
 }
 
 // ---------- Dashboard ----------
@@ -63,8 +64,8 @@ export async function getMinhasCandidaturas() {
 }
 export async function submeterCandidatura({ badgeId }) {
   await delay(700)
-  if (!badgeId) throw new Error('Seleciona um badge.')
-  return { mensagem: 'Candidatura submetida com sucesso.', candidaturaId: Math.floor(Math.random() * 1000) + 200 }
+  if (!badgeId) throw new Error(i18next.t('api.validacao.selecionaBadge'))
+  return { mensagem: i18next.t('api.mensagens.candidaturaSubmetida'), candidaturaId: Math.floor(Math.random() * 1000) + 200 }
 }
 
 // ---------- Badges conquistados ----------
@@ -117,14 +118,14 @@ export async function getEmailSignature() {
 }
 export async function saveEmailSignature() {
   await delay()
-  return { mensagem: 'Assinatura guardada.' }
+  return { mensagem: i18next.t('api.mensagens.assinaturaGuardada') }
 }
 
 // ---------- Password ----------
 export async function changePassword({ currentPassword, newPassword }) {
   await delay()
-  if (!currentPassword || !newPassword) throw new Error('Preenche os campos.')
-  return { message: 'Password alterada com sucesso.' }
+  if (!currentPassword || !newPassword) throw new Error(i18next.t('api.validacao.preencheCampos'))
+  return { message: i18next.t('api.mensagens.passwordAlterada') }
 }
 
 // ---------- Consultores (diretório) ----------
@@ -181,7 +182,7 @@ export async function getCandidatura(id) {
 }
 export async function validarTalentManager() {
   await delay(500)
-  return { mensagem: 'Decisão registada.' }
+  return { mensagem: i18next.t('api.mensagens.decisaoRegistada') }
 }
 
 // ---------- Service Line Leader ----------
@@ -195,7 +196,7 @@ export async function getServiceLinePedidos() {
 }
 export async function validarServiceLine() {
   await delay(500)
-  return { mensagem: 'Decisão registada.' }
+  return { mensagem: i18next.t('api.mensagens.decisaoRegistada') }
 }
 
 // ---------- Admin (CRUD genérico, com store em memória) ----------
@@ -320,5 +321,5 @@ export async function exportarRelatorio() {
 }
 
 export async function updateConsultant(id, body) {
-  return { mensagem: 'Perfil atualizado com sucesso!' }
+  return { mensagem: i18next.t('api.mensagens.perfilAtualizado') }
 }

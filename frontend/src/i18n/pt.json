@@ -559,7 +559,9 @@
     "eliminarAviso": "Esta ação não pode ser desfeita.",
     "eliminar": "Eliminar",
     "ariaEditar": "Editar",
-    "ariaEliminar": "Eliminar"
+    "ariaEliminar": "Eliminar",
+    "selecione": "Selecione…",
+    "erroEliminar": "Não foi possível eliminar este registo."
   },
   "adminUsers": {
     "titulo": "Utilizadores",
@@ -960,7 +962,24 @@
       "atividade": "Pedido \"{{nome}}\" em aprovação"
     },
     "erros": {
-      "exportacao": "Não foi possível exportar."
+      "exportacao": "Não foi possível exportar.",
+      "generico": "Erro {{status}}"
+    },
+    "validacao": {
+      "emailPassword": "Indica o email e a password.",
+      "registoCampos": "Preenche nome, email e password.",
+      "indicaEmail": "Indica o teu email.",
+      "selecionaBadge": "Seleciona um badge.",
+      "preencheCampos": "Preenche os campos."
+    },
+    "mensagens": {
+      "contaCriada": "Conta criada com sucesso! Já podes iniciar sessão.",
+      "recuperacaoEnviada": "Se o email existir, enviámos um link de recuperação.",
+      "candidaturaSubmetida": "Candidatura submetida com sucesso.",
+      "assinaturaGuardada": "Assinatura guardada.",
+      "passwordAlterada": "Password alterada com sucesso.",
+      "decisaoRegistada": "Decisão registada.",
+      "perfilAtualizado": "Perfil atualizado com sucesso!"
     }
   },
   "app": {
@@ -975,5 +994,14 @@
   },
   "authShell": {
     "plataforma": "Plataforma de Badges"
+  },
+  "roleGuard": {
+    "acessoNegado": "Acesso Negado",
+    "aTentarAceder": "A tentar aceder a:",
+    "perfilAtual": "O teu perfil atual no sistema é:",
+    "perfisPermitidos": "Perfis permitidos nesta página: {{perfis}}."
+  },
+  "hooks": {
+    "erroGenerico": "Ocorreu um erro."
   }
 }

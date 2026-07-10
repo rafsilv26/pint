@@ -569,7 +569,9 @@
     "eliminarAviso": "Esta acción no se puede deshacer.",
     "eliminar": "Eliminar",
     "ariaEditar": "Editar",
-    "ariaEliminar": "Eliminar"
+    "ariaEliminar": "Eliminar",
+    "selecione": "Seleccione…",
+    "erroEliminar": "No se pudo eliminar este registro."
   },
   "adminUsers": {
     "titulo": "Utilizadores",
@@ -958,7 +960,24 @@
       "atividade": "Solicitud \"{{nome}}\" en aprobación"
     },
     "erros": {
-      "exportacao": "No se pudo exportar."
+      "exportacao": "No se pudo exportar.",
+      "generico": "Error {{status}}"
+    },
+    "validacao": {
+      "emailPassword": "Indica el email y la contraseña.",
+      "registoCampos": "Rellena nombre, email y contraseña.",
+      "indicaEmail": "Indica tu email.",
+      "selecionaBadge": "Selecciona una insignia.",
+      "preencheCampos": "Rellena los campos."
+    },
+    "mensagens": {
+      "contaCriada": "¡Cuenta creada con éxito! Ya puedes iniciar sesión.",
+      "recuperacaoEnviada": "Si el email existe, hemos enviado un enlace de recuperación.",
+      "candidaturaSubmetida": "Solicitud enviada con éxito.",
+      "assinaturaGuardada": "Firma guardada.",
+      "passwordAlterada": "Contraseña cambiada con éxito.",
+      "decisaoRegistada": "Decisión registrada.",
+      "perfilAtualizado": "¡Perfil actualizado con éxito!"
     }
   },
   "app": {
@@ -973,5 +992,14 @@
   },
   "authShell": {
     "plataforma": "Plataforma de Insignias"
+  },
+  "roleGuard": {
+    "acessoNegado": "Acceso Denegado",
+    "aTentarAceder": "Intentando acceder a:",
+    "perfilAtual": "Tu perfil actual en el sistema es:",
+    "perfisPermitidos": "Perfiles permitidos en esta página: {{perfis}}."
+  },
+  "hooks": {
+    "erroGenerico": "Ha ocurrido un error."
   }
 }
