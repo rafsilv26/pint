@@ -36,6 +36,118 @@ class ConsultantsDirectoryStats {
   final int specialsTotal;
 }
 
+class ConsultantDetailData {
+  const ConsultantDetailData({
+    required this.consultant,
+    required this.badges,
+    required this.achievements,
+    required this.stats,
+    this.loadedFromCache = false,
+  });
+
+  final ConsultantProfile consultant;
+  final List<ConsultantAwardedBadge> badges;
+  final List<ConsultantSpecialAchievement> achievements;
+  final ConsultantActivityStats stats;
+  final bool loadedFromCache;
+
+  factory ConsultantDetailData.empty({
+    required ConsultantProfile consultant,
+    bool loadedFromCache = false,
+  }) {
+    return ConsultantDetailData(
+      consultant: consultant,
+      badges: const [],
+      achievements: const [],
+      stats: ConsultantActivityStats.fromTotals(
+        points: consultant.points,
+        badges: consultant.badges,
+        achievements: consultant.specials,
+      ),
+      loadedFromCache: loadedFromCache,
+    );
+  }
+}
+
+class ConsultantAwardedBadge {
+  const ConsultantAwardedBadge({
+    required this.badgeId,
+    required this.title,
+    required this.level,
+    required this.points,
+    required this.imagePath,
+    this.obtainedAt,
+    this.valid = true,
+  });
+
+  final int badgeId;
+  final String title;
+  final String level;
+  final int points;
+  final String imagePath;
+  final DateTime? obtainedAt;
+  final bool valid;
+}
+
+class ConsultantSpecialAchievement {
+  const ConsultantSpecialAchievement({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.icon,
+    this.awardedAt,
+  });
+
+  final int id;
+  final String title;
+  final String description;
+  final String icon;
+  final DateTime? awardedAt;
+}
+
+class ConsultantActivityStats {
+  const ConsultantActivityStats({
+    required this.completionRate,
+    required this.monthlyGrowthPercent,
+    required this.activityDays,
+    required this.points,
+    required this.badges,
+    required this.achievements,
+  });
+
+  final double completionRate;
+  final int monthlyGrowthPercent;
+  final int activityDays;
+  final int points;
+  final int badges;
+  final int achievements;
+
+  factory ConsultantActivityStats.fromTotals({
+    required int points,
+    required int badges,
+    required int achievements,
+    int totalAvailableBadges = 0,
+    int recentPoints = 0,
+    int activityDays = 0,
+  }) {
+    final completionRate = totalAvailableBadges <= 0
+        ? 0.0
+        : (badges / totalAvailableBadges).clamp(0.0, 1.0).toDouble();
+    final monthlyGrowthPercent = points <= 0
+        ? 0
+        : ((recentPoints / points) * 100).round();
+
+    return ConsultantActivityStats(
+      completionRate: completionRate,
+      monthlyGrowthPercent: monthlyGrowthPercent,
+      activityDays: activityDays,
+      points: points,
+      badges: badges,
+      achievements: achievements,
+    );
+  }
+}
+
 class AppNotification {
   const AppNotification({
     required this.id,

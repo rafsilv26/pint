@@ -5,9 +5,12 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api_config.dart';
+import 'local_badges_database.dart';
 
 class AuthService {
-  AuthService({http.Client? client}) : client = client ?? http.Client();
+  AuthService({http.Client? client, LocalBadgesDatabase? database})
+    : client = client ?? http.Client(),
+      database = database ?? LocalBadgesDatabase.instance;
 
   static const String _loggedInKey = 'softinsa_user_logged_in';
   static const String _nameKey = 'softinsa_user_name';
@@ -19,6 +22,7 @@ class AuthService {
       'softinsa_user_must_change_password';
 
   final http.Client client;
+  final LocalBadgesDatabase database;
 
   Future<bool> isLoggedIn() async {
     final preferences = await SharedPreferences.getInstance();
@@ -130,6 +134,46 @@ class AuthService {
     await preferences.setBool(_loggedInKey, true);
   }
 
+  Future<PasswordChangeResult> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final preferences = await SharedPreferences.getInstance();
+    final token = preferences.getString(tokenKey);
+    if (token == null || token.isEmpty || _isExpiredJwt(token)) {
+      await _clearSession(preferences);
+      throw const AuthException('Sessao expirada. Inicie sessao novamente.');
+    }
+
+    final uri = Uri.parse('${ApiConfig.baseUrl}/auth/change-password');
+    final response = await client
+        .put(
+          uri,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'currentPassword': currentPassword,
+            'newPassword': newPassword,
+          }),
+        )
+        .timeout(const Duration(seconds: 12));
+
+    final body = _decodeBody(response);
+    final apiMessage = _apiMessage(body);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw AuthException(
+        apiMessage ?? 'Nao foi possivel alterar a palavra-passe.',
+      );
+    }
+
+    await preferences.setBool(_mustChangePasswordKey, false);
+    await _syncCurrentUserAfterPasswordChange(token);
+
+    return PasswordChangeResult(message: apiMessage ?? '');
+  }
+
   Future<String?> getSavedEmail() async {
     final preferences = await SharedPreferences.getInstance();
     return preferences.getString(_emailKey);
@@ -143,6 +187,14 @@ class AuthService {
   Future<String?> getSavedRole() async {
     final preferences = await SharedPreferences.getInstance();
     return preferences.getString(_roleKey);
+  }
+
+  Future<bool> mustChangePassword() async {
+    final preferences = await SharedPreferences.getInstance();
+    final localUser = await database.getCurrentUserProfile();
+    return localUser?.mustChangePassword ??
+        preferences.getBool(_mustChangePasswordKey) ??
+        false;
   }
 
   Future<String?> getToken() async {
@@ -166,6 +218,44 @@ class AuthService {
     }
 
     return {};
+  }
+
+  String? _apiMessage(Map<String, dynamic> body) {
+    final message = body['message'] ?? body['error'] ?? body['details'];
+    if (message is String && message.trim().isNotEmpty) {
+      return message;
+    }
+
+    return null;
+  }
+
+  Future<void> _syncCurrentUserAfterPasswordChange(String token) async {
+    try {
+      final response = await client
+          .get(
+            Uri.parse('${ApiConfig.baseUrl}/auth/me'),
+            headers: {'Authorization': 'Bearer $token'},
+          )
+          .timeout(const Duration(seconds: 8));
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        await database.markCurrentUserPasswordChanged();
+        return;
+      }
+
+      final body = _decodeBody(response);
+      final user = body['user'] ?? body['data'] ?? body;
+      if (user is Map) {
+        final userMap = Map<String, dynamic>.from(user);
+        userMap['mustChangePassword'] = false;
+        await database.upsertCurrentUser(userMap);
+        return;
+      }
+
+      await database.markCurrentUserPasswordChanged();
+    } catch (_) {
+      await database.markCurrentUserPasswordChanged();
+    }
   }
 
   Future<void> _clearSession(SharedPreferences preferences) async {
@@ -205,6 +295,12 @@ class AuthService {
       return false;
     }
   }
+}
+
+class PasswordChangeResult {
+  const PasswordChangeResult({required this.message});
+
+  final String message;
 }
 
 class AuthException implements Exception {

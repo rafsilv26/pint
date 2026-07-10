@@ -53,6 +53,25 @@ void main() {
     expect(find.text('OutSystems Advanced'), findsOneWidget);
   });
 
+  testWidgets('forca alterar password no primeiro login empresarial', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      ...loggedSession(),
+      'softinsa_user_must_change_password': true,
+    });
+
+    await tester.pumpWidget(const SoftinsaBadgesApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Alterar Palavra-Passe'), findsWidgets);
+    expect(
+      find.textContaining('palavra-passe fornecida pela empresa'),
+      findsWidgets,
+    );
+    expect(find.text('Total de Pontos'), findsNothing);
+  });
+
   testWidgets('abre a pagina de perfil pelo menu inferior', (
     WidgetTester tester,
   ) async {
@@ -130,6 +149,35 @@ void main() {
     await tester.tap(find.text('Stats'));
     await tester.pumpAndSettle();
     expect(find.text('Taxa de Conclusão'), findsOneWidget);
+  });
+
+  testWidgets('menu inferior navega a partir do detalhe de consultor', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues(loggedSession());
+
+    await tester.pumpWidget(const SoftinsaBadgesApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Perfil'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Diretório de\nConsultores'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Diretório de\nConsultores'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('João Silva'));
+    await tester.pumpAndSettle();
+
+    final rankingMenuItem = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.text('Ranking'),
+    );
+    await tester.tap(rankingMenuItem);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gamification'), findsOneWidget);
   });
 
   testWidgets('abre gamification pelo menu de ranking', (

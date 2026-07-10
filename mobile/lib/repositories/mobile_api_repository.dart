@@ -1,3 +1,4 @@
+import '../models/consultant_profile.dart';
 import '../models/mobile_api_data.dart';
 import '../services/badges_api_service.dart';
 import '../services/local_badges_database.dart';
@@ -33,8 +34,15 @@ class MobileApiRepository {
         apiService.fetchCatalogResource('badges'),
         apiService.fetchMyCandidaturas(),
       ]);
+      final consultantBadges = await _fetchOptionalCatalogResource(
+        'consultor-badges',
+      );
+      final badgePremium = await _fetchOptionalCatalogResource('badge-premium');
+      final consultantBadgePremium = await _fetchOptionalCatalogResource(
+        'consultor-badge-premium',
+      );
 
-      await database.upsertApiSnapshot({
+      final snapshot = <String, Object?>{
         'learningPaths': results[0],
         'serviceLines': results[1],
         'areas': results[2],
@@ -42,10 +50,31 @@ class MobileApiRepository {
         'requirements': results[4],
         'badges': results[5],
         'candidaturas': results[6],
-      });
+      };
+      if (consultantBadges != null) {
+        snapshot['consultorBadges'] = consultantBadges;
+      }
+      if (badgePremium != null) {
+        snapshot['badgePremium'] = badgePremium;
+      }
+      if (consultantBadgePremium != null) {
+        snapshot['consultorBadgePremium'] = consultantBadgePremium;
+      }
+
+      await database.upsertApiSnapshot(snapshot);
       return true;
     } catch (_) {
       return false;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>?> _fetchOptionalCatalogResource(
+    String resource,
+  ) async {
+    try {
+      return await apiService.fetchCatalogResource(resource);
+    } catch (_) {
+      return null;
     }
   }
 
@@ -85,6 +114,23 @@ class MobileApiRepository {
       consultants: local.consultants,
       stats: local.stats,
       loadedFromCache: !synced,
+    );
+  }
+
+  Future<ConsultantDetailData> getConsultantDetail(
+    ConsultantProfile consultant,
+  ) async {
+    final results = await Future.wait([
+      syncConsultantsDirectory(),
+      syncCatalogData(),
+    ]);
+    final local = await database.getConsultantDetail(consultant);
+    return ConsultantDetailData(
+      consultant: local.consultant,
+      badges: local.badges,
+      achievements: local.achievements,
+      stats: local.stats,
+      loadedFromCache: !results.every((item) => item),
     );
   }
 

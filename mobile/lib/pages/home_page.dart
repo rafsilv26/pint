@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/dashboard_data.dart';
 import '../repositories/dashboard_repository.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../widgets/app_bottom_navigation.dart';
 import 'catalog_page.dart';
 import 'gamification_page.dart';
 import 'my_badges_page.dart';
@@ -28,7 +29,29 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    selectedIndex = AppBottomNavigationDestination.home.index;
+    AppNavigationController.select(AppBottomNavigationDestination.home);
+    AppNavigationController.destination.addListener(updateSelectedDestination);
     dashboardFuture = repository.getDashboard();
+  }
+
+  @override
+  void dispose() {
+    AppNavigationController.destination.removeListener(
+      updateSelectedDestination,
+    );
+    super.dispose();
+  }
+
+  void updateSelectedDestination() {
+    final nextIndex = AppNavigationController.destination.value.index;
+    if (selectedIndex == nextIndex) {
+      return;
+    }
+
+    setState(() {
+      selectedIndex = nextIndex;
+    });
   }
 
   @override
@@ -72,53 +95,19 @@ class _HomePageState extends State<HomePage> {
           return _HomeContent(
             data: data,
             onOpenCatalog: () {
-              setState(() {
-                selectedIndex = 1;
-              });
+              AppNavigationController.select(
+                AppBottomNavigationDestination.catalog,
+              );
             },
           );
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: selectedIndex,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        elevation: 12,
-        selectedItemColor: const Color(0xFF006DAA),
-        unselectedItemColor: const Color(0xFF5E6878),
-        selectedFontSize: 11,
-        unselectedFontSize: 11,
-        onTap: (index) {
-          setState(() {
-            selectedIndex = index;
-          });
+      bottomNavigationBar: AppBottomNavigation(
+        currentDestination:
+            AppBottomNavigationDestination.values[selectedIndex],
+        onDestinationSelected: (destination) {
+          AppNavigationController.select(destination);
         },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Início',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.workspace_premium_outlined),
-            activeIcon: Icon(Icons.workspace_premium),
-            label: 'Catálogo',
-          ),
-          BottomNavigationBarItem(
-            icon: _BadgeNavigationIcon(),
-            label: 'Meus\nBadges',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events_outlined),
-            activeIcon: Icon(Icons.emoji_events),
-            label: 'Ranking',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
-        ],
       ),
     );
   }
@@ -1144,70 +1133,6 @@ class _CardShell extends StatelessWidget {
         ],
       ),
       child: child,
-    );
-  }
-}
-
-class _BadgeNavigationIcon extends StatefulWidget {
-  const _BadgeNavigationIcon();
-
-  @override
-  State<_BadgeNavigationIcon> createState() => _BadgeNavigationIconState();
-}
-
-class _BadgeNavigationIconState extends State<_BadgeNavigationIcon> {
-  final MobileApiRepository repository = MobileApiRepository();
-  late Future<int> inProgressFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    inProgressFuture = _loadInProgressCount();
-  }
-
-  Future<int> _loadInProgressCount() async {
-    final applications = await repository.getMyBadgeApplications();
-    return applications
-        .where((item) => !item.isApproved && !item.isRejected)
-        .length;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<int>(
-      future: inProgressFuture,
-      builder: (context, snapshot) {
-        final count = snapshot.data ?? 0;
-
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            const Icon(Icons.workspace_premium_outlined),
-            if (count > 0)
-              Positioned(
-                top: -7,
-                right: -8,
-                child: Container(
-                  width: 16,
-                  height: 16,
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFF3B48),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    count > 9 ? '9+' : '$count',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
     );
   }
 }

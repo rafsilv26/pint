@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../widgets/app_bottom_navigation.dart';
 
 class EmailSignaturePage extends StatefulWidget {
   const EmailSignaturePage({super.key});
@@ -196,7 +197,12 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
           ],
         ),
       ),
-      bottomNavigationBar: const _SignatureBottomNavigation(),
+      bottomNavigationBar: AppBottomNavigation(
+        currentDestination: AppBottomNavigationDestination.profile,
+        onDestinationSelected: (destination) {
+          AppNavigationController.open(context, destination);
+        },
+      ),
     );
   }
 }
@@ -1312,83 +1318,6 @@ class _SignatureCard extends StatelessWidget {
         ],
       ),
       child: child,
-    );
-  }
-}
-
-class _SignatureBottomNavigation extends StatelessWidget {
-  const _SignatureBottomNavigation();
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 4,
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      elevation: 12,
-      selectedItemColor: const Color(0xFF006DAA),
-      unselectedItemColor: const Color(0xFF5E6878),
-      selectedFontSize: 11,
-      unselectedFontSize: 11,
-      onTap: (index) {
-        if (index == 4) {
-          Navigator.of(context).pop();
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          label: 'Início',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.workspace_premium_outlined),
-          label: 'Catálogo',
-        ),
-        BottomNavigationBarItem(
-          icon: _BadgeNavigationIcon(),
-          label: 'Meus\nBadges',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.emoji_events_outlined),
-          label: 'Ranking',
-        ),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-      ],
-    );
-  }
-}
-
-class _BadgeNavigationIcon extends StatelessWidget {
-  const _BadgeNavigationIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        const Icon(Icons.notifications_none),
-        Positioned(
-          top: -7,
-          right: -8,
-          child: Container(
-            width: 16,
-            height: 16,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFF3B48),
-              shape: BoxShape.circle,
-            ),
-            child: const Text(
-              '2',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
