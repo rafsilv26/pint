@@ -65,6 +65,18 @@ export const ROLE_HOME = {
 export const primaryRole = (user) => (user?.roles && user.roles[0]) || user?.role || 'Consultor'
 export const homeForRole = (user) => ROLE_HOME[primaryRole(user)] || '/'
 
+// O backend devolve sempre os perfis com o nome completo (ex: 'TalentManager',
+// 'ServiceLineLeader'), mas as rotas/RoleGuard usam códigos curtos ('tm', 'sll').
+// Este mapa é o único sítio que faz essa conversão — evita bugs de "Acesso
+// Negado" por o código curto nunca coincidir com o nome completo em minúsculas.
+const ROLE_SHORT_CODES = {
+  Consultor: 'consultor',
+  TalentManager: 'tm',
+  ServiceLineLeader: 'sll',
+  Admin: 'admin',
+}
+export const roleShortCode = (role) => ROLE_SHORT_CODES[role] || String(role || '').toLowerCase()
+
 // O painel (sidebar) é escolhido pelo caminho — fácil de pré-visualizar.
 export const getPanelForPath = (pathname = '', t) => {
   const panels = getRolePanels(t)

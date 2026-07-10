@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
+import { roleShortCode } from '../config/navigation'
 
 export default function RoleGuard({ allowedRoles }) {
   const { user } = useAuth()
@@ -11,9 +12,9 @@ export default function RoleGuard({ allowedRoles }) {
     return <Navigate to="/login" replace />
   }
 
-  // 1. Garantir que capturamos o perfil corretamente (e tudo em minúsculas para evitar erros de 'Admin' vs 'admin')
-  // ALERTA: Se o teu backend envia o perfil com outro nome (ex: user.tipo), muda aqui!
-  const userRole = user?.role ? String(user.role).toLowerCase() : 'desconhecido'
+  // 1. Converte o perfil (nome completo vindo do backend, ex: 'TalentManager')
+  // para o código curto usado nas rotas (ex: 'tm') — ver roleShortCode em config/navigation.js
+  const userRole = user?.role ? roleShortCode(user.role) : 'desconhecido'
 
   // 2. Se o utilizador não tiver permissão para a página atual...
   if (!allowedRoles.includes(userRole)) {
