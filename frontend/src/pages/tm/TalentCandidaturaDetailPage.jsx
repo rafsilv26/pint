@@ -101,9 +101,10 @@ export default function TalentCandidaturaDetailPage() {
                     onClick={() => decidir('APROVAR')}
                     disabled={submitting || !todasEvidenciasValidadas}
                     title={!todasEvidenciasValidadas ? t('talentCandidaturaDetail.avisos.evidenciasPorValidar') : undefined}
-                    className="rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {t('talentCandidaturaDetail.botoes.validar')}
+                    {submitting && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
+                    {submitting ? t('talentCandidaturaDetail.botoes.aProcessar') : t('talentCandidaturaDetail.botoes.validar')}
                   </button>
                   <button
                     onClick={() => setAcao('rejeitar')}
@@ -115,6 +116,9 @@ export default function TalentCandidaturaDetailPage() {
                 </div>
                 {!todasEvidenciasValidadas && (
                   <p className="mt-2 text-xs text-amber-700">{t('talentCandidaturaDetail.avisos.evidenciasPorValidar')}</p>
+                )}
+                {submitting && (
+                  <p className="mt-2 text-xs text-muted">{t('talentCandidaturaDetail.avisos.aProcessarDemora')}</p>
                 )}
               </div>
             )
@@ -151,9 +155,10 @@ export default function TalentCandidaturaDetailPage() {
             <button
               onClick={() => decidir('REJEITAR')}
               disabled={submitting}
-              className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-60"
+              className="flex items-center gap-2 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-60"
             >
-              {t('talentCandidaturaDetail.botoes.confirmarRejeicao')}
+              {submitting && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
+              {submitting ? t('talentCandidaturaDetail.botoes.aProcessar') : t('talentCandidaturaDetail.botoes.confirmarRejeicao')}
             </button>
           </div>
         </Card>
@@ -218,20 +223,33 @@ export default function TalentCandidaturaDetailPage() {
                     disabled={evidSubmittingId === evid.id}
                     className={`flex items-center gap-1 rounded-full px-4 py-1.5 text-xs font-semibold text-white transition disabled:opacity-60 ${evid.validado === false ? 'bg-red-700' : 'bg-red-500 hover:bg-red-600'}`}
                   >
-                    <X size={13} /> {t('talentCandidaturaDetail.botoes.rejeitar')}
+                    {evidSubmittingId === evid.id ? (
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    ) : (
+                      <X size={13} />
+                    )}
+                    {t('talentCandidaturaDetail.botoes.rejeitar')}
                   </button>
                   <button
                     onClick={() => validarEvidenciaAtual(true)}
                     disabled={evidSubmittingId === evid.id}
                     className={`flex items-center gap-1 rounded-full px-4 py-1.5 text-xs font-semibold text-white transition disabled:opacity-60 ${evid.validado === true ? 'bg-green-800' : 'bg-green-600 hover:bg-green-700'}`}
                   >
-                    <Check size={13} /> {t('talentCandidaturaDetail.botoes.aprovar')}
+                    {evidSubmittingId === evid.id ? (
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    ) : (
+                      <Check size={13} />
+                    )}
+                    {t('talentCandidaturaDetail.botoes.aprovar')}
                   </button>
                 </div>
-                {evid.validado === true && (
+                {evidSubmittingId === evid.id && (
+                  <p className="text-xs text-muted">{t('talentCandidaturaDetail.avisos.aProcessarDemora')}</p>
+                )}
+                {evid.validado === true && evidSubmittingId !== evid.id && (
                   <p className="text-xs font-medium text-green-700">{t('talentCandidaturaDetail.avisos.evidenciaValidada')}</p>
                 )}
-                {evid.validado === false && (
+                {evid.validado === false && evidSubmittingId !== evid.id && (
                   <p className="text-xs font-medium text-red-700">{t('talentCandidaturaDetail.avisos.evidenciaRejeitada')}</p>
                 )}
               </div>

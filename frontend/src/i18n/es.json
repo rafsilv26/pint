@@ -833,7 +833,9 @@
     "semHistorico": "Sin historial.",
     "evidenciaTitulo": "Evidencia",
     "requisitoAssociado": "Requisito Asociado",
-    "semEvidencias": "Sin evidencias en esta solicitud."
+    "semEvidencias": "Sin evidencias en esta solicitud.",
+    "aProcessar": "Procesando…",
+    "aProcessarDemora": "Procesando… el servidor puede tardar un poco en responder."
   },
   "sllPedidos": {
     "titulo": "Solicitudes",
@@ -889,7 +891,8 @@
       "cancelar": "Cancelar",
       "confirmarRejeicao": "Confirmar Rechazo",
       "rejeitar": "Rechazar",
-      "aprovar": "Aprobar"
+      "aprovar": "Aprobar",
+      "aProcessar": "Procesando…"
     },
     "labels": {
       "motivoRejeicao": "Motivo del rechazo"
@@ -911,7 +914,8 @@
     "avisos": {
       "evidenciasPorValidar": "Tienes que validar todas las evidencias antes de aprobar la candidatura.",
       "evidenciaValidada": "Evidencia validada.",
-      "evidenciaRejeitada": "Evidencia rechazada."
+      "evidenciaRejeitada": "Evidencia rechazada.",
+      "aProcessarDemora": "Procesando… el servidor puede tardar un poco en responder."
     }
   },
   "talentCandidaturas": {

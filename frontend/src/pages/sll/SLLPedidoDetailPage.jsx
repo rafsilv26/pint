@@ -74,16 +74,22 @@ export default function SLLPedidoDetailPage() {
               {t('sllPedidoDetail.iniciarAprovacao')}
             </button>
           ) : (
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button onClick={() => decidir('APROVAR')} disabled={submitting} className="rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:opacity-60">
-                {t('sllPedidoDetail.aprovar')}
-              </button>
-              <button onClick={() => setAcao('REJEITAR')} disabled={submitting} className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60">
-                {t('sllPedidoDetail.rejeitar')}
-              </button>
-              <button onClick={() => setAcao('SEND_BACK')} disabled={submitting} className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:opacity-60">
-                <Undo2 size={15} /> {t('sllPedidoDetail.devolver')}
-              </button>
+            <div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button onClick={() => decidir('APROVAR')} disabled={submitting} className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:opacity-60">
+                  {submitting && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
+                  {submitting ? t('sllPedidoDetail.aProcessar') : t('sllPedidoDetail.aprovar')}
+                </button>
+                <button onClick={() => setAcao('REJEITAR')} disabled={submitting} className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60">
+                  {t('sllPedidoDetail.rejeitar')}
+                </button>
+                <button onClick={() => setAcao('SEND_BACK')} disabled={submitting} className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:opacity-60">
+                  <Undo2 size={15} /> {t('sllPedidoDetail.devolver')}
+                </button>
+              </div>
+              {submitting && (
+                <p className="mt-2 text-xs text-muted">{t('sllPedidoDetail.aProcessarDemora')}</p>
+              )}
             </div>
           )}
           {msg && <p className="mt-2 text-sm text-red-700">{msg}</p>}
@@ -115,9 +121,10 @@ export default function SLLPedidoDetailPage() {
             <button
               onClick={() => decidir(acao)}
               disabled={submitting}
-              className={`rounded-lg px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-60 ${acao === 'REJEITAR' ? 'bg-red-600' : 'bg-amber-500'}`}
+              className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-60 ${acao === 'REJEITAR' ? 'bg-red-600' : 'bg-amber-500'}`}
             >
-              {acao === 'REJEITAR' ? t('sllPedidoDetail.confirmarRejeicao') : t('sllPedidoDetail.confirmarDevolucao')}
+              {submitting && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
+              {submitting ? t('sllPedidoDetail.aProcessar') : (acao === 'REJEITAR' ? t('sllPedidoDetail.confirmarRejeicao') : t('sllPedidoDetail.confirmarDevolucao'))}
             </button>
           </div>
         </Card>

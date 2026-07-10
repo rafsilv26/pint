@@ -833,7 +833,9 @@
     "semHistorico": "No history.",
     "evidenciaTitulo": "Evidence",
     "requisitoAssociado": "Associated Requirement",
-    "semEvidencias": "No evidence in this request."
+    "semEvidencias": "No evidence in this request.",
+    "aProcessar": "Processing…",
+    "aProcessarDemora": "Processing… the server may take a while to respond."
   },
   "sllPedidos": {
     "titulo": "Requests",
@@ -889,7 +891,8 @@
       "cancelar": "Cancel",
       "confirmarRejeicao": "Confirm Rejection",
       "rejeitar": "Reject",
-      "aprovar": "Approve"
+      "aprovar": "Approve",
+      "aProcessar": "Processing…"
     },
     "labels": {
       "motivoRejeicao": "Reason for rejection"
@@ -911,7 +914,8 @@
     "avisos": {
       "evidenciasPorValidar": "You must validate all evidence before approving the application.",
       "evidenciaValidada": "Evidence validated.",
-      "evidenciaRejeitada": "Evidence rejected."
+      "evidenciaRejeitada": "Evidence rejected.",
+      "aProcessarDemora": "Processing… the server may take a while to respond."
     }
   },
   "talentCandidaturas": {
