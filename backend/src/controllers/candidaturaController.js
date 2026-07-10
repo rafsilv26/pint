@@ -8,13 +8,16 @@ const {
   User,
   HistoricoCandidatura,
   ConsultorBadge,
-  Requirement
+  Requirement,
+  Level,
+  Area
 } = require('../models');
 const { uploadFicheiro } = require('../services/cloudinary.service');
 const {
   emailCandidaturaSubmetida,
   emailNovaSubmissao,
   emailEnviadoParaServiceLine,
+  emailNovaValidacaoSLL,
   emailBadgeAprovado,
   emailBadgeRejeitado,
   emailSendBack
@@ -72,6 +75,28 @@ const sendEmail = async (fn, ...args) => {
   } catch (error) {
     console.error('Erro ao enviar email:', error.message);
   }
+};
+
+// Encontra os Service Line Leaders responsáveis pela service line de uma
+// badge (Badge -> Level -> Area -> serviceLineId), para notificar apenas
+// quem realmente trata daquela área — o TM vê tudo, mas o SLL é "da área"
+// (conforme o guião do projeto).
+const getServiceLineLeadersDaBadge = async (badgeId) => {
+  const badge = await Badge.findByPk(badgeId, {
+    include: [{ model: Level, include: [{ model: Area }] }]
+  });
+  const serviceLineId = badge?.Level?.Area?.serviceLineId;
+  if (!serviceLineId) return [];
+
+  return User.findAll({
+    include: [
+      {
+        association: User.associations.ServiceLineLeader,
+        required: true,
+        where: { serviceLineId }
+      }
+    ]
+  }).catch(() => []);
 };
 
 const calcularExpiracao = (badge) => {
@@ -382,6 +407,19 @@ exports.validarTalentManager = async (req, res) => {
     if (decisao === 'APROVAR') {
       res.json({ mensagem: 'Candidatura validada e enviada para aprovação final.' });
       sendEmail(emailEnviadoParaServiceLine, consultor, candidatura.Badge);
+
+      // Notificar o(s) Service Line Leader(s) da área do badge — conforme o
+      // guião, o SLL deve receber email dos pedidos que aguardam a sua decisão.
+      (async () => {
+        try {
+          const serviceLineLeaders = await getServiceLineLeadersDaBadge(candidatura.badgeId);
+          await Promise.all(
+            serviceLineLeaders.map((sll) => sendEmail(emailNovaValidacaoSLL, sll, consultor, candidatura.Badge))
+          );
+        } catch (erroEmail) {
+          console.error('Erro ao notificar Service Line Leaders:', erroEmail.message);
+        }
+      })();
       return;
     }
 

@@ -131,6 +131,33 @@ const emailEnviadoParaServiceLine = async (consultor, badge) => {
   );
 };
 
+// Email ao Service Line Leader quando o Talent Manager valida uma
+// candidatura e esta fica à espera da decisão final dele
+const emailNovaValidacaoSLL = async (serviceLineLeader, consultor, badge) => {
+  await enviarEmail(
+    serviceLineLeader.email,
+    '🔔 Candidatura à espera da tua aprovação final',
+    `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #003087; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
+        <p style="color: #cccccc; margin: 5px 0;">Plataforma de Badges</p>
+      </div>
+      <div style="padding: 30px; background-color: #f9f9f9;">
+        <h2>Candidatura validada pelo Talent Manager</h2>
+        <p>A candidatura do consultor <strong>${consultor.nome}</strong> foi validada pelo Talent Manager e está agora à espera da tua aprovação final.</p>
+        <div style="background-color: #e8f0fe; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Consultor:</strong> ${consultor.nome}</p>
+          <p style="margin: 5px 0;"><strong>Badge:</strong> ${badge.nome}</p>
+          <p style="margin: 5px 0;"><strong>Nível:</strong> ${badge.nivel || ''}</p>
+        </div>
+        <p>Acede à plataforma para tomar a decisão final.</p>
+      </div>
+    </div>
+    `
+  );
+};
+
 // Email ao consultor quando badge aprovado
 const emailBadgeAprovado = async (consultor, badge, uuid) => {
   await enviarEmail(
@@ -210,6 +237,7 @@ module.exports = {
   emailCandidaturaSubmetida,
   emailNovaSubmissao,
   emailEnviadoParaServiceLine,
+  emailNovaValidacaoSLL,
   emailBadgeAprovado,
   emailBadgeRejeitado,
   emailSendBack
