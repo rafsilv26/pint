@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
 
@@ -124,7 +126,7 @@ class _MyBadgesHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          const AppText(
             'Meus Badges',
             style: TextStyle(
               color: Colors.white,
@@ -133,7 +135,7 @@ class _MyBadgesHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          const AppText(
             'Candidaturas e conquistas sincronizadas',
             style: TextStyle(color: Color(0xD9FFFFFF), fontSize: 13),
           ),
@@ -172,7 +174,7 @@ class _HeaderCounter extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            AppText(
               value,
               style: const TextStyle(
                 color: Colors.white,
@@ -181,7 +183,7 @@ class _HeaderCounter extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
+            AppText(
               label,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -229,7 +231,7 @@ class _StatusFilters extends StatelessWidget {
           children: [
             for (final item in filters) ...[
               ChoiceChip(
-                label: Text('${item.$2} (${item.$3})'),
+                label: AppText('${item.$2} (${item.$3})'),
                 selected: selected == item.$1,
                 onSelected: (_) => onChanged(item.$1),
                 selectedColor: const Color(0xFFEAF3FF),
@@ -340,7 +342,7 @@ class _ApplicationCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: Text(
+                            child: AppText(
                               application.title,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -360,7 +362,7 @@ class _ApplicationCard extends StatelessWidget {
                       ),
                       if (application.description.isNotEmpty) ...[
                         const SizedBox(height: 8),
-                        Text(
+                        AppText(
                           application.description,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -449,7 +451,7 @@ class _ApplicationDetailSheet extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        AppText(
                           application.title,
                           style: const TextStyle(
                             color: Color(0xFF111827),
@@ -469,7 +471,7 @@ class _ApplicationDetailSheet extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               if (application.description.isNotEmpty)
-                Text(
+                AppText(
                   application.description,
                   style: const TextStyle(
                     color: Color(0xFF344054),
@@ -495,13 +497,44 @@ class _ApplicationDetailSheet extends StatelessWidget {
                   label: 'Última atualização',
                   value: _formatDate(application.updatedAt!),
                 ),
+              const SizedBox(height: 18),
+              const AppText(
+                'Evidências enviadas',
+                style: TextStyle(
+                  color: Color(0xFF111827),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 10),
+              if (application.evidences.isEmpty)
+                const AppText(
+                  'Sem evidências sincronizadas para esta candidatura.',
+                  style: TextStyle(color: Color(0xFF667085), fontSize: 14),
+                )
+              else
+                for (
+                  var index = 0;
+                  index < application.evidences.length;
+                  index++
+                )
+                  Padding(
+                    padding: EdgeInsets.only(
+                      bottom: index == application.evidences.length - 1
+                          ? 0
+                          : 10,
+                    ),
+                    child: _EvidenceViewTile(
+                      evidence: application.evidences[index],
+                    ),
+                  ),
               const SizedBox(height: 20),
               SizedBox(
                 height: 48,
                 child: FilledButton.icon(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.check),
-                  label: const Text('Fechar'),
+                  label: const AppText('Fechar'),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF006DAA),
                     foregroundColor: Colors.white,
@@ -515,6 +548,67 @@ class _ApplicationDetailSheet extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _EvidenceViewTile extends StatelessWidget {
+  const _EvidenceViewTile({required this.evidence});
+
+  final ApplicationEvidence evidence;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE0E5EE)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.description_outlined, color: Color(0xFF006DAA)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  evidence.fileName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF111827),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                if (evidence.requirementTitle.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  AppText(
+                    evidence.requirementTitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color(0xFF667085),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            tooltip: context.tr('Abrir evidência'),
+            onPressed: evidence.hasUrl
+                ? () => _openEvidenceUrl(context, evidence.url)
+                : null,
+            icon: const Icon(Icons.open_in_new, color: Color(0xFF006DAA)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -611,7 +705,7 @@ class _MetaPill extends StatelessWidget {
         children: [
           Icon(icon, color: const Color(0xFF475467), size: 13),
           const SizedBox(width: 4),
-          Text(
+          AppText(
             text,
             style: const TextStyle(
               color: Color(0xFF475467),
@@ -639,7 +733,7 @@ class _StatusPill extends StatelessWidget {
         color: colors.background,
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(
+      child: AppText(
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -679,12 +773,12 @@ class _DetailRow extends StatelessWidget {
           Icon(icon, color: const Color(0xFF006DAA), size: 19),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
+            child: AppText(
               label,
               style: const TextStyle(color: Color(0xFF475467), fontSize: 13),
             ),
           ),
-          Text(
+          AppText(
             value,
             style: const TextStyle(
               color: Color(0xFF111827),
@@ -720,7 +814,7 @@ class _EmptyMyBadges extends StatelessWidget {
             size: 28,
           ),
           SizedBox(height: 12),
-          Text(
+          AppText(
             'Sem candidaturas sincronizadas.',
             style: TextStyle(
               color: Color(0xFF111827),
@@ -729,7 +823,7 @@ class _EmptyMyBadges extends StatelessWidget {
             ),
           ),
           SizedBox(height: 6),
-          Text(
+          AppText(
             'Quando submeter ou conquistar badges, eles aparecem aqui.',
             style: TextStyle(color: Color(0xFF667085), fontSize: 13),
           ),
@@ -783,6 +877,23 @@ IconData _iconFor(String value) {
     return Icons.school_outlined;
   }
   return Icons.workspace_premium_outlined;
+}
+
+Future<void> _openEvidenceUrl(BuildContext context, String url) async {
+  final uri = Uri.tryParse(url.trim());
+  if (uri == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: AppText('URL da evidência inválido.')),
+    );
+    return;
+  }
+
+  final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+  if (!opened && context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: AppText('Não foi possível abrir a evidência.')),
+    );
+  }
 }
 
 String _formatDate(DateTime value) {

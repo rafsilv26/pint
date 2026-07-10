@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
 
@@ -127,7 +128,7 @@ class _GamificationHeader extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       'Gamification',
                       style: TextStyle(
                         color: Colors.white,
@@ -136,7 +137,7 @@ class _GamificationHeader extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 4),
-                    Text(
+                    AppText(
                       'Ranking e Conquistas',
                       style: TextStyle(color: Color(0xD9FFFFFF), fontSize: 13),
                     ),
@@ -182,12 +183,12 @@ class _HeaderStat extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          AppText(
             title,
             style: const TextStyle(color: Color(0xD9FFFFFF), fontSize: 12),
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             value,
             style: const TextStyle(
               color: Colors.white,
@@ -258,7 +259,7 @@ class _SpecialAchievementsGrid extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    Text(
+                    AppText(
                       achievement.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -270,7 +271,7 @@ class _SpecialAchievementsGrid extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Expanded(
-                      child: Text(
+                      child: AppText(
                         achievement.description,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
@@ -371,7 +372,7 @@ class _LeaderboardRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 30,
-            child: Text(
+            child: AppText(
               rankText,
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -390,7 +391,7 @@ class _LeaderboardRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   user.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -403,7 +404,7 @@ class _LeaderboardRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                AppText(
                   '${user.badges} badges',
                   style: const TextStyle(
                     color: Color(0xFF475467),
@@ -416,7 +417,7 @@ class _LeaderboardRow extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
+              AppText(
                 '${user.points}',
                 style: const TextStyle(
                   color: Color(0xFF111827),
@@ -424,7 +425,7 @@ class _LeaderboardRow extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const Text(
+              const AppText(
                 'pontos',
                 style: TextStyle(color: Color(0xFF475467), fontSize: 10),
               ),
@@ -511,7 +512,7 @@ class _TimelineRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   event.title,
                   style: const TextStyle(
                     color: Color(0xFF111827),
@@ -521,7 +522,7 @@ class _TimelineRow extends StatelessWidget {
                 ),
                 if (event.description.isNotEmpty) ...[
                   const SizedBox(height: 5),
-                  Text(
+                  AppText(
                     event.description,
                     style: const TextStyle(
                       color: Color(0xFF475467),
@@ -530,7 +531,7 @@ class _TimelineRow extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 6),
-                Text(
+                AppText(
                   _formatDate(event.date),
                   style: const TextStyle(
                     color: Color(0xFF667085),
@@ -562,7 +563,7 @@ class _InitialsAvatar extends StatelessWidget {
         color: highlighted ? const Color(0xFF006DAA) : const Color(0xFFEAF3FF),
         shape: BoxShape.circle,
       ),
-      child: Text(
+      child: AppText(
         _initials(name),
         style: TextStyle(
           color: highlighted ? Colors.white : const Color(0xFF006DAA),
@@ -592,7 +593,7 @@ class _SectionLabel extends StatelessWidget {
         Icon(icon, color: iconColor, size: 18),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(
+          child: AppText(
             text,
             style: const TextStyle(
               color: Color(0xFF111827),
@@ -621,7 +622,7 @@ class _EmptyCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFE0E5EE)),
       ),
-      child: Text(
+      child: AppText(
         text,
         style: const TextStyle(color: Color(0xFF667085), fontSize: 13),
       ),

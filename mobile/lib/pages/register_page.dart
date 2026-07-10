@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
 import '../services/auth_service.dart';
 import '../widgets/auth_widgets.dart';
 import 'confirmation_page.dart';
@@ -40,21 +41,21 @@ class _RegisterPageState extends State<RegisterPage> {
         passwordController.text.trim().isEmpty ||
         confirmPasswordController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha todos os campos.')),
+        const SnackBar(content: AppText('Preencha todos os campos.')),
       );
       return;
     }
 
     if (passwordController.text != confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('As palavras-passe não coincidem.')),
+        const SnackBar(content: AppText('As palavras-passe não coincidem.')),
       );
       return;
     }
 
     if (!acceptedTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Aceite os termos para continuar.')),
+        const SnackBar(content: AppText('Aceite os termos para continuar.')),
       );
       return;
     }
@@ -89,14 +90,16 @@ class _RegisterPageState extends State<RegisterPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
+      ).showSnackBar(SnackBar(content: AppText(error.message)));
     } catch (_) {
       if (!mounted) {
         return;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nao foi possivel comunicar com a API.')),
+        const SnackBar(
+          content: AppText('Nao foi possivel comunicar com a API.'),
+        ),
       );
     } finally {
       if (mounted) {
@@ -135,7 +138,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                const AppText(
                   'Criar conta',
                   style: TextStyle(
                     color: Color(0xFF24272E),
@@ -144,7 +147,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
+                const AppText(
                   'Crie uma conta para iniciar.',
                   style: TextStyle(color: Color(0xFF858A94), fontSize: 16),
                 ),
@@ -259,16 +262,16 @@ class _TermsRow extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4),
             child: Text.rich(
               TextSpan(
-                text: "I've read and agree with the ",
+                text: context.tr("I've read and agree with the "),
                 style: const TextStyle(
                   color: Color(0xFF6B7280),
                   fontSize: 14,
                   height: 1.25,
                 ),
                 children: [
-                  _LinkText('Terms and Conditions'),
-                  const TextSpan(text: ' and the '),
-                  _LinkText('Privacy Policy'),
+                  _LinkText(context.tr('Terms and Conditions')),
+                  TextSpan(text: context.tr(' and the ')),
+                  _LinkText(context.tr('Privacy Policy')),
                   const TextSpan(text: '.'),
                 ],
               ),

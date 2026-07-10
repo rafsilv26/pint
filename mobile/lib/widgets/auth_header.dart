@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
+
 class AuthHeader extends StatelessWidget {
   const AuthHeader({super.key, required this.height, this.compact = false});
 
@@ -49,7 +51,7 @@ class AuthHeader extends StatelessWidget {
                   : CrossAxisAlignment.center,
               children: [
                 if (compact)
-                  const Text(
+                  const AppText(
                     'INSPIRING\nTHE FUTURE\nWITH YOU!',
                     textAlign: TextAlign.right,
                     style: TextStyle(
@@ -60,7 +62,7 @@ class AuthHeader extends StatelessWidget {
                     ),
                   )
                 else
-                  const Text(
+                  const AppText(
                     'SOFTINSA',
                     style: TextStyle(
                       color: Colors.white,
@@ -71,7 +73,7 @@ class AuthHeader extends StatelessWidget {
                   ),
                 if (compact) ...[
                   const SizedBox(height: 4),
-                  const Text(
+                  const AppText(
                     'SOFTINSA',
                     style: TextStyle(
                       color: Colors.white,

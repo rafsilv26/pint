@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
 import '../widgets/app_bottom_navigation.dart';
@@ -61,7 +62,7 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
     final selectedCount = badges.where((item) => item.selected).length;
     if (!badge.selected && selectedCount >= 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pode selecionar até 4 badges.')),
+        const SnackBar(content: AppText('Pode selecionar até 4 badges.')),
       );
       return;
     }
@@ -101,7 +102,7 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
       });
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Assinatura guardada.')));
+      ).showSnackBar(const SnackBar(content: AppText('Assinatura guardada.')));
     } catch (_) {
       if (!mounted) {
         return;
@@ -110,7 +111,9 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
         saving = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Não foi possível guardar a assinatura.')),
+        const SnackBar(
+          content: AppText('Não foi possível guardar a assinatura.'),
+        ),
       );
     }
   }
@@ -228,13 +231,13 @@ class _SignatureHeader extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             icon: const Icon(Icons.arrow_back, size: 18),
-            label: const Text(
+            label: const AppText(
               'Voltar',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
+          const AppText(
             'Assinatura de Email',
             style: TextStyle(
               color: Colors.white,
@@ -243,7 +246,7 @@ class _SignatureHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
+          const AppText(
             'Configure a sua assinatura profissional com badges',
             style: TextStyle(
               color: Color(0xFFE6F5FF),
@@ -329,7 +332,7 @@ class _SignatureTab extends StatelessWidget {
           children: [
             Icon(item.icon, color: color, size: 18),
             const SizedBox(width: 6),
-            Text(
+            AppText(
               item.label,
               style: TextStyle(
                 color: color,
@@ -425,7 +428,7 @@ class _EditSignatureView extends StatelessWidget {
                     const Icon(Icons.auto_awesome, color: Color(0xFF8B35FF)),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: const Text(
+                      child: const AppText(
                         'Badges\nConquistados',
                         style: TextStyle(
                           color: Color(0xFF111827),
@@ -435,7 +438,7 @@ class _EditSignatureView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
+                    AppText(
                       '$selectedCount/4\nselecionados',
                       textAlign: TextAlign.right,
                       style: const TextStyle(
@@ -447,7 +450,7 @@ class _EditSignatureView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 18),
-                const Text(
+                const AppText(
                   'Selecione até 4 badges para mostrar na sua assinatura',
                   style: TextStyle(
                     color: Color(0xFF475467),
@@ -464,7 +467,7 @@ class _EditSignatureView extends StatelessWidget {
                       color: const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Text(
+                    child: const AppText(
                       'Sem badges conquistados sincronizados.',
                       style: TextStyle(color: Color(0xFF667085)),
                     ),
@@ -501,7 +504,7 @@ class _EditSignatureView extends StatelessWidget {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.save_outlined),
-                    label: Text(saving ? 'A guardar...' : 'Guardar seleção'),
+                    label: AppText(saving ? 'A guardar...' : 'Guardar seleção'),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF006DAA),
                       foregroundColor: Colors.white,
@@ -536,7 +539,7 @@ class _EditSignatureView extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            AppText(
                               'Mostrar Logo da Empresa',
                               style: TextStyle(
                                 color: Color(0xFF111827),
@@ -545,7 +548,7 @@ class _EditSignatureView extends StatelessWidget {
                               ),
                             ),
                             SizedBox(height: 6),
-                            Text(
+                            AppText(
                               'Exibir logo Softinsa na assinatura',
                               style: TextStyle(
                                 color: Color(0xFF667085),
@@ -614,7 +617,7 @@ class _PreviewSignatureView extends StatelessWidget {
                   title: 'Pré-visualização',
                 ),
                 const SizedBox(height: 22),
-                const Text(
+                const AppText(
                   'Esta é a aparência da sua assinatura nos emails',
                   style: TextStyle(
                     color: Color(0xFF667085),
@@ -668,7 +671,7 @@ class _ExportSignatureView extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: () {},
                     icon: const Icon(Icons.copy_outlined),
-                    label: const Text('Copiar HTML'),
+                    label: const AppText('Copiar HTML'),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF006DAA),
                       foregroundColor: Colors.white,
@@ -689,7 +692,7 @@ class _ExportSignatureView extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: () {},
                     icon: const Icon(Icons.download_outlined),
-                    label: const Text('Download HTML'),
+                    label: const AppText('Download HTML'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF005DFF),
                       side: const BorderSide(color: Color(0xFF005DFF)),
@@ -711,7 +714,7 @@ class _ExportSignatureView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
-                Text(
+                AppText(
                   'Como adicionar ao seu email',
                   style: TextStyle(
                     color: Color(0xFF111827),
@@ -759,13 +762,13 @@ class _ExportSignatureView extends StatelessWidget {
             child: const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('✅', style: TextStyle(fontSize: 24)),
+                AppText('✅', style: TextStyle(fontSize: 24)),
                 SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      AppText(
                         'Pronto para usar!',
                         style: TextStyle(
                           color: Color(0xFF116329),
@@ -774,7 +777,7 @@ class _ExportSignatureView extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 12),
-                      Text(
+                      AppText(
                         'A sua assinatura personalizada está pronta. Mostre as suas certificações e conquistas em todos os emails que enviar!',
                         style: TextStyle(
                           color: Color(0xFF087333),
@@ -840,7 +843,7 @@ class _SignatureTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        AppText(
           label,
           style: const TextStyle(
             color: Color(0xFF344054),
@@ -904,7 +907,7 @@ class _BadgeTile extends StatelessWidget {
               children: [
                 _BadgeImage(badge: badge, size: 64),
                 const SizedBox(height: 10),
-                Text(
+                AppText(
                   badge.title,
                   textAlign: TextAlign.center,
                   maxLines: 2,
@@ -1048,7 +1051,7 @@ class _EmailPreviewCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (showCompanyLogo)
-            const Text(
+            const AppText(
               'S',
               style: TextStyle(
                 color: Color(0xFF3B82F6),
@@ -1066,7 +1069,7 @@ class _EmailPreviewCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                AppText(
                   name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1077,7 +1080,7 @@ class _EmailPreviewCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                AppText(
                   role,
                   style: const TextStyle(
                     color: Color(0xFF667085),
@@ -1085,7 +1088,7 @@ class _EmailPreviewCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
+                AppText(
                   '✉ $email',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1095,7 +1098,7 @@ class _EmailPreviewCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 14),
-                Text(
+                AppText(
                   '☎ $phone',
                   style: const TextStyle(
                     color: Color(0xFF475467),
@@ -1103,7 +1106,7 @@ class _EmailPreviewCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 14),
-                Text(
+                AppText(
                   '🌐 $website',
                   style: const TextStyle(
                     color: Color(0xFF005DFF),
@@ -1113,7 +1116,7 @@ class _EmailPreviewCard extends StatelessWidget {
                 const SizedBox(height: 14),
                 const Divider(color: Color(0xFFE8EDF3)),
                 const SizedBox(height: 8),
-                const Text(
+                const AppText(
                   'CERTIFICAÇÕES',
                   style: TextStyle(
                     color: Color(0xFF98A2B3),
@@ -1123,7 +1126,7 @@ class _EmailPreviewCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 if (badges.isEmpty)
-                  const Text(
+                  const AppText(
                     'Sem badges selecionados',
                     style: TextStyle(color: Color(0xFF667085), fontSize: 12),
                   )
@@ -1161,13 +1164,13 @@ class _TipCard extends StatelessWidget {
       child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('💡', style: TextStyle(fontSize: 24)),
+          AppText('💡', style: TextStyle(fontSize: 24)),
           SizedBox(width: 18),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   'Dica',
                   style: TextStyle(
                     color: Color(0xFF8A3B12),
@@ -1176,7 +1179,7 @@ class _TipCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 12),
-                Text(
+                AppText(
                   'A assinatura será exibida automaticamente no final de todos os seus emails. Certifique-se de que as informações estão corretas antes de exportar.',
                   style: TextStyle(
                     color: Color(0xFF9A3412),
@@ -1226,7 +1229,7 @@ class _InstructionBox extends StatelessWidget {
               color: iconColor,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(
+            child: AppText(
               iconText,
               style: const TextStyle(
                 color: Colors.white,
@@ -1239,7 +1242,7 @@ class _InstructionBox extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   title,
                   style: const TextStyle(
                     color: Color(0xFF111827),
@@ -1251,7 +1254,7 @@ class _InstructionBox extends StatelessWidget {
                 for (final step in steps)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 7),
-                    child: Text(
+                    child: AppText(
                       step,
                       style: const TextStyle(
                         color: Color(0xFF344054),
@@ -1282,7 +1285,7 @@ class _CardTitle extends StatelessWidget {
         Icon(icon, color: const Color(0xFF005DFF), size: 22),
         const SizedBox(width: 10),
         Expanded(
-          child: Text(
+          child: AppText(
             title,
             style: const TextStyle(
               color: Color(0xFF111827),

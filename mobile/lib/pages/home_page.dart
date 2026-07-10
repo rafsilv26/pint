@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
 import '../models/dashboard_data.dart';
 import '../repositories/dashboard_repository.dart';
 import '../repositories/mobile_api_repository.dart';
@@ -67,7 +68,7 @@ class _HomePageState extends State<HomePage> {
 
           if (!snapshot.hasData) {
             return const Center(
-              child: Text('Não foi possível carregar os dados.'),
+              child: AppText('Não foi possível carregar os dados.'),
             );
           }
 
@@ -213,7 +214,7 @@ class _HeaderCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    const AppText(
                       'Softinsa Badges',
                       style: TextStyle(
                         color: Color(0xCFFFFFFF),
@@ -222,12 +223,12 @@ class _HeaderCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 18),
-                    Text(
+                    AppText(
                       data.greeting,
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                     ),
                     const SizedBox(height: 6),
-                    Text(
+                    AppText(
                       data.userName,
                       style: const TextStyle(
                         color: Colors.white,
@@ -237,7 +238,7 @@ class _HeaderCard extends StatelessWidget {
                     ),
                     if (data.userRole.isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      Text(
+                      AppText(
                         data.userRole,
                         style: const TextStyle(
                           color: Color(0xFFE6F5FF),
@@ -267,7 +268,7 @@ class _HeaderCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      const AppText(
                         'Total de Pontos',
                         style: TextStyle(
                           color: Color(0xFFE6F5FF),
@@ -277,7 +278,7 @@ class _HeaderCard extends StatelessWidget {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Text(
+                          AppText(
                             '${data.totalPoints}',
                             style: const TextStyle(
                               color: Colors.white,
@@ -389,7 +390,7 @@ class _NotificationButtonState extends State<_NotificationButton> {
                       color: Color(0xFFFF3B48),
                       shape: BoxShape.circle,
                     ),
-                    child: Text(
+                    child: AppText(
                       unreadCount > 9 ? '9+' : '$unreadCount',
                       style: const TextStyle(
                         color: Colors.white,
@@ -433,7 +434,7 @@ class _LearningPathCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       data.learningPathTitle,
                       style: const TextStyle(
                         color: Color(0xFF111827),
@@ -442,7 +443,7 @@ class _LearningPathCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    const Text(
+                    const AppText(
                       'Continue a evoluir no seu percurso técnico',
                       style: TextStyle(color: Color(0xFF667085), fontSize: 12),
                     ),
@@ -458,7 +459,7 @@ class _LearningPathCard extends StatelessWidget {
                   color: const Color(0xFFEAF2FF),
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Text(
+                child: AppText(
                   '$percentage%',
                   style: const TextStyle(
                     color: Color(0xFF005DFF),
@@ -521,7 +522,7 @@ class _NoticeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   data.noticeTitle,
                   style: const TextStyle(
                     color: Color(0xFF111827),
@@ -530,7 +531,7 @@ class _NoticeCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                Text(
+                AppText(
                   data.noticeMessage,
                   style: const TextStyle(
                     color: Color(0xFF263244),
@@ -597,7 +598,7 @@ class _AchievementCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  AppText(
                     data.specialAchievementTitle,
                     style: const TextStyle(
                       color: Colors.white,
@@ -606,7 +607,7 @@ class _AchievementCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 5),
-                  Text(
+                  AppText(
                     data.specialAchievementMessage,
                     style: const TextStyle(
                       color: Colors.white,
@@ -637,7 +638,7 @@ class _SectionTitle extends StatelessWidget {
         const Icon(Icons.trending_up, color: Color(0xFF005DFF), size: 20),
         const SizedBox(width: 8),
         const Expanded(
-          child: Text(
+          child: AppText(
             'Recomendado para Si',
             style: TextStyle(
               color: Color(0xFF111827),
@@ -655,7 +656,7 @@ class _SectionTitle extends StatelessWidget {
           ),
           child: const Row(
             children: [
-              Text('Ver Todas', style: TextStyle(fontSize: 12)),
+              AppText('Ver Todas', style: TextStyle(fontSize: 12)),
               SizedBox(width: 2),
               Icon(Icons.chevron_right, size: 17),
             ],
@@ -688,7 +689,7 @@ class _SuggestionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   'Sugestões Personalizadas',
                   style: TextStyle(
                     color: Color(0xFF12379F),
@@ -697,7 +698,7 @@ class _SuggestionCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 6),
-                Text(
+                AppText(
                   'Baseadas no seu progresso atual e na sua área: OutSystems',
                   style: TextStyle(
                     color: Color(0xFF005DFF),
@@ -741,7 +742,7 @@ class _RecommendationCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: Text(
+                            child: AppText(
                               badge.title,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -762,7 +763,7 @@ class _RecommendationCard extends StatelessWidget {
                         _TagPill(text: badge.tag),
                       ],
                       const SizedBox(height: 8),
-                      Text(
+                      AppText(
                         badge.description,
                         style: const TextStyle(
                           color: Color(0xFF4B5563),
@@ -798,7 +799,7 @@ class _RecommendationCard extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
+                    child: AppText(
                       'Ver detalhes do badge',
                       style: TextStyle(color: Color(0xFF4B5563), fontSize: 12),
                     ),
@@ -866,7 +867,7 @@ class _LevelPill extends StatelessWidget {
         color: isLevelA ? const Color(0xFFEF35A6) : const Color(0xFFFF6B00),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(
+      child: AppText(
         level,
         style: const TextStyle(
           color: Colors.white,
@@ -893,7 +894,7 @@ class _TagPill extends StatelessWidget {
         color: isRelated ? const Color(0xFFF1E5FF) : const Color(0xFFDDEBFF),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Text(
+      child: AppText(
         text,
         style: TextStyle(
           color: isRelated ? const Color(0xFF7624CA) : const Color(0xFF005DFF),
@@ -917,19 +918,19 @@ class _BadgeMetaRow extends StatelessWidget {
       children: [
         const Icon(Icons.star_border, color: Color(0xFF005DFF), size: 14),
         const SizedBox(width: 3),
-        Text(
+        AppText(
           '$points pontos',
           style: const TextStyle(color: Color(0xFF667085), fontSize: 11),
         ),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
+          child: AppText(
             '•',
             style: TextStyle(color: Color(0xFF667085), fontSize: 11),
           ),
         ),
         Flexible(
-          child: Text(
+          child: AppText(
             duration,
             style: const TextStyle(color: Color(0xFF667085), fontSize: 11),
           ),
@@ -957,7 +958,7 @@ class _PrerequisitesBox extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          const AppText(
             'Pré-requisitos:',
             style: TextStyle(color: Color(0xFF4B5563), fontSize: 10),
           ),
@@ -976,7 +977,7 @@ class _PrerequisitesBox extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Text(
+                  child: AppText(
                     item,
                     style: const TextStyle(
                       color: Color(0xFF4B5563),
@@ -1011,7 +1012,7 @@ class _ExploreButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        child: const Text('Explorar Mais Badges'),
+        child: const AppText('Explorar Mais Badges'),
       ),
     );
   }
@@ -1082,7 +1083,7 @@ class _StatCard extends StatelessWidget {
             child: Icon(icon, color: const Color(0xFF006DAA), size: 19),
           ),
           const SizedBox(height: 10),
-          Text(
+          AppText(
             number,
             style: const TextStyle(
               color: Color(0xFF005DFF),
@@ -1091,7 +1092,7 @@ class _StatCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          AppText(
             label,
             textAlign: TextAlign.center,
             maxLines: 2,

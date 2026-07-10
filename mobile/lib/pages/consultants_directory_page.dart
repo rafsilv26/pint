@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
 import '../models/consultant_profile.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
@@ -131,7 +132,7 @@ class _DirectoryHeader extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             icon: const Icon(Icons.arrow_back, size: 18),
-            label: const Text(
+            label: const AppText(
               'Voltar',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
@@ -145,7 +146,7 @@ class _DirectoryHeader extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    const AppText(
                       'Consultores',
                       style: TextStyle(
                         color: Colors.white,
@@ -154,7 +155,7 @@ class _DirectoryHeader extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(
+                    AppText(
                       '$total consultores',
                       style: const TextStyle(
                         color: Color(0xD9FFFFFF),
@@ -172,7 +173,7 @@ class _DirectoryHeader extends StatelessWidget {
             onChanged: onChanged,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              hintText: 'Pesquisar consultores...',
+              hintText: context.tr('Pesquisar consultores...'),
               hintStyle: const TextStyle(color: Color(0xD9FFFFFF)),
               prefixIcon: const Icon(Icons.search, color: Colors.white),
               contentPadding: const EdgeInsets.symmetric(vertical: 13),
@@ -227,7 +228,7 @@ class _DirectoryList extends StatelessWidget {
                   if (consultants.isEmpty)
                     const Padding(
                       padding: EdgeInsets.only(top: 40),
-                      child: Text(
+                      child: AppText(
                         'Nenhum consultor encontrado.',
                         style: TextStyle(color: Color(0xFF667085)),
                       ),
@@ -306,7 +307,7 @@ class _DirectoryStat extends StatelessWidget {
 
     return Column(
       children: [
-        Text(
+        AppText(
           value,
           style: TextStyle(
             color: color,
@@ -315,7 +316,7 @@ class _DirectoryStat extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 5),
-        Text(
+        AppText(
           label,
           textAlign: TextAlign.center,
           style: const TextStyle(color: Color(0xFF475467), fontSize: 11),
@@ -371,7 +372,7 @@ class _ConsultantListCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
+                        child: AppText(
                           consultant.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -392,7 +393,7 @@ class _ConsultantListCard extends StatelessWidget {
                             color: const Color(0xFFEAF3FF),
                             borderRadius: BorderRadius.circular(999),
                           ),
-                          child: const Text(
+                          child: const AppText(
                             'Você',
                             style: TextStyle(
                               color: Color(0xFF005DFF),
@@ -404,7 +405,7 @@ class _ConsultantListCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(
+                  AppText(
                     consultant.role,
                     style: const TextStyle(
                       color: Color(0xFF475467),
@@ -479,7 +480,7 @@ class _RankBubble extends StatelessWidget {
         color: Color(0xFF2F8AB9),
         shape: BoxShape.circle,
       ),
-      child: Text(
+      child: AppText(
         '$rank',
         style: const TextStyle(
           color: Colors.white,
@@ -567,7 +568,7 @@ class _AreaPill extends StatelessWidget {
         color: const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(
+      child: AppText(
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -599,7 +600,7 @@ class _MiniMetric extends StatelessWidget {
       children: [
         Icon(icon, color: color, size: 13),
         const SizedBox(width: 3),
-        Text(text, style: TextStyle(color: color, fontSize: 11)),
+        AppText(text, style: TextStyle(color: color, fontSize: 11)),
       ],
     );
   }

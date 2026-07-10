@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
 import '../services/auth_service.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_widgets.dart';
@@ -50,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
     if (emailController.text.trim().isEmpty ||
         passwordController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha o email e a palavra-passe.')),
+        const SnackBar(content: AppText('Preencha o email e a palavra-passe.')),
       );
       return;
     }
@@ -74,9 +75,9 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: AppText(error.message)));
     } catch (_) {
       if (!mounted) {
         return;
@@ -84,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Nao foi possivel comunicar com a API.'),
+          content: AppText('Nao foi possivel comunicar com a API.'),
         ),
       );
     } finally {
@@ -135,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          const AppText(
                             'Entrar',
                             style: TextStyle(
                               color: Colors.black,
@@ -179,7 +180,7 @@ class _LoginPageState extends State<LoginPage> {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            child: const Text(
+                            child: const AppText(
                               'Esqueceste-te da palavra-passe?',
                             ),
                           ),
@@ -202,7 +203,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                               const SizedBox(width: 14),
-                              const Text(
+                              const AppText(
                                 'Guardar dados login',
                                 style: TextStyle(
                                   color: Color(0xFF767C86),
@@ -220,7 +221,7 @@ class _LoginPageState extends State<LoginPage> {
                           Center(
                             child: TextButton(
                               onPressed: openRegister,
-                              child: const Text('Criar conta'),
+                              child: const AppText('Criar conta'),
                             ),
                           ),
                         ],

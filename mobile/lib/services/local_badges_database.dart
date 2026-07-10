@@ -18,7 +18,7 @@ class LocalBadgesDatabase {
   Database? _database;
   DashboardData? _memoryDashboard;
 
-  static const int _databaseVersion = 5;
+  static const int _databaseVersion = 6;
 
   Future<Database> get database async {
     final currentDatabase = _database;
@@ -80,6 +80,26 @@ class LocalBadgesDatabase {
     }
     if (oldVersion < 5) {
       await _createConsultantDetailTables(db);
+    }
+    if (oldVersion < 6) {
+      await _addEvidenciaRequirementColumn(db);
+    }
+  }
+
+  Future<void> _addEvidenciaRequirementColumn(Database db) async {
+    await _addColumnIfMissing(db, 'evidencias', 'requisito_id', 'INTEGER');
+  }
+
+  Future<void> _addColumnIfMissing(
+    Database db,
+    String table,
+    String column,
+    String definition,
+  ) async {
+    final columns = await db.rawQuery('PRAGMA table_info($table)');
+    final exists = columns.any((row) => row['name'] == column);
+    if (!exists) {
+      await db.execute('ALTER TABLE $table ADD COLUMN $column $definition');
     }
   }
 
@@ -255,6 +275,7 @@ class LocalBadgesDatabase {
       CREATE TABLE IF NOT EXISTS evidencias (
         id INTEGER PRIMARY KEY,
         candidatura_id INTEGER,
+        requisito_id INTEGER,
         url TEXT,
         nome_ficheiro TEXT,
         tipo TEXT,
@@ -856,6 +877,7 @@ class LocalBadgesDatabase {
             'candidaturaId',
             'CANDIDATURAID',
           ]),
+          'requisito_id': _intValue(row, const ['requisitoId', 'REQUISITOID']),
           'url': _textValue(row, const ['url', 'FILEPATH']),
           'nome_ficheiro': _textValue(row, const ['nomeFicheiro', 'FILEPATH']),
           'tipo': _textValue(row, const ['tipo', 'TIPO_ARQUIVO']),
@@ -1518,7 +1540,9 @@ class LocalBadgesDatabase {
           type: badge.tag,
           provider: '',
           imagePath: badge.iconName,
-          requirements: badge.prerequisites,
+          requirements: badge.prerequisites.asMap().entries.map((item) {
+            return CatalogRequirement(id: item.key + 1, title: item.value);
+          }).toList(),
         );
       }).toList();
     }
@@ -1547,14 +1571,24 @@ class LocalBadgesDatabase {
       'candidaturas',
       orderBy: 'updated_at DESC, created_at DESC',
     );
-    final applicationByBadgeId = <int, String>{};
+    final applicationByBadgeId = <int, CatalogApplication>{};
     for (final row in applicationRows) {
       final badgeId = row['badge_id'] as int?;
       if (badgeId == null || applicationByBadgeId.containsKey(badgeId)) {
         continue;
       }
-      applicationByBadgeId[badgeId] = _statusLabel(
-        row['estado'] as String? ?? '',
+      final candidaturaId = row['id'] as int? ?? 0;
+      final raw = _jsonMap(row['raw_json'] as String?);
+      final status = _statusCodeFromRow(raw) ?? row['estado'] as String? ?? '';
+      final statusMap = _mapValue(raw, const ['status']);
+      final statusLabel =
+          _textValue(statusMap, const ['name', 'description']) ??
+          _statusLabel(status);
+      applicationByBadgeId[badgeId] = CatalogApplication(
+        id: candidaturaId,
+        status: status,
+        statusLabel: statusLabel,
+        evidences: await _applicationEvidences(db, candidaturaId),
       );
     }
 
@@ -1572,11 +1606,8 @@ class LocalBadgesDatabase {
       result.add(
         _catalogBadgeFromRow(
           row,
-          requirementRows
-              .map((item) => item['nome'] as String? ?? '')
-              .where((item) => item.isNotEmpty)
-              .toList(),
-          applicationByBadgeId[row['id'] as int? ?? 0] ?? '',
+          requirementRows.map(_catalogRequirementFromRow).toList(),
+          applicationByBadgeId[row['id'] as int? ?? 0],
         ),
       );
     }
@@ -1631,7 +1662,18 @@ class LocalBadgesDatabase {
       ORDER BY c.updated_at DESC, c.created_at DESC
     ''');
 
-    return rows.map(_myBadgeApplicationFromRow).toList();
+    final applications = <MyBadgeApplication>[];
+    for (final row in rows) {
+      final candidaturaId = row['candidatura_id'] as int? ?? 0;
+      applications.add(
+        _myBadgeApplicationFromRow(
+          row,
+          await _applicationEvidences(db, candidaturaId),
+        ),
+      );
+    }
+
+    return applications;
   }
 
   Future<ConsultantDetailData> getConsultantDetail(
@@ -2252,8 +2294,8 @@ class LocalBadgesDatabase {
 
   CatalogBadge _catalogBadgeFromRow(
     Map<String, Object?> row,
-    List<String> requirements,
-    String applicationStatus,
+    List<CatalogRequirement> requirements,
+    CatalogApplication? application,
   ) {
     final raw = _jsonMap(row['raw_json'] as String?);
     final durationMonths = row['duracao_meses'] as int?;
@@ -2278,11 +2320,23 @@ class LocalBadgesDatabase {
       provider: _textValue(raw, const ['fornecedor']) ?? '',
       imagePath: row['imagem'] as String? ?? '',
       requirements: requirements,
-      applicationStatus: applicationStatus,
+      applicationStatus: application?.statusLabel ?? '',
+      application: application,
     );
   }
 
-  MyBadgeApplication _myBadgeApplicationFromRow(Map<String, Object?> row) {
+  CatalogRequirement _catalogRequirementFromRow(Map<String, Object?> row) {
+    return CatalogRequirement(
+      id: row['id'] as int? ?? 0,
+      title: row['nome'] as String? ?? '',
+      description: row['descricao'] as String? ?? '',
+    );
+  }
+
+  MyBadgeApplication _myBadgeApplicationFromRow(
+    Map<String, Object?> row,
+    List<ApplicationEvidence> evidences,
+  ) {
     final candidaturaRaw = _jsonMap(row['candidatura_raw_json'] as String?);
     final badgeRaw = _jsonMap(row['badge_raw_json'] as String?);
     final nestedBadge = _mapValue(candidaturaRaw, const ['Badge', 'badge']);
@@ -2318,8 +2372,62 @@ class LocalBadgesDatabase {
           row['badge_imagem'] as String? ??
           _textValue(nestedBadge, const ['imagem']) ??
           '',
+      evidences: evidences,
       createdAt: _dateFromText(row['candidatura_created_at'] as String?),
       updatedAt: _dateFromText(row['candidatura_updated_at'] as String?),
+    );
+  }
+
+  Future<List<ApplicationEvidence>> _applicationEvidences(
+    Database db,
+    int candidaturaId,
+  ) async {
+    if (candidaturaId <= 0) {
+      return const [];
+    }
+
+    final rows = await db.rawQuery(
+      '''
+      SELECT
+        e.id,
+        e.candidatura_id,
+        e.requisito_id,
+        e.url,
+        e.nome_ficheiro,
+        e.tipo,
+        e.raw_json,
+        r.nome AS requisito_nome
+      FROM evidencias e
+      LEFT JOIN requirements r ON r.id = e.requisito_id
+      WHERE e.candidatura_id = ?
+      ORDER BY e.created_at ASC, e.id ASC
+      ''',
+      [candidaturaId],
+    );
+
+    return rows.map(_applicationEvidenceFromRow).toList();
+  }
+
+  ApplicationEvidence _applicationEvidenceFromRow(Map<String, Object?> row) {
+    final raw = _jsonMap(row['raw_json'] as String?);
+    final requirement = _mapValue(raw, const ['Requirement', 'requirement']);
+    final fileName =
+        row['nome_ficheiro'] as String? ??
+        _textValue(raw, const ['nomeFicheiro']) ??
+        _textValue(raw, const ['fileName']) ??
+        '';
+
+    return ApplicationEvidence(
+      id: row['id'] as int? ?? 0,
+      requirementId: row['requisito_id'] as int?,
+      requirementTitle:
+          row['requisito_nome'] as String? ??
+          _textValue(requirement, const ['titulo', 'nome']) ??
+          '',
+      fileName: fileName.isNotEmpty ? fileName : 'Evidência',
+      url: row['url'] as String? ?? _textValue(raw, const ['url']) ?? '',
+      type: row['tipo'] as String? ?? _textValue(raw, const ['tipo']) ?? '',
+      validated: _boolValue(raw, const ['validado']),
     );
   }
 
@@ -2610,6 +2718,15 @@ class LocalBadgesDatabase {
     }
 
     return null;
+  }
+
+  bool? _boolValue(Map<String, dynamic> row, List<String> keys) {
+    final value = _boolIntValue(row, keys);
+    if (value == null) {
+      return null;
+    }
+
+    return value == 1;
   }
 
   String? _firstListTextValue(Map<String, dynamic> row, List<String> keys) {

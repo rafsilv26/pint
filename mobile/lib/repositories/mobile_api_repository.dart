@@ -88,11 +88,30 @@ class MobileApiRepository {
     return database.getMyBadgeApplications();
   }
 
-  Future<void> submitCandidatura(int badgeId) async {
-    await apiService.submitCandidatura(badgeId: badgeId);
+  Future<String> submitCandidatura({
+    required int badgeId,
+    List<EvidenceAttachment> evidenceFiles = const [],
+    String? descricao,
+  }) async {
+    final response = await apiService.submitCandidatura(
+      badgeId: badgeId,
+      evidenceFiles: evidenceFiles,
+      descricao: descricao,
+    );
     await syncCatalogData();
     await syncNotifications();
     await syncGamification();
+    return _apiMessage(response) ?? 'Candidatura submetida com sucesso.';
+  }
+
+  String? _apiMessage(Map<String, dynamic>? response) {
+    final message =
+        response?['mensagem'] ?? response?['message'] ?? response?['erro'];
+    if (message is String && message.trim().isNotEmpty) {
+      return message;
+    }
+
+    return null;
   }
 
   Future<bool> syncConsultantsDirectory() async {

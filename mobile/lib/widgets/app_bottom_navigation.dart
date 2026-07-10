@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
 import '../repositories/mobile_api_repository.dart';
 
 enum AppBottomNavigationDestination {
@@ -43,6 +44,8 @@ class AppBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppStrings.of(context);
+
     return BottomNavigationBar(
       currentIndex: currentDestination.index,
       type: BottomNavigationBarType.fixed,
@@ -55,31 +58,31 @@ class AppBottomNavigation extends StatelessWidget {
       onTap: (index) {
         onDestinationSelected(AppBottomNavigationDestination.values[index]);
       },
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home),
-          label: 'Início',
+          icon: const Icon(Icons.home_outlined),
+          activeIcon: const Icon(Icons.home),
+          label: strings.navHome,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.workspace_premium_outlined),
-          activeIcon: Icon(Icons.workspace_premium),
-          label: 'Catálogo',
+          icon: const Icon(Icons.workspace_premium_outlined),
+          activeIcon: const Icon(Icons.workspace_premium),
+          label: strings.navCatalog,
         ),
         BottomNavigationBarItem(
-          icon: AppBadgeNavigationIcon(),
-          activeIcon: AppBadgeNavigationIcon(),
-          label: 'Meus\nBadges',
+          icon: const AppBadgeNavigationIcon(),
+          activeIcon: const AppBadgeNavigationIcon(),
+          label: strings.navMyBadges,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.emoji_events_outlined),
-          activeIcon: Icon(Icons.emoji_events),
-          label: 'Ranking',
+          icon: const Icon(Icons.emoji_events_outlined),
+          activeIcon: const Icon(Icons.emoji_events),
+          label: strings.navRanking,
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          activeIcon: Icon(Icons.person),
-          label: 'Perfil',
+          icon: const Icon(Icons.person_outline),
+          activeIcon: const Icon(Icons.person),
+          label: strings.navProfile,
         ),
       ],
     );
@@ -133,7 +136,7 @@ class _AppBadgeNavigationIconState extends State<AppBadgeNavigationIcon> {
                     color: Color(0xFFFF3B48),
                     shape: BoxShape.circle,
                   ),
-                  child: Text(
+                  child: AppText(
                     count > 9 ? '9+' : '$count',
                     style: const TextStyle(
                       color: Colors.white,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
 import '../models/consultant_profile.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
@@ -141,7 +142,7 @@ class _DetailHeader extends StatelessWidget {
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         icon: const Icon(Icons.arrow_back, size: 18),
-        label: const Text(
+        label: const AppText(
           'Voltar',
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
@@ -169,7 +170,7 @@ class _ConsultantSummary extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       consultant.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -180,7 +181,7 @@ class _ConsultantSummary extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
+                    AppText(
                       consultant.role,
                       style: const TextStyle(
                         color: Color(0xFF475467),
@@ -193,7 +194,7 @@ class _ConsultantSummary extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          Text(
+          AppText(
             consultant.biography.isNotEmpty
                 ? consultant.biography
                 : 'Perfil profissional sincronizado a partir da plataforma.',
@@ -322,7 +323,7 @@ class _DetailTabs extends StatelessWidget {
                           size: 18,
                         ),
                         const SizedBox(width: 6),
-                        Text(
+                        AppText(
                           tabs[index].label,
                           style: TextStyle(
                             color: selectedIndex == index
@@ -471,7 +472,7 @@ class _BadgeCard extends StatelessWidget {
         children: [
           _BadgeImage(badge: badge),
           const SizedBox(height: 12),
-          Text(
+          AppText(
             badge.title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -483,14 +484,14 @@ class _BadgeCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 7),
-          Text(
+          AppText(
             badge.level,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(color: Color(0xFF667085), fontSize: 12),
           ),
           const SizedBox(height: 6),
-          Text(
+          AppText(
             _formatDate(badge.obtainedAt),
             style: const TextStyle(color: Color(0xFF667085), fontSize: 11),
           ),
@@ -544,7 +545,7 @@ class _AchievementCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   achievement.title,
                   style: const TextStyle(
                     color: Color(0xFF111827),
@@ -553,7 +554,7 @@ class _AchievementCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 7),
-                Text(
+                AppText(
                   achievement.description,
                   style: const TextStyle(
                     color: Color(0xFF475467),
@@ -561,7 +562,7 @@ class _AchievementCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                AppText(
                   _achievementDateText(achievement.awardedAt),
                   style: const TextStyle(
                     color: Color(0xFF667085),
@@ -606,7 +607,7 @@ class _MetricCard extends StatelessWidget {
               Icon(icon, color: color, size: 20),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
+                child: AppText(
                   title,
                   style: const TextStyle(
                     color: Color(0xFF111827),
@@ -615,7 +616,7 @@ class _MetricCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(
+              AppText(
                 value,
                 style: TextStyle(
                   color: color,
@@ -639,7 +640,7 @@ class _MetricCard extends StatelessWidget {
           ],
           if (subtitle != null) ...[
             const SizedBox(height: 14),
-            Text(
+            AppText(
               subtitle!,
               style: const TextStyle(color: Color(0xFF475467), fontSize: 13),
             ),
@@ -672,7 +673,7 @@ class _ActivitySummary extends StatelessWidget {
             children: [
               Icon(Icons.star_border, color: Color(0xFF005DFF)),
               SizedBox(width: 10),
-              Text(
+              AppText(
                 'Resumo de Atividade',
                 style: TextStyle(
                   color: Color(0xFF111827),
@@ -735,7 +736,7 @@ class _ActivityMetric extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          AppText(
             value,
             style: TextStyle(
               color: color,
@@ -744,7 +745,7 @@ class _ActivityMetric extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 7),
-          Text(
+          AppText(
             label,
             style: const TextStyle(color: Color(0xFF475467), fontSize: 12),
           ),
@@ -823,7 +824,7 @@ class _ProfileMiniInfo extends StatelessWidget {
           Icon(icon, color: const Color(0xFF005DFF), size: 15),
           const SizedBox(width: 6),
           Expanded(
-            child: Text(
+            child: AppText(
               text,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -852,7 +853,7 @@ class _SummaryStat extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          Text(
+          AppText(
             value,
             style: TextStyle(
               color: color,
@@ -861,7 +862,7 @@ class _SummaryStat extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          AppText(
             label,
             textAlign: TextAlign.center,
             style: const TextStyle(color: Color(0xFF475467), fontSize: 11),
@@ -883,7 +884,7 @@ class _TabTitle extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Text(
+          child: AppText(
             title,
             style: const TextStyle(
               color: Color(0xFF111827),
@@ -892,7 +893,7 @@ class _TabTitle extends StatelessWidget {
             ),
           ),
         ),
-        Text(
+        AppText(
           trailing,
           style: const TextStyle(color: Color(0xFF667085), fontSize: 12),
         ),
@@ -920,7 +921,7 @@ class _EmptyState extends StatelessWidget {
         children: [
           Icon(icon, color: const Color(0xFF667085), size: 32),
           const SizedBox(height: 12),
-          Text(
+          AppText(
             title,
             textAlign: TextAlign.center,
             style: const TextStyle(
@@ -930,7 +931,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             message,
             textAlign: TextAlign.center,
             style: const TextStyle(

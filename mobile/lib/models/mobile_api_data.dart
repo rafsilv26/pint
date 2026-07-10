@@ -434,6 +434,7 @@ class CatalogBadge {
     required this.imagePath,
     required this.requirements,
     this.applicationStatus = '',
+    this.application,
   });
 
   final int id;
@@ -446,10 +447,79 @@ class CatalogBadge {
   final String type;
   final String provider;
   final String imagePath;
-  final List<String> requirements;
+  final List<CatalogRequirement> requirements;
   final String applicationStatus;
+  final CatalogApplication? application;
 
   bool get hasApplication => applicationStatus.isNotEmpty;
+}
+
+class CatalogApplication {
+  const CatalogApplication({
+    required this.id,
+    required this.status,
+    required this.statusLabel,
+    required this.evidences,
+  });
+
+  final int id;
+  final String status;
+  final String statusLabel;
+  final List<ApplicationEvidence> evidences;
+}
+
+class CatalogRequirement {
+  const CatalogRequirement({
+    required this.id,
+    required this.title,
+    this.description = '',
+  });
+
+  final int id;
+  final String title;
+  final String description;
+
+  String get displayText {
+    if (description.trim().isEmpty) {
+      return title;
+    }
+
+    return '$title\n$description';
+  }
+}
+
+class EvidenceAttachment {
+  const EvidenceAttachment({
+    required this.requirementId,
+    required this.path,
+    required this.fileName,
+  });
+
+  final int requirementId;
+  final String path;
+  final String fileName;
+}
+
+class ApplicationEvidence {
+  const ApplicationEvidence({
+    required this.id,
+    required this.fileName,
+    required this.url,
+    required this.type,
+    this.requirementId,
+    this.requirementTitle = '',
+    this.validated,
+  });
+
+  final int id;
+  final int? requirementId;
+  final String requirementTitle;
+  final String fileName;
+  final String url;
+  final String type;
+  final bool? validated;
+
+  bool get hasUrl => url.trim().isNotEmpty;
 }
 
 class MyBadgeApplication {
@@ -462,6 +532,7 @@ class MyBadgeApplication {
     required this.statusLabel,
     required this.points,
     required this.imagePath,
+    this.evidences = const [],
     this.createdAt,
     this.updatedAt,
   });
@@ -474,6 +545,7 @@ class MyBadgeApplication {
   final String statusLabel;
   final int points;
   final String imagePath;
+  final List<ApplicationEvidence> evidences;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
