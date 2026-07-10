@@ -1,12 +1,21 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
+// Usamos host/porta explícitos (587, STARTTLS) em vez do atalho
+// "service: 'gmail'" (que usa a porta 465/SSL) — em vários PaaS a porta 465
+// fica bloqueada/instável, enquanto a 587 costuma ser mais fiável.
+// Timeouts mais curtos para não ficar pendurado minutos se a rede bloquear.
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // STARTTLS
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000
 });
 
 // Função base
