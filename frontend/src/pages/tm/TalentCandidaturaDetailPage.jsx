@@ -25,10 +25,16 @@ export default function TalentCandidaturaDetailPage() {
   const [comentario, setComentario] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [msg, setMsg] = useState(null)
+  const [evidSubmittingId, setEvidSubmittingId] = useState(null)
 
   if (loading) return <Spinner />
   if (error) return <ErrorState onRetry={reload} />
   if (!c) return <p className="text-muted">{t('talentCandidaturaDetail.naoEncontrada')}</p>
+
+  // Só é possível validar/rejeitar uma candidatura enquanto esta aguarda
+  // decisão do Talent Manager. Já validada, rejeitada ou aprovada -> sem ações.
+  const podeValidar = c.estado?.code === 'SUBMITTED'
+  const todasEvidenciasValidadas = c.evidencias.length === 0 || c.evidencias.every((e) => e.validado === true)
 
   async function decidir(decisao) {
     setSubmitting(true)
@@ -40,6 +46,20 @@ export default function TalentCandidaturaDetailPage() {
       setMsg(e.message)
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function validarEvidenciaAtual(validado) {
+    if (!evid) return
+    setEvidSubmittingId(evid.id)
+    setMsg(null)
+    try {
+      await api.validarEvidencia(evid.id, validado)
+      await reload()
+    } catch (e) {
+      setMsg(e.message)
+    } finally {
+      setEvidSubmittingId(null)
     }
   }
 
@@ -66,30 +86,38 @@ export default function TalentCandidaturaDetailPage() {
             {c.consultor} · {t('talentCandidaturaDetail.submissao')}: {c.submissao}
           </p>
 
-          {!validando ? (
-            <button
-              onClick={() => setValidando(true)}
-              className="mt-4 rounded-lg bg-amber-400 px-5 py-2.5 text-sm font-semibold text-amber-950 transition hover:bg-amber-500"
-            >
-              {t('talentCandidaturaDetail.botoes.iniciarValidacao')}
-            </button>
-          ) : (
-            <div className="mt-4 flex gap-2">
+          {podeValidar && (
+            !validando ? (
               <button
-                onClick={() => decidir('APROVAR')}
-                disabled={submitting}
-                className="rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:opacity-60"
+                onClick={() => setValidando(true)}
+                className="mt-4 rounded-lg bg-amber-400 px-5 py-2.5 text-sm font-semibold text-amber-950 transition hover:bg-amber-500"
               >
-                {t('talentCandidaturaDetail.botoes.validar')}
+                {t('talentCandidaturaDetail.botoes.iniciarValidacao')}
               </button>
-              <button
-                onClick={() => setAcao('rejeitar')}
-                disabled={submitting}
-                className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
-              >
-                {t('talentCandidaturaDetail.botoes.rejeitarCand')}
-              </button>
-            </div>
+            ) : (
+              <div className="mt-4">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => decidir('APROVAR')}
+                    disabled={submitting || !todasEvidenciasValidadas}
+                    title={!todasEvidenciasValidadas ? t('talentCandidaturaDetail.avisos.evidenciasPorValidar') : undefined}
+                    className="rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {t('talentCandidaturaDetail.botoes.validar')}
+                  </button>
+                  <button
+                    onClick={() => setAcao('rejeitar')}
+                    disabled={submitting}
+                    className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
+                  >
+                    {t('talentCandidaturaDetail.botoes.rejeitarCand')}
+                  </button>
+                </div>
+                {!todasEvidenciasValidadas && (
+                  <p className="mt-2 text-xs text-amber-700">{t('talentCandidaturaDetail.avisos.evidenciasPorValidar')}</p>
+                )}
+              </div>
+            )
           )}
           {msg && <p className="mt-2 text-sm text-red-700">{msg}</p>}
         </div>
@@ -137,9 +165,11 @@ export default function TalentCandidaturaDetailPage() {
           <button
             key={e.id}
             onClick={() => setTab(i)}
-            className={`rounded-t-lg px-3 py-2 text-sm font-medium ${tab === i ? 'bg-white text-brand ring-1 ring-gray-200' : 'text-muted hover:text-ink'}`}
+            className={`flex items-center gap-1.5 rounded-t-lg px-3 py-2 text-sm font-medium ${tab === i ? 'bg-white text-brand ring-1 ring-gray-200' : 'text-muted hover:text-ink'}`}
           >
             {t('talentCandidaturaDetail.tabs.evidencia', { numero: i + 1 })}
+            {e.validado === true && <Check size={13} className="text-green-600" />}
+            {e.validado === false && <X size={13} className="text-red-600" />}
           </button>
         ))}
         <button
@@ -180,14 +210,30 @@ export default function TalentCandidaturaDetailPage() {
               </span>
               <a href={evid.url} target="_blank" rel="noreferrer" className="text-muted hover:text-brand"><Download size={18} /></a>
             </div>
-            {validando && (
-              <div className="mt-3 flex justify-center gap-2">
-                <button className="flex items-center gap-1 rounded-full bg-red-500 px-4 py-1.5 text-xs font-semibold text-white">
-                  <X size={13} /> {t('talentCandidaturaDetail.botoes.rejeitar')}
-                </button>
-                <button className="flex items-center gap-1 rounded-full bg-green-600 px-4 py-1.5 text-xs font-semibold text-white">
-                  <Check size={13} /> {t('talentCandidaturaDetail.botoes.aprovar')}
-                </button>
+            {podeValidar && validando && (
+              <div className="mt-3 flex flex-col items-center gap-2">
+                <div className="flex justify-center gap-2">
+                  <button
+                    onClick={() => validarEvidenciaAtual(false)}
+                    disabled={evidSubmittingId === evid.id}
+                    className={`flex items-center gap-1 rounded-full px-4 py-1.5 text-xs font-semibold text-white transition disabled:opacity-60 ${evid.validado === false ? 'bg-red-700' : 'bg-red-500 hover:bg-red-600'}`}
+                  >
+                    <X size={13} /> {t('talentCandidaturaDetail.botoes.rejeitar')}
+                  </button>
+                  <button
+                    onClick={() => validarEvidenciaAtual(true)}
+                    disabled={evidSubmittingId === evid.id}
+                    className={`flex items-center gap-1 rounded-full px-4 py-1.5 text-xs font-semibold text-white transition disabled:opacity-60 ${evid.validado === true ? 'bg-green-800' : 'bg-green-600 hover:bg-green-700'}`}
+                  >
+                    <Check size={13} /> {t('talentCandidaturaDetail.botoes.aprovar')}
+                  </button>
+                </div>
+                {evid.validado === true && (
+                  <p className="text-xs font-medium text-green-700">{t('talentCandidaturaDetail.avisos.evidenciaValidada')}</p>
+                )}
+                {evid.validado === false && (
+                  <p className="text-xs font-medium text-red-700">{t('talentCandidaturaDetail.avisos.evidenciaRejeitada')}</p>
+                )}
               </div>
             )}
           </div>

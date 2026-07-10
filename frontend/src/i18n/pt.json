@@ -909,6 +909,11 @@
       "evidenciaTitulo": "Evidência",
       "requisitoAssociado": "Requisito Associado",
       "semEvidencias": "Sem evidências nesta candidatura."
+    },
+    "avisos": {
+      "evidenciasPorValidar": "Tens de validar todas as evidências antes de aprovar a candidatura.",
+      "evidenciaValidada": "Evidência validada.",
+      "evidenciaRejeitada": "Evidência rejeitada."
     }
   },
   "talentCandidaturas": {

@@ -12,6 +12,9 @@ router.get('/minhas', candidaturaController.listarMinhasCandidaturas);
 router.get('/talent/pendentes', authorize('TalentManager', 'Admin'), candidaturaController.listarCandidaturasTalent);
 router.put('/talent/:id/validar', authorize('TalentManager', 'Admin'), candidaturaController.validarTalentManager);
 
+// Validação individual de uma evidência (passo obrigatório antes de aprovar a candidatura)
+router.put('/evidencias/:id/validar', authorize('TalentManager', 'Admin'), candidaturaController.validarEvidencia);
+
 // SERVICE LINE LEADER (Admin também pode consultar/gerir; TalentManager pode
 // consultar em modo leitura as candidaturas que já validou, ex: tab "Validadas")
 router.get('/serviceline/pendentes', authorize('ServiceLineLeader', 'Admin', 'TalentManager'), candidaturaController.listarCandidaturasServiceLine);

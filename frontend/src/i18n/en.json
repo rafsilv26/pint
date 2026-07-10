@@ -907,6 +907,11 @@
       "evidenciaTitulo": "Evidence",
       "requisitoAssociado": "Associated Requirement",
       "semEvidencias": "No evidence in this application."
+    },
+    "avisos": {
+      "evidenciasPorValidar": "You must validate all evidence before approving the application.",
+      "evidenciaValidada": "Evidence validated.",
+      "evidenciaRejeitada": "Evidence rejected."
     }
   },
   "talentCandidaturas": {

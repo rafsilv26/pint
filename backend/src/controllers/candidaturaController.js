@@ -284,6 +284,33 @@ exports.listarCandidaturasTalent = async (_req, res) => {
   }
 };
 
+// Validar (ou invalidar) uma evidência específica de uma candidatura. Passo
+// obrigatório antes do Talent Manager poder aprovar a candidatura completa.
+exports.validarEvidencia = async (req, res) => {
+  try {
+    const { validado } = req.body;
+    if (typeof validado !== 'boolean') {
+      return res.status(400).json({ erro: 'Campo "validado" é obrigatório e deve ser um booleano.' });
+    }
+
+    const evidencia = await Evidencia.findByPk(req.params.id);
+    if (!evidencia) {
+      return res.status(404).json({ erro: 'Evidência não encontrada.' });
+    }
+
+    await evidencia.update({
+      validado,
+      validadoPor: req.user.id,
+      validadoEm: new Date()
+    });
+
+    res.json({ mensagem: 'Evidência atualizada.', evidencia });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ erro: 'Erro ao validar evidência.', details: erro.message });
+  }
+};
+
 exports.validarTalentManager = async (req, res) => {
   // Validar ou rejeitar candidatura pelo Talent Manager
   try {
@@ -302,7 +329,16 @@ exports.validarTalentManager = async (req, res) => {
     if (!nextStatus) {
       return res.status(400).json({ erro: 'Decisão inválida. Use APROVAR ou REJEITAR.' });
     }
-    
+
+    // É obrigatório validar todas as evidências antes de poder aprovar a candidatura.
+    if (decisao === 'APROVAR') {
+      const evidencias = candidatura.evidencias || [];
+      const faltaValidar = evidencias.some((e) => e.validado !== true);
+      if (evidencias.length > 0 && faltaValidar) {
+        return res.status(400).json({ erro: 'Tens de validar todas as evidências antes de aprovar a candidatura.' });
+      }
+    }
+
     // Atualizar candidatura com nova decisão do Talent Manager
     await candidatura.update({
       estadoId: nextStatus.statusId,

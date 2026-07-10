@@ -38,6 +38,19 @@ const Evidencia = sequelize.define('Evidencia', {
     type: DataTypes.INTEGER,
     allowNull: true
   },
+  validado: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: null
+  },
+  validadoPor: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  validadoEm: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW

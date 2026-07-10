@@ -335,6 +335,7 @@ export async function getCandidatura(id) {
     evidencias: (c.evidencias || []).map((e) => ({
       id: e.id, nome: e.nomeFicheiro || i18next.t('api.generic.evidencia'), url: e.url || '#',
       requisito: e.Requirement?.titulo || e.Requirement?.descricao || e.descricao || '—',
+      validado: e.validado === true ? true : e.validado === false ? false : null,
     })),
     historico: (c.history || []).map((h) => ({
       estado: '—', data: dataPT(h.createdAt), motivo: h.motivo || h.reason || '',
@@ -343,6 +344,12 @@ export async function getCandidatura(id) {
 }
 export async function validarTalentManager(id, { decisao, comentario } = {}) {
   return http(`/candidaturas/talent/${id}/validar`, { method: 'PUT', body: { decisao, comentario } })
+}
+
+// Validar (ou invalidar) uma evidência individual — passo obrigatório antes
+// de o Talent Manager poder aprovar a candidatura completa.
+export async function validarEvidencia(id, validado) {
+  return http(`/candidaturas/evidencias/${id}/validar`, { method: 'PUT', body: { validado } })
 }
 
 // ---------- Service Line Leader ----------

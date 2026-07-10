@@ -189,8 +189,8 @@ export async function getCandidatura(id) {
     submissao: base?.data || '—',
     badge: { nome: base?.badge || 'Badge', nivel: base?.nivel || '—', tint: 'salmon' },
     evidencias: [
-      { id: 1, nome: 'Certificado.pdf', url: '#', requisito: 'Certificado oficial reconhecido pela entidade fornecedora.' },
-      { id: 2, nome: 'Projeto.pdf', url: '#', requisito: 'Projeto prático validado, com evidências do trabalho realizado.' },
+      { id: 1, nome: 'Certificado.pdf', url: '#', requisito: 'Certificado oficial reconhecido pela entidade fornecedora.', validado: base?._evidenciasValidadas ? true : null },
+      { id: 2, nome: 'Projeto.pdf', url: '#', requisito: 'Projeto prático validado, com evidências do trabalho realizado.', validado: base?._evidenciasValidadas ? true : null },
     ],
     historico: [
       { estado: 'Submetida', data: base?.data || '—', motivo: 'Candidatura submetida pelo consultor' },
@@ -200,6 +200,10 @@ export async function getCandidatura(id) {
 export async function validarTalentManager() {
   await delay(500)
   return { mensagem: i18next.t('api.mensagens.decisaoRegistada') }
+}
+export async function validarEvidencia(id, validado) {
+  await delay(300)
+  return { mensagem: i18next.t('api.mensagens.decisaoRegistada'), evidencia: { id, validado } }
 }
 
 // ---------- Service Line Leader ----------
