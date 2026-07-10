@@ -14,8 +14,8 @@ export default function AdminPedidosPage() {
     <div>
       <PageHeader 
         title={t('adminPedidos.titulo')} 
-        subtitle={t('adminPedidos.subtitulo')} 
-        action={<ExportButtons />} 
+        subtitle={t('adminPedidos.subtitulo')}
+        action={<ExportButtons />}
       />
 
       <Card className="overflow-hidden p-0">

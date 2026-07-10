@@ -28,20 +28,6 @@ export const getAdminResources = (t) => ({
       { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea' },
     ],
   },
-  policies: {
-    resource: 'policies',
-    titulo: t('admin.policies.titulo'),
-    singular: t('admin.policies.singular'),
-    colunas: [
-      { key: 'titulo', label: t('admin.generic.titulo') },
-      { key: 'versao', label: t('admin.policies.campos.versao') },
-    ],
-    campos: [
-      { key: 'titulo', label: t('admin.generic.titulo') },
-      { key: 'versao', label: t('admin.policies.campos.versao') },
-      { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea' },
-    ],
-  },
   notices: {
     resource: 'notices',
     titulo: t('admin.notices.titulo'),

@@ -12,7 +12,7 @@ export default function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  const [email, setEmail] = useState('rafael@softinsa.pt')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [erro, setErro] = useState(null)
   const [loading, setLoading] = useState(false)
