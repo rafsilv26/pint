@@ -473,7 +473,13 @@
     "vazioEspecialTitulo": "Sem conquistas especiais",
     "vazioEspecialDesc": "As conquistas especiais aparecem aqui quando as desbloqueares.",
     "conquistasCount": "conquista(s) especial(is)",
-    "pts": "pts"
+    "pts": "pts",
+    "areaLabel": "Área",
+    "serviceLineLabel": "Service Line",
+    "rankingLabel": "Posição no ranking",
+    "valido": "Válido",
+    "expirado": "Expirado",
+    "obtidoEm": "Obtido em"
   },
   "ranking": {
     "titulo": "Ranking",

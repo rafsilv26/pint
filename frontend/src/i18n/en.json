@@ -483,7 +483,13 @@
     "vazioEspecialTitulo": "No special achievements",
     "vazioEspecialDesc": "Special achievements will appear here when you unlock them.",
     "conquistasCount": "special achievement(s)",
-    "pts": "pts"
+    "pts": "pts",
+    "areaLabel": "Area",
+    "serviceLineLabel": "Service Line",
+    "rankingLabel": "Ranking position",
+    "valido": "Valid",
+    "expirado": "Expired",
+    "obtidoEm": "Earned on"
   },
   "ranking": {
     "titulo": "Ranking",

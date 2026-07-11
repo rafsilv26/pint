@@ -483,7 +483,13 @@
     "vazioEspecialTitulo": "Sin logros especiales",
     "vazioEspecialDesc": "Los logros especiales aparecerán aquí cuando los desbloquees.",
     "conquistasCount": "logro(s) especial(es)",
-    "pts": "pts"
+    "pts": "pts",
+    "areaLabel": "Área",
+    "serviceLineLabel": "Service Line",
+    "rankingLabel": "Posición en el ranking",
+    "valido": "Válido",
+    "expirado": "Caducado",
+    "obtidoEm": "Obtenido el"
   },
   "ranking": {
     "titulo": "Clasificación",
