@@ -1,8 +1,8 @@
 const dns = require('dns');
-// O Render (e muitos outros PaaS) não tem rede de saída IPv6, mas o DNS do
-// Gmail (smtp.gmail.com) devolve um registo AAAA (IPv6). Sem isto, o Node
-// tenta primeiro o IPv6 e falha com "ENETUNREACH", ou fica preso até dar
-// "Connection timeout". Isto força a preferir sempre IPv4.
+// O Render (e muitos outros PaaS) não tem rede de saída IPv6, mas alguns
+// serviços externos devolvem registos AAAA (IPv6) no DNS. Sem isto, o Node
+// pode tentar primeiro o IPv6 e falhar com "ENETUNREACH" ou ficar preso em
+// timeouts. Isto força a preferir sempre IPv4 nas ligações de saída.
 dns.setDefaultResultOrder('ipv4first');
 
 const express = require('express');

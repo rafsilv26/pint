@@ -2,30 +2,15 @@ const { Notice } = require('../models');
 const { verificarLigacao, enviarEmail } = require('../services/email.service');
 
 // Diagnóstico do envio de emails em produção (só Admin).
-//   GET /api/notifications/email-status         -> valida config + ligação (Brevo API ou SMTP)
+//   GET /api/notifications/email-status         -> valida BREVO_API_KEY/EMAIL_USER + ligação ao Brevo
 //   GET /api/notifications/email-status?send=1  -> além disso envia um email de teste ao próprio admin
 exports.emailStatus = async (req, res) => {
   const status = {
-    // Com BREVO_API_KEY o envio é por API HTTPS (obrigatório no Render free,
-    // que bloqueia as portas SMTP); sem ela usa SMTP Gmail (só funciona local).
     brevoApiKeyDefinida: Boolean(process.env.BREVO_API_KEY),
     emailUser: process.env.EMAIL_USER || null,
-    emailPassDefinida: Boolean(process.env.EMAIL_PASS),
-    emailPassComprimento: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0,
-    // Uma App Password do Gmail tem 16 caracteres; com espaços colados são 19.
-    avisoEspacos: Boolean(process.env.EMAIL_PASS && process.env.EMAIL_PASS.includes(' ')),
     ligacao: null,
     envioTeste: null
   };
-
-  if (!process.env.EMAIL_USER) {
-    status.ligacao = { ok: false, erro: 'EMAIL_USER não está definido no ambiente (é o remetente).' };
-    return res.status(500).json(status);
-  }
-  if (!process.env.BREVO_API_KEY && !process.env.EMAIL_PASS) {
-    status.ligacao = { ok: false, erro: 'Define BREVO_API_KEY (produção/Render) ou EMAIL_PASS (SMTP local).' };
-    return res.status(500).json(status);
-  }
 
   try {
     const { modo } = await verificarLigacao();
