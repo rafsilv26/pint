@@ -720,7 +720,7 @@
     }
   },
   "admin": {
-    "generic": { "nome": "Nombre", "titulo": "Título", "descricao": "Descripción", "mensagem": "Mensaje" },
+    "generic": { "nome": "Nombre", "titulo": "Título", "descricao": "Descripción", "mensagem": "Mensaje", "tipo": "Tipo", "ativo": "Activo", "lida": "Leída", "data": "Fecha", "dataInicio": "Fecha de inicio", "dataFim": "Fecha de fin" },
     "badges": { "titulo": "Insignias", "singular": "Insignia", "campos": { "nivel": "Nivel", "pontos": "Puntos" } },
     "learningPaths": { "titulo": "Rutas de aprendizaje", "singular": "Ruta de aprendizaje" },
     "badgePremium": { "titulo": "Insignias Premium", "singular": "Insignia Premium" },

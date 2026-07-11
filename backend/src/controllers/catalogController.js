@@ -196,10 +196,13 @@ exports.updateResource = async (req, res) => {
 
     // 3. SE FOR AVISO, GARANTIMOS QUE OS CAMPOS OBRIGATÓRIOS TÊM VALOR
     if (req.params.resource === 'notices') {
+        // A difusão a todos os consultores só existe na criação; num update,
+        // '__ALL__' não é um id válido — mantém o destinatário original.
+        if (payload.userId === '__ALL__') payload.userId = row.userId;
         // Se o formulário não enviou o campo, usa o que já existe na BD (row.campo)
         payload.userId = payload.userId || row.userId;
-        payload.type = payload.type || row.type || 'info'; 
-        
+        payload.type = payload.type || row.type || 'info';
+
         // Remove campos que não devem ser alterados, se necessário
         delete payload.createdAt;
     }
