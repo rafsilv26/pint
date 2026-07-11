@@ -1,8 +1,9 @@
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
-import { ArrowLeft, Award, Star, Sparkles, Calendar, Mail, ExternalLink, Network, Trophy, FileText, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Award, Star, Sparkles, Calendar, Mail, ExternalLink, Network, Trophy, FileText, ChevronRight, Download, Clock3, Target } from 'lucide-react'
 import { Card, Spinner, ErrorState, EmptyState, StatusPill } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
+import { API_URL } from '../services/http'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 // Perfil de um consultor visto por um perfil de gestão (TM / SLL / Admin).
@@ -11,7 +12,8 @@ export default function ManagerConsultorDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
-  const { data: c, loading, error, reload } = useAsync(() => api.getConsultant(id), [id])
+  const talentView = location.pathname.startsWith('/tm')
+  const { data: c, loading, error, reload } = useAsync(() => talentView ? api.getTalentConsultant(id) : api.getConsultant(id), [id, talentView])
   const { data: historico, loading: loadingHistorico } = useAsync(() => api.getConsultantCandidaturas(id), [id])
 
   if (loading) return <Spinner />
@@ -31,6 +33,8 @@ export default function ManagerConsultorDetailPage() {
     { icon: Calendar, label: t('managerConsultor.stats.desde'), value: c.startDate || '—' },
   ]
   const badgesConquistados = c.badgesConquistados || []
+  const specialAchievements = c.specialAchievements || []
+  const timeline = c.timeline || []
   const listaHistorico = historico || []
 
   return (
@@ -130,6 +134,8 @@ export default function ManagerConsultorDetailPage() {
                         {t('managerConsultor.badgesConquistados.expirado')}
                       </span>
                     )}
+                    {b.expirationDate && <p className={`mt-1 fs-xs mb-0 ${b.expiration?.code === 'expired' ? 'text-danger' : b.expiration?.code === 'soon' ? 'text-warning-emphasis' : 'text-muted'}`}>{t('tmWorkspace.validityLabel')}: {new Date(b.expirationDate).toLocaleDateString()}</p>}
+                    {b.publicToken && <a className="mt-2 d-inline-flex align-items-center gap-1 fs-xs fw-semibold text-brand text-decoration-none" href={`${API_URL}/relatorios/certificado/${b.publicToken}`} target="_blank" rel="noreferrer"><Download size={13} /> {t('tmWorkspace.certificate')}</a>}
                   </div>
                 </div>
               </div>
@@ -137,6 +143,11 @@ export default function ManagerConsultorDetailPage() {
           </div>
         )}
       </Card>
+
+      {talentView && <div className="mt-4 row g-4">
+        <div className="col-lg-6"><Card className="h-100"><h2 className="mb-3 h6 fw-bold"><Sparkles size={17} className="me-2 text-warning" />{t('tmWorkspace.specialAchievements')}</h2>{specialAchievements.length === 0 ? <p className="small text-muted mb-0">{t('tmWorkspace.noSpecialAchievements')}</p> : <div className="d-flex flex-column gap-3">{specialAchievements.map((item) => <div key={`${item.badgePremiumId}-${item.achievementDate}`} className="rounded-3 border p-3"><p className="small fw-bold mb-1">{item.name}</p><p className="fs-xs text-muted mb-1">{item.description || item.criteriaDescription}</p><p className="fs-xs text-muted mb-0">{item.achievementDate ? new Date(item.achievementDate).toLocaleDateString() : '—'}</p></div>)}</div>}</Card></div>
+        <div className="col-lg-6"><Card className="h-100"><h2 className="mb-3 h6 fw-bold"><Target size={17} className="me-2 text-primary" />{t('tmWorkspace.developmentTimeline')}</h2>{timeline.length === 0 ? <p className="small text-muted mb-0">{t('tmWorkspace.noGoals')}</p> : <div className="d-flex flex-column gap-3">{timeline.map((item) => <div key={item.timelineId} className="d-flex gap-3"><div className="d-flex align-items-center justify-content-center rounded-circle bg-brand-light text-brand flex-shrink-0" style={{ width: 32, height: 32 }}><Clock3 size={15} /></div><div><p className="small fw-bold mb-0">{item.title}</p><p className="fs-xs text-muted mb-1">{item.type} · {item.status}</p>{item.expectedDate && <p className="fs-xs text-muted mb-0">{t('tmWorkspace.expected')}: {new Date(item.expectedDate).toLocaleDateString()}</p>}</div></div>)}</div>}</Card></div>
+      </div>}
 
       {/* Histórico de Candidaturas */}
       <Card className="mt-4 overflow-hidden p-0">

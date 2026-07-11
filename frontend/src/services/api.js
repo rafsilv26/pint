@@ -59,6 +59,11 @@ export const getTalentCandidaturas = impl.getTalentCandidaturas
 export const getCandidatura = impl.getCandidatura
 export const validarTalentManager = impl.validarTalentManager
 export const validarEvidencia = impl.validarEvidencia
+export const getTalentReports = impl.getTalentReports
+export const getTalentConsultants = impl.getTalentConsultants
+export const getTalentConsultant = impl.getTalentConsultant
+export const getTalentCatalog = impl.getTalentCatalog
+export const refreshTalentWorkspace = impl.refreshTalentWorkspace
 
 // Service Line Leader
 export const getServiceLineDashboard = impl.getServiceLineDashboard

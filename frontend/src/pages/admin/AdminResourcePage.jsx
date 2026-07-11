@@ -36,7 +36,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
       try {
         const areas = await api.listResource('areas');
         areas.forEach(a => areasMap[a.id] = a.nome);
-      } catch (e) { console.error("Erro ao carregar áreas para dropdown"); }
+      } catch { console.error("Erro ao carregar áreas para dropdown"); }
 
       for (const f of cfg.campos) {
         if (f.type === 'select' && f.optionsResource) {
@@ -94,7 +94,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
       await api.deleteResource(cfg.resource, confirmar.id)
       setConfirmar(null)
       reload()
-    } catch (err) {
+    } catch {
       setErroDelete(t('adminResource.erroEliminar'))
     }
   }

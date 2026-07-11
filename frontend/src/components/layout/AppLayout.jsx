@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import Topnav from './Topnav'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../context/useAuth'
 import ChangePasswordModal from '../ChangePasswordModal'
 import RgpdPolicyModal from '../RgpdPolicyModal'
 

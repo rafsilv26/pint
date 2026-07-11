@@ -1,21 +1,24 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Mail, ArrowLeft, Copy, Download, Award, Phone, MapPin, Info } from 'lucide-react'
 import { Card, Toggle } from '../components/ui'
 import * as api from '../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
-function gerarHTML(d) {
+const escapeHtml = (value = '') => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+function gerarHTML(d, badges = [], baseUrl = '') {
   return `<table style="font-family:Arial,sans-serif;color:#1f2330">
   <tr>
     <td style="padding-right:16px;border-right:2px solid #1e6cab">
-      <div style="width:48px;height:48px;border-radius:8px;background:#1e6cab;color:#fff;font-weight:bold;font-size:24px;text-align:center;line-height:48px">${(d.nome[0] || 'S')}</div>
+      <div style="width:48px;height:48px;border-radius:8px;background:#1e6cab;color:#fff;font-weight:bold;font-size:24px;text-align:center;line-height:48px">${escapeHtml(d.nome[0] || 'S')}</div>
     </td>
     <td style="padding-left:16px">
-      <strong>${d.nome}</strong><br/>
-      <span style="color:#6b7280">${d.cargo}</span><br/>
-      ${d.email} · ${d.telefone}<br/>
-      <span style="color:#6b7280">${d.localizacao}</span>
+      <strong>${escapeHtml(d.nome)}</strong><br/>
+      <span style="color:#6b7280">${escapeHtml(d.cargo)}</span><br/>
+      ${escapeHtml(d.email)} · ${escapeHtml(d.telefone)}<br/>
+      <span style="color:#6b7280">${escapeHtml(d.localizacao)}</span>
+      ${badges.length ? `<div style="margin-top:8px">${badges.map((badge) => `<a href="${escapeHtml(`${baseUrl}/badge/${badge.publicToken || ''}`)}" style="display:inline-block;margin-right:6px;text-decoration:none;color:#1e6cab" title="${escapeHtml(badge.title)}">${badge.imagePath ? `<img src="${escapeHtml(badge.imagePath)}" alt="${escapeHtml(badge.title)}" width="28" height="28" style="border:0;border-radius:4px;vertical-align:middle"/>` : `<span style="display:inline-block;padding:3px 6px;border:1px solid #dbeafe;border-radius:4px;font-size:11px">${escapeHtml(badge.title)}</span>`}</a>`).join('')}</div>` : ''}
     </td>
   </tr>
 </table>`
@@ -36,6 +39,8 @@ function Campo({ label, value, onChange }) {
 
 export default function EmailSignaturePage() {
   const { t } = useTranslation() // <-- Inicializa a tradução
+  const location = useLocation()
+  const backTo = location.pathname.startsWith('/tm') ? '/tm/conta' : '/perfil'
 
   const [d, setD] = useState({
     nome: '',
@@ -46,11 +51,14 @@ export default function EmailSignaturePage() {
   })
   const [mostrarBadges, setMostrarBadges] = useState(true)
   const [copiado, setCopiado] = useState(false)
+  const [badges, setBadges] = useState([])
+  const [selected, setSelected] = useState([])
+  const [message, setMessage] = useState('')
 
   // Carrega a assinatura guardada (popula os campos)
   useEffect(() => {
     api.getEmailSignature()
-      .then((s) =>
+      .then((s) => {
         setD((cur) => ({
           ...cur,
           nome: s.nome || cur.nome,
@@ -59,26 +67,58 @@ export default function EmailSignaturePage() {
           telefone: s.telefone || cur.telefone,
           localizacao: s.localizacao || cur.localizacao,
         }))
-      )
-      .catch(() => {})
+        setBadges(s.badges || [])
+        setSelected((s.badges || []).filter((badge) => badge.selected).map((badge) => badge.id))
+      })
+      .catch((error) => setMessage(error.message))
   }, [])
 
   const set = (k) => (v) => setD({ ...d, [k]: v })
   const iniciais = (d.nome[0] || 'S').toUpperCase()
 
-  function copiarHTML() {
-    const html = gerarHTML(d)
-    navigator.clipboard?.writeText(html).then(() => {
+  async function copiarHTML() {
+    const chosen = mostrarBadges ? badges.filter((badge) => selected.includes(badge.id)) : []
+    const html = gerarHTML(d, chosen, window.location.origin)
+    const plainText = [d.nome, d.cargo, d.email, d.telefone, d.localizacao].filter(Boolean).join('\n')
+    try {
+      if (navigator.clipboard?.write && window.ClipboardItem) {
+        await navigator.clipboard.write([new window.ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([plainText], { type: 'text/plain' }),
+        })])
+      } else {
+        await navigator.clipboard?.writeText(html)
+      }
       setCopiado(true)
       setTimeout(() => setCopiado(false), 2000)
-    })
+    } catch (error) {
+      setMessage(error.message)
+      return
+    }
     // Persiste a assinatura no backend (quando ligado à API real)
-    api.saveEmailSignature({ templateHtml: html }).catch(() => {})
+    if (chosen.length === 0) {
+      setMessage(t('tmWorkspace.signature.persistenceRequiresBadge'))
+      return
+    }
+    api.saveEmailSignature({ templateHtml: html, badgeIds: chosen.map((badge) => badge.id) })
+      .then((result) => setMessage(result?.mensagem || t('api.mensagens.assinaturaGuardada')))
+      .catch((error) => setMessage(error.message))
+  }
+
+  function descarregarHTML() {
+    const chosen = mostrarBadges ? badges.filter((badge) => selected.includes(badge.id)) : []
+    const blob = new Blob([gerarHTML(d, chosen, window.location.origin)], { type: 'text/html;charset=utf-8' })
+    const href = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = href
+    link.download = 'assinatura-softinsa.html'
+    link.click()
+    URL.revokeObjectURL(href)
   }
 
   return (
     <div>
-      <Link to="/perfil" className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
+      <Link to={backTo} className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
         <ArrowLeft size={16} /> {t('assinatura.voltar')}
       </Link>
 
@@ -111,6 +151,8 @@ export default function EmailSignaturePage() {
               <Toggle checked={mostrarBadges} onChange={setMostrarBadges} />
             </div>
             <p className="mt-1 small text-muted mb-0">{t('assinatura.badgesDesc')}</p>
+            {mostrarBadges && badges.length > 0 && <div className="mt-3 d-flex flex-column gap-2">{badges.map((badge) => <label className="d-flex align-items-center gap-2 small" key={badge.id}><input type="checkbox" className="form-check-input mt-0" checked={selected.includes(badge.id)} onChange={(event) => setSelected((current) => event.target.checked ? [...current, badge.id].slice(0, 4) : current.filter((id) => id !== badge.id))} />{badge.title}</label>)}</div>}
+            {mostrarBadges && badges.length === 0 && <p className="mt-3 fs-xs text-muted mb-0">{t('tmWorkspace.signature.noBadges')}</p>}
           </Card>
 
           <Card>
@@ -121,9 +163,10 @@ export default function EmailSignaturePage() {
             >
               <Copy size={16} /> {copiado ? t('assinatura.copiado') : t('assinatura.copiar')}
             </button>
-            <button className="mt-2 btn btn-outline-secondary bg-white w-100 d-flex align-items-center justify-content-center gap-2">
+            <button onClick={descarregarHTML} className="mt-2 btn btn-outline-secondary bg-white w-100 d-flex align-items-center justify-content-center gap-2">
               <Download size={16} /> {t('assinatura.baixar')}
             </button>
+            {message && <p className="mt-2 small text-muted mb-0">{message}</p>}
             <div className="mt-3 d-flex align-items-start gap-2 rounded-3 bg-brand-light p-3 fs-xs text-muted">
               <Info size={14} className="mt-1 flex-shrink-0 text-brand" />
               {t('assinatura.dicaCopia')}
@@ -145,11 +188,9 @@ export default function EmailSignaturePage() {
                 <p className="mt-1 d-flex align-items-center gap-1 text-muted mb-0"><Mail size={12} /> {d.email}</p>
                 <p className="d-flex align-items-center gap-1 text-muted mb-0"><Phone size={12} /> {d.telefone}</p>
                 <p className="d-flex align-items-center gap-1 text-muted mb-0"><MapPin size={12} /> {d.localizacao}</p>
-                {mostrarBadges && (
+                {mostrarBadges && selected.length > 0 && (
                   <div className="mt-2 d-flex gap-1">
-                    <span className="d-flex align-items-center justify-content-center rounded-2" style={{ height: '1.5rem', width: '1.5rem', backgroundColor: '#e0f2fe', color: '#0284c7' }}><Award size={13} /></span>
-                    <span className="d-flex align-items-center justify-content-center rounded-2" style={{ height: '1.5rem', width: '1.5rem', backgroundColor: '#d1fae5', color: '#059669' }}><Award size={13} /></span>
-                    <span className="d-flex align-items-center justify-content-center rounded-2" style={{ height: '1.5rem', width: '1.5rem', backgroundColor: '#ffedd5', color: '#ea580c' }}><Award size={13} /></span>
+                    {badges.filter((badge) => selected.includes(badge.id)).map((badge) => <span key={badge.id} title={badge.title} className="d-flex align-items-center justify-content-center rounded-2 bg-brand-light text-brand" style={{ height: '1.5rem', width: '1.5rem' }}><Award size={13} /></span>)}
                   </div>
                 )}
               </div>

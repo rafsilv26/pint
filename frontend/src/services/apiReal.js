@@ -5,6 +5,11 @@
 // =============================================================
 import { http, getUser, getToken, api } from './http.js'
 import i18next from 'i18next' // <-- Import da instância global para ficheiros JS puros
+import {
+  buildTalentReport,
+  getTalentWorkspace,
+  invalidateTalentWorkspace,
+} from './talentWorkspace.js'
 
 const CODE_COR = {
   OPEN: 'gray', SUBMITTED: 'blue', IN_VALIDATION: 'amber', VALIDATED: 'indigo',
@@ -16,6 +21,11 @@ const CODE_PROGRESSO = {
 const TINTS = ['salmon', 'sky', 'emerald', 'violet']
 const tintFor = (s = '') => TINTS[[...String(s)].reduce((a, c) => a + c.charCodeAt(0), 0) % TINTS.length]
 const dataPT = (d) => (d ? new Date(d).toLocaleDateString('pt-PT') : '—')
+const statusName = (code, fallback = code || '—') => i18next.t(`api.statusCodes.${code}`, { defaultValue: fallback })
+const localizeTalentRow = (row) => ({
+  ...row,
+  status: row.status ? { ...row.status, name: statusName(row.status.code, row.status.name) } : row.status,
+})
 
 // ---------- Autenticação ----------
 export async function login({ email, password }) {
@@ -96,7 +106,11 @@ function adaptBadge(b = {}) {
     tint: tintFor(b.fornecedor || b.nome || ''),
     ponto: b.ponto ?? 0,
     duracaoMeses: b.duracaoMeses,
+    expiracao: b.expiracao || null,
+    custoEstimado: b.custoEstimado ?? null,
     descricao: b.descricao || '',
+    imagem: b.imagem || null,
+    ativo: b.ativo !== false,
     requisitos: [],
     slug: b.slug,
     publicToken: b.publicToken,
@@ -110,11 +124,29 @@ export async function getBadge(id) {
   const raw = await http(`/catalog/badges/${id}`)
   const badge = adaptBadge(raw)
   if (raw?.nivelId != null) {
-    const reqs = await http(`/catalog/requirements?nivelId=${raw.nivelId}`).catch(() => [])
+    const [reqs, levels, areas, serviceLines, learningPaths] = await Promise.all([
+      http(`/catalog/requirements?nivelId=${raw.nivelId}`).catch(() => []),
+      http('/catalog/levels').catch(() => []),
+      http('/catalog/areas').catch(() => []),
+      http('/catalog/service-lines').catch(() => []),
+      http('/catalog/learning-paths').catch(() => []),
+    ])
     badge.requisitos = (reqs || []).map((r) => ({
       id: r.requisitoId ?? r.id,
       titulo: r.titulo ?? r.descricao ?? '',
+      descricao: r.descricao || '',
+      obrigatorio: r.obrigatorio !== false,
+      ordem: r.ordem,
+      icone: r.icone || '',
     }))
+    const level = (levels || []).find((row) => Number(row.id) === Number(raw.nivelId)) || {}
+    const area = (areas || []).find((row) => Number(row.id) === Number(level.areaId)) || {}
+    const serviceLine = (serviceLines || []).find((row) => Number(row.id) === Number(area.serviceLineId)) || {}
+    const learningPath = (learningPaths || []).find((row) => Number(row.id) === Number(serviceLine.learningPathId)) || {}
+    badge.nivel = level.nome || level.ordem || badge.nivel
+    badge.area = area.nome || ''
+    badge.serviceLine = serviceLine.nome || ''
+    badge.learningPath = learningPath.nome || ''
   }
   return badge
 }
@@ -128,7 +160,7 @@ export async function getMinhasCandidaturas() {
       id: c.id,
       badge: { id: c.Badge?.id ?? c.badgeId, nome: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }) },
       tags: [],
-      status: { code, name: c.status?.name || code || '—', cor: CODE_COR[code] || 'gray' },
+      status: { code, name: statusName(code, c.status?.name || code || '—'), cor: CODE_COR[code] || 'gray' },
       progresso: CODE_PROGRESSO[code] ?? 0,
       submittedDate: dataPT(c.dataSubmicao),
       diasAnalise: c.dataSubmicao ? Math.max(0, Math.round((Date.now() - new Date(c.dataSubmicao)) / 86400000)) : 0,
@@ -182,7 +214,7 @@ export async function getNotificacoes() {
     id: n.noticeId ?? n.id,
     title: n.title,
     message: n.message,
-    type: n.tipo || 'info',
+    type: n.type || n.tipo || 'info',
     lida: !!n.read,
     createdAt: n.createdAt,
   }))
@@ -254,34 +286,41 @@ export async function getConsultantCandidaturas(id) {
       badge: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }),
       nivel: c.Badge?.nivelId != null ? i18next.t('api.generic.nivel', { nivel: c.Badge.nivelId }) : '—',
       data: dataPT(c.dataSubmicao),
-      status: { code, name: c.status?.name || code || '—', cor: CODE_COR[code] || 'gray' },
+      status: { code, name: statusName(code, c.status?.name || code || '—'), cor: CODE_COR[code] || 'gray' },
     }
   })
 }
 
 // ---------- Talent Manager ----------
 export async function getTalentDashboard() {
-  const [consultants, badges, slines, pendentes, fechadas] = await Promise.all([
-    http('/consultants').catch(() => ({ data: [], total: 0 })),
-    http('/catalog/badges').catch(() => []),
-    http('/catalog/service-lines').catch(() => []),
-    http('/candidaturas/talent/pendentes').catch(() => []),
+  const [workspace, fechadas] = await Promise.all([
+    getTalentWorkspace(),
     http('/candidaturas/fechadas-semana').catch(() => [0, 0, 0, 0, 0, 0, 0]),
   ])
-  const cons = consultants?.data || []
+  const cons = workspace.consultants
+  const pendentes = workspace.candidaturas.filter((row) => row.status.code === 'SUBMITTED')
+  const emProcesso = workspace.candidaturas.filter((row) => !['APPROVED', 'REJECTED'].includes(row.status.code))
   return {
     stats: [
-      { label: i18next.t('api.tm.stats.consultores'), value: String(consultants?.total ?? cons.length), delta: '', tint: 'sky' },
-      { label: i18next.t('api.tm.stats.badges'), value: String((badges || []).length), delta: '', tint: 'violet' },
-      { label: i18next.t('api.tm.stats.candidaturas'), value: String((pendentes || []).length), delta: '', tint: 'amber' },
-      { label: i18next.t('api.tm.stats.serviceLines'), value: String((slines || []).length), delta: '', tint: 'emerald' },
+      { label: i18next.t('api.tm.stats.consultores'), value: String(cons.length), delta: '', tint: 'sky' },
+      { label: i18next.t('api.tm.stats.badgesAtribuidos', { defaultValue: 'Badges atribuídas' }), value: String(workspace.awards.length), delta: '', tint: 'violet' },
+      { label: i18next.t('api.tm.stats.candidaturasPendentes', { defaultValue: 'Candidaturas pendentes' }), value: String(pendentes.length), delta: '', tint: 'amber' },
+      { label: i18next.t('api.tm.stats.serviceLines'), value: String(workspace.serviceLines.length), delta: '', tint: 'emerald' },
     ],
-    pontuacaoGlobal: cons.slice(0, 8).map((c, i) => ({ rank: i + 1, nome: c.name, pontos: c.points })),
+    pontuacaoGlobal: [...cons].sort((a, b) => (b.points || 0) - (a.points || 0)).slice(0, 8).map((c, i) => ({ rank: c.rank || i + 1, id: c.id, nome: c.name, pontos: c.points })),
     pedidosFechados: Array.isArray(fechadas) && fechadas.length === 7 ? fechadas : [0, 0, 0, 0, 0, 0, 0],
-    atividadeRecente: (pendentes || []).slice(0, 3).map((c) => ({
-      nome: c.Consultant?.User?.nome || i18next.t('api.generic.consultor'),
-      texto: i18next.t('api.tm.atividade', { nome: c.Badge?.nome || '' }),
+    atividadeRecente: workspace.candidaturas.slice(0, 5).map((c) => ({
+      nome: c.consultor || i18next.t('api.generic.consultor'),
+      texto: `${c.badge} · ${statusName(c.status.code, c.status.name)}`,
     })),
+    statusBreakdown: buildTalentReport(workspace).statusBreakdown,
+    progressoConsultores: [...cons].sort((a, b) => b.progress - a.progress),
+    progressAreas: [...new Set(cons.map((consultant) => consultant.area).filter(Boolean))].sort(),
+    progressServiceLines: [...new Set(cons.map((consultant) => consultant.serviceLine).filter(Boolean))].sort(),
+    expiracoes: workspace.expiring.slice(0, 6),
+    emProcesso: emProcesso.length,
+    conquistasEspeciais: cons.reduce((sum, c) => sum + c.specialAchievements.length, 0),
+    generatedAt: workspace.generatedAt,
   }
 }
 // ---------- Admin: Dashboard (painel de controlo) ----------
@@ -303,58 +342,90 @@ export async function getAdminDashboard() {
 }
 
 export async function getTalentCandidaturas(estado = 'pendentes') {
-  // 'pendentes' -> aguardam validação do TM (SUBMITTED)
-  // 'validadas' -> já validadas pelo TM, aguardam aprovação final do SLL (VALIDATED)
-  // 'relatorios' -> ainda não implementado nesta página
-  if (estado === 'relatorios') return []
-  const path = estado === 'validadas' ? '/candidaturas/serviceline/pendentes' : '/candidaturas/talent/pendentes'
-  const rows = await http(path).catch(() => [])
-  return (rows || []).map((c) => ({
-    id: c.id,
-    trackingId: `#${String(c.id).padStart(5, '0')}`,
-    consultor: c.Consultant?.User?.nome || i18next.t('api.generic.consultorId', { id: c.consultorId }),
-    badge: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }),
-    nivel: c.Badge?.nivelId != null ? String(c.Badge.nivelId) : '—',
-    data: c.dataSubmicao ? new Date(c.dataSubmicao).toLocaleDateString('pt-PT') : '—',
-    status: c.status
-      ? { code: c.status.code, name: c.status.name, cor: CODE_COR[c.status.code] || 'gray' }
-      : (estado === 'validadas'
-        ? { code: 'VALIDATED', name: i18next.t('api.status.validada'), cor: 'indigo' }
-        : { code: 'SUBMITTED', name: i18next.t('api.status.submetido'), cor: 'amber' }),
-  }))
+  const workspace = await getTalentWorkspace()
+  const filters = {
+    pendentes: ['SUBMITTED'],
+    validadas: ['VALIDATED', 'IN_APPROVAL'],
+    aprovadas: ['APPROVED'],
+    rejeitadas: ['REJECTED'],
+    processo: ['OPEN', 'SUBMITTED', 'IN_VALIDATION', 'VALIDATED', 'IN_APPROVAL'],
+  }
+  const codes = filters[estado]
+  const rows = codes ? workspace.candidaturas.filter((row) => codes.includes(row.status.code)) : workspace.candidaturas
+  return rows.map(localizeTalentRow)
 }
 export async function getCandidatura(id) {
-  const c = await http(`/candidaturas/${id}`)
-  const code = c.status?.code
+  const [c, workspace] = await Promise.all([
+    http(`/candidaturas/${id}`),
+    getTalentWorkspace().catch(() => null),
+  ])
+  const enriched = workspace?.candidaturas.find((row) => Number(row.id) === Number(id))
+  const code = c.status?.code || enriched?.status?.code
   return {
     id: c.id,
     numero: `#${String(c.id).padStart(6, '0')}`,
-    estado: { code, name: c.status?.name || code || '—', cor: CODE_COR[code] || 'gray' },
+    estado: { code, name: statusName(code, c.status?.name || code || '—'), cor: CODE_COR[code] || 'gray' },
     consultor: c.Consultant?.User?.nome || i18next.t('api.generic.consultorId', { id: c.consultorId }),
     submissao: dataPT(c.dataSubmicao),
     badge: {
-      nome: c.Badge?.nome || 'Badge', // Nome vem da API
-      nivel: c.Badge?.nivelId != null ? i18next.t('api.generic.nivel', { nivel: c.Badge.nivelId }) : '—',
+      id: c.Badge?.id ?? c.badgeId,
+      nome: c.Badge?.nome || enriched?.badge || 'Badge',
+      nivel: enriched?.nivel || (c.Badge?.nivelId != null ? i18next.t('api.generic.nivel', { nivel: c.Badge.nivelId }) : '—'),
+      descricao: c.Badge?.descricao || '',
+      pontos: c.Badge?.ponto ?? enriched?.pontos ?? 0,
+      requisitos: enriched?.requirements || [],
       tint: tintFor(c.Badge?.fornecedor || c.Badge?.nome || ''),
     },
     evidencias: (c.evidencias || []).map((e) => ({
       id: e.id, nome: e.nomeFicheiro || i18next.t('api.generic.evidencia'), url: e.url || '#',
+      requisitoId: e.requisitoId,
       requisito: e.Requirement?.titulo || e.Requirement?.descricao || e.descricao || '—',
       validado: e.validado === true ? true : e.validado === false ? false : null,
     })),
-    historico: (c.history || []).map((h) => ({
-      estado: '—', data: dataPT(h.createdAt), motivo: h.motivo || h.reason || '',
+    historico: enriched?.historico?.map((h) => ({ ...h, estado: statusName(h.code, h.estado), data: dataPT(h.data) })) || (c.history || []).map((h) => ({
+      estado: i18next.t('api.generic.atualizacaoEstado', { defaultValue: 'Atualização de estado' }), data: dataPT(h.createdAt), motivo: h.motivo || h.reason || '',
     })),
   }
 }
 export async function validarTalentManager(id, { decisao, comentario } = {}) {
-  return http(`/candidaturas/talent/${id}/validar`, { method: 'PUT', body: { decisao, comentario } })
+  const result = await http(`/candidaturas/talent/${id}/validar`, { method: 'PUT', body: { decisao, comentario } })
+  invalidateTalentWorkspace()
+  return result
 }
 
 // Validar (ou invalidar) uma evidência individual — passo obrigatório antes
 // de o Talent Manager poder aprovar a candidatura completa.
 export async function validarEvidencia(id, validado) {
-  return http(`/candidaturas/evidencias/${id}/validar`, { method: 'PUT', body: { validado } })
+  const result = await http(`/candidaturas/evidencias/${id}/validar`, { method: 'PUT', body: { validado } })
+  invalidateTalentWorkspace()
+  return result
+}
+
+export async function getTalentReports(filters = {}) {
+  const report = buildTalentReport(await getTalentWorkspace(), filters)
+  return {
+    ...report,
+    candidaturas: report.candidaturas.map(localizeTalentRow),
+    approvals: report.approvals.map(localizeTalentRow),
+    rejections: report.rejections.map(localizeTalentRow),
+    statusBreakdown: report.statusBreakdown.map((item) => ({ ...item, label: statusName(item.code, item.label) })),
+  }
+}
+
+export async function getTalentConsultants() {
+  return (await getTalentWorkspace()).consultants
+}
+
+export async function getTalentConsultant(id) {
+  return (await getTalentWorkspace()).consultants.find((consultant) => Number(consultant.id) === Number(id)) || null
+}
+
+export async function getTalentCatalog() {
+  return (await getTalentWorkspace()).catalog
+}
+
+export async function refreshTalentWorkspace() {
+  return getTalentWorkspace(true)
 }
 
 // ---------- Service Line Leader ----------

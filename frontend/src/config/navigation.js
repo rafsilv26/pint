@@ -1,6 +1,6 @@
 import {
   Home, LayoutGrid, Medal, Trophy, User,
-  LayoutDashboard, ClipboardCheck, Route, Users, Award, FileBarChart, Bell,
+  LayoutDashboard, ClipboardCheck, Route, Users, Award, FileBarChart, Bell, CalendarClock,
   ShieldCheck, Info, Settings, Network, Boxes, BarChart3, ListChecks,
 } from 'lucide-react'
 
@@ -20,6 +20,10 @@ export const getTalentNav = (t) => [
   { to: '/tm/catalogo', label: t('nav.tm.catalogo'), icon: LayoutGrid },
   { to: '/tm/learning-paths', label: t('nav.tm.learningPaths'), icon: Route },
   { to: '/tm/consultores', label: t('nav.tm.consultores'), icon: Users },
+  { to: '/tm/relatorios', label: t('nav.tm.relatorios', { defaultValue: 'Relatórios' }), icon: FileBarChart },
+  { to: '/tm/validades', label: t('nav.tm.validades', { defaultValue: 'Validades' }), icon: CalendarClock },
+  { to: '/tm/notificacoes', label: t('nav.tm.notificacoes', { defaultValue: 'Notificações' }), icon: Bell },
+  { to: '/tm/informacoes', label: t('nav.tm.informacoes', { defaultValue: 'Informações' }), icon: Info },
 ]
 
 // ===== Sidebar do Service Line Leader =====

@@ -12,9 +12,13 @@ export function useAsync(fn, deps = []) {
 
   useEffect(() => {
     let alive = true
-    setLoading(true)
-    setError(null)
-    Promise.resolve(fn())
+    Promise.resolve()
+      .then(() => {
+        if (!alive) return undefined
+        setLoading(true)
+        setError(null)
+        return fn()
+      })
       .then((d) => alive && setData(d))
       .catch((e) => alive && setError(e.message || t('hooks.erroGenerico')))
       .finally(() => alive && setLoading(false))

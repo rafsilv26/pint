@@ -33,6 +33,12 @@ import PublicBadgePage from './pages/PublicBadgePage'
 import TalentDashboardPage from './pages/tm/TalentDashboardPage'
 import TalentCandidaturasPage from './pages/tm/TalentCandidaturasPage'
 import TalentCandidaturaDetailPage from './pages/tm/TalentCandidaturaDetailPage'
+import TalentReportsPage from './pages/tm/TalentReportsPage'
+import TalentConsultantsPage from './pages/tm/TalentConsultantsPage'
+import TalentCatalogPage from './pages/tm/TalentCatalogPage'
+import TalentExpirationsPage from './pages/tm/TalentExpirationsPage'
+import TalentSearchPage from './pages/tm/TalentSearchPage'
+import TalentLearningPathsPage from './pages/tm/TalentLearningPathsPage'
 import BadgesGridView from './components/BadgesGridView'
 
 // Service Line Leader
@@ -107,11 +113,17 @@ export default function App() {
           <Route path="/tm" element={<TalentDashboardPage />} />
           <Route path="/tm/candidaturas" element={<TalentCandidaturasPage />} />
           <Route path="/tm/candidaturas/:id" element={<TalentCandidaturaDetailPage />} />
-          <Route path="/tm/catalogo" element={<BadgesGridView titulo={t('app.rotas.catalogoBadges')} linkBase="/tm/catalogo" />} />
+          <Route path="/tm/catalogo" element={<TalentCatalogPage />} />
           <Route path="/tm/catalogo/:id" element={<ManagerBadgeDetailPage />} />
-          <Route path="/tm/learning-paths" element={<AdminResourcePage resourceKey="learning-paths" readOnly />} />
-          <Route path="/tm/consultores" element={<ConsultoresPage linkBase="/tm/consultores" />} />
+          <Route path="/tm/learning-paths" element={<TalentLearningPathsPage />} />
+          <Route path="/tm/consultores" element={<TalentConsultantsPage />} />
           <Route path="/tm/consultores/:id" element={<ManagerConsultorDetailPage />} />
+          <Route path="/tm/relatorios" element={<TalentReportsPage />} />
+          <Route path="/tm/validades" element={<TalentExpirationsPage />} />
+          <Route path="/tm/notificacoes" element={<NotificationsPage />} />
+          <Route path="/tm/informacoes" element={<AdminResourcePage resourceKey="information" readOnly />} />
+          <Route path="/tm/assinatura" element={<EmailSignaturePage />} />
+          <Route path="/tm/pesquisa" element={<TalentSearchPage />} />
           <Route path="/tm/conta" element={<ManagerContaPage />} />
         </Route>
 

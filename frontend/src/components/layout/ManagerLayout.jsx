@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { Search, LogOut } from 'lucide-react'
-import { useAuth } from '../../context/AuthContext'
+import { Search, LogOut, Menu, X, PenLine } from 'lucide-react'
+import { useAuth } from '../../context/useAuth'
 import { getPanelForPath } from '../../config/navigation' // <-- Import da função atualizada
 import Logo from '../Logo'
 import ChangePasswordModal from '../ChangePasswordModal'
@@ -14,6 +15,9 @@ export default function ManagerLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const bloqueado = Boolean(user?.mustChangePassword)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [globalSearch, setGlobalSearch] = useState('')
+  const [confirmLogout, setConfirmLogout] = useState(false)
 
   // Obter o painel dinâmico já com os labels traduzidos
   const panel = getPanelForPath(location.pathname, t)
@@ -21,6 +25,46 @@ export default function ManagerLayout() {
 
   const iniciais = (user?.nome || 'U')
     .split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
+
+  const submitSearch = (event) => {
+    event.preventDefault()
+    if (!globalSearch.trim()) return
+    const destination = base === '/tm' ? '/tm/pesquisa' : base === '/sll' ? '/sll/consultores' : '/admin/utilizadores'
+    const key = base === '/tm' ? 'q' : 'search'
+    navigate(`${destination}?${key}=${encodeURIComponent(globalSearch.trim())}`)
+    setMobileOpen(false)
+  }
+
+  const navigation = (mobile = false) => (
+    <>
+      <nav className="flex-grow-1 d-flex flex-column gap-1 px-2 py-2 overflow-y-auto">
+        {panel.nav.map(({ to, label, icon: Icon, end }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={end}
+            onClick={() => mobile && setMobileOpen(false)}
+            className={({ isActive }) =>
+              `d-flex align-items-center gap-2 rounded-3 px-3 py-2 small fw-medium text-decoration-none ${
+                isActive ? 'bg-white text-brand shadow-sm' : 'text-white-50'
+              }`
+            }
+          >
+            <Icon size={18} />
+            {label}
+          </NavLink>
+        ))}
+      </nav>
+      <div className="border-top border-white border-opacity-10 px-2 py-3">
+        {base === '/tm' && <NavLink to="/tm/assinatura" onClick={() => mobile && setMobileOpen(false)} className="d-flex align-items-center gap-2 rounded-3 px-3 py-2 mb-1 text-decoration-none text-white-50"><PenLine size={18} /> <span className="small fw-medium">{t('tmWorkspace.signature.emailSignature')}</span></NavLink>}
+        <NavLink to={`${base}/conta`} onClick={() => mobile && setMobileOpen(false)} className="d-flex align-items-center gap-2 rounded-3 px-2 py-2 text-decoration-none text-white">
+          <div className="d-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25 small fw-semibold flex-shrink-0" style={{ height: '2.25rem', width: '2.25rem' }}>{iniciais}</div>
+          <div className="flex-grow-1 min-w-0"><p className="text-truncate small fw-semibold mb-0">{user?.nome}</p><p className="text-truncate small text-white-50 mb-0">{panel.label}</p></div>
+        </NavLink>
+        <button onClick={() => setConfirmLogout(true)} className="btn btn-link d-flex align-items-center gap-2 w-100 mt-1 px-2 py-2 small text-white-50 text-decoration-none"><LogOut size={18} /> {t('managerLayout.terminarSessao')}</button>
+      </div>
+    </>
+  )
 
   return (
     <div className="d-flex vh-100 overflow-hidden">
@@ -34,47 +78,13 @@ export default function ManagerLayout() {
           <p className="mt-1 mb-0 small text-white-50">{panel.label}</p>
         </div>
 
-        <nav className="flex-grow-1 d-flex flex-column gap-1 px-2 py-2">
-          {panel.nav.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                `d-flex align-items-center gap-2 rounded-3 px-3 py-2 small fw-medium text-decoration-none ${
-                  isActive ? 'bg-white text-brand shadow-sm' : 'text-white-50'
-                }`
-              }
-            >
-              <Icon size={18} />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
+        {navigation()}
+      </aside>
 
-        <div className="border-top border-white border-opacity-10 px-2 py-3">
-          <NavLink
-            to={`${base}/conta`}
-            className="d-flex align-items-center gap-2 rounded-3 px-2 py-2 text-decoration-none text-white"
-          >
-            <div
-              className="d-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25 small fw-semibold flex-shrink-0"
-              style={{ height: '2.25rem', width: '2.25rem' }}
-            >
-              {iniciais}
-            </div>
-            <div className="flex-grow-1 min-w-0">
-              <p className="text-truncate small fw-semibold mb-0">{user?.nome}</p>
-              <p className="text-truncate small text-white-50 mb-0">{panel.label}</p>
-            </div>
-          </NavLink>
-          <button
-            onClick={() => { logout(); navigate('/login') }}
-            className="btn btn-link d-flex align-items-center gap-2 w-100 mt-1 px-2 py-2 small text-white-50 text-decoration-none"
-          >
-            <LogOut size={18} /> {t('managerLayout.terminarSessao')}
-          </button>
-        </div>
+      {mobileOpen && <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-md-none" style={{ zIndex: 1040 }} onClick={() => setMobileOpen(false)} />}
+      <aside className={`position-fixed top-0 start-0 h-100 d-md-none d-flex flex-column bg-gradient-brand text-white ${mobileOpen ? '' : 'd-none'}`} style={{ width: '17rem', zIndex: 1050 }}>
+        <div className="px-4 py-4 d-flex align-items-start justify-content-between"><div><Logo height={28} /><p className="mt-1 mb-0 small text-white-50">{panel.label}</p></div><button className="btn btn-link text-white p-0" onClick={() => setMobileOpen(false)} aria-label="Fechar menu"><X size={22} /></button></div>
+        {navigation(true)}
       </aside>
 
       {/* Main */}
@@ -83,7 +93,8 @@ export default function ManagerLayout() {
           className="d-flex flex-shrink-0 align-items-center gap-3 border-bottom bg-white px-4"
           style={{ height: '4rem' }}
         >
-          <div className="position-relative w-100" style={{ maxWidth: '28rem' }}>
+          <button className="btn btn-link text-brand p-0 d-md-none" onClick={() => setMobileOpen(true)} aria-label="Abrir menu"><Menu size={24} /></button>
+          <form className="position-relative w-100" style={{ maxWidth: '28rem' }} onSubmit={submitSearch}>
             <Search
               size={18}
               className="position-absolute text-secondary"
@@ -92,8 +103,10 @@ export default function ManagerLayout() {
             <input
               placeholder={t('managerLayout.procurar')}
               className="form-control rounded-pill ps-5"
+              value={globalSearch}
+              onChange={(event) => setGlobalSearch(event.target.value)}
             />
-          </div>
+          </form>
         </header>
         <main className="flex-grow-1 overflow-y-auto p-4 p-lg-5">
           {bloqueado ? null : <Outlet />}
@@ -101,6 +114,7 @@ export default function ManagerLayout() {
       </div>
 
       {bloqueado && <ChangePasswordModal />}
+      {confirmLogout && <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 p-3" style={{ zIndex: 1100 }} role="dialog" aria-modal="true" aria-labelledby="logout-title"><div className="bg-white rounded-3 shadow p-4 w-100" style={{ maxWidth: 420 }}><h2 id="logout-title" className="h5 fw-bold text-ink">{t('managerLayout.confirmarTitulo')}</h2><p className="small text-muted">{t('managerLayout.confirmarTexto')}</p><div className="d-flex justify-content-end gap-2"><button type="button" className="btn btn-outline-secondary" onClick={() => setConfirmLogout(false)}>{t('managerLayout.cancelar')}</button><button type="button" className="btn btn-danger" onClick={() => { setConfirmLogout(false); logout(); navigate('/login') }}>{t('managerLayout.confirmar')}</button></div></div></div>}
     </div>
   )
 }

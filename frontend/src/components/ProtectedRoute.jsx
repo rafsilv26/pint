@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 // Bloqueia rotas privadas: se não houver sessão, redireciona para /login.
