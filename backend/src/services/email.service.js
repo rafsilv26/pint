@@ -36,7 +36,9 @@ const transporter = nodemailer.createTransport({
   },
   connectionTimeout: 10000,
   greetingTimeout: 10000,
-  socketTimeout: 10000
+  socketTimeout: 10000,
+  logger: true, // regista no console cada passo da ligação SMTP
+  debug: true   // inclui os dados trocados com o servidor (endereço tentado, etc.)
 });
 
 // Função base
@@ -50,7 +52,18 @@ const enviarEmail = async (para, assunto, html) => {
     });
     console.log(`✅ Email enviado para ${para}`);
   } catch (erro) {
-    console.error('❌ Erro ao enviar email:', erro.message);
+    // Log detalhado: código do erro, comando SMTP onde falhou, resposta do
+    // servidor (se houver) e o endereço/porta que estava a tentar ligar.
+    console.error('❌ Erro ao enviar email:', {
+      message: erro.message,
+      code: erro.code,
+      command: erro.command,
+      response: erro.response,
+      responseCode: erro.responseCode,
+      address: erro.address,
+      port: erro.port,
+      syscall: erro.syscall
+    });
     throw erro;
   }
 };
