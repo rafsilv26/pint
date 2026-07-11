@@ -8,5 +8,6 @@ router.post('/register', protect, authorize('Admin'), authController.register);
 router.post('/login', authController.login);
 router.get('/me', protect, authController.me);
 router.put('/change-password', protect, authController.changePassword);
+router.post('/accept-policy', protect, authController.acceptPolicy);
 
 module.exports = router;

@@ -54,6 +54,25 @@ export function AuthProvider({ children }) {
     })
   }
 
+  // Aceita uma política RGPD pendente (bloqueia a app até a lista ficar vazia).
+  async function acceptPolicy(policyId) {
+    const resultado = await api.acceptPolicy(policyId)
+    setUser((prev) => {
+      if (!prev) return prev
+      const pendingPolicies = resultado?.pendingPolicies
+        ?? (prev.pendingPolicies || []).filter((p) => p.policyId !== policyId)
+      const updated = { ...prev, pendingPolicies }
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...saved, user: updated }))
+      } catch {
+        // ignora
+      }
+      return updated
+    })
+    return resultado
+  }
+
   const value = {
     user,
     token,
@@ -62,6 +81,7 @@ export function AuthProvider({ children }) {
     login,
     logout,
     markPasswordChanged,
+    acceptPolicy,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

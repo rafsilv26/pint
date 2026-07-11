@@ -162,6 +162,13 @@ export async function me() {
   return { user: clone(mockUser) }
 }
 
+// ---------- RGPD ----------
+// Em modo mock não há políticas pendentes a bloquear a entrada.
+export async function acceptPolicy() {
+  await delay(200)
+  return { message: 'Política aceite com sucesso.', pendingPolicies: [] }
+}
+
 // ---------- Talent Manager ----------
 export async function getTalentDashboard() {
   await delay()

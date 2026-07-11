@@ -28,6 +28,7 @@ export async function login({ email, password }) {
       role: u.role || (u.roles || [])[0] || null,
       roles: u.roles || [], area: u.area || '',
       mustChangePassword: u.mustChangePassword,
+      pendingPolicies: u.pendingPolicies || [],
     },
   }
 }
@@ -46,6 +47,10 @@ export async function changePassword({ currentPassword, newPassword }) {
 
 export async function me() {
   return http('/auth/me')
+}
+
+export async function acceptPolicy(policyId) {
+  return http('/auth/accept-policy', { method: 'POST', body: { policyId } })
 }
 
 // ---------- Dashboard ----------

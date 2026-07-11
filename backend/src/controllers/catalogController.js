@@ -77,6 +77,12 @@ exports.listResources = async (req, res) => {
       whereClause = await restringirBadgesPorServiceLine(req, whereClause);
     }
 
+    // As aceitações de RGPD são dados pessoais: um consultor só pode ver as
+    // suas próprias, nunca as de outros. Admin continua a ver tudo.
+    if (req.params.resource === 'policy-acceptances' && req.user && !req.user.roles.includes('Admin')) {
+      whereClause.consultorId = req.user.id;
+    }
+
     const rows = await config.model.findAll({
       where: whereClause,
       limit: req.query.limit ? Number(req.query.limit) : undefined,
