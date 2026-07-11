@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const {
   Candidatura,
   Badge,
@@ -9,12 +10,24 @@ const {
 } = require('../models');
 const { gerarCertificado } = require('../services/pdf.service');
 const { gerarExcelCandidaturas } = require('../services/excel.service');
+const { getServiceLineScopeForUser, getBadgeIdsDaServiceLine } = require('../services/serviceLineScope.service');
 
 const reportInclude = [
   { model: Badge },
   { model: BadgeStatus, as: 'status' },
   { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] }
 ];
+
+// Um Service Line Leader só deve exportar/ver relatórios da sua própria
+// Service Line (guião: "Relatórios de badges atribuídos na sua área/período"
+// e exportações "dos pedidos/badges/consultores/aprovações" no perfil do
+// Service Line). Admin e TalentManager continuam a ver tudo.
+const buildCandidaturaWhereParaUtilizador = async (user) => {
+  const serviceLineId = await getServiceLineScopeForUser(user);
+  if (!serviceLineId) return {};
+  const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
+  return { badgeId: { [Op.in]: badgeIds.length ? badgeIds : [-1] } };
+};
 
 const findAwardByPublicToken = async (publicToken) => {
   const badge = await Badge.findOne({ where: { publicToken } });
@@ -32,9 +45,10 @@ const findAwardByPublicToken = async (publicToken) => {
   return award ? { badge, award } : { badge, award: null };
 };
 
-exports.exportarCandidaturasExcel = async (_req, res) => {
+exports.exportarCandidaturasExcel = async (req, res) => {
   try {
-    const candidaturas = await Candidatura.findAll({ include: reportInclude });
+    const where = await buildCandidaturaWhereParaUtilizador(req.user);
+    const candidaturas = await Candidatura.findAll({ where, include: reportInclude });
     const workbook = await gerarExcelCandidaturas(candidaturas);
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -117,9 +131,10 @@ exports.verificarBadge = async (req, res) => {
   }
 };
 
-exports.exportarCandidaturasPDF = async (_req, res) => {
+exports.exportarCandidaturasPDF = async (req, res) => {
   try {
-    const candidaturas = await Candidatura.findAll({ include: reportInclude });
+    const where = await buildCandidaturaWhereParaUtilizador(req.user);
+    const candidaturas = await Candidatura.findAll({ where, include: reportInclude });
     const PDFDocument = require('pdfkit');
     const doc = new PDFDocument({ margin: 30, size: 'A4', layout: 'landscape' });
     const buffers = [];

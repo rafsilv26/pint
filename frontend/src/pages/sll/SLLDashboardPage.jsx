@@ -21,9 +21,18 @@ export default function SLLDashboardPage() {
   if (loading || !data) return <Spinner />
 
   const maxBar = Math.max(1, ...(data.badgesAtribuidos.length ? data.badgesAtribuidos : [1]))
-  
+  const temDados = data.badgesAtribuidos.some((v) => v > 0)
+  const totalSemana = data.badgesAtribuidos.reduce((soma, v) => soma + v, 0)
+
   // Recupera o array de dias da semana a partir do ficheiro de idioma
   const diasSemana = t('sllDashboard.diasSemana', { returnObjects: true })
+  // O gráfico é rolante (últimos 7 dias): a barra i corresponde à data
+  // (hoje - (total-1-i)), tal como no dashboard do Talent Manager.
+  const rotularDia = (i, total) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (total - 1 - i))
+    return diasSemana[(d.getDay() + 6) % 7] || ''
+  }
 
   return (
     <div className="space-y-6">
@@ -52,8 +61,8 @@ export default function SLLDashboardPage() {
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+      <div className="grid items-stretch gap-6 lg:grid-cols-2">
+        <Card className="flex h-full flex-col">
           <h2 className="mb-4 font-semibold text-ink">{t('sllDashboard.pontuacaoMensal')}</h2>
           <div className="grid grid-cols-[2rem_1fr_auto_auto] gap-3 px-2 pb-2 text-xs font-medium text-muted">
             <span>{t('sllDashboard.tabela.posicao')}</span>
@@ -61,7 +70,7 @@ export default function SLLDashboardPage() {
             <span>{t('sllDashboard.tabela.badges')}</span>
             <span>{t('sllDashboard.tabela.pontos')}</span>
           </div>
-          <div className="space-y-0.5">
+          <div className="flex-1 space-y-0.5">
             {data.pontuacaoMensal.map((r) => (
               <div key={r.rank} className="grid grid-cols-[2rem_1fr_auto_auto] items-center gap-3 rounded-lg px-2 py-2 hover:bg-gray-50">
                 <span className="text-sm font-bold text-muted">{r.rank}</span>
@@ -78,18 +87,28 @@ export default function SLLDashboardPage() {
           </div>
         </Card>
 
-        <div className="space-y-6">
+        <div className="flex h-full flex-col space-y-6">
           <Card>
-            <h2 className="mb-4 font-semibold text-ink">{t('sllDashboard.badgesAtribuidos')}</h2>
-            {data.badgesAtribuidos.length === 0 ? (
+            <div className="mb-4 flex items-baseline justify-between">
+              <h2 className="font-semibold text-ink">{t('sllDashboard.badgesAtribuidos')}</h2>
+              <span className="text-xs text-muted">{t('sllDashboard.badgesAtribuidosTotal', { count: totalSemana })}</span>
+            </div>
+            {!temDados ? (
               <p className="text-sm text-muted">{t('sllDashboard.semDados')}</p>
             ) : (
-              <div className="flex h-40 items-end gap-2">
+              <div className="flex h-40 gap-2">
                 {data.badgesAtribuidos.map((v, i) => (
                   <div key={i} className="flex flex-1 flex-col items-center gap-1">
-                    <div className="w-full rounded-t bg-brand transition-all" style={{ height: `${(v / maxBar) * 100}%` }} />
+                    <span className="text-[11px] font-semibold text-ink">{v}</span>
+                    <div className="flex w-full flex-1 items-end">
+                      <div
+                        className="w-full min-h-[2px] rounded-t bg-brand transition-all"
+                        style={{ height: `${(v / maxBar) * 100}%` }}
+                        title={String(v)}
+                      />
+                    </div>
                     <span className="text-[10px] text-gray-400">
-                      {diasSemana[i] || ''}
+                      {rotularDia(i, data.badgesAtribuidos.length)}
                     </span>
                   </div>
                 ))}
@@ -99,7 +118,7 @@ export default function SLLDashboardPage() {
           <Card>
             <h2 className="mb-3 font-semibold text-ink">{t('sllDashboard.atividadeRecente')}</h2>
             <div className="space-y-3">
-              {data.atividadeRecente.map((a, i) => (
+              {data.atividadeRecente.slice(0, 5).map((a, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-light text-xs font-semibold text-brand">
                     {iniciais(a.nome)}

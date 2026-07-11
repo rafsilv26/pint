@@ -20,11 +20,22 @@ export default function SLLPedidosPage() {
     { label: t('sllPedidos.resumo.rejeitados'), value: cont('REJECTED'), icon: XCircle, tint: 'bg-red-100 text-red-600' },
   ]
 
+  const exportColumns = [
+    { key: 'trackingId', label: t('sllPedidos.tabela.trackingId') },
+    { key: 'badge', label: t('sllPedidos.tabela.badge') },
+    { key: 'consultor', label: t('sllPedidos.tabela.consultor') },
+    { key: 'data', label: t('sllPedidos.tabela.data') },
+    { key: 'nivel', label: t('sllPedidos.tabela.nivel') },
+    { key: 'pontos', label: t('sllPedidos.tabela.pontos') },
+    { key: 'estadoTexto', label: t('sllPedidos.tabela.estado') },
+  ]
+  const exportData = lista.map((c) => ({ ...c, estadoTexto: c.status?.name || c.status?.code || '' }))
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-ink">{t('sllPedidos.titulo')}</h1>
-        <ExportButtons />
+        <ExportButtons data={exportData} columns={exportColumns} filename="pedidos-service-line" />
       </div>
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         {resumo.map((r) => (

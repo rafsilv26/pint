@@ -22,10 +22,14 @@ router.put('/evidencias/:id/validar', authorize('TalentManager', 'Admin'), candi
 // SERVICE LINE LEADER (Admin também pode consultar/gerir; TalentManager pode
 // consultar em modo leitura as candidaturas que já validou, ex: tab "Validadas")
 router.get('/serviceline/pendentes', authorize('ServiceLineLeader', 'Admin', 'TalentManager'), candidaturaController.listarCandidaturasServiceLine);
+router.get('/serviceline/todas', authorize('ServiceLineLeader', 'Admin', 'TalentManager'), candidaturaController.listarTodasCandidaturasServiceLine);
 router.put('/serviceline/:id/validar', authorize('ServiceLineLeader', 'Admin'), candidaturaController.validarServiceLine);
 
 // Estatística para o gráfico "Pedidos Fechados" do painel de controlo
 router.get('/fechadas-semana', authorize('TalentManager', 'ServiceLineLeader', 'Admin'), candidaturaController.getFechadasPorSemana);
+
+// Estatística para o gráfico "Badges Atribuídos" do painel de controlo do SLL
+router.get('/badges-semana', authorize('ServiceLineLeader', 'Admin'), candidaturaController.getBadgesAtribuidosPorSemana);
 
 // Histórico de candidaturas de um consultor (o próprio, ou TM/SLL/Admin)
 router.get('/consultor/:id', candidaturaController.listarCandidaturasPorConsultor);

@@ -806,6 +806,7 @@
       "pontos": "Points"
     },
     "badgesAtribuidos": "Badges Awarded",
+    "badgesAtribuidosTotal": "{{count}} in the last 7 days",
     "semDados": "No data for the period.",
     "diasSemana": ["M", "T", "W", "T", "F", "S", "S"],
     "atividadeRecente": "Recent Activity"
@@ -838,7 +839,10 @@
     "requisitoAssociado": "Associated Requirement",
     "semEvidencias": "No evidence in this request.",
     "aProcessar": "Processing…",
-    "aProcessarDemora": "Processing… the server may take a while to respond."
+    "aProcessarDemora": "Processing… the server may take a while to respond.",
+    "evidenciaValidadaPeloTM": "Evidence validated by the Talent Manager.",
+    "evidenciaRejeitadaPeloTM": "Evidence rejected by the Talent Manager.",
+    "semAcaoDisponivel": "This request already has a final decision, or has not yet been validated by the Talent Manager."
   },
   "sllPedidos": {
     "titulo": "Requests",
@@ -861,16 +865,32 @@
       "estado": "Status"
     }
   },
-  "sllPedidos": {
-    "titulo": "Requests",
+  "sllRelatorios": {
+    "titulo": "Reports",
+    "subtitulo": "Reports and exports for your Service Line",
     "resumo": {
-      "pendentes": "Pending",
-      "aprovados": "Approved",
-      "rejeitados": "Rejected"
+      "badgesAtribuidos": "Badges awarded",
+      "totalPedidos": "Total requests",
+      "aprovacoes": "Approvals",
+      "consultores": "Consultants"
     },
-    "empty": {
-      "titulo": "No requests",
-      "descricao": "There are no requests for final approval."
+    "seccoes": {
+      "pedidos": {
+        "titulo": "Requests",
+        "descricao": "All badge requests for your Service Line, in any state."
+      },
+      "badges": {
+        "titulo": "Badges",
+        "descricao": "Catalog of badges available on the platform."
+      },
+      "consultores": {
+        "titulo": "Consultants",
+        "descricao": "Consultants in your Service Line, with points and badges."
+      },
+      "aprovacoes": {
+        "titulo": "Approvals",
+        "descricao": "Requests already approved in your Service Line."
+      }
     },
     "tabela": {
       "trackingId": "Tracking ID",
@@ -879,8 +899,16 @@
       "data": "Date",
       "nivel": "Level",
       "pontos": "Points",
-      "estado": "Status"
-    }
+      "estado": "Status",
+      "nome": "Name",
+      "tipo": "Type",
+      "fornecedor": "Provider",
+      "email": "Email",
+      "area": "Area",
+      "serviceLine": "Service Line",
+      "badges": "Badges"
+    },
+    "semDados": "No data to show."
   },
   "talentCandidaturaDetail": {
     "voltar": "Back",
@@ -987,7 +1015,7 @@
     },
     "sll": {
       "stats": {
-        "consultoresLowCode": "LowCode Consultants",
+        "consultores": "Service Line Consultants",
         "badgesAtribuidos": "Badges awarded",
         "pedidosBadges": "Badge requests",
         "pontosAtribuidos": "Points awarded"

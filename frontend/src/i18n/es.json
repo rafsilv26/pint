@@ -806,6 +806,7 @@
       "pontos": "Puntos"
     },
     "badgesAtribuidos": "Insignias Otorgadas",
+    "badgesAtribuidosTotal": "{{count}} en los últimos 7 días",
     "semDados": "No hay datos para el período.",
     "diasSemana": ["L", "M", "X", "J", "V", "S", "D"],
     "atividadeRecente": "Actividad Reciente"
@@ -838,7 +839,10 @@
     "requisitoAssociado": "Requisito Asociado",
     "semEvidencias": "Sin evidencias en esta solicitud.",
     "aProcessar": "Procesando…",
-    "aProcessarDemora": "Procesando… el servidor puede tardar un poco en responder."
+    "aProcessarDemora": "Procesando… el servidor puede tardar un poco en responder.",
+    "evidenciaValidadaPeloTM": "Evidencia validada por el Talent Manager.",
+    "evidenciaRejeitadaPeloTM": "Evidencia rechazada por el Talent Manager.",
+    "semAcaoDisponivel": "Esta solicitud ya tiene una decisión final, o aún no ha sido validada por el Talent Manager."
   },
   "sllPedidos": {
     "titulo": "Solicitudes",
@@ -861,16 +865,32 @@
       "estado": "Estado"
     }
   },
-  "sllPedidos": {
-    "titulo": "Solicitudes",
+  "sllRelatorios": {
+    "titulo": "Informes",
+    "subtitulo": "Informes y exportaciones de tu Service Line",
     "resumo": {
-      "pendentes": "Pendientes",
-      "aprovados": "Aprobados",
-      "rejeitados": "Rechazados"
+      "badgesAtribuidos": "Badges asignados",
+      "totalPedidos": "Total de solicitudes",
+      "aprovacoes": "Aprobaciones",
+      "consultores": "Consultores"
     },
-    "empty": {
-      "titulo": "Sin solicitudes",
-      "descricao": "No hay solicitudes para aprobación final."
+    "seccoes": {
+      "pedidos": {
+        "titulo": "Solicitudes",
+        "descricao": "Todas las solicitudes de badges de tu Service Line, en cualquier estado."
+      },
+      "badges": {
+        "titulo": "Badges",
+        "descricao": "Catálogo de badges disponibles en la plataforma."
+      },
+      "consultores": {
+        "titulo": "Consultores",
+        "descricao": "Consultores de tu Service Line, con puntos y badges."
+      },
+      "aprovacoes": {
+        "titulo": "Aprobaciones",
+        "descricao": "Solicitudes ya aprobadas en tu Service Line."
+      }
     },
     "tabela": {
       "trackingId": "ID de seguimiento",
@@ -879,8 +899,16 @@
       "data": "Fecha",
       "nivel": "Nivel",
       "pontos": "Puntos",
-      "estado": "Estado"
-    }
+      "estado": "Estado",
+      "nome": "Nombre",
+      "tipo": "Tipo",
+      "fornecedor": "Proveedor",
+      "email": "Email",
+      "area": "Área",
+      "serviceLine": "Service Line",
+      "badges": "Badges"
+    },
+    "semDados": "Sin datos para mostrar."
   },
   "talentCandidaturaDetail": {
     "voltar": "Volver",
@@ -987,7 +1015,7 @@
     },
     "sll": {
       "stats": {
-        "consultoresLowCode": "Consultores LowCode",
+        "consultores": "Consultores de la Service Line",
         "badgesAtribuidos": "Insignias otorgadas",
         "pedidosBadges": "Solicitudes de insignias",
         "pontosAtribuidos": "Puntos otorgados"

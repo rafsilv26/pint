@@ -22,6 +22,7 @@ const {
   emailBadgeRejeitado,
   emailSendBack
 } = require('../services/email.service');
+const { getServiceLineScopeForUser, getBadgeIdsDaServiceLine } = require('../services/serviceLineScope.service');
 
 const STATUS = {
   OPEN: 'OPEN',
@@ -314,6 +315,39 @@ exports.getFechadasPorSemana = async (_req, res) => {
   }
 };
 
+// Nº de badges atribuídos por dia, nos últimos 7 dias, para o gráfico
+// "Badges Atribuídos" do painel de controlo do Service Line Leader —
+// restrito à sua própria Service Line (Admin/TalentManager veem todas).
+// Mesmo formato/janela que getFechadasPorSemana.
+exports.getBadgesAtribuidosPorSemana = async (req, res) => {
+  try {
+    const fim = new Date();
+    fim.setHours(0, 0, 0, 0);
+    fim.setDate(fim.getDate() + 1);
+    const inicio = new Date(fim);
+    inicio.setDate(inicio.getDate() - 7);
+
+    const where = { obtainedDate: { [Op.gte]: inicio, [Op.lt]: fim } };
+    const serviceLineId = await getServiceLineScopeForUser(req.user);
+    if (serviceLineId) {
+      const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
+      where.badgeId = { [Op.in]: badgeIds.length ? badgeIds : [-1] };
+    }
+
+    const awards = await ConsultorBadge.findAll({ where, attributes: ['obtainedDate'] });
+
+    const contagem = [0, 0, 0, 0, 0, 0, 0];
+    awards.forEach((award) => {
+      const dias = Math.floor((new Date(award.obtainedDate) - inicio) / 86400000);
+      if (dias >= 0 && dias < 7) contagem[dias] += 1;
+    });
+
+    res.json(contagem);
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao calcular badges atribuídos.', details: erro.message });
+  }
+};
+
 exports.listarCandidaturasTalent = async (_req, res) => {
   // Listar candidaturas com estado SUBMITTED para validação do Talent Manager
   try {
@@ -449,14 +483,49 @@ exports.validarTalentManager = async (req, res) => {
   }
 };
 
-exports.listarCandidaturasServiceLine = async (_req, res) => {
-  // Listar candidaturas com estado VALIDATED para aprovação do Service Line Leader
+exports.listarCandidaturasServiceLine = async (req, res) => {
+  // Listar candidaturas com estado VALIDATED para aprovação do Service Line Leader,
+  // restrito à Service Line do próprio SLL (Admin/TalentManager veem tudo).
   try {
     const validated = await getStatus(STATUS.VALIDATED);
+    const where = { estadoId: validated.statusId };
+
+    const serviceLineId = await getServiceLineScopeForUser(req.user);
+    if (serviceLineId) {
+      const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
+      where.badgeId = { [Op.in]: badgeIds.length ? badgeIds : [-1] };
+    }
+
     const candidaturas = await Candidatura.findAll({
-      where: { estadoId: validated.statusId },
+      where,
       include: candidaturaInclude,
       order: [['createdAt', 'ASC']]
+    });
+
+    res.json(candidaturas);
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao listar candidaturas.', details: erro.message });
+  }
+};
+
+// Vista do Service Line Leader sobre TODOS os pedidos de badges da sua
+// Service Line, em qualquer estado do workflow (ao contrário de
+// /serviceline/pendentes, que só devolve as ainda por aprovar). Cobre os
+// requisitos do guião de histórico/estado em tempo real da sua service
+// line/área (Admin/TalentManager veem todas as service lines).
+exports.listarTodasCandidaturasServiceLine = async (req, res) => {
+  try {
+    const where = {};
+    const serviceLineId = await getServiceLineScopeForUser(req.user);
+    if (serviceLineId) {
+      const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
+      where.badgeId = { [Op.in]: badgeIds.length ? badgeIds : [-1] };
+    }
+
+    const candidaturas = await Candidatura.findAll({
+      where,
+      include: candidaturaInclude,
+      order: [['createdAt', 'DESC']]
     });
 
     res.json(candidaturas);
@@ -471,6 +540,17 @@ exports.validarServiceLine = async (req, res) => {
     const candidatura = await Candidatura.findByPk(req.params.id, { include: candidaturaIncludeMinimo });
     if (!candidatura) {
       return res.status(404).json({ erro: 'Candidatura não encontrada.' });
+    }
+
+    // Um Service Line Leader só pode decidir sobre candidaturas da sua
+    // própria Service Line (guião: "não tem acesso às áreas de outras
+    // Service Lines"). Admin/TalentManager não têm esta restrição.
+    const serviceLineId = await getServiceLineScopeForUser(req.user);
+    if (serviceLineId) {
+      const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
+      if (!badgeIds.includes(candidatura.badgeId)) {
+        return res.status(403).json({ erro: 'Não tens permissão para validar candidaturas de outra Service Line.' });
+      }
     }
 
     // Verificar se a candidatura está no estado correto para aprovação final

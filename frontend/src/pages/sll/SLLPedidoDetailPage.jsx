@@ -43,6 +43,13 @@ export default function SLLPedidoDetailPage() {
     }
   }
 
+  // Só faz sentido decidir sobre candidaturas que o Talent Manager já validou
+  // (estado VALIDATED) e que ainda não têm decisão final do SLL — sem este
+  // filtro, a página mostrava sempre o botão "Iniciar Aprovação", mesmo em
+  // pedidos já aprovados/rejeitados ou ainda por validar pelo TM (o backend
+  // já recusa (400) essas decisões, mas a UI não devia sequer oferecê-las).
+  const podeDecidir = c.estado?.code === 'VALIDATED'
+
   const evid = typeof tab === 'number' ? c.evidencias[tab] : null
 
   return (
@@ -66,7 +73,9 @@ export default function SLLPedidoDetailPage() {
             {c.consultor} · {t('sllPedidoDetail.submissao')}: {c.submissao}
           </p>
 
-          {!aprovando ? (
+          {!podeDecidir ? (
+            <p className="mt-4 text-sm text-muted">{t('sllPedidoDetail.semAcaoDisponivel')}</p>
+          ) : !aprovando ? (
             <button
               onClick={() => setAprovando(true)}
               className="mt-4 rounded-lg bg-amber-400 px-5 py-2.5 text-sm font-semibold text-amber-950 transition hover:bg-amber-500"
@@ -132,8 +141,10 @@ export default function SLLPedidoDetailPage() {
 
       <div className="mt-6 flex flex-wrap gap-1 border-b border-gray-200">
         {c.evidencias.map((e, i) => (
-          <button key={e.id} onClick={() => setTab(i)} className={`rounded-t-lg px-3 py-2 text-sm font-medium ${tab === i ? 'bg-white text-brand ring-1 ring-gray-200' : 'text-muted hover:text-ink'}`}>
+          <button key={e.id} onClick={() => setTab(i)} className={`flex items-center gap-1.5 rounded-t-lg px-3 py-2 text-sm font-medium ${tab === i ? 'bg-white text-brand ring-1 ring-gray-200' : 'text-muted hover:text-ink'}`}>
             {t('sllPedidoDetail.evidenciaTab', { numero: i + 1 })}
+            {e.validado === true && <Check size={13} className="text-green-600" />}
+            {e.validado === false && <X size={13} className="text-red-600" />}
           </button>
         ))}
         <button onClick={() => setTab('hist')} className={`rounded-t-lg px-3 py-2 text-sm font-medium ${tab === 'hist' ? 'bg-white text-brand ring-1 ring-gray-200' : 'text-muted hover:text-ink'}`}>
@@ -171,11 +182,18 @@ export default function SLLPedidoDetailPage() {
               </span>
               <a href={evid.url} target="_blank" rel="noreferrer" className="text-muted hover:text-brand"><Download size={18} /></a>
             </div>
-            {aprovando && (
-              <div className="mt-3 flex justify-center gap-2">
-                <button className="flex items-center gap-1 rounded-full bg-red-500 px-4 py-1.5 text-xs font-semibold text-white"><X size={13} /> {t('sllPedidoDetail.rejeitar')}</button>
-                <button className="flex items-center gap-1 rounded-full bg-green-600 px-4 py-1.5 text-xs font-semibold text-white"><Check size={13} /> {t('sllPedidoDetail.aprovar')}</button>
-              </div>
+            {/* A validação de cada evidência é feita pelo Talent Manager antes de
+                chegar ao Service Line Leader — aqui mostra-se apenas o resultado
+                dessa validação, em modo leitura. */}
+            {evid.validado === true && (
+              <p className="mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-green-700">
+                <Check size={13} /> {t('sllPedidoDetail.evidenciaValidadaPeloTM')}
+              </p>
+            )}
+            {evid.validado === false && (
+              <p className="mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-red-700">
+                <X size={13} /> {t('sllPedidoDetail.evidenciaRejeitadaPeloTM')}
+              </p>
             )}
           </div>
           <div>

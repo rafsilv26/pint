@@ -808,6 +808,7 @@
       "pontos": "Pontos"
     },
     "badgesAtribuidos": "Badges Atribuídos",
+    "badgesAtribuidosTotal": "{{count}} nos últimos 7 dias",
     "semDados": "Sem dados para o período.",
     "diasSemana": ["S", "T", "Q", "Q", "S", "S", "D"],
     "atividadeRecente": "Atividade Recente"
@@ -840,7 +841,10 @@
     "requisitoAssociado": "Requisito Associado",
     "semEvidencias": "Sem evidências neste pedido.",
     "aProcessar": "A processar…",
-    "aProcessarDemora": "A processar… o servidor pode demorar um pouco a responder."
+    "aProcessarDemora": "A processar… o servidor pode demorar um pouco a responder.",
+    "evidenciaValidadaPeloTM": "Evidência validada pelo Talent Manager.",
+    "evidenciaRejeitadaPeloTM": "Evidência rejeitada pelo Talent Manager.",
+    "semAcaoDisponivel": "Este pedido já tem uma decisão final ou ainda não foi validado pelo Talent Manager."
   },
   "sllPedidos": {
     "titulo": "Pedidos",
@@ -863,16 +867,32 @@
       "estado": "Estado"
     }
   },
-  "sllPedidos": {
-    "titulo": "Pedidos",
+  "sllRelatorios": {
+    "titulo": "Relatórios",
+    "subtitulo": "Relatórios e exportações da tua Service Line",
     "resumo": {
-      "pendentes": "Pendentes",
-      "aprovados": "Aprovados",
-      "rejeitados": "Rejeitados"
+      "badgesAtribuidos": "Badges atribuídos",
+      "totalPedidos": "Total de pedidos",
+      "aprovacoes": "Aprovações",
+      "consultores": "Consultores"
     },
-    "empty": {
-      "titulo": "Sem pedidos",
-      "descricao": "Não há pedidos para aprovação final."
+    "seccoes": {
+      "pedidos": {
+        "titulo": "Pedidos",
+        "descricao": "Todos os pedidos de badges da tua Service Line, em qualquer estado."
+      },
+      "badges": {
+        "titulo": "Badges",
+        "descricao": "Catálogo de badges disponíveis na plataforma."
+      },
+      "consultores": {
+        "titulo": "Consultores",
+        "descricao": "Consultores da tua Service Line, com pontos e badges."
+      },
+      "aprovacoes": {
+        "titulo": "Aprovações",
+        "descricao": "Pedidos já aprovados na tua Service Line."
+      }
     },
     "tabela": {
       "trackingId": "Tracking ID",
@@ -881,8 +901,16 @@
       "data": "Data",
       "nivel": "Nível",
       "pontos": "Pontos",
-      "estado": "Estado"
-    }
+      "estado": "Estado",
+      "nome": "Nome",
+      "tipo": "Tipo",
+      "fornecedor": "Fornecedor",
+      "email": "Email",
+      "area": "Área",
+      "serviceLine": "Service Line",
+      "badges": "Badges"
+    },
+    "semDados": "Sem dados para mostrar."
   },
   "talentCandidaturaDetail": {
     "voltar": "Voltar",
@@ -989,7 +1017,7 @@
     },
     "sll": {
       "stats": {
-        "consultoresLowCode": "Consultores LowCode",
+        "consultores": "Consultores da Service Line",
         "badgesAtribuidos": "Badges atribuídos",
         "pedidosBadges": "Pedidos de badges",
         "pontosAtribuidos": "Pontos atribuídos"

@@ -353,40 +353,50 @@ export async function validarEvidencia(id, validado) {
 }
 
 // ---------- Service Line Leader ----------
+// Nota: /consultants, /candidaturas/serviceline/* e /relatorios/* já vêm
+// automaticamente restringidos pelo backend à Service Line do SLL
+// autenticado (Admin/TalentManager continuam a ver tudo).
 export async function getServiceLineDashboard() {
-  const [consultants, badges, pendentes] = await Promise.all([
+  const [consultants, pendentes, badgesSemana] = await Promise.all([
     http('/consultants').catch(() => ({ data: [], total: 0 })),
-    http('/catalog/badges').catch(() => []),
     http('/candidaturas/serviceline/pendentes').catch(() => []),
+    http('/candidaturas/badges-semana').catch(() => [0, 0, 0, 0, 0, 0, 0]),
   ])
   const cons = consultants?.data || []
+  const totalBadgesAtribuidos = cons.reduce((s, c) => s + (c.badges || 0), 0)
   return {
     stats: [
-      { label: i18next.t('api.sll.stats.consultoresLowCode'), value: String(consultants?.total ?? cons.length), delta: '', tint: 'sky' },
-      { label: i18next.t('api.sll.stats.badgesAtribuidos'), value: String((badges || []).length), delta: '', tint: 'violet' },
+      { label: i18next.t('api.sll.stats.consultores'), value: String(consultants?.total ?? cons.length), delta: '', tint: 'sky' },
+      { label: i18next.t('api.sll.stats.badgesAtribuidos'), value: String(totalBadgesAtribuidos), delta: '', tint: 'violet' },
       { label: i18next.t('api.sll.stats.pedidosBadges'), value: String((pendentes || []).length), delta: '', tint: 'amber' },
       { label: i18next.t('api.sll.stats.pontosAtribuidos'), value: String(cons.reduce((s, c) => s + (c.points || 0), 0)), delta: '', tint: 'emerald' },
     ],
     pontuacaoMensal: cons.slice(0, 6).map((c, i) => ({ rank: i + 1, nome: c.name, badges: c.badges, pontos: c.points })),
-    badgesAtribuidos: [],
-    atividadeRecente: (pendentes || []).slice(0, 3).map((c) => ({
+    badgesAtribuidos: Array.isArray(badgesSemana) && badgesSemana.length === 7 ? badgesSemana : [0, 0, 0, 0, 0, 0, 0],
+    atividadeRecente: (pendentes || []).slice(0, 5).map((c) => ({
       nome: c.Consultant?.User?.nome || i18next.t('api.generic.consultor'),
       texto: i18next.t('api.sll.atividade', { nome: c.Badge?.nome || '' }),
     })),
   }
 }
+// Histórico completo dos pedidos da Service Line do SLL (todos os estados,
+// não só os pendentes de aprovação final) — guião: "visualização do status
+// dos pedidos... em tempo real" + "histórico de badges... obtidos e em processo".
 export async function getServiceLinePedidos() {
-  const rows = await http('/candidaturas/serviceline/pendentes').catch(() => [])
-  return (rows || []).map((c) => ({
-    id: c.id,
-    trackingId: `#${String(c.id).padStart(5, '0')}`,
-    badge: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }),
-    consultor: c.Consultant?.User?.nome || i18next.t('api.generic.consultorId', { id: c.consultorId }),
-    data: c.dataSubmicao ? new Date(c.dataSubmicao).toLocaleDateString('pt-PT') : '—',
-    nivel: c.Badge?.nivelId != null ? String(c.Badge.nivelId) : '—',
-    pontos: c.Badge?.ponto ?? 0,
-    status: { code: c.status?.code || 'VALIDATED', name: c.status?.name || i18next.t('api.status.validada'), cor: 'indigo' },
-  }))
+  const rows = await http('/candidaturas/serviceline/todas').catch(() => [])
+  return (rows || []).map((c) => {
+    const code = c.status?.code || 'VALIDATED'
+    return {
+      id: c.id,
+      trackingId: `#${String(c.id).padStart(5, '0')}`,
+      badge: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }),
+      consultor: c.Consultant?.User?.nome || i18next.t('api.generic.consultorId', { id: c.consultorId }),
+      data: c.dataSubmicao ? new Date(c.dataSubmicao).toLocaleDateString('pt-PT') : '—',
+      nivel: c.Badge?.nivelId != null ? String(c.Badge.nivelId) : '—',
+      pontos: c.Badge?.ponto ?? 0,
+      status: { code, name: c.status?.name || i18next.t('api.status.validada'), cor: CODE_COR[code] || 'gray' },
+    }
+  })
 }
 export async function validarServiceLine(id, { decisao, comentario } = {}) {
   return http(`/candidaturas/serviceline/${id}/validar`, { method: 'PUT', body: { decisao, comentario } })

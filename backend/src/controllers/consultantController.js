@@ -7,10 +7,21 @@ const {
   ServiceLine,
   User
 } = require('../models');
+const { getServiceLineScopeForUser } = require('../services/serviceLineScope.service');
 
-const consultantInclude = [
+// Quando `serviceLineId` é indicado (Service Line Leader), o INNER JOIN em
+// Area (required: true) restringe a lista aos consultores dessa Service
+// Line — em linha com o guião: o SLL "não tem acesso às áreas de outras
+// Service Lines". Sem `serviceLineId` (Admin/TalentManager), mantém-se o
+// LEFT JOIN original e vê-se toda a gente.
+const buildConsultantInclude = (serviceLineId) => [
   { model: User, attributes: { exclude: ['password'] } },
-  { model: Area, include: [ServiceLine] },
+  {
+    model: Area,
+    required: Boolean(serviceLineId),
+    where: serviceLineId ? { serviceLineId } : undefined,
+    include: [ServiceLine]
+  },
   { model: ConsultorBadge, as: 'acquiredBadges', include: [Badge] },
   { model: ConsultorBadgePremium, as: 'premiumBadges' }
 ];
@@ -56,8 +67,8 @@ const serialize = (consultant, rank, currentUserId) => ({
     }))
 });
 
-const loadRankedConsultants = async () => {
-  const consultants = await Consultant.findAll({ include: consultantInclude });
+const loadRankedConsultants = async (serviceLineId) => {
+  const consultants = await Consultant.findAll({ include: buildConsultantInclude(serviceLineId) });
   return consultants.sort((a, b) =>
     score(b) - score(a) ||
     (b.acquiredBadges || []).length - (a.acquiredBadges || []).length ||
@@ -67,7 +78,8 @@ const loadRankedConsultants = async () => {
 
 exports.listConsultants = async (req, res) => {
   try {
-    const ranked = await loadRankedConsultants();
+    const serviceLineId = await getServiceLineScopeForUser(req.user);
+    const ranked = await loadRankedConsultants(serviceLineId);
     const query = (req.query.q || '').toString().trim().toLowerCase();
     const filtered = query
       ? ranked.filter((consultant) => [
@@ -98,7 +110,8 @@ exports.listConsultants = async (req, res) => {
 
 exports.getConsultant = async (req, res) => {
   try {
-    const ranked = await loadRankedConsultants();
+    const serviceLineId = await getServiceLineScopeForUser(req.user);
+    const ranked = await loadRankedConsultants(serviceLineId);
     const consultant = ranked.find((row) => row.consultorId === Number(req.params.id));
     if (!consultant) {
       return res.status(404).json({ erro: 'Consultor nao encontrado.' });
