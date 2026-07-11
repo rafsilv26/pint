@@ -18,11 +18,9 @@ const frontendUrl = () => (process.env.FRONTEND_URL || 'http://localhost:5173').
 // tokens em circulação nos emails continuam inutilizáveis.
 const hashToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
 
-// Só os consultores têm de aceitar as políticas RGPD (é a única tabela que
-// liga aceitações a consultorId); outros perfis (Admin/TM/SLL) ficam sempre
-// com a lista vazia e nunca são bloqueados por isto.
-const pendingPoliciesFor = async (userId, roles) => {
-    if (!roles.includes('Consultor')) return [];
+// Todos os perfis (Admin, Consultor, TalentManager, ServiceLineLeader) têm de
+// aceitar as políticas RGPD obrigatórias — não só os consultores.
+const pendingPoliciesFor = async (userId) => {
     const pendentes = await getPendingPolicies(userId);
     return pendentes.map((p) => ({
         policyId: p.policyId,
@@ -41,7 +39,7 @@ const publicUser = async (user) => {
         fotoPerfil: user.fotoPerfil,
         idioma: user.idioma,
         mustChangePassword: user.mustChangePassword,
-        pendingPolicies: await pendingPoliciesFor(user.id, roles),
+        pendingPolicies: await pendingPoliciesFor(user.id),
         role: roles[0] || null,
         roles
     };
@@ -148,7 +146,7 @@ exports.login = async (req, res) => {
                 role: roles[0] || null,
                 roles,
                 mustChangePassword: user.mustChangePassword,
-                pendingPolicies: await pendingPoliciesFor(user.id, roles)
+                pendingPolicies: await pendingPoliciesFor(user.id)
             }
         });
     } catch (error) {
@@ -234,9 +232,9 @@ exports.resetPassword = async (req, res) => {
     }
 };
 
-// Aceitação de uma política RGPD pelo consultor autenticado. Devolve a lista
-// atualizada de políticas ainda pendentes (para o modal do frontend saber se
-// já pode desbloquear a app ou se ainda falta aceitar mais alguma).
+// Aceitação de uma política RGPD pelo utilizador autenticado (qualquer perfil).
+// Devolve a lista atualizada de políticas ainda pendentes (para o modal do
+// frontend saber se já pode desbloquear a app ou se ainda falta aceitar mais alguma).
 exports.acceptPolicy = async (req, res) => {
     try {
         const { policyId } = req.body;
@@ -244,25 +242,35 @@ exports.acceptPolicy = async (req, res) => {
             return res.status(400).json({ message: 'policyId é obrigatório.' });
         }
 
-        if (!req.user.roles.includes('Consultor')) {
-            return res.status(403).json({ message: 'Apenas consultores têm de aceitar políticas RGPD.' });
-        }
-
         const policy = await PolicyRGPD.findByPk(policyId);
         if (!policy) {
             return res.status(404).json({ message: 'Política não encontrada.' });
         }
 
-        await PolicyRGPDAcceptance.findOrCreate({
-            where: { policyId, consultorId: req.user.id },
-            defaults: {
-                acceptanceDate: new Date(),
-                originIP: req.ip,
-                userAgent: req.headers['user-agent'] || null
+        try {
+            await PolicyRGPDAcceptance.findOrCreate({
+                where: { policyId, consultorId: req.user.id },
+                defaults: {
+                    acceptanceDate: new Date(),
+                    originIP: req.ip,
+                    userAgent: req.headers['user-agent'] || null
+                }
+            });
+        } catch (dbError) {
+            // Se a BD tiver uma foreign key que só aceita CONSULTORID de quem
+            // está na tabela CONSULTOR (utilizadores sem perfil Consultor não
+            // têm lá registo), isto falha para Admin/TM/SLL. Ver nota no PR:
+            // é preciso alterar essa FK para apontar para UTILIZADOR(id).
+            if (dbError.name === 'SequelizeForeignKeyConstraintError') {
+                return res.status(500).json({
+                    error: 'Erro ao aceitar política.',
+                    details: 'A tabela ACEITACAO_POLITICA_RGPD tem uma foreign key restrita a consultores. É preciso alterar essa constraint para referenciar UTILIZADOR(id) em vez de CONSULTOR(consultorId).'
+                });
             }
-        });
+            throw dbError;
+        }
 
-        const pendingPolicies = await pendingPoliciesFor(req.user.id, req.user.roles);
+        const pendingPolicies = await pendingPoliciesFor(req.user.id);
         res.json({ message: 'Política aceite com sucesso.', pendingPolicies });
     } catch (error) {
         res.status(500).json({ error: 'Erro ao aceitar política.', details: error.message });
