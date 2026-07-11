@@ -42,6 +42,29 @@ export const getAdminResources = (t) => ({
       },
     ],
   },
+  'badge-premium': {
+    resource: 'badge-premium',
+    titulo: t('admin.badgePremium.titulo'),
+    singular: t('admin.badgePremium.singular'),
+    colunas: [
+      { key: 'name', label: t('admin.generic.nome') },
+      { key: 'icon', label: 'Ícone' },
+      { key: 'active', label: 'Ativo' },
+    ],
+    campos: [
+      { key: 'name', label: t('admin.generic.nome') },
+      { key: 'description', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
+      { key: 'icon', label: 'Ícone', optional: true },
+      { key: 'criteriaDescription', label: 'Critério de Atribuição', type: 'textarea', optional: true },
+      {
+        key: 'active',
+        label: 'Está ativo?',
+        type: 'select',
+        options: [{ value: true, label: 'Sim' }, { value: false, label: 'Não' }],
+        optional: true,
+      },
+    ],
+  },
   'learning-paths': {
     resource: 'learning-paths',
     titulo: t('admin.learningPaths.titulo'),

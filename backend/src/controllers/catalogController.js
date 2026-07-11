@@ -135,6 +135,9 @@ exports.createResource = async (req, res) => {
     if (req.params.resource === 'information') {
       payload.createdBy = req.user?.id || 1; // Campo obrigatório no modelo Information
     }
+    if (req.params.resource === 'badge-premium') {
+      payload.createdBy = req.user?.id || 1; // Campo obrigatório no modelo BadgePremium
+    }
 
     const row = await config.model.create(payload);
     res.status(201).json(row);
