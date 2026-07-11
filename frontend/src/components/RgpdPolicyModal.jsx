@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShieldCheck } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
@@ -9,17 +9,28 @@ import { useTranslation } from 'react-i18next'
 // app — igual ao ChangePasswordModal — até todas ficarem aceites.
 // Mostra uma política de cada vez; quando "pendingPolicies" fica vazio no
 // AuthContext, o AppLayout deixa de renderizar este modal automaticamente.
+// Exige confirmação explícita (checkbox) de que a política foi lida antes de
+// deixar aceitar — não basta clicar, tem de confirmar a leitura primeiro.
 export default function RgpdPolicyModal({ policies }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { acceptPolicy, logout } = useAuth()
   const [erro, setErro] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [confirmoLeitura, setConfirmoLeitura] = useState(false)
 
   const politica = policies[0]
   const total = policies.length
 
+  // Sempre que muda a política em exibição (a atual foi aceite e passou-se
+  // à seguinte), a confirmação de leitura tem de ser feita de novo.
+  useEffect(() => {
+    setConfirmoLeitura(false)
+    setErro(null)
+  }, [politica?.policyId])
+
   async function handleAceitar() {
+    if (!confirmoLeitura) return
     setErro(null)
     setLoading(true)
     try {
@@ -68,7 +79,17 @@ export default function RgpdPolicyModal({ policies }) {
 
         {erro && <div className="mb-3 rounded-3 bg-danger-subtle px-3 py-2 small text-danger">{erro}</div>}
 
-        <button onClick={handleAceitar} disabled={loading} className="btn btn-primary w-100">
+        <label className="mb-3 d-flex align-items-start gap-2 small text-ink" style={{ cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            className="form-check-input mt-1 flex-shrink-0"
+            checked={confirmoLeitura}
+            onChange={(e) => setConfirmoLeitura(e.target.checked)}
+          />
+          {t('rgpdPolicyModal.confirmoLeitura')}
+        </label>
+
+        <button onClick={handleAceitar} disabled={loading || !confirmoLeitura} className="btn btn-primary w-100">
           {loading ? t('rgpdPolicyModal.botoes.aceitando') : t('rgpdPolicyModal.botoes.aceitar')}
         </button>
 

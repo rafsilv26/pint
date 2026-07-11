@@ -679,6 +679,7 @@
     "descricao": "Antes de continuar, tienes que leer y aceptar esta política para poder usar la plataforma.",
     "versao": "Versión {{versao}}",
     "contador": "Política {{atual}} de {{total}}",
+    "confirmoLeitura": "Confirmo que he leído y comprendido esta política.",
     "erro": "No fue posible registrar la aceptación. Inténtalo de nuevo.",
     "botoes": {
       "aceitando": "Registrando…",

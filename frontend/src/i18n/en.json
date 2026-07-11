@@ -679,6 +679,7 @@
     "descricao": "Before continuing, you must read and accept this policy to use the platform.",
     "versao": "Version {{versao}}",
     "contador": "Policy {{atual}} of {{total}}",
+    "confirmoLeitura": "I confirm that I have read and understood this policy.",
     "erro": "Could not record your acceptance. Please try again.",
     "botoes": {
       "aceitando": "Recording…",
