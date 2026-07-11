@@ -330,6 +330,22 @@ exports.listarCandidaturasTalent = async (_req, res) => {
   }
 };
 
+// Vista do Admin sobre TODOS os pedidos de badges, em qualquer estado do
+// workflow (ao contrário de /talent/pendentes e /serviceline/pendentes, que
+// só devolvem as candidaturas ainda por validar/aprovar).
+exports.listarTodasCandidaturas = async (_req, res) => {
+  try {
+    const candidaturas = await Candidatura.findAll({
+      include: candidaturaInclude,
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json(candidaturas);
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao listar candidaturas.', details: erro.message });
+  }
+};
+
 // Validar (ou invalidar) uma evidência específica de uma candidatura. Passo
 // obrigatório antes do Talent Manager poder aprovar a candidatura completa.
 exports.validarEvidencia = async (req, res) => {

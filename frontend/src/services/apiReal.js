@@ -425,17 +425,20 @@ export async function deleteUser(id) {
 
 // ---------- Admin: Pedidos ----------
 export async function getAdminPedidos() {
-  const rows = await http('/candidaturas/talent/pendentes').catch(() => [])
-  return (rows || []).map((c) => ({
-    id: c.id,
-    trackingId: `#${String(c.id).padStart(5, '0')}`,
-    badge: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }),
-    consultor: c.Consultant?.User?.nome || i18next.t('api.generic.consultorId', { id: c.consultorId }),
-    data: c.dataSubmicao ? new Date(c.dataSubmicao).toLocaleDateString('pt-PT') : '—',
-    nivel: c.Badge?.nivelId != null ? String(c.Badge.nivelId) : '—',
-    pontos: c.Badge?.ponto ?? 0,
-    status: { code: c.status?.code || 'SUBMITTED', name: c.status?.name || i18next.t('api.status.submetido'), cor: 'amber' },
-  }))
+  const rows = await http('/candidaturas/admin/todas').catch(() => [])
+  return (rows || []).map((c) => {
+    const code = c.status?.code || 'SUBMITTED'
+    return {
+      id: c.id,
+      trackingId: `#${String(c.id).padStart(5, '0')}`,
+      badge: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }),
+      consultor: c.Consultant?.User?.nome || i18next.t('api.generic.consultorId', { id: c.consultorId }),
+      data: c.dataSubmicao ? new Date(c.dataSubmicao).toLocaleDateString('pt-PT') : '—',
+      nivel: c.Badge?.nivelId != null ? String(c.Badge.nivelId) : '—',
+      pontos: c.Badge?.ponto ?? 0,
+      status: { code, name: c.status?.name || i18next.t('api.status.submetido'), cor: CODE_COR[code] || 'gray' },
+    }
+  })
 }
 
 // ---------- Exportações ----------
