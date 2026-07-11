@@ -772,12 +772,21 @@
     "subtitulo": "Introduce la nueva contraseña de acceso",
     "campos": {
       "passwordLabel": "Contraseña",
-      "passwordPlaceholder": "Introducir nueva contraseña"
+      "passwordPlaceholder": "Introducir nueva contraseña",
+      "confirmarLabel": "Confirmar contraseña",
+      "confirmarPlaceholder": "Repetir la nueva contraseña"
     },
     "botoes": {
       "guardando": "Guardando…",
-      "entrar": "Entrar"
-    }
+      "entrar": "Entrar",
+      "pedirNovoLink": "Pedir un nuevo enlace"
+    },
+    "erros": {
+      "minimoCaracteres": "La contraseña debe tener al menos 8 caracteres.",
+      "naoCoincidem": "Las contraseñas no coinciden.",
+      "semToken": "El enlace de recuperación no es válido o está incompleto. Solicita un nuevo enlace de recuperación."
+    },
+    "sucesso": "Contraseña actualizada con éxito. Ya puedes iniciar sesión."
   },
   "forgotPassword": {
     "titulo": "Recuperar Contraseña",
@@ -1056,7 +1065,9 @@
       "registoCampos": "Rellena nombre, email y contraseña.",
       "indicaEmail": "Indica tu email.",
       "selecionaBadge": "Selecciona una insignia.",
-      "preencheCampos": "Rellena los campos."
+      "preencheCampos": "Rellena los campos.",
+      "tokenInvalido": "Enlace de recuperación no válido o caducado.",
+      "passwordCurta": "La contraseña debe tener al menos 8 caracteres."
     },
     "mensagens": {
       "contaCriada": "¡Cuenta creada con éxito! Ya puedes iniciar sesión.",

@@ -46,8 +46,12 @@ export async function register(dados) {
   return http('/auth/register', { method: 'POST', body: dados })
 }
 
-export async function recuperarPassword() {
-  return { message: i18next.t('api.recuperacaoIndisponivel') }
+export async function recuperarPassword({ email }) {
+  return http('/auth/forgot-password', { method: 'POST', body: { email }, auth: false })
+}
+
+export async function resetPassword({ token, novaPassword }) {
+  return http('/auth/reset-password', { method: 'POST', body: { token, novaPassword }, auth: false })
 }
 
 export async function changePassword({ currentPassword, newPassword }) {

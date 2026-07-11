@@ -20,6 +20,7 @@ const impl = USE_REAL_API ? real : mock
 export const login = impl.login
 export const register = impl.register
 export const recuperarPassword = impl.recuperarPassword
+export const resetPassword = impl.resetPassword
 export const changePassword = impl.changePassword
 export const me = impl.me
 

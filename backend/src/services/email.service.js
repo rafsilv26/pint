@@ -220,6 +220,68 @@ const emailBadgeRejeitado = async (consultor, badge, motivo) => {
   );
 };
 
+// Email com o link de recuperação de password (fluxo "esqueci-me da password")
+const emailRecuperarPassword = async (user, link) => {
+  await enviarEmail(
+    user.email,
+    '🔑 Recuperação de password',
+    `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #003087; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
+        <p style="color: #cccccc; margin: 5px 0;">Plataforma de Badges</p>
+      </div>
+      <div style="padding: 30px; background-color: #f9f9f9;">
+        <h2>Olá ${user.nome}!</h2>
+        <p>Recebemos um pedido para repor a password da tua conta.</p>
+        <p>Clica no botão abaixo para definires uma nova password. O link é válido durante <strong>1 hora</strong>.</p>
+        <p style="text-align: center; margin: 30px 0;">
+          <a href="${link}"
+             style="background-color: #003087; color: white; padding: 12px 24px;
+                    text-decoration: none; border-radius: 5px;">
+            Definir nova password
+          </a>
+        </p>
+        <p style="color: #666; font-size: 13px;">Se não pediste esta recuperação, ignora este email — a tua password mantém-se igual.</p>
+        <p>Equipa Softinsa Badges</p>
+      </div>
+    </div>
+    `
+  );
+};
+
+// Email de boas-vindas quando o Admin regista um novo utilizador
+const emailBoasVindas = async (user, loginLink) => {
+  await enviarEmail(
+    user.email,
+    '👋 A tua conta na Plataforma de Badges foi criada',
+    `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #003087; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
+        <p style="color: #cccccc; margin: 5px 0;">Plataforma de Badges</p>
+      </div>
+      <div style="padding: 30px; background-color: #f9f9f9;">
+        <h2>Bem-vindo(a), ${user.nome}!</h2>
+        <p>Foi criada uma conta para ti na Plataforma de Badges da Softinsa.</p>
+        <div style="background-color: #e8f0fe; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Email de acesso:</strong> ${user.email}</p>
+        </div>
+        <p>A password inicial é comunicada pelo administrador. No primeiro acesso vais ser convidado(a) a definir uma nova password.</p>
+        <p style="text-align: center; margin: 30px 0;">
+          <a href="${loginLink}"
+             style="background-color: #003087; color: white; padding: 12px 24px;
+                    text-decoration: none; border-radius: 5px;">
+            Aceder à plataforma
+          </a>
+        </p>
+        <p>Equipa Softinsa Badges</p>
+      </div>
+    </div>
+    `
+  );
+};
+
 // Email ao consultor quando send back
 const emailSendBack = async (consultor, badge, comentario) => {
   await enviarEmail(
@@ -244,11 +306,16 @@ const emailSendBack = async (consultor, badge, comentario) => {
 };
 
 module.exports = {
+  // exportados para diagnóstico (scripts/test-email.js) e usos genéricos
+  transporter,
+  enviarEmail,
   emailCandidaturaSubmetida,
   emailNovaSubmissao,
   emailEnviadoParaServiceLine,
   emailNovaValidacaoSLL,
   emailBadgeAprovado,
   emailBadgeRejeitado,
-  emailSendBack
+  emailSendBack,
+  emailRecuperarPassword,
+  emailBoasVindas
 };

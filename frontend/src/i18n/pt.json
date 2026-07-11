@@ -762,24 +762,21 @@
     "subtitulo": "Introduzir a nova password de acesso",
     "campos": {
       "passwordLabel": "Password",
-      "passwordPlaceholder": "Introduzir nova password"
+      "passwordPlaceholder": "Introduzir nova password",
+      "confirmarLabel": "Confirmar password",
+      "confirmarPlaceholder": "Repetir a nova password"
     },
     "botoes": {
       "guardando": "A guardar…",
-      "entrar": "Entrar"
-    }
-  },
-  "atualizarPassword": {
-    "titulo": "Atualizar Password",
-    "subtitulo": "Introduzir a nova password de acesso",
-    "campos": {
-      "passwordLabel": "Password",
-      "passwordPlaceholder": "Introduzir nova password"
+      "entrar": "Entrar",
+      "pedirNovoLink": "Pedir novo link"
     },
-    "botoes": {
-      "guardando": "A guardar…",
-      "entrar": "Entrar"
-    }
+    "erros": {
+      "minimoCaracteres": "A password deve ter pelo menos 8 caracteres.",
+      "naoCoincidem": "As passwords não coincidem.",
+      "semToken": "O link de recuperação é inválido ou está incompleto. Pede um novo link de recuperação."
+    },
+    "sucesso": "Password atualizada com sucesso. Já podes iniciar sessão."
   },
   "forgotPassword": {
     "titulo": "Recuperar Password",
@@ -1058,7 +1055,9 @@
       "registoCampos": "Preenche nome, email e password.",
       "indicaEmail": "Indica o teu email.",
       "selecionaBadge": "Seleciona um badge.",
-      "preencheCampos": "Preenche os campos."
+      "preencheCampos": "Preenche os campos.",
+      "tokenInvalido": "Link de recuperação inválido ou expirado.",
+      "passwordCurta": "A password deve ter pelo menos 8 caracteres."
     },
     "mensagens": {
       "contaCriada": "Conta criada com sucesso! Já podes iniciar sessão.",

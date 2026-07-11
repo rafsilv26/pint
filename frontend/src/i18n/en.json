@@ -772,12 +772,21 @@
     "subtitulo": "Enter your new access password",
     "campos": {
       "passwordLabel": "Password",
-      "passwordPlaceholder": "Enter new password"
+      "passwordPlaceholder": "Enter new password",
+      "confirmarLabel": "Confirm password",
+      "confirmarPlaceholder": "Repeat the new password"
     },
     "botoes": {
       "guardando": "Saving…",
-      "entrar": "Enter"
-    }
+      "entrar": "Enter",
+      "pedirNovoLink": "Request a new link"
+    },
+    "erros": {
+      "minimoCaracteres": "The password must be at least 8 characters long.",
+      "naoCoincidem": "The passwords do not match.",
+      "semToken": "The recovery link is invalid or incomplete. Please request a new recovery link."
+    },
+    "sucesso": "Password updated successfully. You can now sign in."
   },
   "forgotPassword": {
     "titulo": "Recover Password",
@@ -1056,7 +1065,9 @@
       "registoCampos": "Fill in name, email and password.",
       "indicaEmail": "Enter your email.",
       "selecionaBadge": "Select a badge.",
-      "preencheCampos": "Fill in the fields."
+      "preencheCampos": "Fill in the fields.",
+      "tokenInvalido": "Invalid or expired recovery link.",
+      "passwordCurta": "The password must be at least 8 characters long."
     },
     "mensagens": {
       "contaCriada": "Account created successfully! You can now sign in.",

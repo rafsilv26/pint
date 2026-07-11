@@ -1,8 +1,19 @@
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 const sequelize = require('../config/database');
 const User = require('../models/User');
 const { applyUserRoles, getUserRoles, normalizeRoles } = require('../services/userRoles.service');
+const { emailRecuperarPassword, emailBoasVindas } = require('../services/email.service');
+
+// URL pública do frontend, usada nos links enviados por email
+// (recuperação de password e página de login).
+const frontendUrl = () => (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+
+// Guardamos apenas o hash do token na BD: se a BD for comprometida, os
+// tokens em circulação nos emails continuam inutilizáveis.
+const hashToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
 
 const publicUser = async (user) => {
     const roles = await getUserRoles(user.id);
@@ -58,6 +69,11 @@ exports.register = async (req, res) => {
             await t.rollback();
             throw error;
         }
+
+        // Email de boas-vindas em background — o registo não deve falhar
+        // nem atrasar por causa do SMTP.
+        emailBoasVindas(newUser, `${frontendUrl()}/login`)
+            .catch((erro) => console.error('Erro ao enviar email de boas-vindas:', erro.message));
 
         res.status(201).json({
             message: 'Utilizador registado com sucesso!',
@@ -123,6 +139,80 @@ exports.login = async (req, res) => {
 
 exports.me = async (req, res) => {
     res.json({ user: await publicUser(req.user.data) });
+};
+
+exports.forgotPassword = async (req, res) => {
+    // Resposta sempre neutra quando o email não existe: não revelamos se
+    // uma conta está registada (evita enumeração de emails).
+    const respostaNeutra = {
+        message: 'Se o email estiver registado, vais receber uma mensagem com as instruções de recuperação.'
+    };
+
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ message: 'O email é obrigatório.' });
+        }
+
+        const user = await User.findOne({ where: { email } });
+        if (!user || user.ativo === false) {
+            return res.json(respostaNeutra);
+        }
+
+        // Token aleatório enviado por email; na BD fica apenas o hash.
+        const token = crypto.randomBytes(32).toString('hex');
+        user.passwordResetToken = hashToken(token);
+        user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+        await user.save();
+
+        const link = `${frontendUrl()}/atualizar-password?token=${token}`;
+        try {
+            await emailRecuperarPassword(user, link);
+        } catch (erroEmail) {
+            // Sem email entregue o utilizador nunca receberia o link — nesse
+            // caso é mais honesto devolver erro do que a resposta neutra.
+            console.error('Erro ao enviar email de recuperação:', erroEmail.message);
+            return res.status(500).json({ message: 'Não foi possível enviar o email de recuperação. Tenta novamente mais tarde.' });
+        }
+
+        res.json(respostaNeutra);
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao processar o pedido de recuperação.', details: error.message });
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    try {
+        const { token, novaPassword } = req.body;
+
+        if (!token || !novaPassword) {
+            return res.status(400).json({ message: 'Token e nova password são obrigatórios.' });
+        }
+        if (novaPassword.length < 8) {
+            return res.status(400).json({ message: 'A nova password deve ter pelo menos 8 caracteres.' });
+        }
+
+        const user = await User.findOne({
+            where: {
+                passwordResetToken: hashToken(token),
+                passwordResetExpires: { [Op.gt]: new Date() }
+            }
+        });
+        if (!user || user.ativo === false) {
+            return res.status(400).json({ message: 'Link de recuperação inválido ou expirado. Pede uma nova recuperação.' });
+        }
+
+        user.password = novaPassword; // o hook beforeUpdate trata do hash
+        user.passwordResetToken = null;
+        user.passwordResetExpires = null;
+        user.mustChangePassword = false;
+        user.updatedAt = new Date();
+        await user.save();
+
+        res.json({ message: 'Password atualizada com sucesso. Já podes iniciar sessão.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao atualizar a password.', details: error.message });
+    }
 };
 
 exports.changePassword = async (req, res) => {

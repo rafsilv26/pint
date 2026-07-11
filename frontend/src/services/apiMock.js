@@ -41,6 +41,13 @@ export async function recuperarPassword({ email }) {
   return { message: i18next.t('api.mensagens.recuperacaoEnviada') }
 }
 
+export async function resetPassword({ token, novaPassword }) {
+  await delay()
+  if (!token) throw new Error(i18next.t('api.validacao.tokenInvalido'))
+  if (!novaPassword || novaPassword.length < 8) throw new Error(i18next.t('api.validacao.passwordCurta'))
+  return { message: i18next.t('api.mensagens.passwordAlterada') }
+}
+
 // ---------- Dashboard ----------
 export async function getDashboard() {
   await delay()

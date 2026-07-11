@@ -1,4 +1,50 @@
 const { Notice } = require('../models');
+const { transporter, enviarEmail } = require('../services/email.service');
+
+// Diagnóstico do envio de emails em produção (só Admin).
+//   GET /api/notifications/email-status         -> valida config + ligação SMTP
+//   GET /api/notifications/email-status?send=1  -> além disso envia um email de teste ao próprio admin
+exports.emailStatus = async (req, res) => {
+  const status = {
+    emailUser: process.env.EMAIL_USER || null,
+    emailPassDefinida: Boolean(process.env.EMAIL_PASS),
+    emailPassComprimento: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0,
+    // Uma App Password do Gmail tem 16 caracteres; com espaços colados são 19.
+    avisoEspacos: Boolean(process.env.EMAIL_PASS && process.env.EMAIL_PASS.includes(' ')),
+    smtp: null,
+    envioTeste: null
+  };
+
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    status.smtp = { ok: false, erro: 'EMAIL_USER e/ou EMAIL_PASS não estão definidos no ambiente.' };
+    return res.status(500).json(status);
+  }
+
+  try {
+    await transporter.verify();
+    status.smtp = { ok: true };
+  } catch (erro) {
+    status.smtp = { ok: false, code: erro.code, erro: erro.message, resposta: erro.response };
+    return res.status(500).json(status);
+  }
+
+  if (req.query.send === '1') {
+    const destino = req.user.data.email;
+    try {
+      await enviarEmail(
+        destino,
+        '✅ Teste de email — Plataforma de Badges Softinsa',
+        '<p>Se estás a ler isto, o envio de emails do backend está a funcionar. 🎉</p>'
+      );
+      status.envioTeste = { ok: true, para: destino };
+    } catch (erro) {
+      status.envioTeste = { ok: false, para: destino, code: erro.code, erro: erro.message };
+      return res.status(500).json(status);
+    }
+  }
+
+  res.json(status);
+};
 
 exports.listNotifications = async (req, res) => {
   try {
