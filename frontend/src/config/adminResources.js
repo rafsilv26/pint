@@ -22,10 +22,18 @@ export const getAdminResources = (t) => ({
     colunas: [
       { key: 'nome', label: t('admin.generic.nome') },
       { key: 'descricao', label: t('admin.generic.descricao') },
+      { key: 'ativo', label: 'Ativo' },
     ],
     campos: [
       { key: 'nome', label: t('admin.generic.nome') },
       { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea' },
+      {
+        key: 'ativo',
+        label: 'Está ativo?',
+        type: 'select',
+        options: [{ value: true, label: 'Sim' }, { value: false, label: 'Não' }],
+        optional: true,
+      },
     ],
   },
   notices: {
@@ -64,19 +72,27 @@ export const getAdminResources = (t) => ({
       { key: 'nome', label: t('admin.generic.nome') },
       { key: 'learningPathId', label: t('admin.learningPaths.singular') }, // Adicionado à tabela
       { key: 'descricao', label: t('admin.generic.descricao') },
+      { key: 'ativo', label: 'Ativo' },
     ],
     campos: [
       { key: 'nome', label: t('admin.generic.nome') },
-      
+
       // AQUI ESTÁ A MAGIA DO DROPDOWN:
-      { 
-        key: 'learningPathId', 
-        label: t('admin.learningPaths.singular'), 
-        type: 'select', 
+      {
+        key: 'learningPathId',
+        label: t('admin.learningPaths.singular'),
+        type: 'select',
         optionsResource: 'learning-paths' // Liga diretamente à API dos learning-paths
       },
-      
+
       { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
+      {
+        key: 'ativo',
+        label: 'Está ativo?',
+        type: 'select',
+        options: [{ value: true, label: 'Sim' }, { value: false, label: 'Não' }],
+        optional: true,
+      },
     ],
   },
   areas: {
@@ -86,21 +102,29 @@ export const getAdminResources = (t) => ({
       colunas: [
         { key: 'nome', label: t('admin.generic.nome') },
         // Opcional: Adicionar a coluna para veres o ID na tabela
-        { key: 'serviceLineId', label: t('admin.serviceLines.singular') }, 
+        { key: 'serviceLineId', label: t('admin.serviceLines.singular') },
         { key: 'descricao', label: t('admin.generic.descricao') },
+        { key: 'ativo', label: 'Ativo' },
       ],
       campos: [
         { key: 'nome', label: t('admin.generic.nome') },
-        
+
         // O NOVO DROPDOWN PARA A SERVICE LINE:
-        { 
-          key: 'serviceLineId', 
-          label: t('admin.serviceLines.singular'), 
-          type: 'select', 
+        {
+          key: 'serviceLineId',
+          label: t('admin.serviceLines.singular'),
+          type: 'select',
           optionsResource: 'service-lines' // Vai buscar a lista à API das service lines
         },
-        
+
         { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
+        {
+          key: 'ativo',
+          label: 'Está ativo?',
+          type: 'select',
+          options: [{ value: true, label: 'Sim' }, { value: false, label: 'Não' }],
+          optional: true,
+        },
       ],
     },
   levels: {

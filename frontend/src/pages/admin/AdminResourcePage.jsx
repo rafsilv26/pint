@@ -117,9 +117,23 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
               <tbody>
                 {rows.map((r) => (
                   <tr key={getPrimaryKey(r)}>
-                    {cfg.colunas.map((c) => (
-                      <td key={c.key} className="text-truncate px-3 py-2 text-ink" style={{ maxWidth: '20rem' }}>{String(r[c.key] ?? '—')}</td>
-                    ))}
+                    {cfg.colunas.map((c) => {
+                      const valor = r[c.key]
+                      if (typeof valor === 'boolean') {
+                        return (
+                          <td key={c.key} className="px-3 py-2">
+                            <span className={`badge rounded-pill ${valor ? 'text-bg-success' : 'text-bg-secondary'}`}>
+                              {valor ? 'Sim' : 'Não'}
+                            </span>
+                          </td>
+                        )
+                      }
+                      return (
+                        <td key={c.key} className="text-truncate px-3 py-2 text-ink" style={{ maxWidth: '20rem' }}>
+                          {String(valor ?? '—')}
+                        </td>
+                      )
+                    })}
                     {!readOnly && (
                       <td className="px-3 py-2 text-end">
                         <button onClick={() => abrir(r)} className="btn btn-link p-0 me-3 text-muted"><Pencil size={16} /></button>
