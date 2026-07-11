@@ -10,12 +10,23 @@ export default function AdminPedidosPage() {
   const { data, loading, error, reload } = useAsync(() => api.getAdminPedidos())
   const lista = data || []
 
+  const exportColumns = [
+    { key: 'trackingId', label: t('adminPedidos.tabela.trackingId') },
+    { key: 'consultor', label: t('adminPedidos.tabela.consultor') },
+    { key: 'badge', label: t('adminPedidos.tabela.badge') },
+    { key: 'nivel', label: t('adminPedidos.tabela.nivel') },
+    { key: 'pontos', label: t('adminPedidos.tabela.pontos') },
+    { key: 'data', label: t('adminPedidos.tabela.data') },
+    { key: 'estadoTexto', label: t('adminPedidos.tabela.estado') },
+  ]
+  const exportData = lista.map((c) => ({ ...c, estadoTexto: c.status?.name || c.status?.code || '' }))
+
   return (
     <div>
       <PageHeader
         title={t('adminPedidos.titulo')}
         subtitle={t('adminPedidos.subtitulo')}
-        action={<ExportButtons />}
+        action={<ExportButtons data={exportData} columns={exportColumns} filename="pedidos-badges" />}
       />
 
       <Card className="overflow-hidden p-0">
