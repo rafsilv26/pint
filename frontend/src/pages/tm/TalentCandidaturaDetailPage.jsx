@@ -46,8 +46,23 @@ export default function TalentCandidaturaDetailPage() {
     setSubmitting(true)
     setMsg(null)
     try {
-      await api.validarTalentManager(c.id, { decisao, comentario })
-      navigate('/tm/candidaturas')
+      const result = await api.validarTalentManager(c.id, { decisao, comentario })
+      const validada = decisao === 'APROVAR'
+      navigate('/tm/candidaturas', {
+        replace: true,
+        state: {
+          tab: validada ? 'validadas' : 'rejeitadas',
+          feedback: {
+            type: validada ? 'success' : 'danger',
+            title: t(validada
+              ? 'talentCandidaturas.feedback.validadaTitulo'
+              : 'talentCandidaturas.feedback.rejeitadaTitulo', { badge: c.badge.nome }),
+            message: result?.mensagem || result?.message || t(validada
+              ? 'talentCandidaturas.feedback.validadaDescricao'
+              : 'talentCandidaturas.feedback.rejeitadaDescricao'),
+          },
+        },
+      })
     } catch (e) {
       setMsg(e.message)
     } finally {

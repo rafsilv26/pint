@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildTalentReport, filterTalentCandidaturas, getEvidenceCoverage, getExpirationState, normalizeTalentWorkspace } from './talentWorkspace'
+import { buildTalentReport, filterTalentApplicationsByTab, filterTalentCandidaturas, getEvidenceCoverage, getExpirationState, getTalentApplicationTabCounts, normalizeTalentWorkspace } from './talentWorkspace'
 
 const raw = {
   consultants: { data: [{ id: 7, name: 'Rafael Teste', area: 'Mobile', serviceLine: 'Technology', points: 200, badgesConquistados: [{ id: 10, nome: 'Flutter', obtidoEm: '2026-01-01', expiraEm: '2026-08-01', valido: true }] }] },
@@ -55,5 +55,18 @@ describe('talent workspace', () => {
     expect(getEvidenceCoverage(requirements, [{ requisitoId: 1, validado: true }])).toMatchObject({ covered: 1, complete: false })
     expect(getEvidenceCoverage(requirements, [{ requisitoId: 1, validado: true }, { requisitoId: 2, validado: true }])).toMatchObject({ covered: 2, complete: true, missing: [] })
     expect(getEvidenceCoverage(requirements, [{ requisitoId: 1, validado: false }, { requisitoId: 2, validado: true }]).complete).toBe(false)
+  })
+
+  it('keeps a Talent Manager decision visible after final approval', () => {
+    const rows = [
+      { id: 1, talentManagerId: 8, status: { code: 'VALIDATED' } },
+      { id: 2, talentManagerId: 8, status: { code: 'APPROVED' } },
+      { id: 3, talentManagerId: 9, status: { code: 'APPROVED' } },
+      { id: 4, talentManagerId: 8, status: { code: 'REJECTED' } },
+    ]
+
+    expect(filterTalentApplicationsByTab(rows, 'validadas', 8).map((row) => row.id)).toEqual([1, 2])
+    expect(filterTalentApplicationsByTab(rows, 'rejeitadas', 8).map((row) => row.id)).toEqual([4])
+    expect(getTalentApplicationTabCounts(rows, 8)).toMatchObject({ validadas: 2, rejeitadas: 1, aprovadas: 2, todas: 4 })
   })
 })

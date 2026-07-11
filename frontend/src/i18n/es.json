@@ -965,7 +965,16 @@
     "tabs": {
       "pendentes": "Pendientes",
       "validadas": "Validadas",
+      "validadasPorMim": "Validadas por mí",
+      "rejeitadasPorMim": "Rechazadas por mí",
       "relatorios": "Informes"
+    },
+    "feedback": {
+      "validadaTitulo": "Has validado la insignia «{{badge}}».",
+      "validadaDescricao": "La candidatura fue validada y enviada para aprobación final.",
+      "rejeitadaTitulo": "Has rechazado la insignia «{{badge}}».",
+      "rejeitadaDescricao": "La candidatura fue rechazada y registrada en tu historial.",
+      "fechar": "Cerrar aviso"
     },
     "empty": {
       "titulo": "Sin candidaturas",
@@ -977,6 +986,7 @@
       "badge": "Insignia",
       "nivel": "Nivel",
       "data": "Fecha",
+      "dataDecisao": "Fecha de decisión",
       "estado": "Estado",
       "verCandidatura": "Ver Candidatura"
     }

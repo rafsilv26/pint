@@ -967,7 +967,16 @@
     "tabs": {
       "pendentes": "Pendentes",
       "validadas": "Validadas",
+      "validadasPorMim": "Validadas por mim",
+      "rejeitadasPorMim": "Rejeitadas por mim",
       "relatorios": "Relatórios"
+    },
+    "feedback": {
+      "validadaTitulo": "Validaste a badge «{{badge}}».",
+      "validadaDescricao": "A candidatura foi validada e enviada para aprovação final.",
+      "rejeitadaTitulo": "Rejeitaste a badge «{{badge}}».",
+      "rejeitadaDescricao": "A candidatura foi rejeitada e ficou registada no teu histórico.",
+      "fechar": "Fechar aviso"
     },
     "empty": {
       "titulo": "Sem candidaturas",
@@ -979,6 +988,7 @@
       "badge": "Badge",
       "nivel": "Nível",
       "data": "Data",
+      "dataDecisao": "Data da decisão",
       "estado": "Estado",
       "verCandidatura": "Ver Candidatura"
     }

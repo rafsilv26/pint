@@ -27,6 +27,45 @@ const toDate = (value) => {
 const dateValue = (value) => toDate(value)?.getTime() || 0
 const dateLabel = (value, locale = 'pt-PT') => toDate(value)?.toLocaleDateString(locale) || '—'
 
+const APPLICATION_TAB_CODES = {
+  pendentes: ['SUBMITTED'],
+  processo: ['OPEN', 'SUBMITTED', 'IN_VALIDATION', 'VALIDATED', 'IN_APPROVAL'],
+  aprovadas: ['APPROVED'],
+}
+
+function belongsToTalentManager(row, userId, hasOwnershipData) {
+  if (!hasOwnershipData || userId == null) return true
+  return Number(row.talentManagerId) === Number(userId)
+}
+
+export function filterTalentApplicationsByTab(rows, tab, userId) {
+  const applications = array(rows)
+  const hasOwnershipData = applications.some((row) => row.talentManagerId != null)
+
+  if (tab === 'validadas') {
+    return applications.filter((row) =>
+      ['VALIDATED', 'IN_APPROVAL', 'APPROVED'].includes(row.status?.code) &&
+      belongsToTalentManager(row, userId, hasOwnershipData)
+    )
+  }
+  if (tab === 'rejeitadas') {
+    return applications.filter((row) =>
+      row.status?.code === 'REJECTED' && belongsToTalentManager(row, userId, hasOwnershipData)
+    )
+  }
+
+  const codes = APPLICATION_TAB_CODES[tab]
+  return codes ? applications.filter((row) => codes.includes(row.status?.code)) : applications
+}
+
+export function getTalentApplicationTabCounts(rows, userId) {
+  return ['pendentes', 'validadas', 'processo', 'aprovadas', 'rejeitadas', 'todas']
+    .reduce((counts, tab) => ({
+      ...counts,
+      [tab]: filterTalentApplicationsByTab(rows, tab, userId).length,
+    }), {})
+}
+
 export function getExpirationState(expirationDate, valid = true, now = new Date()) {
   const expiration = toDate(expirationDate)
   if (!expiration) return { code: valid === false ? 'expired' : 'permanent', days: null }
@@ -182,6 +221,8 @@ export function normalizeTalentWorkspace(raw, now = new Date()) {
       requirements: array(badge.requisitos),
       submittedAt: candidate.dataSubmicao || candidate.createdAt,
       data: dateLabel(candidate.dataSubmicao || candidate.createdAt),
+      decisionAt: candidate.dataValidacao,
+      decisionDate: dateLabel(candidate.dataValidacao),
       status: { code, name: meta.name, cor: meta.cor },
       progress: meta.progress,
       evidencias: array(candidate.evidencias),

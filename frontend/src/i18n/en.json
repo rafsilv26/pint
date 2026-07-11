@@ -965,7 +965,16 @@
     "tabs": {
       "pendentes": "Pending",
       "validadas": "Validated",
+      "validadasPorMim": "Validated by me",
+      "rejeitadasPorMim": "Rejected by me",
       "relatorios": "Reports"
+    },
+    "feedback": {
+      "validadaTitulo": "You validated the «{{badge}}» badge.",
+      "validadaDescricao": "The application was validated and sent for final approval.",
+      "rejeitadaTitulo": "You rejected the «{{badge}}» badge.",
+      "rejeitadaDescricao": "The application was rejected and recorded in your history.",
+      "fechar": "Close notification"
     },
     "empty": {
       "titulo": "No applications",
@@ -977,6 +986,7 @@
       "badge": "Badge",
       "nivel": "Level",
       "data": "Date",
+      "dataDecisao": "Decision date",
       "estado": "Status",
       "verCandidatura": "View Application"
     }
