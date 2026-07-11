@@ -55,6 +55,19 @@ export async function resetPassword({ token, novaPassword }) {
   return http('/auth/reset-password', { method: 'POST', body: { token, novaPassword }, auth: false })
 }
 
+export async function confirmarEmail({ token }) {
+  return http('/auth/confirm-email', { method: 'POST', body: { token }, auth: false })
+}
+
+// ---------- Preferências de notificação ----------
+export async function getNotificationPrefs() {
+  return http('/notifications/preferences')
+}
+
+export async function saveNotificationPrefs(prefs) {
+  return http('/notifications/preferences', { method: 'PUT', body: prefs })
+}
+
 export async function changePassword({ currentPassword, newPassword }) {
   return http('/auth/change-password', { method: 'PUT', body: { currentPassword, newPassword } })
 }

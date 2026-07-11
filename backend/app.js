@@ -34,6 +34,24 @@ app.get('/api/teste', (req, res) => {
     res.json({ mensagem: 'API funcionando!', data: new Date() });
 });
 
+// Verificação de SLA acionável por um cron externo (ex.: cron-job.org),
+// útil porque o Render free adormece e o job interno pode não correr.
+// Protegida por chave: GET /api/sla-check?key=<CRON_SECRET>
+const { verificarSLA, iniciarJobSLA } = require('./src/services/sla.service');
+app.get('/api/sla-check', async (req, res) => {
+    if (!process.env.CRON_SECRET || req.query.key !== process.env.CRON_SECRET) {
+        return res.status(401).json({ message: 'Chave inválida.' });
+    }
+    try {
+        res.json(await verificarSLA());
+    } catch (erro) {
+        res.status(500).json({ error: 'Erro na verificação de SLA.', details: erro.message });
+    }
+});
+
+// Job interno: verifica os SLAs pouco depois do arranque e a cada 12 horas.
+iniciarJobSLA();
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor a correr na porta ${PORT}`);

@@ -21,6 +21,7 @@ export const login = impl.login
 export const register = impl.register
 export const recuperarPassword = impl.recuperarPassword
 export const resetPassword = impl.resetPassword
+export const confirmarEmail = impl.confirmarEmail
 export const changePassword = impl.changePassword
 export const me = impl.me
 export const acceptPolicy = impl.acceptPolicy
@@ -39,6 +40,8 @@ export const getMeusBadges = impl.getMeusBadges
 export const getNotificacoes = impl.getNotificacoes
 export const markNotificationRead = impl.markNotificationRead
 export const markAllNotificationsRead = impl.markAllNotificationsRead
+export const getNotificationPrefs = impl.getNotificationPrefs
+export const saveNotificationPrefs = impl.saveNotificationPrefs
 
 // Gamificação / consultores
 export const getGamification = impl.getGamification

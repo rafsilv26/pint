@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Settings, Bell, Eye, Shield, Sun, Moon, Monitor, Info, ArrowLeft } from 'lucide-react'
 import { Card, Toggle } from '../components/ui'
+import * as api from '../services/api'
 import { useTranslation } from 'react-i18next'
 
 function ToggleRow({ label, desc, checked, onChange }) {
@@ -49,6 +50,30 @@ export default function PreferencesPage() {
   const [mostrarImagens, setMostrarImagens] = useState(true)
   const [badgesPorPagina, setBadgesPorPagina] = useState(12)
   const [guardado, setGuardado] = useState(false)
+  const [erro, setErro] = useState(null)
+  const [aGuardar, setAGuardar] = useState(false)
+
+  // As preferências de notificação são persistidas no backend; as restantes
+  // secções (visualização/privacidade) continuam locais.
+  useEffect(() => {
+    api.getNotificationPrefs()
+      .then((prefs) => setNotif((cur) => ({ ...cur, ...prefs })))
+      .catch(() => {}) // sem prefs guardadas, ficam os defaults
+  }, [])
+
+  async function guardarPreferencias() {
+    setErro(null)
+    setAGuardar(true)
+    try {
+      await api.saveNotificationPrefs(notif)
+      setGuardado(true)
+      setTimeout(() => setGuardado(false), 2000)
+    } catch (err) {
+      setErro(err.message)
+    } finally {
+      setAGuardar(false)
+    }
+  }
 
   const upd = (obj, setter, key) => (v) => setter({ ...obj, [key]: v })
 
@@ -211,8 +236,10 @@ export default function PreferencesPage() {
         </div>
       </div>
 
+      {erro && <div className="mt-4 rounded-3 bg-danger-subtle px-3 py-2 small text-danger">{erro}</div>}
       <button
-        onClick={() => { setGuardado(true); setTimeout(() => setGuardado(false), 2000) }}
+        onClick={guardarPreferencias}
+        disabled={aGuardar}
         className="mt-4 btn btn-brand w-100 py-2 fw-semibold"
       >
         {guardado ? t('preferencias.guardado') : t('preferencias.guardar')}

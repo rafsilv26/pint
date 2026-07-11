@@ -48,6 +48,29 @@ export async function resetPassword({ token, novaPassword }) {
   return { message: i18next.t('api.mensagens.passwordAlterada') }
 }
 
+export async function confirmarEmail({ token }) {
+  await delay()
+  if (!token) throw new Error(i18next.t('api.validacao.tokenInvalido'))
+  return { message: i18next.t('api.mensagens.emailConfirmado') }
+}
+
+// ---------- Preferências de notificação ----------
+let mockNotificationPrefs = {
+  email: true, aprovado: true, rejeitado: true,
+  novos: true, ranking: false, semanal: true, mensal: false,
+}
+
+export async function getNotificationPrefs() {
+  await delay()
+  return { ...mockNotificationPrefs }
+}
+
+export async function saveNotificationPrefs(prefs) {
+  await delay()
+  mockNotificationPrefs = { ...mockNotificationPrefs, ...prefs }
+  return { message: i18next.t('api.mensagens.preferenciasGuardadas'), prefs: { ...mockNotificationPrefs } }
+}
+
 // ---------- Dashboard ----------
 export async function getDashboard() {
   await delay()

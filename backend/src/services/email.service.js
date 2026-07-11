@@ -244,8 +244,9 @@ const emailRecuperarPassword = async (user, link) => {
   );
 };
 
-// Email de boas-vindas quando o Admin regista um novo utilizador
-const emailBoasVindas = async (user, loginLink) => {
+// Email de boas-vindas quando o Admin regista um novo utilizador.
+// confirmLink (opcional): link para confirmar o endereço de email.
+const emailBoasVindas = async (user, loginLink, confirmLink) => {
   await enviarEmail(
     user.email,
     '👋 A tua conta na Plataforma de Badges foi criada',
@@ -262,13 +263,61 @@ const emailBoasVindas = async (user, loginLink) => {
           <p style="margin: 0;"><strong>Email de acesso:</strong> ${user.email}</p>
         </div>
         <p>A password inicial é comunicada pelo administrador. No primeiro acesso vais ser convidado(a) a definir uma nova password.</p>
-        <p style="text-align: center; margin: 30px 0;">
+        ${confirmLink ? `
+        <p style="text-align: center; margin: 30px 0 10px;">
+          <a href="${confirmLink}"
+             style="background-color: #2e7d32; color: white; padding: 12px 24px;
+                    text-decoration: none; border-radius: 5px;">
+            Confirmar o meu email
+          </a>
+        </p>
+        <p style="color: #666; font-size: 13px; text-align: center;">Confirma que este endereço de email é teu.</p>
+        ` : ''}
+        <p style="text-align: center; margin: 20px 0 30px;">
           <a href="${loginLink}"
              style="background-color: #003087; color: white; padding: 12px 24px;
                     text-decoration: none; border-radius: 5px;">
             Aceder à plataforma
           </a>
         </p>
+        <p>Equipa Softinsa Badges</p>
+      </div>
+    </div>
+    `
+  );
+};
+
+// Alerta de SLA ultrapassado, enviado a Talent Managers / Service Line
+// Leaders com a lista de candidaturas em atraso que lhes dizem respeito.
+const emailAlertaSLA = async (user, atrasadas, responseDays) => {
+  const linhas = atrasadas.map((c) => `
+        <tr>
+          <td style="padding: 6px 10px; border-bottom: 1px solid #e0e0e0;">${c.badgeNome}</td>
+          <td style="padding: 6px 10px; border-bottom: 1px solid #e0e0e0;">${c.consultorNome}</td>
+          <td style="padding: 6px 10px; border-bottom: 1px solid #e0e0e0; text-align: center; color: #c62828; font-weight: bold;">${c.diasEmEspera}</td>
+        </tr>`).join('');
+
+  await enviarEmail(
+    user.email,
+    `⏰ SLA ultrapassado: ${atrasadas.length} candidatura(s) em atraso`,
+    `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #003087; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
+        <p style="color: #cccccc; margin: 5px 0;">Plataforma de Badges</p>
+      </div>
+      <div style="padding: 30px; background-color: #f9f9f9;">
+        <h2>Olá ${user.nome}</h2>
+        <p>Há <strong>${atrasadas.length} candidatura(s)</strong> à espera de decisão há mais de <strong>${responseDays} dia(s)</strong> (SLA definido):</p>
+        <table style="width: 100%; border-collapse: collapse; background: white; margin: 20px 0; font-size: 14px;">
+          <tr style="background-color: #e8f0fe;">
+            <th style="padding: 8px 10px; text-align: left;">Badge</th>
+            <th style="padding: 8px 10px; text-align: left;">Consultor</th>
+            <th style="padding: 8px 10px;">Dias em espera</th>
+          </tr>
+          ${linhas}
+        </table>
+        <p>Acede à plataforma para tomares as decisões pendentes.</p>
         <p>Equipa Softinsa Badges</p>
       </div>
     </div>
@@ -311,5 +360,6 @@ module.exports = {
   emailBadgeRejeitado,
   emailSendBack,
   emailRecuperarPassword,
-  emailBoasVindas
+  emailBoasVindas,
+  emailAlertaSLA
 };

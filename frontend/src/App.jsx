@@ -9,6 +9,7 @@ import ManagerLayout from './components/layout/ManagerLayout'
 import LoginPage from './pages/auth/LoginPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import AtualizarPasswordPage from './pages/auth/AtualizarPasswordPage'
+import ConfirmarEmailPage from './pages/auth/ConfirmarEmailPage'
 
 // Consultor
 import DashboardPage from './pages/DashboardPage'
@@ -67,6 +68,7 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/recuperar-password" element={<ForgotPasswordPage />} />
       <Route path="/atualizar-password" element={<AtualizarPasswordPage />} />
+      <Route path="/confirmar-email" element={<ConfirmarEmailPage />} />
       <Route path="/badge/:token" element={<PublicBadgePage />} />
       <Route path="/certificado/:token" element={<CertificatePage />} />
 

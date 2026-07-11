@@ -801,6 +801,14 @@
     },
     "sucesso": "Password updated successfully. You can now sign in."
   },
+  "confirmarEmail": {
+    "titulo": "Confirm Email",
+    "subtitulo": "Validating your account email address",
+    "aConfirmar": "Confirming your email…",
+    "sucesso": "Email confirmed successfully. You can now sign in.",
+    "semToken": "The confirmation link is invalid or incomplete.",
+    "irParaLogin": "Go to login"
+  },
   "forgotPassword": {
     "titulo": "Recover Password",
     "subtitulo": "Enter your account email",
@@ -1091,7 +1099,9 @@
       "assinaturaGuardada": "Signature saved.",
       "passwordAlterada": "Password changed successfully.",
       "decisaoRegistada": "Decision recorded.",
-      "perfilAtualizado": "Profile updated successfully!"
+      "perfilAtualizado": "Profile updated successfully!",
+      "emailConfirmado": "Email confirmed successfully. You can now sign in.",
+      "preferenciasGuardadas": "Preferences saved."
     }
   },
   "tmWorkspace": {

@@ -1,5 +1,35 @@
 const { Notice } = require('../models');
 const { verificarLigacao, enviarEmail } = require('../services/email.service');
+const { getPrefs, savePrefs } = require('../services/notificationPrefs.service');
+const { verificarSLA } = require('../services/sla.service');
+
+// Preferências de notificação por email do utilizador autenticado.
+exports.getMyNotificationPrefs = async (req, res) => {
+  try {
+    res.json(await getPrefs(req.user.id));
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao ler preferências.', details: error.message });
+  }
+};
+
+exports.saveMyNotificationPrefs = async (req, res) => {
+  try {
+    const prefs = await savePrefs(req.user.id, req.body || {});
+    res.json({ message: 'Preferências guardadas.', prefs });
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao guardar preferências.', details: error.message });
+  }
+};
+
+// Corre a verificação de SLA a pedido (só Admin; há também /api/sla-check
+// com CRON_SECRET para crons externos).
+exports.runSlaCheck = async (req, res) => {
+  try {
+    res.json(await verificarSLA());
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro na verificação de SLA.', details: error.message });
+  }
+};
 
 // Diagnóstico do envio de emails em produção (só Admin).
 //   GET /api/notifications/email-status         -> valida BREVO_API_KEY/EMAIL_USER + ligação ao Brevo

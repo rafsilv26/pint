@@ -74,11 +74,20 @@ exports.register = async (req, res) => {
         // transação: se a atribuição do perfil falhar (ex: ServiceLineLeader
         // sem serviceLineId), o utilizador criado é revertido também, em vez
         // de ficar "órfão" na BD sem perfil nenhum atribuído.
+        // Token para o novo utilizador confirmar o endereço de email
+        // (link incluído no email de boas-vindas; na BD fica só o hash).
+        const confirmToken = crypto.randomBytes(32).toString('hex');
+
         const t = await sequelize.transaction();
         let newUser;
         let assignedRoles;
         try {
-            newUser = await User.create({ nome, email, password }, { transaction: t });
+            newUser = await User.create({
+                nome,
+                email,
+                password,
+                emailConfirmationToken: hashToken(confirmToken)
+            }, { transaction: t });
             assignedRoles = await applyUserRoles(newUser.id, normalizedRoles, { areaId, serviceLineId }, t);
             await t.commit();
         } catch (error) {
@@ -88,7 +97,7 @@ exports.register = async (req, res) => {
 
         // Email de boas-vindas em background — o registo não deve falhar
         // nem atrasar por causa do SMTP.
-        emailBoasVindas(newUser, `${frontendUrl()}/login`)
+        emailBoasVindas(newUser, `${frontendUrl()}/login`, `${frontendUrl()}/confirmar-email?token=${confirmToken}`)
             .catch((erro) => console.error('Erro ao enviar email de boas-vindas:', erro.message));
 
         res.status(201).json({
@@ -274,6 +283,30 @@ exports.acceptPolicy = async (req, res) => {
         res.json({ message: 'Política aceite com sucesso.', pendingPolicies });
     } catch (error) {
         res.status(500).json({ error: 'Erro ao aceitar política.', details: error.message });
+    }
+};
+
+// Confirmação do endereço de email através do link enviado no email de
+// boas-vindas (rota pública: quem tem o token prova que recebeu o email).
+exports.confirmEmail = async (req, res) => {
+    try {
+        const { token } = req.body;
+        if (!token) {
+            return res.status(400).json({ message: 'Token é obrigatório.' });
+        }
+
+        const user = await User.findOne({ where: { emailConfirmationToken: hashToken(token) } });
+        if (!user) {
+            return res.status(400).json({ message: 'Link de confirmação inválido ou já utilizado.' });
+        }
+
+        user.emailConfirmed = true;
+        user.emailConfirmationToken = null;
+        await user.save();
+
+        res.json({ message: 'Email confirmado com sucesso. Já podes iniciar sessão.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao confirmar o email.', details: error.message });
     }
 };
 

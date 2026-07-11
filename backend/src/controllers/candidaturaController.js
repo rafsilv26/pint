@@ -24,6 +24,7 @@ const {
   emailSendBack
 } = require('../services/email.service');
 const { getServiceLineScopeForUser, getBadgeIdsDaServiceLine } = require('../services/serviceLineScope.service');
+const { podeReceberEmail } = require('../services/notificationPrefs.service');
 
 const STATUS = {
   OPEN: 'OPEN',
@@ -74,6 +75,18 @@ const candidaturaIncludeTalentManager = [
 const sendEmail = async (fn, ...args) => {
   try {
     await fn(...args);
+  } catch (error) {
+    console.error('Erro ao enviar email:', error.message);
+  }
+};
+
+// Variante para emails dirigidos ao CONSULTOR: respeita as preferências de
+// notificação dele (tipo: 'geral' | 'aprovado' | 'rejeitado'). Os emails
+// para TM/SLL não passam por aqui — são itens de trabalho, vão sempre.
+const sendEmailConsultor = async (tipo, fn, consultor, ...args) => {
+  try {
+    if (!consultor?.id || !(await podeReceberEmail(consultor.id, tipo))) return;
+    await fn(consultor, ...args);
   } catch (error) {
     console.error('Erro ao enviar email:', error.message);
   }
@@ -202,7 +215,7 @@ exports.submeterCandidatura = async (req, res) => {
       try {
         const consultor = await User.findByPk(consultorId);
         if (!consultor) return;
-        await sendEmail(emailCandidaturaSubmetida, consultor, badge);
+        await sendEmailConsultor('geral', emailCandidaturaSubmetida, consultor, badge);
 
         const talentManagers = await User.findAll({
           include: [{ association: User.associations.TalentManager, required: true }]
@@ -476,7 +489,7 @@ exports.validarTalentManager = async (req, res) => {
     const consultor = candidatura.Consultant?.User;
     if (decisao === 'APROVAR') {
       res.json({ mensagem: 'Candidatura validada e enviada para aprovação final.' });
-      sendEmail(emailEnviadoParaServiceLine, consultor, candidatura.Badge);
+      sendEmailConsultor('geral', emailEnviadoParaServiceLine, consultor, candidatura.Badge);
 
       // Notificar o(s) Service Line Leader(s) da área do badge — conforme o
       // guião, o SLL deve receber email dos pedidos que aguardam a sua decisão.
@@ -495,7 +508,7 @@ exports.validarTalentManager = async (req, res) => {
 
     // Se a decisão for rejeitar, enviar email de rejeição (em background)
     res.json({ mensagem: 'Candidatura rejeitada pelo Talent Manager.' });
-    sendEmail(emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
+    sendEmailConsultor('rejeitado', emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
   } catch (erro) {
     console.error(erro);
     res.status(500).json({ erro: 'Erro ao validar candidatura.', details: erro.message });
@@ -640,20 +653,20 @@ exports.validarServiceLine = async (req, res) => {
       });
       // Responder já — o email (SMTP) é lento e vai em background
       res.json({ mensagem: 'Badge aprovada e atribuída ao consultor.' });
-      sendEmail(emailBadgeAprovado, consultor, candidatura.Badge, candidatura.Badge.publicToken);
+      sendEmailConsultor('aprovado', emailBadgeAprovado, consultor, candidatura.Badge, candidatura.Badge.publicToken);
       return;
     }
 
     // Se a decisão for enviar de volta para o consultor, notificação em background
     if (decisao === 'SEND_BACK') {
       res.json({ mensagem: 'Candidatura devolvida ao consultor.' });
-      sendEmail(emailSendBack, consultor, candidatura.Badge, comentario);
+      sendEmailConsultor('rejeitado', emailSendBack, consultor, candidatura.Badge, comentario);
       return;
     }
 
     // Se a decisão for rejeitar, notificação em background
     res.json({ mensagem: 'Candidatura rejeitada.' });
-    sendEmail(emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
+    sendEmailConsultor('rejeitado', emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
   } catch (erro) {
     console.error(erro);
     res.status(500).json({ erro: 'Erro na aprovação final.', details: erro.message });

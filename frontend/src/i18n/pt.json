@@ -791,6 +791,14 @@
     },
     "sucesso": "Password atualizada com sucesso. Já podes iniciar sessão."
   },
+  "confirmarEmail": {
+    "titulo": "Confirmar Email",
+    "subtitulo": "Validação do endereço de email da conta",
+    "aConfirmar": "A confirmar o teu email…",
+    "sucesso": "Email confirmado com sucesso. Já podes iniciar sessão.",
+    "semToken": "O link de confirmação é inválido ou está incompleto.",
+    "irParaLogin": "Ir para o login"
+  },
   "forgotPassword": {
     "titulo": "Recuperar Password",
     "subtitulo": "Introduzir o email da conta de acesso",
@@ -1081,7 +1089,9 @@
       "assinaturaGuardada": "Assinatura guardada.",
       "passwordAlterada": "Password alterada com sucesso.",
       "decisaoRegistada": "Decisão registada.",
-      "perfilAtualizado": "Perfil atualizado com sucesso!"
+      "perfilAtualizado": "Perfil atualizado com sucesso!",
+      "emailConfirmado": "Email confirmado com sucesso. Já podes iniciar sessão.",
+      "preferenciasGuardadas": "Preferências guardadas."
     }
   },
   "tmWorkspace": {
