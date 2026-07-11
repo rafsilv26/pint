@@ -96,6 +96,14 @@ export const getAdminResources = (t) => ({
       { key: 'type', label: 'Tipo' },
     ],
     campos: [
+      {
+        key: 'userId',
+        label: t('admin.notices.destinatario'),
+        type: 'select',
+        optionsLoader: 'consultores',
+        allOption: t('admin.notices.todosConsultores'),
+        optional: true,
+      },
       { key: 'title', label: t('admin.generic.titulo') },
       { key: 'message', label: t('admin.generic.mensagem'), type: 'textarea' },
       {

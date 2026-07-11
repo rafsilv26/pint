@@ -725,7 +725,7 @@
     "learningPaths": { "titulo": "Learning Paths", "singular": "Learning Path" },
     "badgePremium": { "titulo": "Premium Badges", "singular": "Premium Badge" },
     "policies": { "titulo": "GDPR Policies", "singular": "Policy", "campos": { "versao": "Version" } },
-    "notices": { "titulo": "Notices", "singular": "Notice" },
+    "notices": { "titulo": "Notices", "singular": "Notice", "destinatario": "Recipient", "todosConsultores": "All consultants" },
     "information": { "titulo": "Information", "singular": "Information" },
     "serviceLines": { "titulo": "Service Lines", "singular": "Service Line" },
     "areas": { "titulo": "Areas", "singular": "Area" },

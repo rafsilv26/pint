@@ -48,6 +48,16 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
             }));
           } catch (err) { console.error(`Erro ao carregar opções para ${f.key}:`, err); }
         }
+        // Carregar a lista de consultores (utilizadores com o perfil Consultor)
+        // para o seletor de destinatário dos avisos.
+        if (f.type === 'select' && f.optionsLoader === 'consultores') {
+          try {
+            const users = await api.getUsers();
+            newOptions[f.key] = (users || [])
+              .filter(u => (u.roles || []).includes('Consultor'))
+              .map(u => ({ value: u.id, label: u.email ? `${u.nome} (${u.email})` : u.nome }));
+          } catch (err) { console.error('Erro ao carregar consultores para dropdown:', err); }
+        }
       }
       setDropdownOptions(newOptions);
     }
@@ -186,6 +196,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
                 {f.type === 'select' ? (
                   <select value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="form-select">
                     <option value="">{t('adminResource.selecione')}</option>
+                    {f.allOption && <option value="__ALL__">{f.allOption}</option>}
                     {(f.options || dropdownOptions[f.key] || []).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 ) : (

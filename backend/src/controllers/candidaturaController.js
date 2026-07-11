@@ -13,6 +13,7 @@ const {
   Area
 } = require('../models');
 const { uploadFicheiro } = require('../services/cloudinary.service');
+const { criarNotificacao } = require('../services/notification.service');
 const {
   emailCandidaturaSubmetida,
   emailNovaSubmissao,
@@ -452,6 +453,24 @@ exports.validarTalentManager = async (req, res) => {
       motivo: comentario || decisao
     });
 
+    // Notificação na app para o consultor (além do email).
+    const nomeBadge = candidatura.Badge?.nome || 'um badge';
+    await criarNotificacao(
+      decisao === 'APROVAR'
+        ? {
+            userId: candidatura.consultorId,
+            title: 'Candidatura validada',
+            message: `A tua candidatura ao badge "${nomeBadge}" foi validada e seguiu para aprovação final.`,
+            type: 'success'
+          }
+        : {
+            userId: candidatura.consultorId,
+            title: 'Candidatura rejeitada',
+            message: `A tua candidatura ao badge "${nomeBadge}" foi rejeitada pelo Talent Manager.${comentario ? ` Motivo: ${comentario}` : ''}`,
+            type: 'error'
+          }
+    );
+
     // Responder já — o email de notificação ao consultor é lento (SMTP) e
     // não deve atrasar a resposta ao Talent Manager.
     const consultor = candidatura.Consultant?.User;
@@ -585,7 +604,27 @@ exports.validarServiceLine = async (req, res) => {
       motivo: comentario || decisao
     });
 
-    
+    // Notificação na app para o consultor (além do email), conforme a decisão.
+    const nomeBadge = candidatura.Badge?.nome || 'um badge';
+    const notificacaoPorDecisao = {
+      APROVAR: {
+        title: 'Badge aprovado',
+        message: `Parabéns! O badge "${nomeBadge}" foi aprovado e atribuído à tua conta.`,
+        type: 'success'
+      },
+      SEND_BACK: {
+        title: 'Candidatura devolvida',
+        message: `A tua candidatura ao badge "${nomeBadge}" foi devolvida para revisão.${comentario ? ` Nota: ${comentario}` : ''}`,
+        type: 'warning'
+      },
+      REJEITAR: {
+        title: 'Candidatura rejeitada',
+        message: `A tua candidatura ao badge "${nomeBadge}" foi rejeitada.${comentario ? ` Motivo: ${comentario}` : ''}`,
+        type: 'error'
+      }
+    };
+    await criarNotificacao({ userId: candidatura.consultorId, ...notificacaoPorDecisao[decisao] });
+
     const consultor = candidatura.Consultant?.User;
     if (decisao === 'APROVAR') {
       // Atribuir badge ao consultor e calcular data de expiração
