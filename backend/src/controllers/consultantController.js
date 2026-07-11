@@ -3,6 +3,7 @@ const {
   Badge,
   ConsultorBadge,
   ConsultorBadgePremium,
+  BadgePremium,
   Consultant,
   ServiceLine,
   User
@@ -23,7 +24,7 @@ const buildConsultantInclude = (serviceLineId) => [
     include: [ServiceLine]
   },
   { model: ConsultorBadge, as: 'acquiredBadges', include: [Badge] },
-  { model: ConsultorBadgePremium, as: 'premiumBadges' }
+  { model: ConsultorBadgePremium, as: 'premiumBadges', include: [BadgePremium] }
 ];
 
 const score = (consultant) => (consultant.acquiredBadges || []).reduce(
@@ -36,7 +37,9 @@ const serialize = (consultant, rank, currentUserId) => ({
   name: consultant.User?.nome || '',
   role: 'Consultor',
   area: consultant.Area?.nome || '',
+  areaId: consultant.areaId || null,
   serviceLine: consultant.Area?.ServiceLine?.nome || '',
+  serviceLineId: consultant.Area?.serviceLineId || null,
   location: '',
   email: consultant.User?.email || '',
   startDate: consultant.createdAt
@@ -63,8 +66,17 @@ const serialize = (consultant, rank, currentUserId) => ({
       fornecedor: award.Badge?.fornecedor || '',
       obtidoEm: award.obtainedDate,
       expiraEm: award.expirationDate,
-      valido: award.valid !== false
-    }))
+      valido: award.valid !== false,
+      publicToken: award.Badge?.publicToken || '',
+      expirationDate: award.expirationDate
+    })),
+  specialAchievements: (consultant.premiumBadges || []).map((award) => ({
+    badgePremiumId: award.badgePremiumId,
+    name: award.BadgePremium?.name || '',
+    description: award.BadgePremium?.description || '',
+    criteriaDescription: award.BadgePremium?.criteriaDescription || '',
+    achievementDate: award.achievementDate
+  }))
 });
 
 const loadRankedConsultants = async (serviceLineId) => {
@@ -104,7 +116,7 @@ exports.listConsultants = async (req, res) => {
       data
     });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao listar consultores.', details: error.message });
+    res.status(error.statusCode || 500).json({ erro: error.message || 'Erro ao listar consultores.', details: error.message });
   }
 };
 
@@ -123,7 +135,7 @@ exports.getConsultant = async (req, res) => {
       req.user.id
     ));
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao obter consultor.', details: error.message });
+    res.status(error.statusCode || 500).json({ erro: error.message || 'Erro ao obter consultor.', details: error.message });
   }
 };
 

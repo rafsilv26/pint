@@ -106,6 +106,8 @@ HistoricoCandidatura.belongsTo(User, { foreignKey: 'userId', as: 'responsavel' }
 
 BadgeStatus.hasMany(HistoricoCandidatura, { foreignKey: 'estadoAnterior', as: 'oldStatus' });
 BadgeStatus.hasMany(HistoricoCandidatura, { foreignKey: 'estadoNovo', as: 'newStatus' });
+HistoricoCandidatura.belongsTo(BadgeStatus, { foreignKey: 'estadoAnterior', as: 'oldStatus' });
+HistoricoCandidatura.belongsTo(BadgeStatus, { foreignKey: 'estadoNovo', as: 'newStatus' });
 
 // Feedback
 Candidatura.hasMany(Feedback, { foreignKey: 'candidaturaId', as: 'feedback' });

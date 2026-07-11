@@ -8,12 +8,12 @@ const {
   User,
   HistoricoCandidatura,
   ConsultorBadge,
+  Notice,
   Requirement,
   Level,
   Area
 } = require('../models');
 const { uploadFicheiro } = require('../services/cloudinary.service');
-const { criarNotificacao } = require('../services/notification.service');
 const {
   emailCandidaturaSubmetida,
   emailNovaSubmissao,
@@ -23,8 +23,11 @@ const {
   emailBadgeRejeitado,
   emailSendBack
 } = require('../services/email.service');
-const { getServiceLineScopeForUser, getBadgeIdsDaServiceLine } = require('../services/serviceLineScope.service');
-const { podeReceberEmail } = require('../services/notificationPrefs.service');
+const {
+  assertBadgeInServiceLineScope,
+  getServiceLineScopeForUser,
+  getBadgeIdsDaServiceLine
+} = require('../services/serviceLineScope.service');
 
 const STATUS = {
   OPEN: 'OPEN',
@@ -57,7 +60,15 @@ const candidaturaInclude = [
   { model: BadgeStatus, as: 'status' },
   { model: Evidencia, as: 'evidencias', include: [{ model: Requirement }] },
   { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] },
-  { model: HistoricoCandidatura, as: 'history' }
+  {
+    model: HistoricoCandidatura,
+    as: 'history',
+    include: [
+      { model: User, as: 'responsavel', attributes: ['id', 'nome'] },
+      { model: BadgeStatus, as: 'oldStatus', attributes: ['statusId', 'code', 'name'] },
+      { model: BadgeStatus, as: 'newStatus', attributes: ['statusId', 'code', 'name'] }
+    ]
+  }
 ];
 
 // Includes reduzidos para os endpoints de decisão (validar/aprovar/rejeitar):
@@ -80,15 +91,13 @@ const sendEmail = async (fn, ...args) => {
   }
 };
 
-// Variante para emails dirigidos ao CONSULTOR: respeita as preferências de
-// notificação dele (tipo: 'geral' | 'aprovado' | 'rejeitado'). Os emails
-// para TM/SLL não passam por aqui — são itens de trabalho, vão sempre.
-const sendEmailConsultor = async (tipo, fn, consultor, ...args) => {
+const createNotice = async (userId, title, message, type = 'info') => {
+  if (!userId) return null;
   try {
-    if (!consultor?.id || !(await podeReceberEmail(consultor.id, tipo))) return;
-    await fn(consultor, ...args);
+    return await Notice.create({ userId, title, message, type, read: false });
   } catch (error) {
-    console.error('Erro ao enviar email:', error.message);
+    console.error('Erro ao criar notificação:', error.message);
+    return null;
   }
 };
 
@@ -215,7 +224,7 @@ exports.submeterCandidatura = async (req, res) => {
       try {
         const consultor = await User.findByPk(consultorId);
         if (!consultor) return;
-        await sendEmailConsultor('geral', emailCandidaturaSubmetida, consultor, badge);
+        await sendEmail(emailCandidaturaSubmetida, consultor, badge);
 
         const talentManagers = await User.findAll({
           include: [{ association: User.associations.TalentManager, required: true }]
@@ -260,10 +269,11 @@ exports.detalhesCandidatura = async (req, res) => {
     if (!isOwner && !canReview) {
       return res.status(403).json({ erro: 'Sem permissões para consultar esta candidatura.' });
     }
+    await assertBadgeInServiceLineScope(req.user, candidatura.badgeId);
 
     res.json(candidatura);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao buscar candidatura.', details: erro.message });
+    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao buscar candidatura.', details: erro.message });
   }
 };
 
@@ -278,15 +288,22 @@ exports.listarCandidaturasPorConsultor = async (req, res) => {
       return res.status(403).json({ erro: 'Sem permissões para consultar candidaturas deste consultor.' });
     }
 
+    const where = { consultorId };
+    const serviceLineId = await getServiceLineScopeForUser(req.user);
+    if (serviceLineId) {
+      const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
+      where.badgeId = { [Op.in]: badgeIds.length ? badgeIds : [-1] };
+    }
+
     const candidaturas = await Candidatura.findAll({
-      where: { consultorId },
+      where,
       include: candidaturaInclude,
       order: [['dataSubmicao', 'DESC']]
     });
 
     res.json(candidaturas);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar candidaturas do consultor.', details: erro.message });
+    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao listar candidaturas do consultor.', details: erro.message });
   }
 };
 
@@ -296,7 +313,7 @@ exports.listarCandidaturasPorConsultor = async (req, res) => {
 // data real de fecho (a Candidatura em si não guarda uma única "data de fecho").
 // Devolve sempre 7 valores, ordenados do mais antigo (índice 0 = há 6 dias)
 // até hoje (índice 6).
-exports.getFechadasPorSemana = async (_req, res) => {
+exports.getFechadasPorSemana = async (req, res) => {
   try {
     const statuses = await getStatuses([STATUS.APPROVED, STATUS.REJECTED]);
     const idsFechados = Object.values(statuses).map((s) => s.statusId);
@@ -309,10 +326,23 @@ exports.getFechadasPorSemana = async (_req, res) => {
     const inicio = new Date(fim);
     inicio.setDate(inicio.getDate() - 7);
 
+    const whereLogs = {
+      estadoNovo: { [Op.in]: idsFechados.length ? idsFechados : [-1] },
+      createdAt: { [Op.gte]: inicio, [Op.lt]: fim }
+    };
+    const serviceLineId = await getServiceLineScopeForUser(req.user);
+    if (serviceLineId) {
+      const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
+      const candidaturas = await Candidatura.findAll({
+        where: { badgeId: { [Op.in]: badgeIds.length ? badgeIds : [-1] } },
+        attributes: ['id']
+      });
+      whereLogs.candidaturaId = { [Op.in]: candidaturas.map((row) => row.id).length ? candidaturas.map((row) => row.id) : [-1] };
+    }
+
     const logs = await HistoricoCandidatura.findAll({
       where: {
-        estadoNovo: { [Op.in]: idsFechados.length ? idsFechados : [-1] },
-        createdAt: { [Op.gte]: inicio, [Op.lt]: fim }
+        ...whereLogs
       },
       attributes: ['createdAt']
     });
@@ -325,7 +355,7 @@ exports.getFechadasPorSemana = async (_req, res) => {
 
     res.json(contagem);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao calcular candidaturas fechadas.', details: erro.message });
+    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao calcular candidaturas fechadas.', details: erro.message });
   }
 };
 
@@ -358,7 +388,7 @@ exports.getBadgesAtribuidosPorSemana = async (req, res) => {
 
     res.json(contagem);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao calcular badges atribuídos.', details: erro.message });
+    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao calcular badges atribuídos.', details: erro.message });
   }
 };
 
@@ -374,7 +404,7 @@ exports.listarCandidaturasTalent = async (_req, res) => {
 
     res.json(candidaturas);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar candidaturas.', details: erro.message });
+    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao listar candidaturas.', details: erro.message });
   }
 };
 
@@ -390,7 +420,7 @@ exports.listarTodasCandidaturas = async (_req, res) => {
 
     res.json(candidaturas);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar candidaturas.', details: erro.message });
+    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao listar candidaturas.', details: erro.message });
   }
 };
 
@@ -452,7 +482,7 @@ exports.validarTalentManager = async (req, res) => {
     // Atualizar candidatura com nova decisão do Talent Manager
     await candidatura.update({
       estadoId: nextStatus.statusId,
-      talentManagerId: req.user.id,
+      talentManagerId: req.user.roles.includes('TalentManager') ? req.user.id : null,
       dataValidacao: new Date(),
       comentario
     });
@@ -466,36 +496,24 @@ exports.validarTalentManager = async (req, res) => {
       motivo: comentario || decisao
     });
 
-    // Notificação na app para o consultor (além do email).
-    const nomeBadge = candidatura.Badge?.nome || 'um badge';
-    await criarNotificacao(
-      decisao === 'APROVAR'
-        ? {
-            userId: candidatura.consultorId,
-            title: 'Candidatura validada',
-            message: `A tua candidatura ao badge "${nomeBadge}" foi validada e seguiu para aprovação final.`,
-            type: 'success'
-          }
-        : {
-            userId: candidatura.consultorId,
-            title: 'Candidatura rejeitada',
-            message: `A tua candidatura ao badge "${nomeBadge}" foi rejeitada pelo Talent Manager.${comentario ? ` Motivo: ${comentario}` : ''}`,
-            type: 'error'
-          }
-    );
-
     // Responder já — o email de notificação ao consultor é lento (SMTP) e
     // não deve atrasar a resposta ao Talent Manager.
     const consultor = candidatura.Consultant?.User;
     if (decisao === 'APROVAR') {
       res.json({ mensagem: 'Candidatura validada e enviada para aprovação final.' });
-      sendEmailConsultor('geral', emailEnviadoParaServiceLine, consultor, candidatura.Badge);
+      sendEmail(emailEnviadoParaServiceLine, consultor, candidatura.Badge);
 
       // Notificar o(s) Service Line Leader(s) da área do badge — conforme o
       // guião, o SLL deve receber email dos pedidos que aguardam a sua decisão.
       (async () => {
         try {
           const serviceLineLeaders = await getServiceLineLeadersDaBadge(candidatura.badgeId);
+          await Promise.all(serviceLineLeaders.map((sll) => createNotice(
+            sll.id,
+            'Badge pronta para aprovação final',
+            `${consultor?.nome || 'Um consultor'} aguarda a decisão final para ${candidatura.Badge?.nome || 'uma badge'}.`,
+            'warning'
+          )));
           await Promise.all(
             serviceLineLeaders.map((sll) => sendEmail(emailNovaValidacaoSLL, sll, consultor, candidatura.Badge))
           );
@@ -508,7 +526,13 @@ exports.validarTalentManager = async (req, res) => {
 
     // Se a decisão for rejeitar, enviar email de rejeição (em background)
     res.json({ mensagem: 'Candidatura rejeitada pelo Talent Manager.' });
-    sendEmailConsultor('rejeitado', emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
+    createNotice(
+      candidatura.consultorId,
+      'Candidatura rejeitada pelo Talent Manager',
+      `${candidatura.Badge?.nome || 'Badge'}: ${comentario || 'Consulta o processo para mais detalhes.'}`,
+      'error'
+    );
+    sendEmail(emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
   } catch (erro) {
     console.error(erro);
     res.status(500).json({ erro: 'Erro ao validar candidatura.', details: erro.message });
@@ -577,12 +601,10 @@ exports.validarServiceLine = async (req, res) => {
     // Um Service Line Leader só pode decidir sobre candidaturas da sua
     // própria Service Line (guião: "não tem acesso às áreas de outras
     // Service Lines"). Admin/TalentManager não têm esta restrição.
-    const serviceLineId = await getServiceLineScopeForUser(req.user);
-    if (serviceLineId) {
-      const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
-      if (!badgeIds.includes(candidatura.badgeId)) {
-        return res.status(403).json({ erro: 'Não tens permissão para validar candidaturas de outra Service Line.' });
-      }
+    await assertBadgeInServiceLineScope(req.user, candidatura.badgeId);
+
+    if (['REJEITAR', 'SEND_BACK'].includes(decisao) && !String(comentario || '').trim()) {
+      return res.status(400).json({ erro: 'É obrigatório indicar um comentário para rejeitar ou devolver a candidatura.' });
     }
 
     // Verificar se a candidatura está no estado correto para aprovação final
@@ -603,7 +625,7 @@ exports.validarServiceLine = async (req, res) => {
     // Atualizar candidatura com nova decisão do Service Line Leader
     await candidatura.update({
       estadoId: nextStatus.statusId,
-      serviceLineLeaderId: req.user.id,
+      serviceLineLeaderId: req.user.roles.includes('ServiceLineLeader') ? req.user.id : null,
       dataAprovacao: decisao === 'APROVAR' ? new Date() : null,
       comentario
     });
@@ -617,27 +639,7 @@ exports.validarServiceLine = async (req, res) => {
       motivo: comentario || decisao
     });
 
-    // Notificação na app para o consultor (além do email), conforme a decisão.
-    const nomeBadge = candidatura.Badge?.nome || 'um badge';
-    const notificacaoPorDecisao = {
-      APROVAR: {
-        title: 'Badge aprovado',
-        message: `Parabéns! O badge "${nomeBadge}" foi aprovado e atribuído à tua conta.`,
-        type: 'success'
-      },
-      SEND_BACK: {
-        title: 'Candidatura devolvida',
-        message: `A tua candidatura ao badge "${nomeBadge}" foi devolvida para revisão.${comentario ? ` Nota: ${comentario}` : ''}`,
-        type: 'warning'
-      },
-      REJEITAR: {
-        title: 'Candidatura rejeitada',
-        message: `A tua candidatura ao badge "${nomeBadge}" foi rejeitada.${comentario ? ` Motivo: ${comentario}` : ''}`,
-        type: 'error'
-      }
-    };
-    await criarNotificacao({ userId: candidatura.consultorId, ...notificacaoPorDecisao[decisao] });
-
+    
     const consultor = candidatura.Consultant?.User;
     if (decisao === 'APROVAR') {
       // Atribuir badge ao consultor e calcular data de expiração
@@ -653,22 +655,40 @@ exports.validarServiceLine = async (req, res) => {
       });
       // Responder já — o email (SMTP) é lento e vai em background
       res.json({ mensagem: 'Badge aprovada e atribuída ao consultor.' });
-      sendEmailConsultor('aprovado', emailBadgeAprovado, consultor, candidatura.Badge, candidatura.Badge.publicToken);
+      createNotice(
+        candidatura.consultorId,
+        'Badge aprovada',
+        `A badge ${candidatura.Badge?.nome || ''} foi aprovada e atribuída ao teu perfil.`,
+        'success'
+      );
+      sendEmail(emailBadgeAprovado, consultor, candidatura.Badge, candidatura.Badge.publicToken);
       return;
     }
 
     // Se a decisão for enviar de volta para o consultor, notificação em background
     if (decisao === 'SEND_BACK') {
       res.json({ mensagem: 'Candidatura devolvida ao consultor.' });
-      sendEmailConsultor('rejeitado', emailSendBack, consultor, candidatura.Badge, comentario);
+      createNotice(
+        candidatura.consultorId,
+        'Candidatura devolvida para correção',
+        `${candidatura.Badge?.nome || 'Badge'}: ${comentario}`,
+        'warning'
+      );
+      sendEmail(emailSendBack, consultor, candidatura.Badge, comentario);
       return;
     }
 
     // Se a decisão for rejeitar, notificação em background
     res.json({ mensagem: 'Candidatura rejeitada.' });
-    sendEmailConsultor('rejeitado', emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
+    createNotice(
+      candidatura.consultorId,
+      'Candidatura rejeitada',
+      `${candidatura.Badge?.nome || 'Badge'}: ${comentario}`,
+      'error'
+    );
+    sendEmail(emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro na aprovação final.', details: erro.message });
+    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro na aprovação final.', details: erro.message });
   }
 };

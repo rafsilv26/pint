@@ -10,7 +10,11 @@ const {
 } = require('../models');
 const { gerarCertificado } = require('../services/pdf.service');
 const { gerarExcelCandidaturas } = require('../services/excel.service');
-const { getServiceLineScopeForUser, getBadgeIdsDaServiceLine } = require('../services/serviceLineScope.service');
+const {
+  assertBadgeInServiceLineScope,
+  getServiceLineScopeForUser,
+  getBadgeIdsDaServiceLine
+} = require('../services/serviceLineScope.service');
 
 const reportInclude = [
   { model: Badge },
@@ -45,6 +49,23 @@ const findAwardByPublicToken = async (publicToken) => {
   return award ? { badge, award } : { badge, award: null };
 };
 
+const sendCertificate = async (req, res, award) => {
+  const consultor = award.Consultant?.User;
+  const pdfBuffer = await gerarCertificado(consultor, award.Badge, award.obtainedDate);
+
+  await CertificateDownload.create({
+    consultorId: award.consultorId,
+    badgeId: award.badgeId,
+    originIP: req.ip,
+    userAgent: req.headers['user-agent'],
+    format: 'PDF'
+  }).catch(() => null);
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename=certificado-${award.Badge.nome}.pdf`);
+  res.send(pdfBuffer);
+};
+
 exports.exportarCandidaturasExcel = async (req, res) => {
   try {
     const where = await buildCandidaturaWhereParaUtilizador(req.user);
@@ -69,27 +90,32 @@ exports.downloadCertificado = async (req, res) => {
       return res.status(404).json({ erro: 'Badge atribuída não encontrada.' });
     }
 
-    const consultor = result.award.Consultant?.User;
-    const pdfBuffer = await gerarCertificado(
-      consultor,
-      result.award.Badge,
-      result.award.obtainedDate
-    );
-
-    await CertificateDownload.create({
-      consultorId: result.award.consultorId,
-      badgeId: result.award.badgeId,
-      originIP: req.ip,
-      userAgent: req.headers['user-agent'],
-      format: 'PDF'
-    }).catch(() => null);
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=certificado-${result.award.Badge.nome}.pdf`);
-    res.send(pdfBuffer);
+    await sendCertificate(req, res, result.award);
   } catch (erro) {
     console.error(erro);
     res.status(500).json({ erro: 'Erro ao gerar certificado', details: erro.message });
+  }
+};
+
+exports.downloadCertificadoGestao = async (req, res) => {
+  try {
+    const consultorId = Number(req.params.consultorId);
+    const badgeId = Number(req.params.badgeId);
+    await assertBadgeInServiceLineScope(req.user, badgeId);
+
+    const award = await ConsultorBadge.findOne({
+      where: { consultorId, badgeId },
+      include: [
+        { model: Badge },
+        { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] }
+      ],
+      order: [['obtainedDate', 'DESC']]
+    });
+    if (!award) return res.status(404).json({ erro: 'Badge atribuída não encontrada.' });
+
+    await sendCertificate(req, res, award);
+  } catch (erro) {
+    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao gerar certificado', details: erro.message });
   }
 };
 

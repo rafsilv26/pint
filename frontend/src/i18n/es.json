@@ -763,7 +763,8 @@
       "badges": "Insignias",
       "pedidos": "Solicitudes",
       "relatorios": "Informes",
-      "notificacoes": "Notificaciones"
+      "notificacoes": "Notificaciones",
+      "informacoes": "Información"
     },
     "admin": {
       "dashboard": "Panel de Control",
@@ -849,6 +850,12 @@
   "sllDashboard": {
     "titulo": "Panel de Control",
     "pontuacaoMensal": "Puntuación Mensual",
+    "rankingServiceLine": "Clasificación de la Service Line",
+    "verConsultores": "Ver consultores",
+    "progressoConsultores": "Progreso de los consultores",
+    "progressoDescricao": "Evolución en las insignias disponibles para cada área de tu Service Line.",
+    "abrirRelatorios": "Abrir informes",
+    "badgesConcluidas": "{{completed}} de {{total}} insignias completadas",
     "tabela": {
       "posicao": "#",
       "nome": "Nombre",
@@ -870,6 +877,12 @@
     "aprovar": "Aprobar",
     "rejeitar": "Rechazar",
     "devolver": "Devolver",
+    "feedback": {
+      "aprovada": "Has aprobado la insignia «{{badge}}».",
+      "rejeitada": "Has rechazado la insignia «{{badge}}».",
+      "devolvida": "Has devuelto la insignia «{{badge}}» al consultor.",
+      "registada": "La decisión final fue registrada."
+    },
     "labels": {
       "motivoRejeicao": "Motivo del rechazo",
       "comentarioDevolucao": "Comentario para el consultor (devolución)"
@@ -899,8 +912,12 @@
     "resumo": {
       "pendentes": "Pendientes",
       "aprovados": "Aprobados",
-      "rejeitados": "Rechazados"
+      "rejeitados": "Rechazados",
+      "devolvidos": "Devueltos"
     },
+    "tabs": { "todos": "Todos", "pendentes": "Pendientes", "aprovados": "Aprobados", "rejeitados": "Rechazados", "devolvidos": "Devueltos" },
+    "pesquisar": "Buscar solicitud",
+    "fecharAviso": "Cerrar aviso",
     "empty": {
       "titulo": "Sin solicitudes",
       "descricao": "No hay solicitudes para aprobación final."
@@ -918,6 +935,17 @@
   "sllRelatorios": {
     "titulo": "Informes",
     "subtitulo": "Informes y exportaciones de tu Service Line",
+    "filtros": { "area": "Área", "todasAreas": "Todas las áreas", "experiencia": "Experiencia", "todasExperiencias": "Todas", "estado": "Estado", "todosEstados": "Todos los estados", "desde": "Desde", "ate": "Hasta", "limpar": "Limpiar" },
+    "experiencia": { "0-11": "Menos de 1 año", "12-35": "1 a 3 años", "36+": "Más de 3 años" },
+    "mesesExperiencia": "{{count}} meses",
+    "distribuicaoEstados": "Solicitudes por estado",
+    "distribuicaoAreas": "Actividad por área",
+    "areaResumo": "{{applications}} solicitudes · {{awards}} otorgadas",
+    "comparacaoTitulo": "Comparación de consultores",
+    "premiumTitulo": "Logros especiales de la Service Line",
+    "exportacoesTitulo": "Exportaciones",
+    "semDados": "No hay datos para los filtros seleccionados.",
+    "semDadosDescricao": "Cambia el período o el área para consultar otros resultados.",
     "resumo": {
       "badgesAtribuidos": "Badges asignados",
       "totalPedidos": "Total de solicitudes",
@@ -957,6 +985,9 @@
       "area": "Área",
       "serviceLine": "Service Line",
       "badges": "Badges"
+      ,"progresso": "Progreso",
+      "premium": "Premium",
+      "experiencia": "Experiencia"
     },
     "semDados": "Sin datos para mostrar."
   },

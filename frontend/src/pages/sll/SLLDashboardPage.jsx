@@ -1,6 +1,8 @@
-import { Users, Award, ClipboardCheck, Flag, ArrowUpRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Users, Award, ClipboardCheck, Flag, ArrowUpRight, ChevronRight } from 'lucide-react'
 import { Card, Spinner, ErrorState } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
+import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import * as api from '../../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
@@ -16,6 +18,7 @@ const iniciais = (n = '') => n.split(' ').map((p) => p[0]).slice(0, 2).join('').
 export default function SLLDashboardPage() {
   const { t } = useTranslation() // <-- Inicializa a tradução
   const { data, loading, error, reload } = useAsync(() => api.getServiceLineDashboard())
+  useAutoRefresh(reload)
 
   if (error) return <ErrorState onRetry={reload} />
   if (loading || !data) return <Spinner />
@@ -66,7 +69,10 @@ export default function SLLDashboardPage() {
       <div className="row g-4 align-items-stretch">
         <div className="col-lg-6">
           <Card className="d-flex h-100 flex-column">
-            <h2 className="mb-3 fw-semibold text-ink">{t('sllDashboard.pontuacaoMensal')}</h2>
+            <div className="mb-3 d-flex align-items-center justify-content-between gap-2">
+              <h2 className="fw-semibold text-ink mb-0">{t('sllDashboard.rankingServiceLine')}</h2>
+              <Link to="/sll/consultores" className="small text-brand text-decoration-none">{t('sllDashboard.verConsultores')}</Link>
+            </div>
             <div className="d-grid gap-3 px-2 pb-2 fs-xs fw-medium text-muted" style={{ gridTemplateColumns: '2rem 1fr auto auto' }}>
               <span>{t('sllDashboard.tabela.posicao')}</span>
               <span>{t('sllDashboard.tabela.nome')}</span>
@@ -74,7 +80,7 @@ export default function SLLDashboardPage() {
               <span>{t('sllDashboard.tabela.pontos')}</span>
             </div>
             <div className="flex-grow-1 d-flex flex-column gap-1">
-              {data.pontuacaoMensal.map((r) => (
+              {data.ranking.map((r) => (
                 <div key={r.rank} className="d-grid align-items-center gap-3 rounded-3 px-2 py-2" style={{ gridTemplateColumns: '2rem 1fr auto auto' }}>
                   <span className="small fw-bold text-muted">{r.rank}</span>
                   <span className="d-flex align-items-center gap-2 small text-ink">
@@ -137,6 +143,35 @@ export default function SLLDashboardPage() {
           </Card>
         </div>
       </div>
+
+      <section>
+        <div className="mb-3 d-flex align-items-center justify-content-between gap-3">
+          <div>
+            <h2 className="h5 fw-bold text-ink mb-1">{t('sllDashboard.progressoConsultores')}</h2>
+            <p className="small text-muted mb-0">{t('sllDashboard.progressoDescricao')}</p>
+          </div>
+          <Link to="/sll/relatorios" className="btn btn-outline-secondary bg-white d-inline-flex align-items-center gap-1">{t('sllDashboard.abrirRelatorios')} <ChevronRight size={16} /></Link>
+        </div>
+        <div className="row row-cols-1 row-cols-lg-2 g-3">
+          {data.consultantProgress.slice(0, 8).map((consultant) => (
+            <div className="col" key={consultant.id}>
+              <Card>
+                <div className="d-flex align-items-center justify-content-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-truncate small fw-semibold text-ink mb-0">{consultant.name}</p>
+                    <p className="text-truncate fs-xs text-muted mb-0">{consultant.area}</p>
+                  </div>
+                  <span className="small fw-bold text-brand">{consultant.progress}%</span>
+                </div>
+                <div className="progress mt-3" role="progressbar" aria-valuenow={consultant.progress} aria-valuemin="0" aria-valuemax="100" style={{ height: 8 }}>
+                  <div className="progress-bar bg-brand" style={{ width: `${consultant.progress}%` }} />
+                </div>
+                <p className="mt-2 fs-xs text-muted mb-0">{t('sllDashboard.badgesConcluidas', { completed: consultant.pathCompleted, total: consultant.pathTotal })}</p>
+              </Card>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }

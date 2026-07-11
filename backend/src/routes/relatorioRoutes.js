@@ -6,6 +6,15 @@ const { protect, authorize } = require('../middlewares/authMiddleware');
 // Certificado publico por token publico da badge
 router.get('/certificado/:publicToken', relatorioController.downloadCertificado);
 
+// Certificado personalizado de uma conquista concreta. A rota autenticada
+// evita a ambiguidade do token partilhado pela definição da badge.
+router.get(
+  '/certificado-gestao/:consultorId/:badgeId',
+  protect,
+  authorize('Admin', 'TalentManager', 'ServiceLineLeader'),
+  relatorioController.downloadCertificadoGestao
+);
+
 // Só Admin, TalentManager e ServiceLineLeader podem ver Excel
 router.get('/excel', protect, authorize('Admin', 'TalentManager', 'ServiceLineLeader'), relatorioController.exportarCandidaturasExcel);
 

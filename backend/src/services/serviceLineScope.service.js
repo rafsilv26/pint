@@ -1,4 +1,5 @@
 const { ServiceLineLeader, Badge, Level, Area } = require('../models');
+const { resolveServiceLineScopeForUser } = require('./serviceLineScope.logic');
 
 // De acordo com o guião: "O Service Line Leader tem acesso a todos os Badges
 // de todas as áreas da sua Service Line. Contudo, não tem acesso às áreas de
@@ -8,15 +9,10 @@ const { ServiceLineLeader, Badge, Level, Area } = require('../models');
 // Devolve o serviceLineId a que o pedido deve ficar restrito, ou `null`
 // quando não deve haver nenhuma restrição (Admin/TalentManager, ou um
 // utilizador sem perfil de Service Line Leader).
-const getServiceLineScopeForUser = async (user) => {
-  const roles = user?.roles || [];
-  if (!roles.length) return null;
-  if (roles.includes('Admin') || roles.includes('TalentManager')) return null;
-  if (!roles.includes('ServiceLineLeader')) return null;
-
-  const ssl = await ServiceLineLeader.findByPk(user.id);
-  return ssl?.serviceLineId ?? null;
-};
+const getServiceLineScopeForUser = (user) => resolveServiceLineScopeForUser(
+  user,
+  (id) => ServiceLineLeader.findByPk(id)
+);
 
 // IDs dos badges cujo nível pertence a uma área da Service Line indicada.
 // Usado para restringir candidaturas/relatórios à Service Line de um SLL.
@@ -28,4 +24,20 @@ const getBadgeIdsDaServiceLine = async (serviceLineId) => {
   return badges.map((b) => b.id);
 };
 
-module.exports = { getServiceLineScopeForUser, getBadgeIdsDaServiceLine };
+const assertBadgeInServiceLineScope = async (user, badgeId) => {
+  const serviceLineId = await getServiceLineScopeForUser(user);
+  if (!serviceLineId) return;
+  const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
+  if (!badgeIds.includes(Number(badgeId))) {
+    const error = new Error('Não tens permissão para aceder a dados de outra Service Line.');
+    error.statusCode = 403;
+    error.code = 'SERVICE_LINE_SCOPE_FORBIDDEN';
+    throw error;
+  }
+};
+
+module.exports = {
+  assertBadgeInServiceLineScope,
+  getServiceLineScopeForUser,
+  getBadgeIdsDaServiceLine
+};

@@ -60,10 +60,10 @@ export default function ManagerLayout() {
         ))}
       </nav>
       <div className="border-top border-white border-opacity-10 px-2 py-3">
-        {base === '/tm' && <NavLink to="/tm/assinatura" onClick={() => mobile && setMobileOpen(false)} className="d-flex align-items-center gap-2 rounded-3 px-3 py-2 mb-1 text-decoration-none text-white-50"><PenLine size={18} /> <span className="small fw-medium">{t('tmWorkspace.signature.emailSignature')}</span></NavLink>}
-        <NavLink to={`${base}/conta`} onClick={() => mobile && setMobileOpen(false)} className="d-flex align-items-center gap-2 rounded-3 px-2 py-2 text-decoration-none text-white">
+        {['/tm', '/sll'].includes(base) && <NavLink to={`${base}/assinatura`} onClick={() => mobile && setMobileOpen(false)} className="d-flex align-items-center gap-2 rounded-3 px-3 py-2 mb-1 text-decoration-none text-white-50"><PenLine size={18} /> <span className="small fw-medium">{t('tmWorkspace.signature.emailSignature')}</span></NavLink>}
+        <NavLink to={`${base}/conta`} onClick={() => mobile && setMobileOpen(false)} className="d-flex align-items-center gap-2 rounded-3 px-2 py-2 text-decoration-none text-white overflow-hidden">
           <div className="d-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25 small fw-semibold flex-shrink-0" style={{ height: '2.25rem', width: '2.25rem' }}>{iniciais}</div>
-          <div className="flex-grow-1 min-w-0"><p className="text-truncate small fw-semibold mb-0">{user?.nome}</p><p className="text-truncate small text-white-50 mb-0">{panel.label}</p></div>
+          <div className="flex-grow-1 overflow-hidden" style={{ minWidth: 0 }}><p className="text-truncate small fw-semibold mb-0" title={user?.nome}>{user?.nome}</p><p className="text-truncate small text-white-50 mb-0">{panel.label}</p></div>
         </NavLink>
         <button onClick={() => setConfirmLogout(true)} className="btn btn-link d-flex align-items-center gap-2 w-100 mt-1 px-2 py-2 small text-white-50 text-decoration-none"><LogOut size={18} /> {t('managerLayout.terminarSessao')}</button>
       </div>
@@ -118,7 +118,7 @@ export default function ManagerLayout() {
       </div>
 
       {bloqueadoPassword && <ChangePasswordModal />}
-      {bloqueadoRgpd && <RgpdPolicyModal policies={pendingPolicies} />}
+      {bloqueadoRgpd && <RgpdPolicyModal key={pendingPolicies[0]?.policyId} policies={pendingPolicies} />}
       {confirmLogout &&<div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 p-3" style={{ zIndex: 1100 }} role="dialog" aria-modal="true" aria-labelledby="logout-title"><div className="bg-white rounded-3 shadow p-4 w-100" style={{ maxWidth: 420 }}><h2 id="logout-title" className="h5 fw-bold text-ink">{t('managerLayout.confirmarTitulo')}</h2><p className="small text-muted">{t('managerLayout.confirmarTexto')}</p><div className="d-flex justify-content-end gap-2"><button type="button" className="btn btn-outline-secondary" onClick={() => setConfirmLogout(false)}>{t('managerLayout.cancelar')}</button><button type="button" className="btn btn-danger" onClick={() => { setConfirmLogout(false); logout(); navigate('/login') }}>{t('managerLayout.confirmar')}</button></div></div></div>}
     </div>
   )
