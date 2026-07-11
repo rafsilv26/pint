@@ -6,12 +6,13 @@ import * as api from '../../services/api'
 import { getAdminResources } from '../../config/adminResources';
 import { useTranslation } from 'react-i18next';
 
-export default function AdminResourcePage({ resourceKey, readOnly = false }) {
+export default function AdminResourcePage({ resourceKey, readOnly = false, variants = null }) {
   const { t } = useTranslation();
 
   const allResources = getAdminResources(t);
-  const cfg = allResources[resourceKey];
-  const { data, loading, error, reload } = useAsync(() => api.listResource(cfg.resource), [resourceKey])
+  const [activeKey, setActiveKey] = useState(resourceKey)
+  const cfg = allResources[activeKey]
+  const { data, loading, error, reload } = useAsync(() => api.listResource(cfg.resource), [activeKey])
 
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState({})
@@ -51,7 +52,17 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
       setDropdownOptions(newOptions);
     }
     loadOptions();
-  }, [resourceKey, cfg.campos]);
+  }, [activeKey, cfg.campos]);
+
+  function trocarVariante(key) {
+    if (key === activeKey) return
+    setActiveKey(key)
+    setEditing(null)
+    setForm({})
+    setErroForm(null)
+    setConfirmar(null)
+    setErroDelete(null)
+  }
 
   function abrir(row) {
     const id = row ? getPrimaryKey(row) : null;
@@ -101,6 +112,21 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
           </Button>
         )}
       />
+
+      {variants && variants.length > 1 && (
+        <div className="d-inline-flex rounded-3 bg-white p-1 border mb-3">
+          {variants.map((v) => (
+            <button
+              key={v.key}
+              type="button"
+              onClick={() => trocarVariante(v.key)}
+              className={`btn btn-sm rounded-2 fw-medium ${activeKey === v.key ? 'btn-brand' : 'btn-link text-muted text-decoration-none'}`}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <Card className="overflow-hidden p-0">
         {loading ? <div className="p-4"><Spinner /></div> : error ? <div className="p-4"><ErrorState onRetry={reload} /></div> : rows.length === 0 ? (

@@ -1,7 +1,7 @@
 import {
   Home, LayoutGrid, Medal, Trophy, User,
   LayoutDashboard, ClipboardCheck, Route, Users, Award, FileBarChart, Bell,
-  ShieldCheck, Info, Settings, Network, Boxes, BarChart3, ListChecks, Gem,
+  ShieldCheck, Info, Settings, Network, Boxes, BarChart3, ListChecks,
 } from 'lucide-react'
 
 // ===== Navbar de topo do Consultor =====
@@ -37,7 +37,6 @@ export const getAdminNav = (t) => [
   { to: '/admin', label: t('nav.admin.dashboard'), icon: LayoutDashboard, end: true },
   { to: '/admin/utilizadores', label: t('nav.admin.utilizadores'), icon: Users },
   { to: '/admin/badges', label: t('nav.admin.badges'), icon: Award },
-  { to: '/admin/badges-premium', label: t('nav.admin.badgesPremium'), icon: Gem },
   { to: '/admin/pedidos', label: t('nav.admin.pedidos'), icon: ClipboardCheck },
   { to: '/admin/learning-paths', label: t('nav.admin.learningPaths'), icon: Route },
   { to: '/admin/service-lines', label: t('nav.admin.serviceLines'), icon: Network },

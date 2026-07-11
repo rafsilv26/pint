@@ -132,8 +132,18 @@ export default function App() {
         {/* ---- Admin ---- */}
         <Route element={<RoleGuard allowedRoles={['admin']} />}>
           <Route path="/admin" element={<TalentDashboardPage usarDadosAdmin />} />
-          <Route path="/admin/badges" element={<AdminResourcePage resourceKey="badges" />} />
-          <Route path="/admin/badges-premium" element={<AdminResourcePage resourceKey="badge-premium" />} />
+          <Route
+            path="/admin/badges"
+            element={
+              <AdminResourcePage
+                resourceKey="badges"
+                variants={[
+                  { key: 'badges', label: t('admin.badges.titulo') },
+                  { key: 'badge-premium', label: t('admin.badgePremium.titulo') },
+                ]}
+              />
+            }
+          />
           <Route path="/admin/learning-paths" element={<AdminResourcePage resourceKey="learning-paths" />} />
           <Route path="/admin/service-lines" element={<AdminResourcePage resourceKey="service-lines" />} />
           <Route path="/admin/areas" element={<AdminResourcePage resourceKey="areas" />} />
