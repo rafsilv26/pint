@@ -23,6 +23,7 @@ export const recuperarPassword = impl.recuperarPassword
 export const resetPassword = impl.resetPassword
 export const changePassword = impl.changePassword
 export const me = impl.me
+export const acceptPolicy = impl.acceptPolicy
 
 // Dashboard / catálogo
 export const getDashboard = impl.getDashboard

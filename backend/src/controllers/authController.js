@@ -4,8 +4,11 @@ const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const sequelize = require('../config/database');
 const User = require('../models/User');
+const PolicyRGPD = require('../models/PolicyRGPD');
+const PolicyRGPDAcceptance = require('../models/PolicyRGPDAcceptance');
 const { applyUserRoles, getUserRoles, normalizeRoles } = require('../services/userRoles.service');
 const { emailRecuperarPassword, emailBoasVindas } = require('../services/email.service');
+const { getPendingPolicies } = require('../services/rgpd.service');
 
 // URL pública do frontend, usada nos links enviados por email
 // (recuperação de password e página de login).
@@ -14,6 +17,20 @@ const frontendUrl = () => (process.env.FRONTEND_URL || 'http://localhost:5173').
 // Guardamos apenas o hash do token na BD: se a BD for comprometida, os
 // tokens em circulação nos emails continuam inutilizáveis.
 const hashToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
+
+// Só os consultores têm de aceitar as políticas RGPD (é a única tabela que
+// liga aceitações a consultorId); outros perfis (Admin/TM/SLL) ficam sempre
+// com a lista vazia e nunca são bloqueados por isto.
+const pendingPoliciesFor = async (userId, roles) => {
+    if (!roles.includes('Consultor')) return [];
+    const pendentes = await getPendingPolicies(userId);
+    return pendentes.map((p) => ({
+        policyId: p.policyId,
+        title: p.title,
+        description: p.description,
+        version: p.version,
+    }));
+};
 
 const publicUser = async (user) => {
     const roles = await getUserRoles(user.id);
@@ -24,6 +41,7 @@ const publicUser = async (user) => {
         fotoPerfil: user.fotoPerfil,
         idioma: user.idioma,
         mustChangePassword: user.mustChangePassword,
+        pendingPolicies: await pendingPoliciesFor(user.id, roles),
         role: roles[0] || null,
         roles
     };
@@ -129,7 +147,8 @@ exports.login = async (req, res) => {
                 email: user.email,
                 role: roles[0] || null,
                 roles,
-                mustChangePassword: user.mustChangePassword
+                mustChangePassword: user.mustChangePassword,
+                pendingPolicies: await pendingPoliciesFor(user.id, roles)
             }
         });
     } catch (error) {
@@ -212,6 +231,41 @@ exports.resetPassword = async (req, res) => {
         res.json({ message: 'Password atualizada com sucesso. Já podes iniciar sessão.' });
     } catch (error) {
         res.status(500).json({ error: 'Erro ao atualizar a password.', details: error.message });
+    }
+};
+
+// Aceitação de uma política RGPD pelo consultor autenticado. Devolve a lista
+// atualizada de políticas ainda pendentes (para o modal do frontend saber se
+// já pode desbloquear a app ou se ainda falta aceitar mais alguma).
+exports.acceptPolicy = async (req, res) => {
+    try {
+        const { policyId } = req.body;
+        if (!policyId) {
+            return res.status(400).json({ message: 'policyId é obrigatório.' });
+        }
+
+        if (!req.user.roles.includes('Consultor')) {
+            return res.status(403).json({ message: 'Apenas consultores têm de aceitar políticas RGPD.' });
+        }
+
+        const policy = await PolicyRGPD.findByPk(policyId);
+        if (!policy) {
+            return res.status(404).json({ message: 'Política não encontrada.' });
+        }
+
+        await PolicyRGPDAcceptance.findOrCreate({
+            where: { policyId, consultorId: req.user.id },
+            defaults: {
+                acceptanceDate: new Date(),
+                originIP: req.ip,
+                userAgent: req.headers['user-agent'] || null
+            }
+        });
+
+        const pendingPolicies = await pendingPoliciesFor(req.user.id, req.user.roles);
+        res.json({ message: 'Política aceite com sucesso.', pendingPolicies });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao aceitar política.', details: error.message });
     }
 };
 

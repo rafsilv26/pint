@@ -674,6 +674,19 @@
       "sair": "Not you? Sign out"
     }
   },
+  "rgpdPolicyModal": {
+    "titulo": "GDPR Policy",
+    "descricao": "Before continuing, you must read and accept this policy to use the platform.",
+    "versao": "Version {{versao}}",
+    "contador": "Policy {{atual}} of {{total}}",
+    "confirmoLeitura": "I confirm that I have read and understood this policy.",
+    "erro": "Could not record your acceptance. Please try again.",
+    "botoes": {
+      "aceitando": "Recording…",
+      "aceitar": "I have read and accept",
+      "sair": "Can't accept right now? Sign out"
+    }
+  },
   "exportButtons": {
     "semDados": "No data to export.",
     "processando": "Processing…",

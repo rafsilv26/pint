@@ -664,6 +664,19 @@
       "sair": "Não és tu? Terminar sessão"
     }
   },
+  "rgpdPolicyModal": {
+    "titulo": "Política RGPD",
+    "descricao": "Antes de continuar, tens de ler e aceitar esta política para poderes usar a plataforma.",
+    "versao": "Versão {{versao}}",
+    "contador": "Política {{atual}} de {{total}}",
+    "confirmoLeitura": "Confirmo que li e compreendi esta política.",
+    "erro": "Não foi possível registar a aceitação. Tenta novamente.",
+    "botoes": {
+      "aceitando": "A registar…",
+      "aceitar": "Li e aceito",
+      "sair": "Não posso aceitar agora? Terminar sessão"
+    }
+  },
   "exportButtons": {
     "semDados": "Sem dados para exportar.",
     "processando": "A processar…",
