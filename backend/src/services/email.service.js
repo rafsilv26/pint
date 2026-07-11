@@ -22,6 +22,21 @@ os.networkInterfaces = function ipv4OnlyNetworkInterfaces(...args) {
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
+// ---------------------------------------------------------------
+// DOIS MODOS DE ENVIO:
+//
+// 1. API HTTPS do Brevo (BREVO_API_KEY definida) — obrigatório em produção:
+//    desde 26/09/2025 o Render bloqueia TODO o tráfego SMTP de saída
+//    (portas 25/465/587) nos serviços gratuitos, pelo que o Gmail por SMTP
+//    dá sempre "ETIMEDOUT CONN". A API do Brevo usa a porta 443 (HTTPS),
+//    que não é bloqueada. Plano grátis: 300 emails/dia.
+//    https://render.com/changelog/free-web-services-will-no-longer-allow-outbound-traffic-to-smtp-ports
+//
+// 2. SMTP Gmail (fallback sem BREVO_API_KEY) — funciona em desenvolvimento
+//    local, onde as portas de saída não estão bloqueadas.
+// ---------------------------------------------------------------
+const usaBrevo = () => Boolean(process.env.BREVO_API_KEY);
+
 // Usamos host/porta explícitos (587, STARTTLS) em vez do atalho
 // "service: 'gmail'" (que usa a porta 465/SSL) — em vários PaaS a porta 465
 // fica bloqueada/instável, enquanto a 587 costuma ser mais fiável.
@@ -41,16 +56,61 @@ const transporter = nodemailer.createTransport({
   debug: true   // inclui os dados trocados com o servidor (endereço tentado, etc.)
 });
 
+// Envio pela API HTTPS do Brevo. O remetente (EMAIL_USER) tem de estar
+// verificado na conta Brevo (Settings -> Senders), senão a API rejeita.
+const enviarViaBrevo = async (para, assunto, html) => {
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'api-key': process.env.BREVO_API_KEY,
+      'content-type': 'application/json',
+      accept: 'application/json'
+    },
+    body: JSON.stringify({
+      sender: { name: 'Softinsa Badges', email: process.env.EMAIL_USER },
+      to: [{ email: para }],
+      subject: assunto,
+      htmlContent: html
+    })
+  });
+  if (!res.ok) {
+    const corpo = await res.text().catch(() => '');
+    throw new Error(`Brevo respondeu ${res.status}: ${corpo}`);
+  }
+};
+
+// Verificação da configuração de envio (usada pelo diagnóstico):
+// no modo API valida a chave contra a conta Brevo; no modo SMTP testa
+// a ligação/autenticação ao Gmail.
+const verificarLigacao = async () => {
+  if (usaBrevo()) {
+    const res = await fetch('https://api.brevo.com/v3/account', {
+      headers: { 'api-key': process.env.BREVO_API_KEY, accept: 'application/json' }
+    });
+    if (!res.ok) {
+      const corpo = await res.text().catch(() => '');
+      throw new Error(`Chave Brevo inválida (HTTP ${res.status}): ${corpo}`);
+    }
+    return { modo: 'brevo-api' };
+  }
+  await transporter.verify();
+  return { modo: 'smtp-gmail' };
+};
+
 // Função base
 const enviarEmail = async (para, assunto, html) => {
   try {
-    await transporter.sendMail({
-      from: `"Softinsa Badges" <${process.env.EMAIL_USER}>`,
-      to: para,
-      subject: assunto,
-      html
-    });
-    console.log(`✅ Email enviado para ${para}`);
+    if (usaBrevo()) {
+      await enviarViaBrevo(para, assunto, html);
+    } else {
+      await transporter.sendMail({
+        from: `"Softinsa Badges" <${process.env.EMAIL_USER}>`,
+        to: para,
+        subject: assunto,
+        html
+      });
+    }
+    console.log(`✅ Email enviado para ${para} (${usaBrevo() ? 'brevo-api' : 'smtp-gmail'})`);
   } catch (erro) {
     // Log detalhado: código do erro, comando SMTP onde falhou, resposta do
     // servidor (se houver) e o endereço/porta que estava a tentar ligar.
@@ -308,6 +368,7 @@ const emailSendBack = async (consultor, badge, comentario) => {
 module.exports = {
   // exportados para diagnóstico (scripts/test-email.js) e usos genéricos
   transporter,
+  verificarLigacao,
   enviarEmail,
   emailCandidaturaSubmetida,
   emailNovaSubmissao,
