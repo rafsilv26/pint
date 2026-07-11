@@ -1,5 +1,7 @@
 const { randomUUID } = require('crypto');
+const { Op } = require('sequelize');
 const models = require('../models');
+const { getServiceLineScopeForUser, getBadgeIdsDaServiceLine } = require('../services/serviceLineScope.service');
 
 const RESOURCES = {
   'learning-paths': { model: models.LearningPath },
@@ -46,17 +48,33 @@ const buildWhere = (query) => {
   return where;
 };
 
+// Por pedido explícito (a decisão foi tomada conscientemente, contrariando o
+// ponto do guião que permite a um Service Line Leader ver badges de outras
+// service lines): o catálogo de badges também fica restrito à service line
+// do SLL autenticado, tal como já acontece com consultores/candidaturas.
+// Admin/TalentManager/Consultor não são afetados.
+const restringirBadgesPorServiceLine = async (req, whereClause) => {
+  const serviceLineId = await getServiceLineScopeForUser(req.user);
+  if (!serviceLineId) return whereClause;
+  const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
+  return { ...whereClause, id: { [Op.in]: badgeIds.length ? badgeIds : [-1] } };
+};
+
 exports.listResources = async (req, res) => {
   try {
     const config = getConfig(req, res);
     if (!config) return;
 
-    const whereClause = buildWhere(req.query);
+    let whereClause = buildWhere(req.query);
 
-    // CORREÇÃO APLICADA AQUI: 
+    // CORREÇÃO APLICADA AQUI:
     // Se a tabela tiver a coluna 'deletedAt', filtra para listar APENAS os não apagados.
     if (config.model.rawAttributes.deletedAt) {
       whereClause.deletedAt = null;
+    }
+
+    if (req.params.resource === 'badges' && req.user) {
+      whereClause = await restringirBadgesPorServiceLine(req, whereClause);
     }
 
     const rows = await config.model.findAll({
@@ -79,6 +97,16 @@ exports.getResource = async (req, res) => {
     const row = await config.model.findByPk(req.params.id);
     if (!row) {
       return res.status(404).json({ erro: 'Registo não encontrado.' });
+    }
+
+    if (req.params.resource === 'badges' && req.user) {
+      const serviceLineId = await getServiceLineScopeForUser(req.user);
+      if (serviceLineId) {
+        const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
+        if (!badgeIds.includes(row.id)) {
+          return res.status(404).json({ erro: 'Registo não encontrado.' });
+        }
+      }
     }
 
     res.json(row);
