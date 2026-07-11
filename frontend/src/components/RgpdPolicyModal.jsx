@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShieldCheck } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import { useTranslation } from 'react-i18next'
 
 // Pop-up de aceitação de política RGPD (mostrado por cima da app quando o
