@@ -38,7 +38,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
         areas.forEach(a => areasMap[a.id] = a.nome);
       } catch { console.error("Erro ao carregar áreas para dropdown"); }
 
-      for (const f of cfg.campos) {
+      for (const f of allResources[activeKey].campos) {
         if (f.type === 'select' && f.optionsResource) {
           try {
             const res = await api.listResource(f.optionsResource);
@@ -62,7 +62,11 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
       setDropdownOptions(newOptions);
     }
     loadOptions();
-  }, [activeKey, cfg.campos]);
+    // Depende só de activeKey: allResources[activeKey].campos é um array novo
+    // a cada render (getAdminResources(t) recria tudo), por isso listá-lo como
+    // dependência disparava este efeito (e o pedido à API) em loop infinito.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeKey]);
 
   function trocarVariante(key) {
     if (key === activeKey) return
