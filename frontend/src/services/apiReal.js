@@ -3,7 +3,7 @@
 //  Cada função chama o endpoint real e ADAPTA a resposta para o
 //  formato que as páginas esperam (que vem do design Figma).
 // =============================================================
-import { http, getUser, getToken, API_URL } from './http.js'
+import { http, getUser, getToken, api } from './http.js'
 import i18next from 'i18next' // <-- Import da instância global para ficheiros JS puros
 
 const CODE_COR = {
@@ -454,12 +454,16 @@ export async function getAdminPedidos() {
 // ---------- Exportações ----------
 export async function exportarRelatorio(formato = 'excel') {
   const token = getToken()
-  const res = await fetch(`${API_URL}/relatorios/${formato}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  })
-  if (!res.ok) throw new Error(i18next.t('api.erros.exportacao'))
-  const blob = await res.blob()
-  const url = URL.createObjectURL(blob)
+  let res
+  try {
+    res = await api.get(`/relatorios/${formato}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      responseType: 'blob',
+    })
+  } catch {
+    throw new Error(i18next.t('api.erros.exportacao'))
+  }
+  const url = URL.createObjectURL(res.data)
   const a = document.createElement('a')
   a.href = url
   a.download = `relatorio-candidaturas.${formato === 'excel' ? 'xlsx' : 'pdf'}`
