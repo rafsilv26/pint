@@ -102,7 +102,7 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
             {!temDados ? (
               <p className="text-sm text-muted">{t('talentDashboard.semDados')}</p>
             ) : (
-              <div className="flex h-40 items-end gap-2">
+              <div className="flex h-40 gap-2">
                 {data.pedidosFechados.map((v, i) => (
                   <div key={i} className="flex flex-1 flex-col items-center gap-1">
                     <span className="text-[11px] font-semibold text-ink">{v}</span>
