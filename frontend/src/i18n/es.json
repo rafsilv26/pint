@@ -720,12 +720,12 @@
     }
   },
   "admin": {
-    "generic": { "nome": "Nombre", "titulo": "Título", "descricao": "Descripción", "mensagem": "Mensaje" },
+    "generic": { "nome": "Nombre", "titulo": "Título", "descricao": "Descripción", "mensagem": "Mensaje", "tipo": "Tipo", "ativo": "Activo", "lida": "Leída", "data": "Fecha", "dataInicio": "Fecha de inicio", "dataFim": "Fecha de fin" },
     "badges": { "titulo": "Insignias", "singular": "Insignia", "campos": { "nivel": "Nivel", "pontos": "Puntos" } },
     "learningPaths": { "titulo": "Rutas de aprendizaje", "singular": "Ruta de aprendizaje" },
     "badgePremium": { "titulo": "Insignias Premium", "singular": "Insignia Premium" },
     "policies": { "titulo": "Políticas RGPD", "singular": "Política", "campos": { "versao": "Versión" } },
-    "notices": { "titulo": "Avisos", "singular": "Aviso" },
+    "notices": { "titulo": "Avisos", "singular": "Aviso", "destinatario": "Destinatario", "todosConsultores": "Todos los consultores" },
     "information": { "titulo": "Información", "singular": "Información" },
     "serviceLines": { "titulo": "Líneas de servicio", "singular": "Línea de servicio" },
     "areas": { "titulo": "Áreas", "singular": "Área" },

@@ -48,6 +48,16 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
             }));
           } catch (err) { console.error(`Erro ao carregar opções para ${f.key}:`, err); }
         }
+        // Carregar a lista de consultores (utilizadores com o perfil Consultor)
+        // para o seletor de destinatário dos avisos.
+        if (f.type === 'select' && f.optionsLoader === 'consultores') {
+          try {
+            const users = await api.getUsers();
+            newOptions[f.key] = (users || [])
+              .filter(u => (u.roles || []).includes('Consultor'))
+              .map(u => ({ value: u.id, label: u.email ? `${u.nome} (${u.email})` : u.nome }));
+          } catch (err) { console.error('Erro ao carregar consultores para dropdown:', err); }
+        }
       }
       setDropdownOptions(newOptions);
     }
@@ -78,8 +88,13 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
     setSaving(true)
     setErroForm(null)
     try {
-      if (editing?.id) await api.updateResource(cfg.resource, editing.id, form)
-      else await api.createResource(cfg.resource, form)
+      // Campos de data vazios seguem como null (string vazia rebenta na BD)
+      const payload = { ...form }
+      cfg.campos.forEach((f) => {
+        if (f.type === 'date' && payload[f.key] === '') payload[f.key] = null
+      })
+      if (editing?.id) await api.updateResource(cfg.resource, editing.id, payload)
+      else await api.createResource(cfg.resource, payload)
       fechar()
       reload()
     } catch (err) {
@@ -144,7 +159,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
                 {rows.map((r) => (
                   <tr key={getPrimaryKey(r)}>
                     {cfg.colunas.map((c) => {
-                      const valor = r[c.key]
+                      let valor = r[c.key]
                       if (typeof valor === 'boolean') {
                         return (
                           <td key={c.key} className="px-3 py-2">
@@ -153,6 +168,16 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
                             </span>
                           </td>
                         )
+                      }
+                      // Datas da BD (ISO) mostradas em formato local
+                      if (c.type === 'date' && valor) {
+                        valor = new Date(valor).toLocaleDateString()
+                      }
+                      // Se a coluna corresponde a um campo select com opções carregadas
+                      // (ex: userId -> nome do consultor), mostra o label em vez do id.
+                      const opcoes = dropdownOptions[c.key]
+                      if (opcoes && valor != null) {
+                        valor = opcoes.find((o) => String(o.value) === String(valor))?.label ?? valor
                       }
                       return (
                         <td key={c.key} className="text-truncate px-3 py-2 text-ink" style={{ maxWidth: '20rem' }}>
@@ -186,10 +211,16 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
                 {f.type === 'select' ? (
                   <select value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="form-select">
                     <option value="">{t('adminResource.selecione')}</option>
+                    {f.allOption && <option value="__ALL__">{f.allOption}</option>}
                     {(f.options || dropdownOptions[f.key] || []).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 ) : (
-                  <input type={f.type || 'text'} value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="form-control" />
+                  <input
+                    type={f.type || 'text'}
+                    value={f.type === 'date' ? String(form[f.key] ?? '').substring(0, 10) : (form[f.key] ?? '')}
+                    onChange={(e) => setForm({...form, [f.key]: e.target.value})}
+                    className="form-control"
+                  />
                 )}
               </label>
             ))}

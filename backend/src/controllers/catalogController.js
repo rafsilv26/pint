@@ -2,6 +2,7 @@ const { randomUUID } = require('crypto');
 const { Op } = require('sequelize');
 const models = require('../models');
 const { getServiceLineScopeForUser, getBadgeIdsDaServiceLine } = require('../services/serviceLineScope.service');
+const { criarNotificacao, notificarTodosConsultores } = require('../services/notification.service');
 
 const RESOURCES = {
   'learning-paths': { model: models.LearningPath },
@@ -135,8 +136,35 @@ exports.createResource = async (req, res) => {
       payload.createdBy = req.user?.id || 1; // Se não houver user, força 1
     }
     if (req.params.resource === 'notices') {
-      payload.userId = req.user?.id || 1; // Atribui o ID do utilizador logado
-      payload.type = payload.type || 'info'; // Define um tipo padrão se não for enviado
+      // Um aviso é enviado a um consultor específico (payload.userId) ou, se o
+      // destinatário for "todos" ('__ALL__') ou vazio, difundido a todos os
+      // consultores. Nunca é atribuído ao próprio admin.
+      const tipo = payload.type || 'info';
+      const alvo = payload.userId;
+
+      if (!payload.title) {
+        return res.status(400).json({ erro: 'O aviso precisa de um título.' });
+      }
+
+      if (!alvo || alvo === '__ALL__') {
+        const criadas = await notificarTodosConsultores({
+          title: payload.title,
+          message: payload.message,
+          type: tipo
+        });
+        return res.status(201).json({
+          mensagem: `Aviso enviado a ${criadas.length} consultor(es).`,
+          count: criadas.length
+        });
+      }
+
+      const nova = await criarNotificacao({
+        userId: alvo,
+        title: payload.title,
+        message: payload.message,
+        type: tipo
+      });
+      return res.status(201).json(nova);
     }
     if (req.params.resource === 'information') {
       payload.createdBy = req.user?.id || 1; // Campo obrigatório no modelo Information
@@ -168,10 +196,13 @@ exports.updateResource = async (req, res) => {
 
     // 3. SE FOR AVISO, GARANTIMOS QUE OS CAMPOS OBRIGATÓRIOS TÊM VALOR
     if (req.params.resource === 'notices') {
+        // A difusão a todos os consultores só existe na criação; num update,
+        // '__ALL__' não é um id válido — mantém o destinatário original.
+        if (payload.userId === '__ALL__') payload.userId = row.userId;
         // Se o formulário não enviou o campo, usa o que já existe na BD (row.campo)
         payload.userId = payload.userId || row.userId;
-        payload.type = payload.type || row.type || 'info'; 
-        
+        payload.type = payload.type || row.type || 'info';
+
         // Remove campos que não devem ser alterados, se necessário
         delete payload.createdAt;
     }
