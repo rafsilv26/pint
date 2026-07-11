@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
+
 class SpecialAchievementsPage extends StatelessWidget {
   const SpecialAchievementsPage({super.key});
 
@@ -72,7 +74,7 @@ class _AchievementsHeader extends StatelessWidget {
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         icon: const Icon(Icons.arrow_back_ios_new, size: 16),
-        label: const Text(
+        label: const AppText(
           'Conquistas especiais',
           style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
         ),
@@ -139,7 +141,7 @@ class _StatBox extends StatelessWidget {
         children: [
           Icon(icon, color: Colors.white, size: 24),
           const SizedBox(height: 10),
-          Text(
+          AppText(
             value,
             style: const TextStyle(
               color: Colors.white,
@@ -148,7 +150,7 @@ class _StatBox extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          AppText(
             label,
             textAlign: TextAlign.center,
             style: const TextStyle(
@@ -213,7 +215,7 @@ class _SpecialAchievementCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
+                      child: AppText(
                         achievement.title,
                         style: const TextStyle(
                           color: Color(0xFF111827),
@@ -232,7 +234,7 @@ class _SpecialAchievementCard extends StatelessWidget {
                         color: achievement.badgeColor,
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: Text(
+                      child: AppText(
                         achievement.rarity,
                         style: TextStyle(
                           color: achievement.badgeTextColor,
@@ -244,7 +246,7 @@ class _SpecialAchievementCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(
+                AppText(
                   achievement.description,
                   style: const TextStyle(
                     color: Color(0xFF475467),
@@ -258,7 +260,7 @@ class _SpecialAchievementCard extends StatelessWidget {
                 if (achievement.progress != null) ...[
                   Row(
                     children: [
-                      const Text(
+                      const AppText(
                         'Progresso',
                         style: TextStyle(
                           color: Color(0xFF667085),
@@ -266,7 +268,7 @@ class _SpecialAchievementCard extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      Text(
+                      AppText(
                         '${(achievement.progress! * 100).round()}%',
                         style: const TextStyle(
                           color: Color(0xFF005DFF),
@@ -297,7 +299,7 @@ class _SpecialAchievementCard extends StatelessWidget {
                       size: 14,
                     ),
                     const SizedBox(width: 4),
-                    Text(
+                    AppText(
                       '${achievement.points} pontos',
                       style: const TextStyle(
                         color: Color(0xFF005DFF),
@@ -307,7 +309,7 @@ class _SpecialAchievementCard extends StatelessWidget {
                     if (achievement.date != null) ...[
                       const Spacer(),
                       Flexible(
-                        child: Text(
+                        child: AppText(
                           achievement.date!,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -343,7 +345,7 @@ class _RequirementLine extends StatelessWidget {
         const Icon(Icons.track_changes, color: Color(0xFF667085), size: 13),
         const SizedBox(width: 6),
         Expanded(
-          child: Text(
+          child: AppText(
             text,
             style: const TextStyle(
               color: Color(0xFF667085),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/app_language.dart';
 import '../services/auth_service.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_widgets.dart';
@@ -32,7 +33,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
 
     if (code.length != 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Insira o código de 4 dígitos.')),
+        const SnackBar(content: AppText('Insira o código de 4 dígitos.')),
       );
       return;
     }
@@ -48,9 +49,9 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
   }
 
   void resendCode() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Código enviado novamente.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: AppText('Código enviado novamente.')),
+    );
   }
 
   @override
@@ -91,7 +92,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                       ),
                       child: Column(
                         children: [
-                          const Text(
+                          const AppText(
                             'Insira o código de confirmação',
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -101,7 +102,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                             ),
                           ),
                           const SizedBox(height: 14),
-                          Text(
+                          AppText(
                             'Um código de 4 dígitos foi enviado para:\n${widget.email}',
                             textAlign: TextAlign.center,
                             style: const TextStyle(
@@ -142,7 +143,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                           SizedBox(height: screenHeight < 700 ? 56 : 132),
                           TextButton(
                             onPressed: resendCode,
-                            child: const Text(
+                            child: const AppText(
                               'Enviar novamente',
                               style: TextStyle(
                                 color: Color(0xFF0076FF),

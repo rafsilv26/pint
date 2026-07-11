@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
 import '../models/consultant_profile.dart';
+import '../models/mobile_api_data.dart';
+import '../repositories/mobile_api_repository.dart';
+import '../widgets/app_bottom_navigation.dart';
 
 class ConsultantDetailPage extends StatefulWidget {
   const ConsultantDetailPage({super.key, required this.consultant});
@@ -12,146 +16,110 @@ class ConsultantDetailPage extends StatefulWidget {
 }
 
 class _ConsultantDetailPageState extends State<ConsultantDetailPage> {
+  final MobileApiRepository repository = MobileApiRepository();
+  late Future<ConsultantDetailData> detailFuture;
   int selectedTab = 0;
 
-  final List<_ConsultantBadge> badges = const [
-    _ConsultantBadge(
-      title: 'Azure Fundament',
-      level: 'Nível: Júnior',
-      date: '10/03/2023',
-      imagePath: 'assets/images/badge_azure_fundamentals.png',
-      color: Color(0xFF244B7A),
-    ),
-    _ConsultantBadge(
-      title: 'AWS Solutions',
-      level: 'Nível: Sénior',
-      date: '22/06/2023',
-      imagePath: 'assets/images/badge_aws_cloud_practitioner.png',
-      color: Color(0xFF2C5574),
-    ),
-    _ConsultantBadge(
-      title: 'Kubernetes Administra',
-      level: 'Nível: Especialista',
-      date: '15/09/2023',
-      imagePath: 'assets/images/badge_kubernetes_administra.png',
-      color: Color(0xFF3B2E7E),
-    ),
-    _ConsultantBadge(
-      title: 'Terraform Associate',
-      level: 'Nível: Pleno',
-      date: '08/11/2023',
-      imagePath: 'assets/images/badge_terraform_associate.png',
-      color: Color(0xFF5D6878),
-    ),
-    _ConsultantBadge(
-      title: 'Docker Certified',
-      level: 'Nível: Júnior',
-      date: '20/01/2024',
-      imagePath: 'assets/images/badge_docker_certified.png',
-      color: Color(0xFF0B7DAE),
-    ),
-    _ConsultantBadge(
-      title: 'Cloud Security',
-      level: 'Nível: Sénior',
-      date: '05/03/2024',
-      imagePath: 'assets/images/badge_cloud_security.png',
-      color: Color(0xFF1D7D79),
-    ),
-  ];
-
-  final List<_Achievement> achievements = const [
-    _Achievement(
-      icon: '🎯',
-      title: 'Primeiro Passo',
-      description: 'Conquistou o primeiro badge',
-      date: 'Desbloqueado em 10/03/2023',
-      color: Color(0xFF667085),
-    ),
-    _Achievement(
-      icon: '👑',
-      title: 'Mestre da Área',
-      description: 'Domínio completo em Hybrid Cloud',
-      date: 'Desbloqueado em 15/09/2023',
-      color: Color(0xFFFF7A00),
-      borderColor: Color(0xFFFFB000),
-    ),
-    _Achievement(
-      icon: '🔥',
-      title: 'Maratona de Aprendizagem',
-      description: '30 dias consecutivos de atividade',
-      date: 'Desbloqueado em 01/12/2023',
-      color: Color(0xFF9C3BFF),
-      borderColor: Color(0xFFC45BFF),
-    ),
-    _Achievement(
-      icon: '💎',
-      title: 'Colecionador',
-      description: 'Conquistou 10+ badges',
-      date: 'Desbloqueado em 14/02/2024',
-      color: Color(0xFF2F80ED),
-      borderColor: Color(0xFF2F80ED),
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    detailFuture = repository.getConsultantDetail(widget.consultant);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FB),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            const _DetailHeader(),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final horizontalPadding = constraints.maxWidth < 380
-                      ? 16.0
-                      : 24.0;
+    return FutureBuilder<ConsultantDetailData>(
+      future: detailFuture,
+      builder: (context, snapshot) {
+        final detail =
+            snapshot.data ??
+            ConsultantDetailData.empty(consultant: widget.consultant);
+        final isLoading = snapshot.connectionState == ConnectionState.waiting;
 
-                  return SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      16,
-                      horizontalPadding,
-                      28,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 560),
-                        child: Column(
-                          children: [
-                            _ConsultantSummary(consultant: widget.consultant),
-                            const SizedBox(height: 18),
-                            _DetailTabs(
-                              selectedIndex: selectedTab,
-                              onChanged: (index) {
-                                setState(() {
-                                  selectedTab = index;
-                                });
-                              },
-                            ),
-                            const SizedBox(height: 20),
-                            IndexedStack(
-                              index: selectedTab,
+        return Scaffold(
+          backgroundColor: const Color(0xFFF4F7FB),
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                const _DetailHeader(),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final horizontalPadding = constraints.maxWidth < 380
+                          ? 16.0
+                          : 24.0;
+
+                      return SingleChildScrollView(
+                        padding: EdgeInsets.fromLTRB(
+                          horizontalPadding,
+                          16,
+                          horizontalPadding,
+                          28,
+                        ),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 560),
+                            child: Column(
                               children: [
-                                _BadgesTab(badges: badges),
-                                _AchievementsTab(achievements: achievements),
-                                _StatsTab(consultant: widget.consultant),
+                                _ConsultantSummary(
+                                  consultant: detail.consultant,
+                                ),
+                                const SizedBox(height: 18),
+                                _DetailTabs(
+                                  selectedIndex: selectedTab,
+                                  onChanged: (index) {
+                                    setState(() {
+                                      selectedTab = index;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(height: 20),
+                                IndexedStack(
+                                  index: selectedTab,
+                                  children: [
+                                    isLoading
+                                        ? const _LoadingTab()
+                                        : _BadgesTab(badges: detail.badges),
+                                    isLoading
+                                        ? const _LoadingTab()
+                                        : _AchievementsTab(
+                                            achievements: detail.achievements,
+                                          ),
+                                    _StatsTab(stats: detail.stats),
+                                  ],
+                                ),
                               ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: const _ConsultantBottomNavigation(),
+          ),
+          bottomNavigationBar: AppBottomNavigation(
+            currentDestination: AppBottomNavigationDestination.profile,
+            onDestinationSelected: (destination) {
+              AppNavigationController.open(context, destination);
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _LoadingTab extends StatelessWidget {
+  const _LoadingTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 32),
+      child: Center(child: CircularProgressIndicator()),
     );
   }
 }
@@ -174,7 +142,7 @@ class _DetailHeader extends StatelessWidget {
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         icon: const Icon(Icons.arrow_back, size: 18),
-        label: const Text(
+        label: const AppText(
           'Voltar',
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
@@ -202,7 +170,7 @@ class _ConsultantSummary extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       consultant.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -213,7 +181,7 @@ class _ConsultantSummary extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
+                    AppText(
                       consultant.role,
                       style: const TextStyle(
                         color: Color(0xFF475467),
@@ -226,7 +194,7 @@ class _ConsultantSummary extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          Text(
+          AppText(
             consultant.biography.isNotEmpty
                 ? consultant.biography
                 : 'Perfil profissional sincronizado a partir da plataforma.',
@@ -355,7 +323,7 @@ class _DetailTabs extends StatelessWidget {
                           size: 18,
                         ),
                         const SizedBox(width: 6),
-                        Text(
+                        AppText(
                           tabs[index].label,
                           style: TextStyle(
                             color: selectedIndex == index
@@ -380,29 +348,40 @@ class _DetailTabs extends StatelessWidget {
 class _BadgesTab extends StatelessWidget {
   const _BadgesTab({required this.badges});
 
-  final List<_ConsultantBadge> badges;
+  final List<ConsultantAwardedBadge> badges;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _TabTitle(title: 'Badges Conquistados', trailing: '6 badges'),
-        const SizedBox(height: 16),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: badges.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 14,
-            mainAxisSpacing: 14,
-            childAspectRatio: 0.82,
-          ),
-          itemBuilder: (context, index) {
-            return _BadgeCard(badge: badges[index]);
-          },
+        _TabTitle(
+          title: 'Badges Conquistados',
+          trailing: '${badges.length} badges',
         ),
+        const SizedBox(height: 16),
+        if (badges.isEmpty)
+          const _EmptyState(
+            icon: Icons.workspace_premium_outlined,
+            title: 'Sem badges conquistados',
+            message:
+                'Ainda não existem badges guardados localmente para este consultor.',
+          )
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: badges.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
+              childAspectRatio: 0.82,
+            ),
+            itemBuilder: (context, index) {
+              return _BadgeCard(badge: badges[index]);
+            },
+          ),
       ],
     );
   }
@@ -411,61 +390,69 @@ class _BadgesTab extends StatelessWidget {
 class _AchievementsTab extends StatelessWidget {
   const _AchievementsTab({required this.achievements});
 
-  final List<_Achievement> achievements;
+  final List<ConsultantSpecialAchievement> achievements;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _TabTitle(
+        _TabTitle(
           title: 'Conquistas Especiais',
-          trailing: '4 conquistas',
+          trailing: '${achievements.length} conquistas',
         ),
         const SizedBox(height: 16),
-        for (final achievement in achievements) ...[
-          _AchievementCard(achievement: achievement),
-          const SizedBox(height: 14),
-        ],
+        if (achievements.isEmpty)
+          const _EmptyState(
+            icon: Icons.emoji_events_outlined,
+            title: 'Sem conquistas especiais',
+            message:
+                'Ainda não existem conquistas especiais guardadas localmente.',
+          )
+        else
+          for (final achievement in achievements) ...[
+            _AchievementCard(achievement: achievement),
+            const SizedBox(height: 14),
+          ],
       ],
     );
   }
 }
 
 class _StatsTab extends StatelessWidget {
-  const _StatsTab({required this.consultant});
+  const _StatsTab({required this.stats});
 
-  final ConsultantProfile consultant;
+  final ConsultantActivityStats stats;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const _MetricCard(
+        _MetricCard(
           icon: Icons.track_changes,
           title: 'Taxa de Conclusão',
-          value: '92%',
-          color: Color(0xFF005DFF),
-          progress: 0.92,
+          value: '${(stats.completionRate * 100).round()}%',
+          color: const Color(0xFF005DFF),
+          progress: stats.completionRate,
         ),
         const SizedBox(height: 14),
-        const _MetricCard(
+        _MetricCard(
           icon: Icons.trending_up,
           title: 'Crescimento Mensal',
-          value: '+15%',
-          color: Color(0xFF00A651),
+          value: '+${stats.monthlyGrowthPercent}%',
+          color: const Color(0xFF00A651),
           subtitle: 'Aumento de pontos no último mês',
         ),
         const SizedBox(height: 14),
-        const _MetricCard(
+        _MetricCard(
           icon: Icons.bolt_outlined,
-          title: 'Sequência de Dias',
-          value: '45 🔥',
-          color: Color(0xFFFF4E00),
-          subtitle: 'Dias consecutivos de atividade',
+          title: 'Dias com Atividade',
+          value: '${stats.activityDays}',
+          color: const Color(0xFFFF4E00),
+          subtitle: 'Dias distintos com badges ou conquistas registadas',
         ),
         const SizedBox(height: 18),
-        _ActivitySummary(consultant: consultant),
+        _ActivitySummary(stats: stats),
       ],
     );
   }
@@ -474,7 +461,7 @@ class _StatsTab extends StatelessWidget {
 class _BadgeCard extends StatelessWidget {
   const _BadgeCard({required this.badge});
 
-  final _ConsultantBadge badge;
+  final ConsultantAwardedBadge badge;
 
   @override
   Widget build(BuildContext context) {
@@ -485,7 +472,7 @@ class _BadgeCard extends StatelessWidget {
         children: [
           _BadgeImage(badge: badge),
           const SizedBox(height: 12),
-          Text(
+          AppText(
             badge.title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -497,15 +484,15 @@ class _BadgeCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 7),
-          Text(
+          AppText(
             badge.level,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(color: Color(0xFF667085), fontSize: 12),
           ),
           const SizedBox(height: 6),
-          Text(
-            badge.date,
+          AppText(
+            _formatDate(badge.obtainedAt),
             style: const TextStyle(color: Color(0xFF667085), fontSize: 11),
           ),
         ],
@@ -517,16 +504,18 @@ class _BadgeCard extends StatelessWidget {
 class _AchievementCard extends StatelessWidget {
   const _AchievementCard({required this.achievement});
 
-  final _Achievement achievement;
+  final ConsultantSpecialAchievement achievement;
 
   @override
   Widget build(BuildContext context) {
+    final achievementColor = _colorForText(achievement.title);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: achievement.borderColor),
+        border: Border.all(color: achievementColor.withValues(alpha: 0.35)),
       ),
       child: Row(
         children: [
@@ -535,24 +524,28 @@ class _AchievementCard extends StatelessWidget {
             height: 52,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: achievement.color,
+              color: achievementColor,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: achievement.color.withValues(alpha: 0.25),
+                  color: achievementColor.withValues(alpha: 0.25),
                   blurRadius: 10,
                   offset: const Offset(0, 5),
                 ),
               ],
             ),
-            child: Text(achievement.icon, style: const TextStyle(fontSize: 22)),
+            child: Icon(
+              _achievementIcon(achievement.icon),
+              color: Colors.white,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   achievement.title,
                   style: const TextStyle(
                     color: Color(0xFF111827),
@@ -561,7 +554,7 @@ class _AchievementCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 7),
-                Text(
+                AppText(
                   achievement.description,
                   style: const TextStyle(
                     color: Color(0xFF475467),
@@ -569,8 +562,8 @@ class _AchievementCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  achievement.date,
+                AppText(
+                  _achievementDateText(achievement.awardedAt),
                   style: const TextStyle(
                     color: Color(0xFF667085),
                     fontSize: 11,
@@ -614,7 +607,7 @@ class _MetricCard extends StatelessWidget {
               Icon(icon, color: color, size: 20),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
+                child: AppText(
                   title,
                   style: const TextStyle(
                     color: Color(0xFF111827),
@@ -623,7 +616,7 @@ class _MetricCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(
+              AppText(
                 value,
                 style: TextStyle(
                   color: color,
@@ -647,7 +640,7 @@ class _MetricCard extends StatelessWidget {
           ],
           if (subtitle != null) ...[
             const SizedBox(height: 14),
-            Text(
+            AppText(
               subtitle!,
               style: const TextStyle(color: Color(0xFF475467), fontSize: 13),
             ),
@@ -659,9 +652,9 @@ class _MetricCard extends StatelessWidget {
 }
 
 class _ActivitySummary extends StatelessWidget {
-  const _ActivitySummary({required this.consultant});
+  const _ActivitySummary({required this.stats});
 
-  final ConsultantProfile consultant;
+  final ConsultantActivityStats stats;
 
   @override
   Widget build(BuildContext context) {
@@ -680,7 +673,7 @@ class _ActivitySummary extends StatelessWidget {
             children: [
               Icon(Icons.star_border, color: Color(0xFF005DFF)),
               SizedBox(width: 10),
-              Text(
+              AppText(
                 'Resumo de Atividade',
                 style: TextStyle(
                   color: Color(0xFF111827),
@@ -694,12 +687,12 @@ class _ActivitySummary extends StatelessWidget {
           Row(
             children: [
               _ActivityMetric(
-                value: '${consultant.badges}',
+                value: '${stats.badges}',
                 label: 'Total de Badges',
                 color: const Color(0xFF005DFF),
               ),
               _ActivityMetric(
-                value: '${consultant.specials}',
+                value: '${stats.achievements}',
                 label: 'Conquistas',
                 color: const Color(0xFF8B35FF),
               ),
@@ -708,13 +701,13 @@ class _ActivitySummary extends StatelessWidget {
           const SizedBox(height: 18),
           Row(
             children: [
-              const _ActivityMetric(
-                value: '45',
-                label: 'Sequência de dias',
-                color: Color(0xFFFF4E00),
+              _ActivityMetric(
+                value: '${stats.activityDays}',
+                label: 'Dias ativos',
+                color: const Color(0xFFFF4E00),
               ),
               _ActivityMetric(
-                value: '${consultant.points}',
+                value: '${stats.points}',
                 label: 'Pontos Totais',
                 color: const Color(0xFF00A651),
               ),
@@ -743,7 +736,7 @@ class _ActivityMetric extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          AppText(
             value,
             style: TextStyle(
               color: color,
@@ -752,7 +745,7 @@ class _ActivityMetric extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 7),
-          Text(
+          AppText(
             label,
             style: const TextStyle(color: Color(0xFF475467), fontSize: 12),
           ),
@@ -831,7 +824,7 @@ class _ProfileMiniInfo extends StatelessWidget {
           Icon(icon, color: const Color(0xFF005DFF), size: 15),
           const SizedBox(width: 6),
           Expanded(
-            child: Text(
+            child: AppText(
               text,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -860,7 +853,7 @@ class _SummaryStat extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          Text(
+          AppText(
             value,
             style: TextStyle(
               color: color,
@@ -869,7 +862,7 @@ class _SummaryStat extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          AppText(
             label,
             textAlign: TextAlign.center,
             style: const TextStyle(color: Color(0xFF475467), fontSize: 11),
@@ -891,7 +884,7 @@ class _TabTitle extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Text(
+          child: AppText(
             title,
             style: const TextStyle(
               color: Color(0xFF111827),
@@ -900,7 +893,7 @@ class _TabTitle extends StatelessWidget {
             ),
           ),
         ),
-        Text(
+        AppText(
           trailing,
           style: const TextStyle(color: Color(0xFF667085), fontSize: 12),
         ),
@@ -909,40 +902,120 @@ class _TabTitle extends StatelessWidget {
   }
 }
 
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({
+    required this.icon,
+    required this.title,
+    required this.message,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return _DetailCard(
+      padding: const EdgeInsets.all(22),
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFF667085), size: 32),
+          const SizedBox(height: 12),
+          AppText(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xFF111827),
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          AppText(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xFF667085),
+              fontSize: 13,
+              height: 1.35,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _BadgeImage extends StatelessWidget {
   const _BadgeImage({required this.badge});
 
-  final _ConsultantBadge badge;
+  final ConsultantAwardedBadge badge;
+
+  @override
+  Widget build(BuildContext context) {
+    final imagePath = badge.imagePath.trim();
+    final color = _colorForText(badge.title);
+
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.network(
+          imagePath,
+          width: double.infinity,
+          height: 88,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _BadgeImageFallback(color: color);
+          },
+        ),
+      );
+    }
+
+    if (imagePath.startsWith('assets/')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.asset(
+          imagePath,
+          width: double.infinity,
+          height: 88,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _BadgeImageFallback(color: color);
+          },
+        ),
+      );
+    }
+
+    return _BadgeImageFallback(color: color);
+  }
+}
+
+class _BadgeImageFallback extends StatelessWidget {
+  const _BadgeImageFallback({required this.color});
+
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: Image.asset(
-        badge.imagePath,
+      child: Container(
         width: double.infinity,
         height: 88,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: double.infinity,
-            height: 88,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [badge.color, badge.color.withValues(alpha: 0.55)],
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.workspace_premium_outlined,
-              color: Colors.white,
-              size: 34,
-            ),
-          );
-        },
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [color, color.withValues(alpha: 0.55)],
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(
+          Icons.workspace_premium_outlined,
+          color: Colors.white,
+          size: 34,
+        ),
       ),
     );
   }
@@ -976,83 +1049,6 @@ class _DetailCard extends StatelessWidget {
   }
 }
 
-class _ConsultantBottomNavigation extends StatelessWidget {
-  const _ConsultantBottomNavigation();
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 4,
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      elevation: 12,
-      selectedItemColor: const Color(0xFF006DAA),
-      unselectedItemColor: const Color(0xFF5E6878),
-      selectedFontSize: 11,
-      unselectedFontSize: 11,
-      onTap: (index) {
-        if (index == 4) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          label: 'Início',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.workspace_premium_outlined),
-          label: 'Catálogo',
-        ),
-        BottomNavigationBarItem(
-          icon: _BadgeNavigationIcon(),
-          label: 'Meus\nBadges',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.emoji_events_outlined),
-          label: 'Ranking',
-        ),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-      ],
-    );
-  }
-}
-
-class _BadgeNavigationIcon extends StatelessWidget {
-  const _BadgeNavigationIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        const Icon(Icons.notifications_none),
-        Positioned(
-          top: -7,
-          right: -8,
-          child: Container(
-            width: 16,
-            height: 16,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFF3B48),
-              shape: BoxShape.circle,
-            ),
-            child: const Text(
-              '2',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _TabData {
   const _TabData(this.icon, this.label);
 
@@ -1060,36 +1056,45 @@ class _TabData {
   final String label;
 }
 
-class _ConsultantBadge {
-  const _ConsultantBadge({
-    required this.title,
-    required this.level,
-    required this.date,
-    required this.imagePath,
-    required this.color,
-  });
+String _formatDate(DateTime? date) {
+  if (date == null) {
+    return 'Data indisponível';
+  }
 
-  final String title;
-  final String level;
-  final String date;
-  final String imagePath;
-  final Color color;
+  final day = date.day.toString().padLeft(2, '0');
+  final month = date.month.toString().padLeft(2, '0');
+  return '$day/$month/${date.year}';
 }
 
-class _Achievement {
-  const _Achievement({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.date,
-    required this.color,
-    this.borderColor = const Color(0xFFE0E5EE),
-  });
+String _achievementDateText(DateTime? date) {
+  if (date == null) {
+    return 'Desbloqueado sem data registada';
+  }
 
-  final String icon;
-  final String title;
-  final String description;
-  final String date;
-  final Color color;
-  final Color borderColor;
+  return 'Desbloqueado em ${_formatDate(date)}';
+}
+
+Color _colorForText(String text) {
+  const colors = [
+    Color(0xFF244B7A),
+    Color(0xFF2C5574),
+    Color(0xFF3B2E7E),
+    Color(0xFF5D6878),
+    Color(0xFF0B7DAE),
+    Color(0xFF1D7D79),
+  ];
+  final index = text.codeUnits.fold<int>(0, (sum, code) => sum + code);
+  return colors[index % colors.length];
+}
+
+IconData _achievementIcon(String icon) {
+  return switch (icon.trim().toLowerCase()) {
+    'target' || 'goal' => Icons.track_changes,
+    'crown' || 'leader' => Icons.workspace_premium_outlined,
+    'fire' || 'streak' => Icons.local_fire_department_outlined,
+    'diamond' || 'gem' => Icons.diamond_outlined,
+    'trophy' || 'award' => Icons.emoji_events_outlined,
+    'star' => Icons.star_border,
+    _ => Icons.emoji_events_outlined,
+  };
 }

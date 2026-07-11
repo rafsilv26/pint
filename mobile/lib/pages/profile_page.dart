@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
 import '../models/dashboard_data.dart';
 import '../repositories/mobile_api_repository.dart';
 import '../services/auth_service.dart';
@@ -145,6 +146,8 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppStrings.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 28),
@@ -155,23 +158,23 @@ class _ProfileHeader extends StatelessWidget {
           bottomRight: Radius.circular(22),
         ),
       ),
-      child: const SafeArea(
+      child: SafeArea(
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Perfil',
-              style: TextStyle(
+            AppText(
+              strings.profileTitle,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 26,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            SizedBox(height: 10),
-            Text(
-              'Gestão de conta e preferências',
-              style: TextStyle(
+            const SizedBox(height: 10),
+            AppText(
+              strings.profileSubtitle,
+              style: const TextStyle(
                 color: Color(0xFFE6F5FF),
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
@@ -192,6 +195,8 @@ class _ProfileSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppStrings.of(context);
+
     return _ProfileCard(
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
       child: Column(
@@ -204,7 +209,7 @@ class _ProfileSummaryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       data.userName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -215,7 +220,7 @@ class _ProfileSummaryCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Text(
+                    AppText(
                       email,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -228,7 +233,7 @@ class _ProfileSummaryCard extends StatelessWidget {
                     _SoftPill(
                       text: data.userRole.isNotEmpty
                           ? data.userRole
-                          : 'Consultor',
+                          : strings.consultant,
                     ),
                   ],
                 ),
@@ -243,13 +248,13 @@ class _ProfileSummaryCard extends StatelessWidget {
               Expanded(
                 child: _ProfileStat(
                   value: '${data.totalPoints}',
-                  label: 'Total Pontos',
+                  label: strings.totalPoints,
                 ),
               ),
               Expanded(
                 child: _ProfileStat(
                   value: '${data.badgesWon}',
-                  label: 'Badges Ganhos',
+                  label: strings.earnedBadges,
                 ),
               ),
             ],
@@ -302,7 +307,7 @@ class _ProfileStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
+        AppText(
           value,
           style: const TextStyle(
             color: Color(0xFF005DFF),
@@ -311,7 +316,7 @@ class _ProfileStat extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Text(
+        AppText(
           label,
           textAlign: TextAlign.center,
           style: const TextStyle(color: Color(0xFF4B5563), fontSize: 13),
@@ -334,6 +339,7 @@ class _AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppStrings.of(context);
     final areaValue = [
       if (area.isNotEmpty) area,
       if (serviceLine.isNotEmpty) serviceLine,
@@ -343,20 +349,20 @@ class _AccountCard extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: Column(
         children: [
-          const _SectionHeader(icon: Icons.person_outline, title: 'Conta'),
+          _SectionHeader(icon: Icons.person_outline, title: strings.account),
           _InfoRow(
             icon: Icons.mail_outline,
-            title: 'Email',
-            value: email.isNotEmpty ? email : 'Sem email local',
+            title: strings.email,
+            value: email.isNotEmpty ? email : strings.noLocalEmail,
           ),
           _InfoRow(
             icon: Icons.work_outline,
-            title: 'Área',
-            value: areaValue.isNotEmpty ? areaValue : 'Sem área local',
+            title: strings.area,
+            value: areaValue.isNotEmpty ? areaValue : strings.noLocalArea,
           ),
           _InfoRow(
             icon: Icons.groups_2_outlined,
-            title: 'Diretório de\nConsultores',
+            title: strings.consultantsDirectory,
             showArrow: true,
             onTap: () {
               Navigator.of(context).push(
@@ -368,7 +374,7 @@ class _AccountCard extends StatelessWidget {
           ),
           _InfoRow(
             icon: Icons.description_outlined,
-            title: 'Configurar Assinatura',
+            title: strings.configureSignature,
             showArrow: true,
             onTap: () {
               Navigator.of(context).push(
@@ -380,7 +386,7 @@ class _AccountCard extends StatelessWidget {
           ),
           _InfoRow(
             icon: Icons.shield_outlined,
-            title: 'Alterar Password',
+            title: strings.changePassword,
             showArrow: true,
             onTap: () {
               Navigator.of(context).push(
@@ -401,16 +407,19 @@ class _LanguageSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = AppLanguageScope.of(context);
+    final strings = AppStrings.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(Icons.language, color: Color(0xFF344054), size: 18),
-            SizedBox(width: 8),
-            Text(
-              'Idioma',
-              style: TextStyle(
+            const Icon(Icons.language, color: Color(0xFF344054), size: 18),
+            const SizedBox(width: 8),
+            AppText(
+              strings.languageTitle,
+              style: const TextStyle(
                 color: Color(0xFF344054),
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
@@ -422,10 +431,13 @@ class _LanguageSection extends StatelessWidget {
         Wrap(
           spacing: 10,
           runSpacing: 10,
-          children: const [
-            _LanguageChip(text: '🇵🇹 Português', selected: true),
-            _LanguageChip(text: '🇬🇧 Inglês'),
-            _LanguageChip(text: '🇪🇸 Espanhol'),
+          children: [
+            for (final language in AppLanguage.values)
+              _LanguageChip(
+                text: '${language.flag} ${strings.languageName(language)}',
+                selected: controller.language == language,
+                onTap: () => controller.setLanguage(language),
+              ),
           ],
         ),
       ],
@@ -438,22 +450,24 @@ class _PrivacyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppStrings.of(context);
+
     return _ProfileCard(
       padding: EdgeInsets.zero,
       child: Column(
         children: [
-          const _SectionHeader(
+          _SectionHeader(
             icon: Icons.shield_outlined,
-            title: 'Privacidade e RGPD',
+            title: strings.privacyTitle,
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Aceito a partilha pública dos meus badges e conquistas no ranking da plataforma. Os dados pessoais são tratados de acordo com o RGPD.',
-                  style: TextStyle(
+                AppText(
+                  strings.privacyBody,
+                  style: const TextStyle(
                     color: Color(0xFF344054),
                     fontSize: 15,
                     height: 1.45,
@@ -467,21 +481,21 @@ class _PrivacyCard extends StatelessWidget {
                     color: const Color(0xFFEAF3FF),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Informação RGPD',
-                        style: TextStyle(
+                      AppText(
+                        strings.rgpdInfo,
+                        style: const TextStyle(
                           color: Color(0xFF0F3F98),
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      SizedBox(height: 6),
-                      Text(
-                        'A Softinsa compromete-se a proteger a sua privacidade. Os seus dados são utilizados apenas para fins de gestão de competências e desenvolvimento profissional.',
-                        style: TextStyle(
+                      const SizedBox(height: 6),
+                      AppText(
+                        strings.rgpdBody,
+                        style: const TextStyle(
                           color: Color(0xFF005DFF),
                           fontSize: 13,
                           height: 1.35,
@@ -521,7 +535,7 @@ class _SectionHeader extends StatelessWidget {
         children: [
           Icon(icon, color: const Color(0xFF005DFF), size: 22),
           const SizedBox(width: 12),
-          Text(
+          AppText(
             title,
             style: const TextStyle(
               color: Color(0xFF111827),
@@ -564,14 +578,14 @@ class _InfoRow extends StatelessWidget {
             Icon(icon, color: const Color(0xFF98A2B3), size: 23),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(
+              child: AppText(
                 title,
                 style: const TextStyle(color: Color(0xFF344054), fontSize: 16),
               ),
             ),
             if (value != null)
               Flexible(
-                child: Text(
+                child: AppText(
                   value!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -592,35 +606,44 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _LanguageChip extends StatelessWidget {
-  const _LanguageChip({required this.text, this.selected = false});
+  const _LanguageChip({
+    required this.text,
+    required this.onTap,
+    this.selected = false,
+  });
 
   final String text;
+  final VoidCallback onTap;
   final bool selected;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: selected ? const Color(0xFF2F8AB9) : Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: selected ? const Color(0xFF2F8AB9) : const Color(0xFFE8EDF3),
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F101828),
-            blurRadius: 12,
-            offset: Offset(0, 6),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFF2F8AB9) : Colors.white,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? const Color(0xFF2F8AB9) : const Color(0xFFE8EDF3),
           ),
-        ],
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: selected ? Colors.white : const Color(0xFF344054),
-          fontSize: 15,
-          fontWeight: FontWeight.w800,
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0F101828),
+              blurRadius: 12,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
+        child: AppText(
+          text,
+          style: TextStyle(
+            color: selected ? Colors.white : const Color(0xFF344054),
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+          ),
         ),
       ),
     );
@@ -640,7 +663,7 @@ class _SoftPill extends StatelessWidget {
         color: const Color(0xFFDCEBFF),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(
+      child: AppText(
         text,
         style: const TextStyle(
           color: Color(0xFF005DFF),
@@ -659,13 +682,15 @@ class _LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppStrings.of(context);
+
     return SizedBox(
       width: double.infinity,
       height: 44,
       child: OutlinedButton.icon(
         onPressed: onPressed,
         icon: const Icon(Icons.logout, size: 22),
-        label: const Text('Terminar Sessão'),
+        label: AppText(strings.logout),
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFFFF1D1D),
           side: const BorderSide(color: Color(0xFFFF5A5A)),

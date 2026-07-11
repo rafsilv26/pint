@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
 import '../models/consultant_profile.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../widgets/app_bottom_navigation.dart';
 import 'consultant_detail_page.dart';
 
 class ConsultantsDirectoryPage extends StatefulWidget {
@@ -91,7 +93,12 @@ class _ConsultantsDirectoryPageState extends State<ConsultantsDirectoryPage> {
           );
         },
       ),
-      bottomNavigationBar: const _ConsultantsBottomNavigation(),
+      bottomNavigationBar: AppBottomNavigation(
+        currentDestination: AppBottomNavigationDestination.profile,
+        onDestinationSelected: (destination) {
+          AppNavigationController.open(context, destination);
+        },
+      ),
     );
   }
 }
@@ -125,7 +132,7 @@ class _DirectoryHeader extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             icon: const Icon(Icons.arrow_back, size: 18),
-            label: const Text(
+            label: const AppText(
               'Voltar',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
@@ -139,7 +146,7 @@ class _DirectoryHeader extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    const AppText(
                       'Consultores',
                       style: TextStyle(
                         color: Colors.white,
@@ -148,7 +155,7 @@ class _DirectoryHeader extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(
+                    AppText(
                       '$total consultores',
                       style: const TextStyle(
                         color: Color(0xD9FFFFFF),
@@ -166,7 +173,7 @@ class _DirectoryHeader extends StatelessWidget {
             onChanged: onChanged,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              hintText: 'Pesquisar consultores...',
+              hintText: context.tr('Pesquisar consultores...'),
               hintStyle: const TextStyle(color: Color(0xD9FFFFFF)),
               prefixIcon: const Icon(Icons.search, color: Colors.white),
               contentPadding: const EdgeInsets.symmetric(vertical: 13),
@@ -221,7 +228,7 @@ class _DirectoryList extends StatelessWidget {
                   if (consultants.isEmpty)
                     const Padding(
                       padding: EdgeInsets.only(top: 40),
-                      child: Text(
+                      child: AppText(
                         'Nenhum consultor encontrado.',
                         style: TextStyle(color: Color(0xFF667085)),
                       ),
@@ -300,7 +307,7 @@ class _DirectoryStat extends StatelessWidget {
 
     return Column(
       children: [
-        Text(
+        AppText(
           value,
           style: TextStyle(
             color: color,
@@ -309,7 +316,7 @@ class _DirectoryStat extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 5),
-        Text(
+        AppText(
           label,
           textAlign: TextAlign.center,
           style: const TextStyle(color: Color(0xFF475467), fontSize: 11),
@@ -365,7 +372,7 @@ class _ConsultantListCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
+                        child: AppText(
                           consultant.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -386,7 +393,7 @@ class _ConsultantListCard extends StatelessWidget {
                             color: const Color(0xFFEAF3FF),
                             borderRadius: BorderRadius.circular(999),
                           ),
-                          child: const Text(
+                          child: const AppText(
                             'Você',
                             style: TextStyle(
                               color: Color(0xFF005DFF),
@@ -398,7 +405,7 @@ class _ConsultantListCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(
+                  AppText(
                     consultant.role,
                     style: const TextStyle(
                       color: Color(0xFF475467),
@@ -473,7 +480,7 @@ class _RankBubble extends StatelessWidget {
         color: Color(0xFF2F8AB9),
         shape: BoxShape.circle,
       ),
-      child: Text(
+      child: AppText(
         '$rank',
         style: const TextStyle(
           color: Colors.white,
@@ -481,83 +488,6 @@ class _RankBubble extends StatelessWidget {
           fontWeight: FontWeight.w800,
         ),
       ),
-    );
-  }
-}
-
-class _ConsultantsBottomNavigation extends StatelessWidget {
-  const _ConsultantsBottomNavigation();
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 4,
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      elevation: 12,
-      selectedItemColor: const Color(0xFF006DAA),
-      unselectedItemColor: const Color(0xFF5E6878),
-      selectedFontSize: 11,
-      unselectedFontSize: 11,
-      onTap: (index) {
-        if (index == 4) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          label: 'Início',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.workspace_premium_outlined),
-          label: 'Catálogo',
-        ),
-        BottomNavigationBarItem(
-          icon: _BadgeNavigationIcon(),
-          label: 'Meus\nBadges',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.emoji_events_outlined),
-          label: 'Ranking',
-        ),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-      ],
-    );
-  }
-}
-
-class _BadgeNavigationIcon extends StatelessWidget {
-  const _BadgeNavigationIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        const Icon(Icons.notifications_none),
-        Positioned(
-          top: -7,
-          right: -8,
-          child: Container(
-            width: 16,
-            height: 16,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFF3B48),
-              shape: BoxShape.circle,
-            ),
-            child: const Text(
-              '2',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -638,7 +568,7 @@ class _AreaPill extends StatelessWidget {
         color: const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(
+      child: AppText(
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -670,7 +600,7 @@ class _MiniMetric extends StatelessWidget {
       children: [
         Icon(icon, color: color, size: 13),
         const SizedBox(width: 3),
-        Text(text, style: TextStyle(color: color, fontSize: 11)),
+        AppText(text, style: TextStyle(color: color, fontSize: 11)),
       ],
     );
   }

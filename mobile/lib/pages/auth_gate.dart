@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../repositories/dashboard_repository.dart';
 import '../repositories/mobile_api_repository.dart';
 import '../services/auth_service.dart';
+import 'change_password_page.dart';
 import 'home_page.dart';
 import 'login_page.dart';
 
@@ -15,40 +16,42 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   final AuthService authService = AuthService();
-  late Future<bool> loggedInFuture;
+  late Future<_AuthState> authStateFuture;
 
   @override
   void initState() {
     super.initState();
-    loggedInFuture = _checkSessionAndSync();
+    authStateFuture = _checkSessionAndSync();
   }
 
   void showHome() {
     setState(() {
-      loggedInFuture = _checkSessionAndSync();
+      authStateFuture = _checkSessionAndSync();
     });
   }
 
   void showLogin() {
     setState(() {
-      loggedInFuture = Future.value(false);
+      authStateFuture = Future.value(const _AuthState.loggedOut());
     });
   }
 
-  Future<bool> _checkSessionAndSync() async {
+  Future<_AuthState> _checkSessionAndSync() async {
     final isLoggedIn = await authService.isLoggedIn();
     if (isLoggedIn) {
       await DashboardRepository().prepareLocalData();
       await MobileApiRepository().syncAvailableMobileData();
+      final mustChangePassword = await authService.mustChangePassword();
+      return _AuthState(loggedIn: true, mustChangePassword: mustChangePassword);
     }
 
-    return isLoggedIn;
+    return const _AuthState.loggedOut();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: loggedInFuture,
+    return FutureBuilder<_AuthState>(
+      future: authStateFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -56,7 +59,15 @@ class _AuthGateState extends State<AuthGate> {
           );
         }
 
-        if (snapshot.data == true) {
+        final authState = snapshot.data ?? const _AuthState.loggedOut();
+        if (authState.loggedIn && authState.mustChangePassword) {
+          return ChangePasswordPage(
+            forceChange: true,
+            onPasswordChanged: showHome,
+          );
+        }
+
+        if (authState.loggedIn) {
           return HomePage(onLoggedOut: showLogin);
         }
 
@@ -64,4 +75,13 @@ class _AuthGateState extends State<AuthGate> {
       },
     );
   }
+}
+
+class _AuthState {
+  const _AuthState({required this.loggedIn, required this.mustChangePassword});
+
+  const _AuthState.loggedOut() : loggedIn = false, mustChangePassword = false;
+
+  final bool loggedIn;
+  final bool mustChangePassword;
 }

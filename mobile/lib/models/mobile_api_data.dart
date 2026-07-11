@@ -36,6 +36,118 @@ class ConsultantsDirectoryStats {
   final int specialsTotal;
 }
 
+class ConsultantDetailData {
+  const ConsultantDetailData({
+    required this.consultant,
+    required this.badges,
+    required this.achievements,
+    required this.stats,
+    this.loadedFromCache = false,
+  });
+
+  final ConsultantProfile consultant;
+  final List<ConsultantAwardedBadge> badges;
+  final List<ConsultantSpecialAchievement> achievements;
+  final ConsultantActivityStats stats;
+  final bool loadedFromCache;
+
+  factory ConsultantDetailData.empty({
+    required ConsultantProfile consultant,
+    bool loadedFromCache = false,
+  }) {
+    return ConsultantDetailData(
+      consultant: consultant,
+      badges: const [],
+      achievements: const [],
+      stats: ConsultantActivityStats.fromTotals(
+        points: consultant.points,
+        badges: consultant.badges,
+        achievements: consultant.specials,
+      ),
+      loadedFromCache: loadedFromCache,
+    );
+  }
+}
+
+class ConsultantAwardedBadge {
+  const ConsultantAwardedBadge({
+    required this.badgeId,
+    required this.title,
+    required this.level,
+    required this.points,
+    required this.imagePath,
+    this.obtainedAt,
+    this.valid = true,
+  });
+
+  final int badgeId;
+  final String title;
+  final String level;
+  final int points;
+  final String imagePath;
+  final DateTime? obtainedAt;
+  final bool valid;
+}
+
+class ConsultantSpecialAchievement {
+  const ConsultantSpecialAchievement({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.icon,
+    this.awardedAt,
+  });
+
+  final int id;
+  final String title;
+  final String description;
+  final String icon;
+  final DateTime? awardedAt;
+}
+
+class ConsultantActivityStats {
+  const ConsultantActivityStats({
+    required this.completionRate,
+    required this.monthlyGrowthPercent,
+    required this.activityDays,
+    required this.points,
+    required this.badges,
+    required this.achievements,
+  });
+
+  final double completionRate;
+  final int monthlyGrowthPercent;
+  final int activityDays;
+  final int points;
+  final int badges;
+  final int achievements;
+
+  factory ConsultantActivityStats.fromTotals({
+    required int points,
+    required int badges,
+    required int achievements,
+    int totalAvailableBadges = 0,
+    int recentPoints = 0,
+    int activityDays = 0,
+  }) {
+    final completionRate = totalAvailableBadges <= 0
+        ? 0.0
+        : (badges / totalAvailableBadges).clamp(0.0, 1.0).toDouble();
+    final monthlyGrowthPercent = points <= 0
+        ? 0
+        : ((recentPoints / points) * 100).round();
+
+    return ConsultantActivityStats(
+      completionRate: completionRate,
+      monthlyGrowthPercent: monthlyGrowthPercent,
+      activityDays: activityDays,
+      points: points,
+      badges: badges,
+      achievements: achievements,
+    );
+  }
+}
+
 class AppNotification {
   const AppNotification({
     required this.id,
@@ -322,6 +434,7 @@ class CatalogBadge {
     required this.imagePath,
     required this.requirements,
     this.applicationStatus = '',
+    this.application,
   });
 
   final int id;
@@ -334,10 +447,79 @@ class CatalogBadge {
   final String type;
   final String provider;
   final String imagePath;
-  final List<String> requirements;
+  final List<CatalogRequirement> requirements;
   final String applicationStatus;
+  final CatalogApplication? application;
 
   bool get hasApplication => applicationStatus.isNotEmpty;
+}
+
+class CatalogApplication {
+  const CatalogApplication({
+    required this.id,
+    required this.status,
+    required this.statusLabel,
+    required this.evidences,
+  });
+
+  final int id;
+  final String status;
+  final String statusLabel;
+  final List<ApplicationEvidence> evidences;
+}
+
+class CatalogRequirement {
+  const CatalogRequirement({
+    required this.id,
+    required this.title,
+    this.description = '',
+  });
+
+  final int id;
+  final String title;
+  final String description;
+
+  String get displayText {
+    if (description.trim().isEmpty) {
+      return title;
+    }
+
+    return '$title\n$description';
+  }
+}
+
+class EvidenceAttachment {
+  const EvidenceAttachment({
+    required this.requirementId,
+    required this.path,
+    required this.fileName,
+  });
+
+  final int requirementId;
+  final String path;
+  final String fileName;
+}
+
+class ApplicationEvidence {
+  const ApplicationEvidence({
+    required this.id,
+    required this.fileName,
+    required this.url,
+    required this.type,
+    this.requirementId,
+    this.requirementTitle = '',
+    this.validated,
+  });
+
+  final int id;
+  final int? requirementId;
+  final String requirementTitle;
+  final String fileName;
+  final String url;
+  final String type;
+  final bool? validated;
+
+  bool get hasUrl => url.trim().isNotEmpty;
 }
 
 class MyBadgeApplication {
@@ -350,6 +532,7 @@ class MyBadgeApplication {
     required this.statusLabel,
     required this.points,
     required this.imagePath,
+    this.evidences = const [],
     this.createdAt,
     this.updatedAt,
   });
@@ -362,6 +545,7 @@ class MyBadgeApplication {
   final String statusLabel;
   final int points;
   final String imagePath;
+  final List<ApplicationEvidence> evidences;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 

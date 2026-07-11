@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
+
 class AuthTextField extends StatelessWidget {
   const AuthTextField({
     super.key,
@@ -26,7 +28,7 @@ class AuthTextField extends StatelessWidget {
       obscureText: obscureText,
       style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
       decoration: InputDecoration(
-        hintText: hintText,
+        hintText: context.tr(hintText),
         hintStyle: const TextStyle(
           color: Color(0xFF9EA4AF),
           fontWeight: FontWeight.w400,
@@ -54,7 +56,7 @@ class AuthTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        AppText(
           label!,
           style: const TextStyle(
             color: Color(0xFF2E3138),
@@ -94,7 +96,7 @@ class PrimaryAuthButton extends StatelessWidget {
           ),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
-        child: Text(text),
+        child: AppText(text),
       ),
     );
   }

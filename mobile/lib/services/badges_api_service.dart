@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/dashboard_data.dart';
+import '../models/mobile_api_data.dart';
 import 'api_config.dart';
 import 'auth_service.dart';
 
@@ -158,34 +160,59 @@ class BadgesApiService {
   Future<Map<String, dynamic>?> submitCandidatura({
     required int badgeId,
     List<int> requisitoIds = const [],
+    List<EvidenceAttachment> evidenceFiles = const [],
     String? descricao,
   }) async {
     if (baseUrl.trim().isEmpty) {
       throw const ApiNotConfiguredException();
     }
 
-    final response = await client
-        .post(
-          Uri.parse('$_normalizedBaseUrl/candidaturas'),
-          headers: await _headers(),
-          body: jsonEncode({
-            'badgeId': badgeId,
-            'requisitoIds': requisitoIds,
-            if (descricao != null && descricao.isNotEmpty)
-              'descricao': descricao,
-          }),
-        )
-        .timeout(const Duration(seconds: 12));
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$_normalizedBaseUrl/candidaturas'),
+    );
+    request.headers.addAll(await _authHeaders());
+    request.fields['badgeId'] = badgeId.toString();
+    if (descricao != null && descricao.isNotEmpty) {
+      request.fields['descricao'] = descricao;
+    }
+
+    final requirementIds = evidenceFiles.isEmpty
+        ? requisitoIds
+        : evidenceFiles.map((file) => file.requirementId).toList();
+    for (final requisitoId in requirementIds) {
+      request.files.add(
+        http.MultipartFile.fromString('requisitoIds', requisitoId.toString()),
+      );
+    }
+
+    for (final evidence in evidenceFiles) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'evidencias',
+          evidence.path,
+          filename: evidence.fileName,
+          contentType: _contentTypeForFile(evidence.fileName),
+        ),
+      );
+    }
+
+    final streamedResponse = await client
+        .send(request)
+        .timeout(const Duration(seconds: 35));
+    final response = await http.Response.fromStream(streamedResponse);
+    final decoded = response.body.trim().isEmpty
+        ? null
+        : _decodeResponse(response);
 
     if (response.statusCode == 204 || response.body.trim().isEmpty) {
       return null;
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw ApiRequestException(response.statusCode);
+      throw ApiRequestException(response.statusCode, _apiMessage(decoded));
     }
 
-    final decoded = _decodeResponse(response);
     if (decoded is Map<String, dynamic>) {
       return decoded;
     }
@@ -194,6 +221,16 @@ class BadgesApiService {
     }
 
     return null;
+  }
+
+  MediaType _contentTypeForFile(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+    return switch (extension) {
+      'pdf' => MediaType('application', 'pdf'),
+      'jpg' || 'jpeg' => MediaType('image', 'jpeg'),
+      'png' => MediaType('image', 'png'),
+      _ => MediaType('application', 'octet-stream'),
+    };
   }
 
   Uri _dashboardUri(DateTime? lastUpdate) {
@@ -552,6 +589,28 @@ class BadgesApiService {
     };
   }
 
+  Future<Map<String, String>> _authHeaders() async {
+    final token = await tokenProvider();
+
+    return {
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+    };
+  }
+
+  String? _apiMessage(Object? decoded) {
+    if (decoded is! Map) {
+      return null;
+    }
+
+    final message =
+        decoded['mensagem'] ?? decoded['message'] ?? decoded['erro'];
+    if (message is String && message.trim().isNotEmpty) {
+      return message;
+    }
+
+    return null;
+  }
+
   static Future<String?> _readStoredToken() async {
     final preferences = await SharedPreferences.getInstance();
     return preferences.getString(AuthService.tokenKey);
@@ -579,7 +638,8 @@ class ApiInvalidResponseException implements Exception {
 }
 
 class ApiRequestException implements Exception {
-  const ApiRequestException(this.statusCode);
+  const ApiRequestException(this.statusCode, [this.message]);
 
   final int statusCode;
+  final String? message;
 }

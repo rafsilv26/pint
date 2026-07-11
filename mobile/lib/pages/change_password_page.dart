@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
+import '../services/auth_service.dart';
+
 class ChangePasswordPage extends StatefulWidget {
-  const ChangePasswordPage({super.key});
+  const ChangePasswordPage({
+    super.key,
+    this.forceChange = false,
+    this.onPasswordChanged,
+  });
+
+  final bool forceChange;
+  final VoidCallback? onPasswordChanged;
 
   @override
   State<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
 
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
+  final AuthService authService = AuthService();
   final currentPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
@@ -15,6 +26,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   bool hideCurrent = true;
   bool hideNew = true;
   bool hideConfirm = true;
+  bool isSubmitting = false;
 
   bool get hasMinLength => newPasswordController.text.length >= 8;
   bool get hasUppercase =>
@@ -28,13 +40,20 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   bool get passwordsMatch =>
       newPasswordController.text.isNotEmpty &&
       newPasswordController.text == confirmPasswordController.text;
+  bool get passwordChanged =>
+      currentPasswordController.text.trim().isNotEmpty &&
+      newPasswordController.text.trim().isNotEmpty &&
+      currentPasswordController.text.trim() !=
+          newPasswordController.text.trim();
   bool get canSubmit =>
+      !isSubmitting &&
       currentPasswordController.text.isNotEmpty &&
       hasMinLength &&
       hasUppercase &&
       hasLowercase &&
       hasNumber &&
       hasSpecial &&
+      passwordChanged &&
       passwordsMatch;
 
   @override
@@ -57,168 +76,244 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     super.dispose();
   }
 
-  void submit() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Palavra-passe alterada com sucesso.')),
-    );
-    Navigator.of(context).pop();
+  Future<void> submit() async {
+    if (!canSubmit) {
+      return;
+    }
+
+    setState(() {
+      isSubmitting = true;
+    });
+
+    try {
+      await authService.changePassword(
+        currentPassword: currentPasswordController.text,
+        newPassword: newPasswordController.text,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: AppText(
+            'Palavra-passe currentPassword == newPasswordsucesso.',
+          ),
+        ),
+      );
+      if (widget.onPasswordChanged != null) {
+        widget.onPasswordChanged!();
+      } else {
+        Navigator.of(context).pop(true);
+      }
+    } on AuthException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: AppText(error.message)));
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: AppText('Nao foi possivel comunicar com a API.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FB),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            const _ChangePasswordHeader(),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final horizontalPadding = constraints.maxWidth < 380
-                      ? 16.0
-                      : 24.0;
+    return PopScope(
+      canPop: !widget.forceChange,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF4F7FB),
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              _ChangePasswordHeader(forceChange: widget.forceChange),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final horizontalPadding = constraints.maxWidth < 380
+                        ? 16.0
+                        : 24.0;
 
-                  return SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      28,
-                      horizontalPadding,
-                      28,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 560),
-                        child: Column(
-                          children: [
-                            _PasswordSection(
-                              icon: Icons.shield_outlined,
-                              title: 'Palavra-Passe Atual',
-                              child: _PasswordField(
-                                controller: currentPasswordController,
-                                hintText: 'Insira a palavra-passe atual',
-                                obscureText: hideCurrent,
-                                onToggle: () {
-                                  setState(() {
-                                    hideCurrent = !hideCurrent;
-                                  });
-                                },
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(
+                        horizontalPadding,
+                        28,
+                        horizontalPadding,
+                        28,
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 560),
+                          child: Column(
+                            children: [
+                              if (widget.forceChange) ...[
+                                const _ForcedPasswordNotice(),
+                                const SizedBox(height: 22),
+                              ],
+                              _PasswordSection(
+                                icon: Icons.shield_outlined,
+                                title: 'Palavra-Passe Atual',
+                                child: _PasswordField(
+                                  controller: currentPasswordController,
+                                  hintText:
+                                      'Insira a palavra-passe fornecida pela empresa',
+                                  obscureText: hideCurrent,
+                                  onToggle: () {
+                                    setState(() {
+                                      hideCurrent = !hideCurrent;
+                                    });
+                                  },
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 22),
-                            _PasswordSection(
-                              icon: Icons.lock_outline,
-                              title: 'Nova Palavra-Passe',
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _PasswordField(
-                                    controller: newPasswordController,
-                                    hintText: 'Insira a nova palavra-passe',
-                                    obscureText: hideNew,
-                                    onToggle: () {
-                                      setState(() {
-                                        hideNew = !hideNew;
-                                      });
-                                    },
-                                  ),
-                                  const SizedBox(height: 22),
-                                  const Text(
-                                    'Requisitos da palavra-passe:',
-                                    style: TextStyle(
-                                      color: Color(0xFF344054),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
+                              const SizedBox(height: 22),
+                              _PasswordSection(
+                                icon: Icons.lock_outline,
+                                title: 'Nova Palavra-Passe',
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _PasswordField(
+                                      controller: newPasswordController,
+                                      hintText: 'Insira a nova palavra-passe',
+                                      obscureText: hideNew,
+                                      onToggle: () {
+                                        setState(() {
+                                          hideNew = !hideNew;
+                                        });
+                                      },
                                     ),
-                                  ),
-                                  const SizedBox(height: 14),
-                                  _RequirementRow(
-                                    text: 'Mínimo de 8 caracteres',
-                                    checked: hasMinLength,
-                                  ),
-                                  _RequirementRow(
-                                    text: 'Pelo menos uma letra maiúscula',
-                                    checked: hasUppercase,
-                                  ),
-                                  _RequirementRow(
-                                    text: 'Pelo menos uma letra minúscula',
-                                    checked: hasLowercase,
-                                  ),
-                                  _RequirementRow(
-                                    text: 'Pelo menos um número',
-                                    checked: hasNumber,
-                                  ),
-                                  _RequirementRow(
-                                    text:
-                                        "Pelo menos um caractere especial (!@#\$%^&*)",
-                                    checked: hasSpecial,
-                                  ),
-                                ],
+                                    const SizedBox(height: 22),
+                                    const AppText(
+                                      'Requisitos da palavra-passe:',
+                                      style: TextStyle(
+                                        color: Color(0xFF344054),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 14),
+                                    _RequirementRow(
+                                      text: 'Mínimo de 8 caracteres',
+                                      checked: hasMinLength,
+                                    ),
+                                    _RequirementRow(
+                                      text: 'Pelo menos uma letra maiúscula',
+                                      checked: hasUppercase,
+                                    ),
+                                    _RequirementRow(
+                                      text: 'Pelo menos uma letra minúscula',
+                                      checked: hasLowercase,
+                                    ),
+                                    _RequirementRow(
+                                      text: 'Pelo menos um número',
+                                      checked: hasNumber,
+                                    ),
+                                    _RequirementRow(
+                                      text:
+                                          "Pelo menos um caractere especial (!@#\$%^&*)",
+                                      checked: hasSpecial,
+                                    ),
+                                    _RequirementRow(
+                                      text: 'Diferente da palavra-passe atual',
+                                      checked: passwordChanged,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 22),
-                            _PasswordSection(
-                              icon: Icons.lock_outline,
-                              title: 'Confirmar Nova Palavra-Passe',
-                              child: _PasswordField(
-                                controller: confirmPasswordController,
-                                hintText: 'Confirme a nova palavra-passe',
-                                obscureText: hideConfirm,
-                                onToggle: () {
-                                  setState(() {
-                                    hideConfirm = !hideConfirm;
-                                  });
-                                },
+                              const SizedBox(height: 22),
+                              _PasswordSection(
+                                icon: Icons.lock_outline,
+                                title: 'Confirmar Nova Palavra-Passe',
+                                child: _PasswordField(
+                                  controller: confirmPasswordController,
+                                  hintText: 'Confirme a nova palavra-passe',
+                                  obscureText: hideConfirm,
+                                  onToggle: () {
+                                    setState(() {
+                                      hideConfirm = !hideConfirm;
+                                    });
+                                  },
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 26),
-                            const _SecurityTips(),
-                            const SizedBox(height: 26),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 58,
-                              child: FilledButton.icon(
-                                onPressed: canSubmit ? submit : null,
-                                icon: const Icon(Icons.lock_outline),
-                                label: const Text('Alterar Palavra-Passe'),
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: const Color(0xFF006DAA),
-                                  disabledBackgroundColor: const Color(
-                                    0xFFD0D5DD,
+                              const SizedBox(height: 26),
+                              const _SecurityTips(),
+                              const SizedBox(height: 26),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 58,
+                                child: FilledButton.icon(
+                                  onPressed: canSubmit ? submit : null,
+                                  icon: isSubmitting
+                                      ? const SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Icon(Icons.lock_outline),
+                                  label: AppText(
+                                    isSubmitting
+                                        ? 'A alterar...'
+                                        : 'Alterar Palavra-Passe',
                                   ),
-                                  disabledForegroundColor: const Color(
-                                    0xFF667085,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  textStyle: const TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w800,
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFF006DAA),
+                                    disabledBackgroundColor: const Color(
+                                      0xFFD0D5DD,
+                                    ),
+                                    disabledForegroundColor: const Color(
+                                      0xFF667085,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    textStyle: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 26),
-                            const Text(
-                              'Após alterar, será necessário fazer login novamente em alguns dispositivos',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Color(0xFF667085),
-                                fontSize: 16,
-                                height: 1.4,
+                              const SizedBox(height: 26),
+                              const AppText(
+                                'Depois da alteração, a aplicação continuará ligada com a nova palavra-passe.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Color(0xFF667085),
+                                  fontSize: 16,
+                                  height: 1.4,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -226,7 +321,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 }
 
 class _ChangePasswordHeader extends StatelessWidget {
-  const _ChangePasswordHeader();
+  const _ChangePasswordHeader({required this.forceChange});
+
+  final bool forceChange;
 
   @override
   Widget build(BuildContext context) {
@@ -237,21 +334,23 @@ class _ChangePasswordHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextButton.icon(
-            onPressed: () => Navigator.of(context).pop(),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(0, 34),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          if (!forceChange) ...[
+            TextButton.icon(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(0, 34),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              icon: const Icon(Icons.arrow_back, size: 22),
+              label: const AppText(
+                'Voltar',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
             ),
-            icon: const Icon(Icons.arrow_back, size: 22),
-            label: const Text(
-              'Voltar',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-          ),
-          const SizedBox(height: 26),
+            const SizedBox(height: 26),
+          ],
           Row(
             children: [
               Container(
@@ -273,7 +372,7 @@ class _ChangePasswordHeader extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       'Alterar Palavra-Passe',
                       style: TextStyle(
                         color: Colors.white,
@@ -282,7 +381,7 @@ class _ChangePasswordHeader extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 12),
-                    Text(
+                    AppText(
                       'Mantenha a sua conta segura',
                       style: TextStyle(color: Color(0xFFE6F5FF), fontSize: 17),
                     ),
@@ -332,7 +431,7 @@ class _PasswordSection extends StatelessWidget {
               Icon(icon, color: const Color(0xFF005DFF), size: 28),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
+                child: AppText(
                   title,
                   style: const TextStyle(
                     color: Color(0xFF111827),
@@ -345,6 +444,41 @@ class _PasswordSection extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           child,
+        ],
+      ),
+    );
+  }
+}
+
+class _ForcedPasswordNotice extends StatelessWidget {
+  const _ForcedPasswordNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF7E6),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFFFC861)),
+      ),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline, color: Color(0xFFFF8A00), size: 26),
+          SizedBox(width: 12),
+          Expanded(
+            child: AppText(
+              'Por segurança, altera a palavra-passe fornecida pela empresa antes de continuar.',
+              style: TextStyle(
+                color: Color(0xFF7A4E00),
+                fontSize: 15,
+                height: 1.35,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -371,7 +505,7 @@ class _PasswordField extends StatelessWidget {
       obscureText: obscureText,
       style: const TextStyle(fontSize: 17),
       decoration: InputDecoration(
-        hintText: hintText,
+        hintText: context.tr(hintText),
         hintStyle: const TextStyle(color: Color(0xFF98A2B3)),
         suffixIcon: IconButton(
           onPressed: onToggle,
@@ -432,7 +566,7 @@ class _RequirementRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
+            child: AppText(
               text,
               style: TextStyle(
                 color: checked
@@ -469,7 +603,7 @@ class _SecurityTips extends StatelessWidget {
             children: [
               Icon(Icons.shield_outlined, color: Color(0xFF174193), size: 30),
               SizedBox(width: 12),
-              Text(
+              AppText(
                 'Dicas de Segurança',
                 style: TextStyle(
                   color: Color(0xFF174193),
@@ -502,13 +636,13 @@ class _TipLine extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          const AppText(
             '•',
             style: TextStyle(color: Color(0xFF005DFF), fontSize: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
+            child: AppText(
               text,
               style: const TextStyle(
                 color: Color(0xFF005DFF),

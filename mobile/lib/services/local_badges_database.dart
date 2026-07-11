@@ -18,7 +18,7 @@ class LocalBadgesDatabase {
   Database? _database;
   DashboardData? _memoryDashboard;
 
-  static const int _databaseVersion = 4;
+  static const int _databaseVersion = 6;
 
   Future<Database> get database async {
     final currentDatabase = _database;
@@ -77,6 +77,29 @@ class LocalBadgesDatabase {
     }
     if (oldVersion < 4) {
       await _createMobileFeatureTables(db);
+    }
+    if (oldVersion < 5) {
+      await _createConsultantDetailTables(db);
+    }
+    if (oldVersion < 6) {
+      await _addEvidenciaRequirementColumn(db);
+    }
+  }
+
+  Future<void> _addEvidenciaRequirementColumn(Database db) async {
+    await _addColumnIfMissing(db, 'evidencias', 'requisito_id', 'INTEGER');
+  }
+
+  Future<void> _addColumnIfMissing(
+    Database db,
+    String table,
+    String column,
+    String definition,
+  ) async {
+    final columns = await db.rawQuery('PRAGMA table_info($table)');
+    final exists = columns.any((row) => row['name'] == column);
+    if (!exists) {
+      await db.execute('ALTER TABLE $table ADD COLUMN $column $definition');
     }
   }
 
@@ -252,6 +275,7 @@ class LocalBadgesDatabase {
       CREATE TABLE IF NOT EXISTS evidencias (
         id INTEGER PRIMARY KEY,
         candidatura_id INTEGER,
+        requisito_id INTEGER,
         url TEXT,
         nome_ficheiro TEXT,
         tipo TEXT,
@@ -295,7 +319,63 @@ class LocalBadgesDatabase {
       'ON historico_candidaturas (candidatura_id)',
     );
 
+    await _createConsultantDetailTables(db);
     await _createMobileFeatureTables(db);
+  }
+
+  Future<void> _createConsultantDetailTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS consultant_badges (
+        consultor_id INTEGER NOT NULL,
+        badge_id INTEGER NOT NULL,
+        obtained_date TEXT,
+        expiration_date TEXT,
+        duration_months INTEGER,
+        valid INTEGER NOT NULL,
+        points_obtained INTEGER,
+        created_at TEXT,
+        updated_at TEXT,
+        raw_json TEXT NOT NULL,
+        last_synced_at TEXT NOT NULL,
+        PRIMARY KEY (consultor_id, badge_id)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS badge_premium (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        icon TEXT NOT NULL,
+        criteria_description TEXT NOT NULL,
+        active INTEGER NOT NULL,
+        created_at TEXT,
+        updated_at TEXT,
+        raw_json TEXT NOT NULL,
+        last_synced_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS consultant_premium_badges (
+        badge_premium_id INTEGER NOT NULL,
+        consultor_id INTEGER NOT NULL,
+        achievement_date TEXT,
+        created_at TEXT,
+        raw_json TEXT NOT NULL,
+        last_synced_at TEXT NOT NULL,
+        PRIMARY KEY (badge_premium_id, consultor_id)
+      )
+    ''');
+
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_consultant_badges_consultor '
+      'ON consultant_badges (consultor_id)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_consultant_premium_badges_consultor '
+      'ON consultant_premium_badges (consultor_id)',
+    );
   }
 
   Future<void> _createMobileFeatureTables(Database db) async {
@@ -646,6 +726,73 @@ class LocalBadgesDatabase {
         syncedAt: timestamp,
       );
 
+      final badgePremiumRows = _mapsFromPayload(payload, const [
+        'badgePremium',
+        'badge-premium',
+        'badge_premium',
+      ]);
+      if (_payloadHasCollection(payload, const [
+        'badgePremium',
+        'badge-premium',
+        'badge_premium',
+      ])) {
+        await transaction.delete('badge_premium');
+        await _upsertMaps(
+          transaction,
+          table: 'badge_premium',
+          maps: badgePremiumRows,
+          idKeys: const ['id', 'badgePremiumId', 'BADGEPREMIUMID'],
+          values: (row) => {
+            'name': _textValue(row, const ['name', 'nome']) ?? '',
+            'description':
+                _textValue(row, const ['description', 'descricao']) ?? '',
+            'icon': _textValue(row, const ['icon', 'icone']) ?? 'star',
+            'criteria_description':
+                _textValue(row, const ['criteriaDescription']) ?? '',
+            'active': _boolIntValue(row, const ['active', 'ativo']) ?? 1,
+            'created_at': _textValue(row, const ['createdAt', 'CREATED_AT']),
+            'updated_at': _textValue(row, const ['updatedAt', 'UPDATED_AT']),
+          },
+          syncedAt: timestamp,
+        );
+      }
+
+      final consultantBadgeRows = _mapsFromPayload(payload, const [
+        'consultorBadges',
+        'consultor-badges',
+        'consultor_badges',
+      ]);
+      if (_payloadHasCollection(payload, const [
+        'consultorBadges',
+        'consultor-badges',
+        'consultor_badges',
+      ])) {
+        await transaction.delete('consultant_badges');
+        await _upsertConsultantBadges(
+          transaction,
+          consultantBadgeRows,
+          timestamp,
+        );
+      }
+
+      final consultantPremiumRows = _mapsFromPayload(payload, const [
+        'consultorBadgePremium',
+        'consultor-badge-premium',
+        'consultor_badge_premium',
+      ]);
+      if (_payloadHasCollection(payload, const [
+        'consultorBadgePremium',
+        'consultor-badge-premium',
+        'consultor_badge_premium',
+      ])) {
+        await transaction.delete('consultant_premium_badges');
+        await _upsertConsultantPremiumBadges(
+          transaction,
+          consultantPremiumRows,
+          timestamp,
+        );
+      }
+
       await _upsertMaps(
         transaction,
         table: 'requirements',
@@ -730,6 +877,7 @@ class LocalBadgesDatabase {
             'candidaturaId',
             'CANDIDATURAID',
           ]),
+          'requisito_id': _intValue(row, const ['requisitoId', 'REQUISITOID']),
           'url': _textValue(row, const ['url', 'FILEPATH']),
           'nome_ficheiro': _textValue(row, const ['nomeFicheiro', 'FILEPATH']),
           'tipo': _textValue(row, const ['tipo', 'TIPO_ARQUIVO']),
@@ -895,12 +1043,16 @@ class LocalBadgesDatabase {
 
   Future<ConsultantsDirectoryData> getConsultantsDirectory() async {
     if (_useMemoryStore) {
+      final consultants = _sampleConsultants();
       return ConsultantsDirectoryData(
-        consultants: ConsultantProfile.samples(),
-        stats: const ConsultantsDirectoryStats(
-          consultants: 10,
-          badgesTotal: 79,
-          specialsTotal: 14,
+        consultants: consultants,
+        stats: ConsultantsDirectoryStats(
+          consultants: consultants.length,
+          badgesTotal: consultants.fold(0, (sum, item) => sum + item.badges),
+          specialsTotal: consultants.fold(
+            0,
+            (sum, item) => sum + item.specials,
+          ),
         ),
         loadedFromCache: true,
       );
@@ -936,7 +1088,7 @@ class LocalBadgesDatabase {
 
   Future<ConsultantProfile?> getCurrentConsultantProfile() async {
     if (_useMemoryStore) {
-      return ConsultantProfile.samples().first;
+      return _sampleConsultants().first;
     }
 
     final db = await database;
@@ -1388,7 +1540,9 @@ class LocalBadgesDatabase {
           type: badge.tag,
           provider: '',
           imagePath: badge.iconName,
-          requirements: badge.prerequisites,
+          requirements: badge.prerequisites.asMap().entries.map((item) {
+            return CatalogRequirement(id: item.key + 1, title: item.value);
+          }).toList(),
         );
       }).toList();
     }
@@ -1417,14 +1571,24 @@ class LocalBadgesDatabase {
       'candidaturas',
       orderBy: 'updated_at DESC, created_at DESC',
     );
-    final applicationByBadgeId = <int, String>{};
+    final applicationByBadgeId = <int, CatalogApplication>{};
     for (final row in applicationRows) {
       final badgeId = row['badge_id'] as int?;
       if (badgeId == null || applicationByBadgeId.containsKey(badgeId)) {
         continue;
       }
-      applicationByBadgeId[badgeId] = _statusLabel(
-        row['estado'] as String? ?? '',
+      final candidaturaId = row['id'] as int? ?? 0;
+      final raw = _jsonMap(row['raw_json'] as String?);
+      final status = _statusCodeFromRow(raw) ?? row['estado'] as String? ?? '';
+      final statusMap = _mapValue(raw, const ['status']);
+      final statusLabel =
+          _textValue(statusMap, const ['name', 'description']) ??
+          _statusLabel(status);
+      applicationByBadgeId[badgeId] = CatalogApplication(
+        id: candidaturaId,
+        status: status,
+        statusLabel: statusLabel,
+        evidences: await _applicationEvidences(db, candidaturaId),
       );
     }
 
@@ -1442,11 +1606,8 @@ class LocalBadgesDatabase {
       result.add(
         _catalogBadgeFromRow(
           row,
-          requirementRows
-              .map((item) => item['nome'] as String? ?? '')
-              .where((item) => item.isNotEmpty)
-              .toList(),
-          applicationByBadgeId[row['id'] as int? ?? 0] ?? '',
+          requirementRows.map(_catalogRequirementFromRow).toList(),
+          applicationByBadgeId[row['id'] as int? ?? 0],
         ),
       );
     }
@@ -1501,7 +1662,123 @@ class LocalBadgesDatabase {
       ORDER BY c.updated_at DESC, c.created_at DESC
     ''');
 
-    return rows.map(_myBadgeApplicationFromRow).toList();
+    final applications = <MyBadgeApplication>[];
+    for (final row in rows) {
+      final candidaturaId = row['candidatura_id'] as int? ?? 0;
+      applications.add(
+        _myBadgeApplicationFromRow(
+          row,
+          await _applicationEvidences(db, candidaturaId),
+        ),
+      );
+    }
+
+    return applications;
+  }
+
+  Future<ConsultantDetailData> getConsultantDetail(
+    ConsultantProfile consultant,
+  ) async {
+    if (_useMemoryStore) {
+      return _sampleConsultantDetail(consultant);
+    }
+
+    final consultantId = consultant.id;
+    if (consultantId == null) {
+      return ConsultantDetailData.empty(
+        consultant: consultant,
+        loadedFromCache: true,
+      );
+    }
+
+    final db = await database;
+    final consultantRows = await db.query(
+      'consultants',
+      where: 'id = ?',
+      whereArgs: [consultantId],
+      limit: 1,
+    );
+    final localConsultant = consultantRows.isEmpty
+        ? consultant
+        : _consultantFromRow(consultantRows.first);
+
+    final badgeRows = await db.rawQuery(
+      '''
+      SELECT
+        cb.consultor_id,
+        cb.badge_id,
+        cb.obtained_date,
+        cb.valid,
+        cb.points_obtained,
+        b.nome AS badge_nome,
+        b.imagem AS badge_imagem,
+        b.pontos AS badge_pontos,
+        l.nome AS level_nome,
+        l.ordem AS level_ordem
+      FROM consultant_badges cb
+      LEFT JOIN badges b ON b.id = cb.badge_id
+      LEFT JOIN levels l ON l.id = b.level_id
+      WHERE cb.consultor_id = ?
+      ORDER BY cb.obtained_date DESC, b.nome ASC
+    ''',
+      [consultantId],
+    );
+
+    final achievementRows = await db.rawQuery(
+      '''
+      SELECT
+        cpb.badge_premium_id,
+        cpb.achievement_date,
+        cpb.created_at AS award_created_at,
+        bp.name,
+        bp.description,
+        bp.icon,
+        bp.criteria_description
+      FROM consultant_premium_badges cpb
+      LEFT JOIN badge_premium bp ON bp.id = cpb.badge_premium_id
+      WHERE cpb.consultor_id = ?
+      ORDER BY cpb.achievement_date DESC, bp.name ASC
+    ''',
+      [consultantId],
+    );
+
+    final totalBadgeRows = await db.rawQuery(
+      'SELECT COUNT(*) AS total FROM badges WHERE ativo IS NULL OR ativo = 1',
+    );
+    final totalAvailableBadges = Sqflite.firstIntValue(totalBadgeRows) ?? 0;
+
+    final badges = badgeRows.map(_consultantAwardedBadgeFromRow).toList();
+    final achievements = achievementRows
+        .map(_consultantSpecialAchievementFromRow)
+        .toList();
+    final points = badges.fold<int>(0, (sum, badge) => sum + badge.points);
+    final recentPoints = badges
+        .where(_wasAwardedInLastThirtyDays)
+        .fold<int>(0, (sum, badge) => sum + badge.points);
+    final activityDays = _distinctActivityDays(badges, achievements);
+
+    final enrichedConsultant = localConsultant.copyWith(
+      points: points > 0 ? points : localConsultant.points,
+      badges: badges.isNotEmpty ? badges.length : localConsultant.badges,
+      specials: achievements.isNotEmpty
+          ? achievements.length
+          : localConsultant.specials,
+    );
+
+    return ConsultantDetailData(
+      consultant: enrichedConsultant,
+      badges: badges,
+      achievements: achievements,
+      stats: ConsultantActivityStats.fromTotals(
+        points: enrichedConsultant.points,
+        badges: enrichedConsultant.badges,
+        achievements: enrichedConsultant.specials,
+        totalAvailableBadges: totalAvailableBadges,
+        recentPoints: recentPoints,
+        activityDays: activityDays,
+      ),
+      loadedFromCache: true,
+    );
   }
 
   Future<DashboardData?> getDashboard() async {
@@ -1589,6 +1866,39 @@ class LocalBadgesDatabase {
       name: row['nome'] as String? ?? '',
       email: row['email'] as String? ?? '',
       role: row['role'] as String? ?? '',
+      mustChangePassword: (row['must_change_password'] as int? ?? 0) == 1,
+    );
+  }
+
+  Future<void> markCurrentUserPasswordChanged({DateTime? updatedAt}) async {
+    if (_useMemoryStore) {
+      return;
+    }
+
+    final db = await database;
+    final metadataRows = await db.query(
+      'sync_metadata',
+      columns: ['value'],
+      where: 'key = ?',
+      whereArgs: ['current_user_id'],
+      limit: 1,
+    );
+
+    if (metadataRows.isEmpty) {
+      return;
+    }
+
+    final id = int.tryParse(metadataRows.first['value'].toString());
+    if (id == null) {
+      return;
+    }
+
+    final timestamp = (updatedAt ?? DateTime.now()).toUtc().toIso8601String();
+    await db.update(
+      'api_users',
+      {'must_change_password': 0, 'updated_at': timestamp},
+      where: 'id = ?',
+      whereArgs: [id],
     );
   }
 
@@ -1652,6 +1962,159 @@ class LocalBadgesDatabase {
     return recommendation.title.trim().toLowerCase().replaceAll(' ', '_');
   }
 
+  ConsultantDetailData _sampleConsultantDetail(ConsultantProfile consultant) {
+    return ConsultantDetailData.empty(
+      consultant: consultant,
+      loadedFromCache: true,
+    );
+  }
+
+  List<ConsultantProfile> _sampleConsultants() {
+    return const [
+      ConsultantProfile(
+        id: 1,
+        name: 'João Silva',
+        role: 'Consultor',
+        area: 'Hybrid Cloud',
+        location: 'Lisboa',
+        email: 'joao.silva@softinsa.pt',
+        startDate: '',
+        points: 2450,
+        badges: 12,
+        specials: 3,
+        rank: 1,
+        imagePath: 'assets/images/consultant_joao_silva.png',
+        isCurrentUser: true,
+      ),
+      ConsultantProfile(
+        id: 2,
+        name: 'Maria Santos',
+        role: 'Consultora Sénior',
+        area: 'Data & AI',
+        location: 'Porto',
+        email: 'maria.santos@softinsa.pt',
+        startDate: '',
+        points: 2380,
+        badges: 15,
+        specials: 2,
+        rank: 2,
+        imagePath: 'assets/images/consultant_maria_santos.png',
+      ),
+      ConsultantProfile(
+        id: 3,
+        name: 'Pedro Costa',
+        role: 'Consultor',
+        area: 'Cybersecurity',
+        location: 'Lisboa',
+        email: 'pedro.costa@softinsa.pt',
+        startDate: '',
+        points: 2120,
+        badges: 10,
+        specials: 2,
+        rank: 3,
+        imagePath: 'assets/images/consultant_pedro_costa.png',
+      ),
+      ConsultantProfile(
+        id: 4,
+        name: 'Ana Rodrigues',
+        role: 'Consultora',
+        area: 'Custom Development',
+        location: 'Braga',
+        email: 'ana.rodrigues@softinsa.pt',
+        startDate: '',
+        points: 1890,
+        badges: 9,
+        specials: 1,
+        rank: 4,
+        imagePath: 'assets/images/consultant_ana_rodrigues.png',
+      ),
+      ConsultantProfile(
+        id: 5,
+        name: 'Ricardo Oliveira',
+        role: 'Consultor',
+        area: 'Application Operations',
+        location: 'Lisboa',
+        email: 'ricardo.oliveira@softinsa.pt',
+        startDate: '',
+        points: 1650,
+        badges: 8,
+        specials: 1,
+        rank: 5,
+        imagePath: 'assets/images/consultant_ricardo_oliveira.png',
+      ),
+      ConsultantProfile(
+        id: 6,
+        name: 'Sofia Fernandes',
+        role: 'Consultora',
+        area: 'Digital Experience',
+        location: 'Porto',
+        email: 'sofia.fernandes@softinsa.pt',
+        startDate: '',
+        points: 1520,
+        badges: 7,
+        specials: 1,
+        rank: 6,
+        imagePath: 'assets/images/consultant_sofia_fernandes.png',
+      ),
+      ConsultantProfile(
+        id: 7,
+        name: 'Miguel Pereira',
+        role: 'Consultor Júnior',
+        area: 'Hybrid Cloud',
+        location: 'Coimbra',
+        email: 'miguel.pereira@softinsa.pt',
+        startDate: '',
+        points: 1280,
+        badges: 6,
+        specials: 1,
+        rank: 7,
+        imagePath: 'assets/images/consultant_miguel_pereira.png',
+      ),
+      ConsultantProfile(
+        id: 8,
+        name: 'Beatriz Alves',
+        role: 'Consultora Júnior',
+        area: 'Data & AI',
+        location: 'Lisboa',
+        email: 'beatriz.alves@softinsa.pt',
+        startDate: '',
+        points: 980,
+        badges: 5,
+        specials: 1,
+        rank: 8,
+        imagePath: 'assets/images/consultant_beatriz_alves.png',
+      ),
+      ConsultantProfile(
+        id: 9,
+        name: 'Tiago Martins',
+        role: 'Consultor Júnior',
+        area: 'Cybersecurity',
+        location: 'Porto',
+        email: 'tiago.martins@softinsa.pt',
+        startDate: '',
+        points: 850,
+        badges: 4,
+        specials: 1,
+        rank: 9,
+        imagePath: 'assets/images/consultant_tiago_martins.png',
+      ),
+      ConsultantProfile(
+        id: 10,
+        name: 'Carla Sousa',
+        role: 'Consultora Júnior',
+        area: 'Custom Development',
+        location: 'Faro',
+        email: 'carla.sousa@softinsa.pt',
+        startDate: '',
+        points: 720,
+        badges: 3,
+        specials: 0,
+        rank: 10,
+        imagePath: 'assets/images/consultant_carla_sousa.png',
+      ),
+    ];
+  }
+
   Future<List<BadgeRecommendation>> _recommendationsFromCachedBadges(
     Database db,
   ) async {
@@ -1680,6 +2143,79 @@ class LocalBadgesDatabase {
         iconName: row['imagem'] as String? ?? 'badge',
       );
     }).toList();
+  }
+
+  ConsultantAwardedBadge _consultantAwardedBadgeFromRow(
+    Map<String, Object?> row,
+  ) {
+    final badgeId = row['badge_id'] as int? ?? 0;
+    final pointsObtained = row['points_obtained'] as int?;
+    final badgePoints = row['badge_pontos'] as int?;
+    final levelName = row['level_nome'] as String?;
+    final levelOrder = row['level_ordem'] as String?;
+
+    return ConsultantAwardedBadge(
+      badgeId: badgeId,
+      title: row['badge_nome'] as String? ?? 'Badge #$badgeId',
+      level: levelName?.isNotEmpty == true
+          ? levelName!
+          : levelOrder?.isNotEmpty == true
+          ? 'Nível: $levelOrder'
+          : 'Nível não definido',
+      points: pointsObtained ?? badgePoints ?? 0,
+      imagePath: row['badge_imagem'] as String? ?? '',
+      obtainedAt: _dateFromText(row['obtained_date'] as String?),
+      valid: (row['valid'] as int? ?? 1) == 1,
+    );
+  }
+
+  ConsultantSpecialAchievement _consultantSpecialAchievementFromRow(
+    Map<String, Object?> row,
+  ) {
+    final id = row['badge_premium_id'] as int? ?? 0;
+    return ConsultantSpecialAchievement(
+      id: id,
+      title: row['name'] as String? ?? 'Conquista #$id',
+      description:
+          row['description'] as String? ??
+          row['criteria_description'] as String? ??
+          '',
+      icon: row['icon'] as String? ?? 'star',
+      awardedAt:
+          _dateFromText(row['achievement_date'] as String?) ??
+          _dateFromText(row['award_created_at'] as String?),
+    );
+  }
+
+  bool _wasAwardedInLastThirtyDays(ConsultantAwardedBadge badge) {
+    final obtainedAt = badge.obtainedAt;
+    if (obtainedAt == null) {
+      return false;
+    }
+
+    return obtainedAt.isAfter(
+      DateTime.now().subtract(const Duration(days: 30)),
+    );
+  }
+
+  int _distinctActivityDays(
+    List<ConsultantAwardedBadge> badges,
+    List<ConsultantSpecialAchievement> achievements,
+  ) {
+    final days = <String>{};
+    for (final badge in badges) {
+      final date = badge.obtainedAt;
+      if (date != null) {
+        days.add('${date.year}-${date.month}-${date.day}');
+      }
+    }
+    for (final achievement in achievements) {
+      final date = achievement.awardedAt;
+      if (date != null) {
+        days.add('${date.year}-${date.month}-${date.day}');
+      }
+    }
+    return days.length;
   }
 
   ConsultantProfile _consultantFromRow(Map<String, Object?> row) {
@@ -1758,8 +2294,8 @@ class LocalBadgesDatabase {
 
   CatalogBadge _catalogBadgeFromRow(
     Map<String, Object?> row,
-    List<String> requirements,
-    String applicationStatus,
+    List<CatalogRequirement> requirements,
+    CatalogApplication? application,
   ) {
     final raw = _jsonMap(row['raw_json'] as String?);
     final durationMonths = row['duracao_meses'] as int?;
@@ -1784,11 +2320,23 @@ class LocalBadgesDatabase {
       provider: _textValue(raw, const ['fornecedor']) ?? '',
       imagePath: row['imagem'] as String? ?? '',
       requirements: requirements,
-      applicationStatus: applicationStatus,
+      applicationStatus: application?.statusLabel ?? '',
+      application: application,
     );
   }
 
-  MyBadgeApplication _myBadgeApplicationFromRow(Map<String, Object?> row) {
+  CatalogRequirement _catalogRequirementFromRow(Map<String, Object?> row) {
+    return CatalogRequirement(
+      id: row['id'] as int? ?? 0,
+      title: row['nome'] as String? ?? '',
+      description: row['descricao'] as String? ?? '',
+    );
+  }
+
+  MyBadgeApplication _myBadgeApplicationFromRow(
+    Map<String, Object?> row,
+    List<ApplicationEvidence> evidences,
+  ) {
     final candidaturaRaw = _jsonMap(row['candidatura_raw_json'] as String?);
     final badgeRaw = _jsonMap(row['badge_raw_json'] as String?);
     final nestedBadge = _mapValue(candidaturaRaw, const ['Badge', 'badge']);
@@ -1824,8 +2372,62 @@ class LocalBadgesDatabase {
           row['badge_imagem'] as String? ??
           _textValue(nestedBadge, const ['imagem']) ??
           '',
+      evidences: evidences,
       createdAt: _dateFromText(row['candidatura_created_at'] as String?),
       updatedAt: _dateFromText(row['candidatura_updated_at'] as String?),
+    );
+  }
+
+  Future<List<ApplicationEvidence>> _applicationEvidences(
+    Database db,
+    int candidaturaId,
+  ) async {
+    if (candidaturaId <= 0) {
+      return const [];
+    }
+
+    final rows = await db.rawQuery(
+      '''
+      SELECT
+        e.id,
+        e.candidatura_id,
+        e.requisito_id,
+        e.url,
+        e.nome_ficheiro,
+        e.tipo,
+        e.raw_json,
+        r.nome AS requisito_nome
+      FROM evidencias e
+      LEFT JOIN requirements r ON r.id = e.requisito_id
+      WHERE e.candidatura_id = ?
+      ORDER BY e.created_at ASC, e.id ASC
+      ''',
+      [candidaturaId],
+    );
+
+    return rows.map(_applicationEvidenceFromRow).toList();
+  }
+
+  ApplicationEvidence _applicationEvidenceFromRow(Map<String, Object?> row) {
+    final raw = _jsonMap(row['raw_json'] as String?);
+    final requirement = _mapValue(raw, const ['Requirement', 'requirement']);
+    final fileName =
+        row['nome_ficheiro'] as String? ??
+        _textValue(raw, const ['nomeFicheiro']) ??
+        _textValue(raw, const ['fileName']) ??
+        '';
+
+    return ApplicationEvidence(
+      id: row['id'] as int? ?? 0,
+      requirementId: row['requisito_id'] as int?,
+      requirementTitle:
+          row['requisito_nome'] as String? ??
+          _textValue(requirement, const ['titulo', 'nome']) ??
+          '',
+      fileName: fileName.isNotEmpty ? fileName : 'Evidência',
+      url: row['url'] as String? ?? _textValue(raw, const ['url']) ?? '',
+      type: row['tipo'] as String? ?? _textValue(raw, const ['tipo']) ?? '',
+      validated: _boolValue(raw, const ['validado']),
     );
   }
 
@@ -1945,6 +2547,61 @@ class LocalBadgesDatabase {
     }
   }
 
+  Future<void> _upsertConsultantBadges(
+    Transaction transaction,
+    List<Map<String, dynamic>> rows,
+    String syncedAt,
+  ) async {
+    for (final row in rows) {
+      final consultorId = _intValue(row, const ['consultorId', 'CONSULTORID']);
+      final badgeId = _intValue(row, const ['badgeId', 'BADGEID']);
+      if (consultorId == null || badgeId == null) {
+        continue;
+      }
+
+      await transaction.insert('consultant_badges', {
+        'consultor_id': consultorId,
+        'badge_id': badgeId,
+        'obtained_date': _textValue(row, const ['obtainedDate']),
+        'expiration_date': _textValue(row, const ['expirationDate']),
+        'duration_months': _intValue(row, const ['durationMonths']),
+        'valid': _boolIntValue(row, const ['valid']) ?? 1,
+        'points_obtained': _intValue(row, const ['pointsObtained']),
+        'created_at': _textValue(row, const ['createdAt', 'CREATED_AT']),
+        'updated_at': _textValue(row, const ['updatedAt', 'UPDATED_AT']),
+        'raw_json': jsonEncode(row),
+        'last_synced_at': syncedAt,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+  }
+
+  Future<void> _upsertConsultantPremiumBadges(
+    Transaction transaction,
+    List<Map<String, dynamic>> rows,
+    String syncedAt,
+  ) async {
+    for (final row in rows) {
+      final badgePremiumId = _intValue(row, const [
+        'badgePremiumId',
+        'BADGEPREMIUMID',
+        'id',
+      ]);
+      final consultorId = _intValue(row, const ['consultorId', 'CONSULTORID']);
+      if (badgePremiumId == null || consultorId == null) {
+        continue;
+      }
+
+      await transaction.insert('consultant_premium_badges', {
+        'badge_premium_id': badgePremiumId,
+        'consultor_id': consultorId,
+        'achievement_date': _textValue(row, const ['achievementDate']),
+        'created_at': _textValue(row, const ['createdAt', 'CREATED_AT']),
+        'raw_json': jsonEncode(row),
+        'last_synced_at': syncedAt,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+  }
+
   List<Map<String, dynamic>> _collectMaps(
     Object? payload,
     Set<String> collectionKeys,
@@ -1973,6 +2630,20 @@ class LocalBadgesDatabase {
 
     collect(payload, null);
     return collected;
+  }
+
+  bool _payloadHasCollection(Object? payload, List<String> keys) {
+    if (payload is! Map<String, dynamic>) {
+      return payload is List;
+    }
+
+    for (final key in keys) {
+      if (_field(payload, [key]) is List) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   Object? _field(Map<String, dynamic> row, List<String> keys) {
@@ -2049,6 +2720,15 @@ class LocalBadgesDatabase {
     return null;
   }
 
+  bool? _boolValue(Map<String, dynamic> row, List<String> keys) {
+    final value = _boolIntValue(row, keys);
+    if (value == null) {
+      return null;
+    }
+
+    return value == 1;
+  }
+
   String? _firstListTextValue(Map<String, dynamic> row, List<String> keys) {
     final value = _field(row, keys);
     if (value is List && value.isNotEmpty) {
@@ -2065,10 +2745,12 @@ class LocalUserProfile {
     required this.name,
     required this.email,
     required this.role,
+    required this.mustChangePassword,
   });
 
   final int id;
   final String name;
   final String email;
   final String role;
+  final bool mustChangePassword;
 }

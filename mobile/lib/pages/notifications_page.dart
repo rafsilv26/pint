@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../widgets/app_bottom_navigation.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -38,7 +40,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Não foi possível atualizar as notificações.'),
+          content: AppText('Não foi possível atualizar as notificações.'),
         ),
       );
     }
@@ -54,7 +56,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Não foi possível marcar a notificação como lida.'),
+          content: AppText('Não foi possível marcar a notificação como lida.'),
         ),
       );
     }
@@ -93,7 +95,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ],
             ),
           ),
-          bottomNavigationBar: const _NotificationsBottomNavigation(),
+          bottomNavigationBar: AppBottomNavigation(
+            currentDestination: AppBottomNavigationDestination.myBadges,
+            onDestinationSelected: (destination) {
+              AppNavigationController.open(context, destination);
+            },
+          ),
         );
       },
     );
@@ -178,7 +185,7 @@ class _NotificationsHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                const AppText(
                   'Notificações',
                   style: TextStyle(
                     color: Colors.white,
@@ -187,7 +194,7 @@ class _NotificationsHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Text(
+                AppText(
                   '$unreadCount novas',
                   style: const TextStyle(
                     color: Color(0xFFE6F5FF),
@@ -201,7 +208,7 @@ class _NotificationsHeader extends StatelessWidget {
           FilledButton.icon(
             onPressed: onMarkAll,
             icon: const Icon(Icons.check, size: 22),
-            label: const Text('Marcar todas'),
+            label: const AppText('Marcar todas'),
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF3D8DBA),
               foregroundColor: Colors.white,
@@ -272,7 +279,7 @@ class _NotificationCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   text,
                   style: const TextStyle(
                     color: Color(0xFF111827),
@@ -281,7 +288,7 @@ class _NotificationCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
+                AppText(
                   _formatDate(notification.createdAt),
                   style: const TextStyle(
                     color: Color(0xFF667085),
@@ -297,7 +304,7 @@ class _NotificationCard extends StatelessWidget {
             TextButton.icon(
               onPressed: onMarkAsRead,
               icon: const Icon(Icons.check, size: 20),
-              label: const Text('Marcar como\nlida'),
+              label: const AppText('Marcar como\nlida'),
               style: TextButton.styleFrom(
                 foregroundColor: const Color(0xFF005DFF),
                 textStyle: const TextStyle(fontSize: 16),
@@ -324,7 +331,7 @@ class _EmptyNotificationsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE8EDF3)),
       ),
-      child: const Text(
+      child: const AppText(
         'Sem notificações sincronizadas.',
         style: TextStyle(color: Color(0xFF667085), fontSize: 16),
       ),
@@ -354,7 +361,7 @@ class _NotificationsTip extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   'Dica',
                   style: TextStyle(
                     color: Color(0xFF174193),
@@ -363,7 +370,7 @@ class _NotificationsTip extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 12),
-                Text(
+                AppText(
                   'Ative as notificações para receber alertas em tempo real sobre aprovações e badges a expirar.',
                   style: TextStyle(
                     color: Color(0xFF005DFF),
@@ -376,86 +383,6 @@ class _NotificationsTip extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _NotificationsBottomNavigation extends StatelessWidget {
-  const _NotificationsBottomNavigation();
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 2,
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      elevation: 12,
-      selectedItemColor: const Color(0xFF006DAA),
-      unselectedItemColor: const Color(0xFF667085),
-      selectedFontSize: 12,
-      unselectedFontSize: 12,
-      onTap: (index) {
-        if (index == 0 || index == 4) {
-          Navigator.of(context).pop();
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          label: 'Início',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.workspace_premium_outlined),
-          label: 'Catálogo',
-        ),
-        BottomNavigationBarItem(
-          icon: _BadgeNavigationIcon(),
-          label: 'Meus\nBadges',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.emoji_events_outlined),
-          label: 'Ranking',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          label: 'Perfil',
-        ),
-      ],
-    );
-  }
-}
-
-class _BadgeNavigationIcon extends StatelessWidget {
-  const _BadgeNavigationIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        const Icon(Icons.notifications_none),
-        Positioned(
-          top: -7,
-          right: -8,
-          child: Container(
-            width: 18,
-            height: 18,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFF3B48),
-              shape: BoxShape.circle,
-            ),
-            child: const Text(
-              '2',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
