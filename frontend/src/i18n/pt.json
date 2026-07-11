@@ -952,6 +952,7 @@
       "pontos": "Pontos"
     },
     "pedidosFechados": "Pedidos fechados",
+    "pedidosFechadosTotal": "{{count}} nos últimos 7 dias",
     "semDados": "Sem dados para o período.",
     "diasSemana": ["S", "T", "Q", "Q", "S", "S", "D"],
     "atividadeRecente": "Atividade Recente"

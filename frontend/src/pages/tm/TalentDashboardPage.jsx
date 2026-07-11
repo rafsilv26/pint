@@ -28,6 +28,7 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
 
   const maxBar = Math.max(1, ...(data.pedidosFechados.length ? data.pedidosFechados : [1]))
   const temDados = data.pedidosFechados.some((v) => v > 0)
+  const totalSemana = data.pedidosFechados.reduce((soma, v) => soma + v, 0)
 
   // Rótulos dos dias a partir do ficheiro de idioma (Segunda-first).
   const diasSemana = t('talentDashboard.diasSemana', { returnObjects: true })
@@ -94,14 +95,24 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
         {/* Pedidos fechados + Atividade */}
         <div className="space-y-6">
           <Card>
-            <h2 className="mb-4 font-semibold text-ink">{t('talentDashboard.pedidosFechados')}</h2>
+            <div className="mb-4 flex items-baseline justify-between">
+              <h2 className="font-semibold text-ink">{t('talentDashboard.pedidosFechados')}</h2>
+              <span className="text-xs text-muted">{t('talentDashboard.pedidosFechadosTotal', { count: totalSemana })}</span>
+            </div>
             {!temDados ? (
               <p className="text-sm text-muted">{t('talentDashboard.semDados')}</p>
             ) : (
               <div className="flex h-40 items-end gap-2">
                 {data.pedidosFechados.map((v, i) => (
                   <div key={i} className="flex flex-1 flex-col items-center gap-1">
-                    <div className="w-full rounded-t bg-brand transition-all" style={{ height: `${(v / maxBar) * 100}%` }} title={String(v)} />
+                    <span className="text-[11px] font-semibold text-ink">{v}</span>
+                    <div className="flex w-full flex-1 items-end">
+                      <div
+                        className="w-full min-h-[2px] rounded-t bg-brand transition-all"
+                        style={{ height: `${(v / maxBar) * 100}%` }}
+                        title={String(v)}
+                      />
+                    </div>
                     <span className="text-[10px] text-gray-400">
                       {rotularDia(i, data.pedidosFechados.length)}
                     </span>

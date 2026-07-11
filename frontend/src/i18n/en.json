@@ -950,6 +950,7 @@
       "pontos": "Points"
     },
     "pedidosFechados": "Closed requests",
+    "pedidosFechadosTotal": "{{count}} in the last 7 days",
     "semDados": "No data for the period.",
     "diasSemana": ["M", "T", "W", "T", "F", "S", "S"],
     "atividadeRecente": "Recent Activity"
