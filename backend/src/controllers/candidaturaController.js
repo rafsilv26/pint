@@ -275,35 +275,36 @@ exports.listarCandidaturasPorConsultor = async (req, res) => {
   }
 };
 
-// Nº de candidaturas fechadas (aprovadas ou rejeitadas) por dia da semana
-// corrente (Segunda a Domingo), para o gráfico "Pedidos Fechados" do painel
-// de controlo do TM/Admin. Usa o histórico de workflow como fonte da data
-// real de fecho (a Candidatura em si não guarda uma única "data de fecho").
+// Nº de candidaturas fechadas (aprovadas ou rejeitadas) por dia, nos últimos
+// 7 dias (janela rolante que termina hoje), para o gráfico "Pedidos Fechados"
+// do painel de controlo do TM/Admin. Usa o histórico de workflow como fonte da
+// data real de fecho (a Candidatura em si não guarda uma única "data de fecho").
+// Devolve sempre 7 valores, ordenados do mais antigo (índice 0 = há 6 dias)
+// até hoje (índice 6).
 exports.getFechadasPorSemana = async (_req, res) => {
   try {
     const statuses = await getStatuses([STATUS.APPROVED, STATUS.REJECTED]);
     const idsFechados = Object.values(statuses).map((s) => s.statusId);
 
-    const hoje = new Date();
-    const diaSemana = hoje.getDay(); // 0 = Domingo ... 6 = Sábado
-    const offsetSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
-    const inicioSemana = new Date(hoje);
-    inicioSemana.setHours(0, 0, 0, 0);
-    inicioSemana.setDate(hoje.getDate() - offsetSegunda);
-    const fimSemana = new Date(inicioSemana);
-    fimSemana.setDate(inicioSemana.getDate() + 7);
+    // Janela dos últimos 7 dias: fim = amanhã às 00:00 (exclusivo, para incluir
+    // hoje por completo); início = 7 dias antes desse fim, às 00:00.
+    const fim = new Date();
+    fim.setHours(0, 0, 0, 0);
+    fim.setDate(fim.getDate() + 1);
+    const inicio = new Date(fim);
+    inicio.setDate(inicio.getDate() - 7);
 
     const logs = await HistoricoCandidatura.findAll({
       where: {
-        estadoNovo: { [Op.in]: idsFechados },
-        createdAt: { [Op.gte]: inicioSemana, [Op.lt]: fimSemana }
+        estadoNovo: { [Op.in]: idsFechados.length ? idsFechados : [-1] },
+        createdAt: { [Op.gte]: inicio, [Op.lt]: fim }
       },
       attributes: ['createdAt']
     });
 
-    const contagem = [0, 0, 0, 0, 0, 0, 0]; // Segunda .. Domingo
+    const contagem = [0, 0, 0, 0, 0, 0, 0]; // índice 0 = há 6 dias ... índice 6 = hoje
     logs.forEach((log) => {
-      const dias = Math.floor((new Date(log.createdAt) - inicioSemana) / 86400000);
+      const dias = Math.floor((new Date(log.createdAt) - inicio) / 86400000);
       if (dias >= 0 && dias < 7) contagem[dias] += 1;
     });
 

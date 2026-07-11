@@ -27,9 +27,17 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
   if (loading || !data) return <Spinner />
 
   const maxBar = Math.max(1, ...(data.pedidosFechados.length ? data.pedidosFechados : [1]))
-  
-  // Recupera o array de dias da semana a partir do ficheiro de idioma
+  const temDados = data.pedidosFechados.some((v) => v > 0)
+
+  // Rótulos dos dias a partir do ficheiro de idioma (Segunda-first).
   const diasSemana = t('talentDashboard.diasSemana', { returnObjects: true })
+  // O gráfico é rolante (últimos 7 dias): a barra i corresponde à data
+  // (hoje - (total-1-i)). Converte para o índice Segunda-first do array acima.
+  const rotularDia = (i, total) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (total - 1 - i))
+    return diasSemana[(d.getDay() + 6) % 7] || ''
+  }
 
   return (
     <div className="space-y-6">
@@ -87,7 +95,7 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
         <div className="space-y-6">
           <Card>
             <h2 className="mb-4 font-semibold text-ink">{t('talentDashboard.pedidosFechados')}</h2>
-            {data.pedidosFechados.length === 0 ? (
+            {!temDados ? (
               <p className="text-sm text-muted">{t('talentDashboard.semDados')}</p>
             ) : (
               <div className="flex h-40 items-end gap-2">
@@ -95,7 +103,7 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
                   <div key={i} className="flex flex-1 flex-col items-center gap-1">
                     <div className="w-full rounded-t bg-brand transition-all" style={{ height: `${(v / maxBar) * 100}%` }} title={String(v)} />
                     <span className="text-[10px] text-gray-400">
-                      {diasSemana[i] || ''}
+                      {rotularDia(i, data.pedidosFechados.length)}
                     </span>
                   </div>
                 ))}
