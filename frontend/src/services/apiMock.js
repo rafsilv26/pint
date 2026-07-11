@@ -151,9 +151,7 @@ export async function getConsultant(id) {
 }
 export async function getConsultantCandidaturas(id) {
   await delay()
-  return mockTalentCandidaturas
-    .filter((c) => Number(id) === 7)
-    .map((c) => ({ ...c }))
+  return Number(id) === 7 ? mockTalentCandidaturas.map((c) => ({ ...c })) : []
 }
 
 // ---------- Sessão ----------
@@ -204,6 +202,85 @@ export async function validarTalentManager() {
 export async function validarEvidencia(id, validado) {
   await delay(300)
   return { mensagem: i18next.t('api.mensagens.decisaoRegistada'), evidencia: { id, validado } }
+}
+
+export async function getTalentConsultants() {
+  const rows = await getConsultants()
+  return rows.map((consultant) => ({
+    ...consultant,
+    learningPath: 'Technology',
+    progress: Math.min(100, Math.round(((consultant.badges || 0) / 10) * 100)),
+    pathCompleted: consultant.badges || 0,
+    pathTotal: 10,
+    expiringCount: 0,
+    expiredCount: 0,
+    activeApplications: 0,
+    awards: consultant.badgesConquistados || [],
+    specialAchievements: [],
+    timeline: [],
+  }))
+}
+
+export async function getTalentConsultant(id) {
+  const rows = await getTalentConsultants()
+  return rows.find((consultant) => Number(consultant.id) === Number(id)) || null
+}
+
+export async function getTalentCatalog() {
+  return getBadges()
+}
+
+export async function getTalentReports(filters = {}) {
+  await delay()
+  const candidaturas = clone(mockTalentCandidaturas).filter((row) => !filters.status || filters.status === 'ALL' || row.status.code === filters.status)
+  const consultants = await getTalentConsultants()
+  const approvals = candidaturas.filter((row) => row.status.code === 'APPROVED')
+  const rejections = candidaturas.filter((row) => row.status.code === 'REJECTED')
+  const awards = consultants.flatMap((consultant) => (consultant.badgesConquistados || []).map((award) => ({
+    ...award,
+    badgeId: award.id,
+    consultor: consultant.name,
+    consultantId: consultant.id,
+    area: consultant.area,
+    serviceLine: consultant.serviceLine,
+    learningPath: consultant.learningPath,
+    nivel: award.nivelId || '—',
+    pontos: award.pontos || 0,
+    obtainedDate: award.obtidoEm,
+    expirationDate: award.expiraEm,
+  })))
+  const learningPathBreakdown = [...new Set(awards.map((award) => award.learningPath))].filter(Boolean).map((learningPath) => ({ learningPath, value: awards.filter((award) => award.learningPath === learningPath).length }))
+  const levelBreakdown = [...new Set(awards.map((award) => award.nivel))].map((level) => ({ level, value: awards.filter((award) => award.nivel === level).length }))
+  return {
+    candidaturas,
+    consultants,
+    awards,
+    approvals,
+    rejections,
+    specialAchievements: [],
+    statusBreakdown: [...new Set(candidaturas.map((row) => row.status.code))].map((code) => ({
+      code,
+      label: candidaturas.find((row) => row.status.code === code)?.status.name || code,
+      value: candidaturas.filter((row) => row.status.code === code).length,
+    })),
+    areaBreakdown: [],
+    learningPathBreakdown,
+    levelBreakdown,
+    badgeBreakdown: [],
+    monthlyBreakdown: [],
+    filterOptions: {
+      areas: [...new Set(consultants.map((consultant) => consultant.area).filter(Boolean))],
+      serviceLines: [...new Set(consultants.map((consultant) => consultant.serviceLine).filter(Boolean))],
+      learningPaths: [...new Set(consultants.map((consultant) => consultant.learningPath).filter(Boolean))],
+      levels: [...new Set(awards.map((award) => award.nivel))],
+      badges: mockBadges.map((badge) => ({ id: badge.id, nome: badge.nome })),
+    },
+    totals: { candidaturas: candidaturas.length, consultants: consultants.length, registeredUsers: consultants.length, awards: awards.length, approvals: approvals.length, rejections: rejections.length, specialAchievements: 0, awardedPoints: awards.reduce((sum, award) => sum + award.pontos, 0) },
+  }
+}
+
+export async function refreshTalentWorkspace() {
+  return { ok: true }
 }
 
 // ---------- Service Line Leader ----------
@@ -341,6 +418,6 @@ export async function exportarRelatorio() {
   return { ok: true }
 }
 
-export async function updateConsultant(id, body) {
+export async function updateConsultant() {
   return { mensagem: i18next.t('api.mensagens.perfilAtualizado') }
 }

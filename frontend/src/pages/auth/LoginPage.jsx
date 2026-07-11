@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Mail, Lock } from 'lucide-react'
 import AuthShell from '../../components/layout/AuthShell'
 import { Field } from '../../components/ui'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../context/useAuth'
 import { homeForRole } from '../../config/navigation'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 

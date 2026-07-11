@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Award, Star, Sparkles, Calendar, Mail, ArrowLeft } from 'lucide-react'
 import { Card, Spinner, EmptyState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import * as api from '../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 

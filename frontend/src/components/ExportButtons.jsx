@@ -30,22 +30,25 @@ export default function ExportButtons({ data, columns, filename }) {
     ]
   })
 
-  // 1. Exportação Excel (CSV)
+  const escapeHtml = (value) => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+
+  // 1. Exportação Excel em tabela HTML compatível com Excel.
   const exportarExcel = () => {
     if (!data || data.length === 0) return alert(t('exportButtons.semDados'))
 
     setBusy('excel')
 
-    const csvContent = [
-      cols.map((c) => c.label).join(','),
-      ...linhas.map((linha) => linha.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
-    ].join('\n')
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const table = `<table><thead><tr>${cols.map((c) => `<th>${escapeHtml(c.label)}</th>`).join('')}</tr></thead><tbody>${linhas.map((linha) => `<tr>${linha.map((value) => `<td>${escapeHtml(value)}</td>`).join('')}</tr>`).join('')}</tbody></table>`
+    const documentHtml = `<html><head><meta charset="utf-8"></head><body>${table}</body></html>`
+    const blob = new Blob(['\ufeff', documentHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' })
     const link = document.createElement("a")
     link.href = URL.createObjectURL(blob)
-    link.download = `${nomeFicheiro}.csv`
+    link.download = `${nomeFicheiro}.xls`
     link.click()
+    URL.revokeObjectURL(link.href)
 
     setBusy(null)
   }

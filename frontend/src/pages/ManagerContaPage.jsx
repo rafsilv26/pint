@@ -1,16 +1,18 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { LogOut, KeyRound } from 'lucide-react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Globe2, LogOut, KeyRound, PenLine } from 'lucide-react'
 import { PageHeader, Card, Field, Button } from '../components/ui'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import * as api from '../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 // Definições de conta dos perfis de gestão (Admin / TM / SLL).
 export default function ManagerContaPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t, i18n } = useTranslation() // <-- Inicializa a tradução
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const isTalentManager = location.pathname.startsWith('/tm')
   const [pw, setPw] = useState({ atual: '', nova: '', confirmar: '' })
   const [msg, setMsg] = useState(null)
   const [erro, setErro] = useState(null)
@@ -26,11 +28,12 @@ export default function ManagerContaPage() {
     // Validações traduzidas
     if (pw.nova.length < 8) return setErro(t('managerConta.erroComprimento'))
     if (pw.nova !== pw.confirmar) return setErro(t('managerConta.erroCoincidem'))
+    if (pw.atual === pw.nova) return setErro(t('managerConta.erroDiferente'))
 
     setSaving(true)
     try {
-      await api.changePassword({ currentPassword: pw.atual, newPassword: pw.nova })
-      setMsg(t('managerConta.sucessoMsg'))
+      const response = await api.changePassword({ currentPassword: pw.atual, newPassword: pw.nova })
+      setMsg(response?.message || response?.mensagem || t('managerConta.sucessoMsg'))
       setPw({ atual: '', nova: '', confirmar: '' })
     } catch (err) {
       setErro(err.message)
@@ -53,6 +56,14 @@ export default function ManagerContaPage() {
           <p className="small text-muted mb-0">{user?.email}</p>
           <p className="mt-1 fs-xs fw-medium text-brand mb-0">{(user?.roles || [user?.role]).filter(Boolean).join(', ')}</p>
         </div>
+      </Card>
+
+      <Card className="mt-4">
+        <h2 className="mb-3 d-flex align-items-center gap-2 fw-semibold text-ink"><Globe2 size={18} className="text-brand" />{t('managerConta.idioma')}</h2>
+        <div className="btn-group w-100" role="group" aria-label={t('managerConta.idioma')}>
+          {[['pt', 'Português'], ['en', 'English'], ['es', 'Español']].map(([code, label]) => <button key={code} type="button" onClick={() => i18n.changeLanguage(code)} className={`btn ${i18n.language.startsWith(code) ? 'btn-brand' : 'btn-outline-secondary'}`}>{label}</button>)}
+        </div>
+        {isTalentManager && <Link to="/tm/assinatura" className="mt-3 btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2"><PenLine size={16} />{t('tmWorkspace.signature.emailSignature')}</Link>}
       </Card>
 
       <Card className="mt-4">
@@ -93,7 +104,7 @@ export default function ManagerContaPage() {
       </Card>
 
       <button
-        onClick={() => { logout(); navigate('/login') }}
+        onClick={() => { if (window.confirm(t('managerConta.confirmarLogout'))) { logout(); navigate('/login') } }}
         className="mt-4 btn btn-outline-danger bg-white w-100 d-flex align-items-center justify-content-center gap-2"
       >
         <LogOut size={16} /> {t('managerConta.botoes.terminarSessao')}

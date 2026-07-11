@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Bell, Calendar, Trash2, Search } from 'lucide-react'
+import { Bell, Calendar, Search } from 'lucide-react'
 import { Spinner, EmptyState, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
@@ -13,10 +14,12 @@ function formatar(dt, locale = 'pt-PT') {
 export default function NotificationsPage() {
   const { t, i18n } = useTranslation() // <-- Inicializa a tradução e o i18n
   const { data, loading, error, reload } = useAsync(() => api.getNotificacoes())
+  useAutoRefresh(reload)
   const [filtro, setFiltro] = useState('todas')
   const [pesquisa, setPesquisa] = useState('')
   const [lidas, setLidas] = useState({})
-  const [apagadas, setApagadas] = useState({})
+  const [actionError, setActionError] = useState('')
+  const [markingAll, setMarkingAll] = useState(false)
 
   // Mapear o idioma atual para o formato de data/hora correto
   const localeMap = {
@@ -31,6 +34,7 @@ export default function NotificationsPage() {
     info: { label: t('notificacoes.tags.info'), cls: 'text-bg-primary' },
     warning: { label: t('notificacoes.tags.aviso'), cls: 'text-bg-warning' },
     success: { label: t('notificacoes.tags.sucesso'), cls: 'text-bg-success' },
+    error: { label: t('notificacoes.tags.erro'), cls: 'text-bg-danger' },
   }
 
   const FILTROS = [
@@ -38,20 +42,40 @@ export default function NotificationsPage() {
     { key: 'nao-lidas', label: t('notificacoes.filtros.naoLidas') },
   ]
 
-  function marcarLida(id) {
+  async function marcarLida(id) {
+    if (lidas[id] || data?.find((notification) => notification.id === id)?.lida) return
+    setActionError('')
     setLidas((a) => ({ ...a, [id]: true }))
-    api.markNotificationRead(id).catch(() => {})
+    try {
+      await api.markNotificationRead(id)
+    } catch (error) {
+      setLidas((current) => {
+        const next = { ...current }
+        delete next[id]
+        return next
+      })
+      setActionError(error.message)
+    }
   }
 
-  function marcarTodas() {
+  async function marcarTodas() {
+    const previous = lidas
     const todas = {}
     ;(data || []).forEach((n) => { todas[n.id] = true })
+    setActionError('')
+    setMarkingAll(true)
     setLidas(todas)
-    api.markAllNotificationsRead().catch(() => {})
+    try {
+      await api.markAllNotificationsRead()
+    } catch (error) {
+      setLidas(previous)
+      setActionError(error.message)
+    } finally {
+      setMarkingAll(false)
+    }
   }
 
   const lista = (data || [])
-    .filter((n) => !apagadas[n.id])
     .filter((n) => (filtro === 'nao-lidas' ? !(n.lida || lidas[n.id]) : true))
     .filter((n) => `${n.title} ${n.message}`.toLowerCase().includes(pesquisa.toLowerCase()))
 
@@ -86,11 +110,13 @@ export default function NotificationsPage() {
         </div>
         <button
           onClick={marcarTodas}
+          disabled={markingAll}
           className="btn btn-outline-secondary bg-white fw-medium"
         >
-          {t('notificacoes.marcarTodas')}
+          {markingAll ? t('notificacoes.aMarcar') : t('notificacoes.marcarTodas')}
         </button>
       </div>
+      {actionError && <div className="alert alert-danger py-2 small" role="alert">{actionError}</div>}
 
       {loading ? (
         <Spinner />
@@ -126,16 +152,6 @@ export default function NotificationsPage() {
                     <Calendar size={12} /> {formatar(n.createdAt, currentLocale)}
                   </p>
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setApagadas((a) => ({ ...a, [n.id]: true }))
-                  }}
-                  className="btn btn-link p-0 text-secondary"
-                  aria-label={t('notificacoes.apagar')}
-                >
-                  <Trash2 size={16} />
-                </button>
               </div>
             )
           })}

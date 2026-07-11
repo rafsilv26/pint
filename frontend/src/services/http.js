@@ -48,9 +48,9 @@ export async function http(path, { method = 'GET', body, auth = true, isForm = f
     if (erro.response) {
       const data = erro.response.data
       const msg = data?.message || data?.erro || data?.error || i18next.t('api.erros.generico', { status: erro.response.status })
-      throw new Error(msg)
+      throw new Error(msg, { cause: erro })
     }
     // Erro de rede (sem resposta do servidor, ex: backend em baixo/CORS)
-    throw new Error(erro.message || i18next.t('api.erros.generico', { status: '' }))
+    throw new Error(erro.message || i18next.t('api.erros.generico', { status: '' }), { cause: erro })
   }
 }

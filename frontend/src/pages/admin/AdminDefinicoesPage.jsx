@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Settings, Clock, Bell } from 'lucide-react'
+import { Clock, Bell } from 'lucide-react'
 import { PageHeader, Card, Toggle } from '../../components/ui'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 

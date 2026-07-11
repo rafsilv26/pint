@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { LogOut, KeyRound, Mail, Users, Settings, ExternalLink } from 'lucide-react'
 import { Card } from '../components/ui'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import { useAsync } from '../hooks/useAsync'
 import { useTranslation } from 'react-i18next'
 import * as api from '../services/api'
@@ -33,14 +33,17 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (consultor || user) {
+    let alive = true
+    Promise.resolve().then(() => {
+      if (!alive || (!consultor && !user)) return
       setForm({
         nome: consultor?.name || user?.nome || '',
         email: user?.email || consultor?.email || '',
         biografia: consultor?.biography || '',
         linkedinUrl: consultor?.linkedinUrl || ''
       })
-    }
+    })
+    return () => { alive = false }
   }, [consultor, user])
 
   const pontos = consultor?.points ?? 0

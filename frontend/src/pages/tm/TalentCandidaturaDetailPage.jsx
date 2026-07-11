@@ -3,7 +3,9 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, FileText, Download, Check, X } from 'lucide-react'
 import { Card, Spinner, ErrorState, StatusPill } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
+import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import * as api from '../../services/api'
+import { getEvidenceCoverage } from '../../services/talentWorkspace'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 const TINT = {
@@ -26,6 +28,7 @@ export default function TalentCandidaturaDetailPage() {
   const [submitting, setSubmitting] = useState(false)
   const [msg, setMsg] = useState(null)
   const [evidSubmittingId, setEvidSubmittingId] = useState(null)
+  useAutoRefresh(reload, 30_000, !validando && !submitting && evidSubmittingId == null)
 
   if (loading) return <Spinner />
   if (error) return <ErrorState onRetry={reload} />
@@ -34,7 +37,10 @@ export default function TalentCandidaturaDetailPage() {
   // Só é possível validar/rejeitar uma candidatura enquanto esta aguarda
   // decisão do Talent Manager. Já validada, rejeitada ou aprovada -> sem ações.
   const podeValidar = c.estado?.code === 'SUBMITTED'
-  const todasEvidenciasValidadas = c.evidencias.length === 0 || c.evidencias.every((e) => e.validado === true)
+  const evidenceCoverage = getEvidenceCoverage(c.badge.requisitos, c.evidencias)
+  const requisitosObrigatorios = evidenceCoverage.required
+  const requisitosEmFalta = evidenceCoverage.missing
+  const todasEvidenciasValidadas = evidenceCoverage.complete
 
   async function decidir(decisao) {
     setSubmitting(true)
@@ -154,13 +160,26 @@ export default function TalentCandidaturaDetailPage() {
             </button>
             <button
               onClick={() => decidir('REJEITAR')}
-              disabled={submitting}
+              disabled={submitting || !comentario.trim()}
               className="btn btn-danger btn-sm d-flex align-items-center gap-2 fw-semibold"
             >
               {submitting && <span className="spinner-border spinner-border-sm text-white" />}
               {submitting ? t('talentCandidaturaDetail.botoes.aProcessar') : t('talentCandidaturaDetail.botoes.confirmarRejeicao')}
             </button>
           </div>
+        </Card>
+      )}
+
+      {podeValidar && requisitosObrigatorios.length > 0 && (
+        <Card className={`mt-4 ${requisitosEmFalta.length ? 'border-warning-subtle bg-warning-subtle' : 'border-success-subtle bg-success-subtle'}`}>
+          <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+              <h2 className="h6 fw-bold mb-1">{t('tmWorkspace.evidenceCoverage.title')}</h2>
+              <p className="small text-muted mb-0">{t('tmWorkspace.evidenceCoverage.summary', { covered: requisitosObrigatorios.length - requisitosEmFalta.length, total: requisitosObrigatorios.length })}</p>
+            </div>
+            <span className={`badge ${requisitosEmFalta.length ? 'text-bg-warning' : 'text-bg-success'}`}>{requisitosEmFalta.length ? t('tmWorkspace.evidenceCoverage.missing', { count: requisitosEmFalta.length }) : t('tmWorkspace.evidenceCoverage.complete')}</span>
+          </div>
+          {requisitosEmFalta.length > 0 && <ul className="mt-3 mb-0 small text-warning-emphasis">{requisitosEmFalta.map((requisito) => <li key={requisito.id}>{requisito.titulo}</li>)}</ul>}
         </Card>
       )}
 
@@ -197,7 +216,7 @@ export default function TalentCandidaturaDetailPage() {
                   <span className="flex-shrink-0 rounded-circle bg-brand mt-1" style={{ height: '0.5rem', width: '0.5rem' }} />
                   <div>
                     <p className="small fw-medium text-ink mb-0">{h.motivo || h.estado}</p>
-                    <p className="fs-xs text-muted mb-0">{h.data}</p>
+                    <p className="fs-xs text-muted mb-0">{[h.estado, h.autor, h.data].filter(Boolean).join(' · ')}</p>
                   </div>
                 </li>
               ))}

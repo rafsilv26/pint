@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Lock } from 'lucide-react'
 import { Field } from './ui'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import * as api from '../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ChevronDown, Coins } from 'lucide-react'
+import { ArrowLeft, CalendarClock, ChevronDown, Coins, Layers3, Network, Tag } from 'lucide-react'
 import { Spinner, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
@@ -39,14 +39,22 @@ export default function ManagerBadgeDetailPage() {
               <span className="d-flex align-items-center gap-1 rounded-pill bg-white bg-opacity-75 px-2 py-1 fs-xs fw-semibold text-ink">
                 <Coins size={12} /> {badge.ponto} {t('managerBadge.pontos')}
               </span>
+              {badge.ativo === false && <span className="rounded-pill text-bg-secondary px-2 py-1 fs-xs fw-semibold">{t('tmWorkspace.catalog.inactive')}</span>}
             </div>
             <h1 className="mt-3 fs-2 fs-sm-1 fw-bold text-ink">{t('managerBadge.badgeDe')} {badge.nome}</h1>
           </div>
           <div className="d-none d-sm-block flex-shrink-0 text-center">
-            <div className="d-flex align-items-center justify-content-center rounded-circle bg-white fs-1 fw-bold text-ink shadow" style={{ height: '6rem', width: '6rem' }}>{badge.nome[0]}</div>
+            <div className="d-flex align-items-center justify-content-center overflow-hidden rounded-circle bg-white fs-1 fw-bold text-ink shadow" style={{ height: '6rem', width: '6rem' }}>{badge.imagem ? <img src={badge.imagem} alt="" className="w-100 h-100 object-fit-cover" /> : badge.nome[0]}</div>
             <p className="mt-2 small fw-medium text-ink">{badge.fornecedor}</p>
           </div>
         </div>
+      </div>
+
+      <div className="mt-3 d-flex flex-wrap gap-2">
+        {badge.learningPath && <span className="badge text-bg-light border d-inline-flex align-items-center gap-1 px-3 py-2"><Layers3 size={13} />{badge.learningPath}</span>}
+        {badge.serviceLine && <span className="badge text-bg-light border d-inline-flex align-items-center gap-1 px-3 py-2"><Network size={13} />{badge.serviceLine}</span>}
+        {badge.area && <span className="badge text-bg-light border d-inline-flex align-items-center gap-1 px-3 py-2"><Tag size={13} />{badge.area}</span>}
+        <span className="badge text-bg-light border d-inline-flex align-items-center gap-1 px-3 py-2"><CalendarClock size={13} />{badge.duracaoMeses ? t('tmWorkspace.badgeDetail.monthsValidity', { count: badge.duracaoMeses }) : t('tmWorkspace.common.semExpiracao')}</span>
       </div>
 
       <div className="mt-4 row g-4">
@@ -67,9 +75,11 @@ export default function ManagerBadgeDetailPage() {
                     <ChevronDown size={18} className="flex-shrink-0 text-muted" style={{ transform: aberto === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                   </button>
                   {aberto === i && (
-                    <p className="border-top px-3 py-2 small text-muted mb-0">
-                      {t('managerBadge.requisitoTextoExtra')}
-                    </p>
+                    <div className="border-top px-3 py-3">
+                      <p className="small text-muted mb-0">{req.descricao || t('managerBadge.requisitoTextoExtra')}</p>
+                      <span className={`mt-2 badge ${req.obrigatorio === false ? 'text-bg-light border' : 'text-bg-primary'}`}>{req.obrigatorio === false ? t('tmWorkspace.badgeDetail.optional') : t('tmWorkspace.badgeDetail.required')}</span>
+                      {/^https?:\/\//i.test(req.icone || '') && <img src={req.icone} alt="" className="mt-3 d-block rounded-2 border object-fit-cover" style={{ width: 96, height: 64 }} />}
+                    </div>
                   )}
                 </div>
               ))}

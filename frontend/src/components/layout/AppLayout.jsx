@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import Topnav from './Topnav'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../context/useAuth'
 import ChangePasswordModal from '../ChangePasswordModal'
 
 // Estrutura das páginas privadas: navbar de topo + conteúdo centrado.
