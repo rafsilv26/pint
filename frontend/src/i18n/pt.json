@@ -811,7 +811,9 @@
       "emailLabel": "Email",
       "emailPlaceholder": "Introduzir o email",
       "passwordLabel": "Password",
-      "passwordPlaceholder": "Introduzir password"
+      "passwordPlaceholder": "Introduzir password",
+      "mostrarPassword": "Mostrar password",
+      "ocultarPassword": "Ocultar password"
     },
     "lembrarMe": "Lembrar-me",
     "esqueceuPassword": "Esqueceu-se da password?",
