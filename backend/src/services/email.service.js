@@ -1,43 +1,53 @@
+const os = require('os');
+
+// O nodemailer resolve SEMPRE o host tanto em IPv4 como em IPv6 e escolhe
+// um endereço aleatório dos dois (ver nodemailer/lib/shared/index.js). O
+// Render tem uma interface de rede "IPv6" local mas sem rota real para a
+// internet — por isso o nodemailer, de vez em quando, tenta ligar por
+// IPv6 e falha com ENETUNREACH. Corrigir na fonte: o nodemailer só
+// considera IPv6 "suportado" se detetar uma interface de rede local desse
+// tipo (os.networkInterfaces). Filtramos essas entradas ANTES do
+// nodemailer ser importado, para ele nunca sequer tentar IPv6.
+const originalNetworkInterfaces = os.networkInterfaces;
+os.networkInterfaces = function ipv4OnlyNetworkInterfaces(...args) {
+  const interfaces = originalNetworkInterfaces.apply(this, args) || {};
+  const filtered = {};
+  for (const [nome, enderecos] of Object.entries(interfaces)) {
+    const apenasIpv4 = (enderecos || []).filter((a) => a.family === 'IPv4' || a.family === 4);
+    if (apenasIpv4.length) filtered[nome] = apenasIpv4;
+  }
+  return filtered;
+};
+
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-// O Render bloqueia ligações SMTP diretas de saída (confirmado: mesmo sem
-// IPv6 e com a porta 587, o pedido nunca chega a lugar nenhum e dá sempre
-// "Connection timeout"). A alternativa fiável nestas plataformas é enviar
-// por HTTPS via uma API de email transacional, em vez de SMTP puro — por
-// isso trocámos o nodemailer/Gmail por uma chamada direta à API do Resend.
-//
-// IMPORTANTE: sem verificares um domínio próprio no Resend, só é possível
-// enviar para o email da própria conta Resend (limitação deles, não nossa).
-// Assim que tiveres um domínio verificado, basta mudar RESEND_FROM.
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const RESEND_FROM = process.env.RESEND_FROM || 'Softinsa Badges <onboarding@resend.dev>';
+// Usamos host/porta explícitos (587, STARTTLS) em vez do atalho
+// "service: 'gmail'" (que usa a porta 465/SSL) — em vários PaaS a porta 465
+// fica bloqueada/instável, enquanto a 587 costuma ser mais fiável.
+// Timeouts mais curtos para não ficar pendurado minutos se a rede bloquear.
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // STARTTLS
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000
+});
 
 // Função base
 const enviarEmail = async (para, assunto, html) => {
   try {
-    if (!RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY não está definida nas variáveis de ambiente.');
-    }
-
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: RESEND_FROM,
-        to: para,
-        subject: assunto,
-        html
-      })
+    await transporter.sendMail({
+      from: `"Softinsa Badges" <${process.env.EMAIL_USER}>`,
+      to: para,
+      subject: assunto,
+      html
     });
-
-    if (!res.ok) {
-      const corpo = await res.text().catch(() => '');
-      throw new Error(`Resend respondeu ${res.status}: ${corpo}`);
-    }
-
     console.log(`✅ Email enviado para ${para}`);
   } catch (erro) {
     console.error('❌ Erro ao enviar email:', erro.message);
