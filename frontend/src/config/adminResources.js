@@ -158,13 +158,15 @@ requirements: {
     colunas: [
       { key: 'nivelId', label: t('admin.levels.singular') },
       { key: 'titulo', label: t('admin.generic.titulo') },
+      { key: 'icone', label: 'Ícone' },
       { key: 'obrigatorio', label: 'Obrigatório' },
+      { key: 'ordem', label: 'Ordem' },
     ],
     campos: [
-      { 
-        key: 'nivelId', 
-        label: t('admin.levels.singular'), 
-        type: 'select', 
+      {
+        key: 'nivelId',
+        label: t('admin.levels.singular'),
+        type: 'select',
         optionsResource: 'levels',
         // Usa o mapa de áreas injetado pelo componente para mostrar "Nome da Área"
         optionLabel: (item, areasMap) => {
@@ -172,19 +174,20 @@ requirements: {
           return `${item.nome || 'Nível'} (${nomeArea})`;
         }
       },
-      
+
       { key: 'titulo', label: t('admin.generic.titulo') },
       { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
-      
-      { 
-        key: 'obrigatorio', 
-        label: 'Obrigatório?', 
-        type: 'select', 
+      { key: 'icone', label: 'Ícone', optional: true },
+
+      {
+        key: 'obrigatorio',
+        label: 'Obrigatório?',
+        type: 'select',
         options: [
           { value: true, label: 'Sim' },
           { value: false, label: 'Não' }
         ],
-        optional: true 
+        optional: true
       },
       { key: 'ordem', label: 'Ordem', type: 'number', optional: true },
     ],
