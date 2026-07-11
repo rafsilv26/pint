@@ -5,14 +5,41 @@ export const getAdminResources = (t) => ({
     singular: t('admin.badges.singular'),
     colunas: [
       { key: 'nome', label: t('admin.generic.nome') },
-      { key: 'nivel', label: t('admin.badges.campos.nivel') },
+      { key: 'nivelId', label: t('admin.badges.campos.nivel') },
+      { key: 'tipo', label: 'Tipo' },
+      { key: 'fornecedor', label: 'Fornecedor' },
       { key: 'ponto', label: t('admin.badges.campos.pontos') },
+      { key: 'ativo', label: 'Ativo' },
     ],
     campos: [
       { key: 'nome', label: t('admin.generic.nome') },
-      { key: 'nivel', label: t('admin.badges.campos.nivel') },
-      { key: 'ponto', label: t('admin.badges.campos.pontos'), type: 'number' },
+      // Dropdown para o nível (mostra "Nome do Nível (Área)", tal como em Requisitos).
+      {
+        key: 'nivelId',
+        label: t('admin.badges.campos.nivel'),
+        type: 'select',
+        optionsResource: 'levels',
+        optionLabel: (item, areasMap) => {
+          const nomeArea = areasMap[item.areaId] || 'Área Desconhecida';
+          return `${item.nome || 'Nível'} (${nomeArea})`;
+        }
+      },
       { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea' },
+      { key: 'tipo', label: 'Tipo (Certificação, Formação, Conquista...)', optional: true },
+      { key: 'fornecedor', label: 'Fornecedor (ex: AWS, Microsoft...)', optional: true },
+      { key: 'ponto', label: t('admin.badges.campos.pontos'), type: 'number' },
+      { key: 'custoEstimado', label: 'Custo Estimado (€)', type: 'number', optional: true },
+      { key: 'duracaoMeses', label: 'Duração até Expirar (meses)', type: 'number', optional: true },
+      { key: 'expiracao', label: 'Data Absoluta de Expiração', type: 'date', optional: true },
+      { key: 'imagem', label: 'URL da Imagem/Ícone', optional: true },
+      { key: 'slug', label: 'Slug (identificador público)', optional: true },
+      {
+        key: 'ativo',
+        label: 'Está ativo?',
+        type: 'select',
+        options: [{ value: true, label: 'Sim' }, { value: false, label: 'Não' }],
+        optional: true,
+      },
     ],
   },
   'learning-paths': {
@@ -43,10 +70,22 @@ export const getAdminResources = (t) => ({
     colunas: [
       { key: 'title', label: t('admin.generic.titulo') },
       { key: 'message', label: t('admin.generic.mensagem') },
+      { key: 'type', label: 'Tipo' },
     ],
     campos: [
       { key: 'title', label: t('admin.generic.titulo') },
       { key: 'message', label: t('admin.generic.mensagem'), type: 'textarea' },
+      {
+        key: 'type',
+        label: 'Tipo',
+        type: 'select',
+        options: [
+          { value: 'info', label: 'Informação' },
+          { value: 'warning', label: 'Aviso' },
+          { value: 'error', label: 'Erro' },
+        ],
+        optional: true,
+      },
     ],
   },
   information: {
@@ -56,12 +95,22 @@ export const getAdminResources = (t) => ({
     colunas: [
       { key: 'title', label: t('admin.generic.titulo') },
       { key: 'message', label: t('admin.generic.mensagem') },
+      { key: 'type', label: 'Tipo' },
+      { key: 'active', label: 'Ativo' },
     ],
     campos: [
       { key: 'title', label: t('admin.generic.titulo') },
       { key: 'message', label: t('admin.generic.mensagem'), type: 'textarea' },
+      { key: 'type', label: 'Tipo', optional: true },
       { key: 'startDate', label: 'Data de início', type: 'date', optional: true },
       { key: 'endDate', label: 'Data de fim', type: 'date', optional: true },
+      {
+        key: 'active',
+        label: 'Está ativo?',
+        type: 'select',
+        options: [{ value: true, label: 'Sim' }, { value: false, label: 'Não' }],
+        optional: true,
+      },
     ],
   },
   'service-lines': {
@@ -135,20 +184,28 @@ export const getAdminResources = (t) => ({
         { key: 'areaId', label: t('admin.areas.singular') }, // Adicionado para veres a Área na tabela
         { key: 'nome', label: t('admin.generic.nome') },
         { key: 'ordem', label: t('admin.levels.campos.ordem') },
+        { key: 'ativo', label: 'Ativo' },
       ],
       campos: [
         // 1. O Dropdown mágico para a Área
-        { 
-          key: 'areaId', 
-          label: t('admin.areas.singular'), 
-          type: 'select', 
-          optionsResource: 'areas' 
+        {
+          key: 'areaId',
+          label: t('admin.areas.singular'),
+          type: 'select',
+          optionsResource: 'areas'
         },
-        
+
         { key: 'nome', label: t('admin.generic.nome'), optional: true },
-        
+
         // Como na BD é CHAR(1) (ex: 'A', 'B', 'C'), tirei o type: 'number' para permitir letras
         { key: 'ordem', label: t('admin.levels.campos.ordem') },
+        {
+          key: 'ativo',
+          label: 'Está ativo?',
+          type: 'select',
+          options: [{ value: true, label: 'Sim' }, { value: false, label: 'Não' }],
+          optional: true,
+        },
       ],
     },
 requirements: {
@@ -200,24 +257,28 @@ requirements: {
         { key: 'policyId', label: 'ID' }, // Adicionado para veres o ID
         { key: 'title', label: t('admin.generic.titulo') },
         { key: 'version', label: 'Versão' },
+        { key: 'effectiveDate', label: 'Data de Eficácia' },
+        { key: 'expirationDate', label: 'Data de Expiração' },
         { key: 'active', label: 'Ativo' },
+        { key: 'mandatory', label: 'Obrigatório' },
       ],
       campos: [
         { key: 'title', label: t('admin.generic.titulo') },
         { key: 'version', label: 'Versão' },
         { key: 'description', label: t('admin.generic.descricao'), type: 'textarea' },
         { key: 'effectiveDate', label: 'Data de Eficácia', type: 'date' },
-        { 
-          key: 'active', 
-          label: 'Está Ativo?', 
-          type: 'select', 
-          options: [{value: true, label: 'Sim'}, {value: false, label: 'Não'}] 
+        { key: 'expirationDate', label: 'Data de Expiração', type: 'date', optional: true },
+        {
+          key: 'active',
+          label: 'Está Ativo?',
+          type: 'select',
+          options: [{value: true, label: 'Sim'}, {value: false, label: 'Não'}]
         },
-        { 
-          key: 'mandatory', 
-          label: 'É Obrigatório?', 
-          type: 'select', 
-          options: [{value: true, label: 'Sim'}, {value: false, label: 'Não'}] 
+        {
+          key: 'mandatory',
+          label: 'É Obrigatório?',
+          type: 'select',
+          options: [{value: true, label: 'Sim'}, {value: false, label: 'Não'}]
         }
       ],
     },
