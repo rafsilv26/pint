@@ -13,6 +13,7 @@ export default function ManagerContaPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const isTalentManager = location.pathname.startsWith('/tm')
+  const isServiceLineLeader = location.pathname.startsWith('/sll')
   const [pw, setPw] = useState({ atual: '', nova: '', confirmar: '' })
   const [msg, setMsg] = useState(null)
   const [erro, setErro] = useState(null)
@@ -63,7 +64,7 @@ export default function ManagerContaPage() {
         <div className="btn-group w-100" role="group" aria-label={t('managerConta.idioma')}>
           {[['pt', 'Português'], ['en', 'English'], ['es', 'Español']].map(([code, label]) => <button key={code} type="button" onClick={() => i18n.changeLanguage(code)} className={`btn ${i18n.language.startsWith(code) ? 'btn-brand' : 'btn-outline-secondary'}`}>{label}</button>)}
         </div>
-        {isTalentManager && <Link to="/tm/assinatura" className="mt-3 btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2"><PenLine size={16} />{t('tmWorkspace.signature.emailSignature')}</Link>}
+        {(isTalentManager || isServiceLineLeader) && <Link to={isTalentManager ? '/tm/assinatura' : '/sll/assinatura'} className="mt-3 btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2"><PenLine size={16} />{t('tmWorkspace.signature.emailSignature')}</Link>}
       </Card>
 
       <Card className="mt-4">

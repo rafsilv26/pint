@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShieldCheck } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
@@ -21,13 +21,6 @@ export default function RgpdPolicyModal({ policies }) {
 
   const politica = policies[0]
   const total = policies.length
-
-  // Sempre que muda a política em exibição (a atual foi aceite e passou-se
-  // à seguinte), a confirmação de leitura tem de ser feita de novo.
-  useEffect(() => {
-    setConfirmoLeitura(false)
-    setErro(null)
-  }, [politica?.policyId])
 
   async function handleAceitar() {
     if (!confirmoLeitura) return

@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import { ArrowLeft, Award, Star, Sparkles, Calendar, Mail, ExternalLink, Network, Trophy, FileText, ChevronRight, Download, Clock3, Target } from 'lucide-react'
 import { Card, Spinner, ErrorState, EmptyState, StatusPill } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
-import { API_URL } from '../services/http'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 // Perfil de um consultor visto por um perfil de gestão (TM / SLL / Admin).
@@ -13,8 +14,12 @@ export default function ManagerConsultorDetailPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const talentView = location.pathname.startsWith('/tm')
+  const serviceLineView = location.pathname.startsWith('/sll')
   const { data: c, loading, error, reload } = useAsync(() => talentView ? api.getTalentConsultant(id) : api.getConsultant(id), [id, talentView])
-  const { data: historico, loading: loadingHistorico } = useAsync(() => api.getConsultantCandidaturas(id), [id])
+  const { data: historico, loading: loadingHistorico, reload: reloadHistorico } = useAsync(() => api.getConsultantCandidaturas(id), [id])
+  const [certificateId, setCertificateId] = useState(null)
+  const [certificateError, setCertificateError] = useState('')
+  useAutoRefresh(() => { reload(); reloadHistorico() })
 
   if (loading) return <Spinner />
   if (error) return <ErrorState onRetry={reload} />
@@ -36,6 +41,18 @@ export default function ManagerConsultorDetailPage() {
   const specialAchievements = c.specialAchievements || []
   const timeline = c.timeline || []
   const listaHistorico = historico || []
+
+  const downloadCertificate = async (badgeId) => {
+    setCertificateId(badgeId)
+    setCertificateError('')
+    try {
+      await api.downloadManagerCertificate(c.id, badgeId)
+    } catch (downloadError) {
+      setCertificateError(downloadError.message)
+    } finally {
+      setCertificateId(null)
+    }
+  }
 
   return (
     <div>
@@ -135,7 +152,7 @@ export default function ManagerConsultorDetailPage() {
                       </span>
                     )}
                     {b.expirationDate && <p className={`mt-1 fs-xs mb-0 ${b.expiration?.code === 'expired' ? 'text-danger' : b.expiration?.code === 'soon' ? 'text-warning-emphasis' : 'text-muted'}`}>{t('tmWorkspace.validityLabel')}: {new Date(b.expirationDate).toLocaleDateString()}</p>}
-                    {b.publicToken && <a className="mt-2 d-inline-flex align-items-center gap-1 fs-xs fw-semibold text-brand text-decoration-none" href={`${API_URL}/relatorios/certificado/${b.publicToken}`} target="_blank" rel="noreferrer"><Download size={13} /> {t('tmWorkspace.certificate')}</a>}
+                    <button type="button" className="mt-2 btn btn-link p-0 d-inline-flex align-items-center gap-1 fs-xs fw-semibold text-brand text-decoration-none" onClick={() => downloadCertificate(b.id)} disabled={certificateId === b.id}><Download size={13} /> {certificateId === b.id ? t('exportButtons.processando') : t('tmWorkspace.certificate')}</button>
                   </div>
                 </div>
               </div>
@@ -143,10 +160,11 @@ export default function ManagerConsultorDetailPage() {
           </div>
         )}
       </Card>
+      {certificateError && <div className="mt-3 alert alert-danger py-2 small" role="alert">{certificateError}</div>}
 
-      {talentView && <div className="mt-4 row g-4">
+      {(talentView || serviceLineView) && <div className="mt-4 row g-4">
         <div className="col-lg-6"><Card className="h-100"><h2 className="mb-3 h6 fw-bold"><Sparkles size={17} className="me-2 text-warning" />{t('tmWorkspace.specialAchievements')}</h2>{specialAchievements.length === 0 ? <p className="small text-muted mb-0">{t('tmWorkspace.noSpecialAchievements')}</p> : <div className="d-flex flex-column gap-3">{specialAchievements.map((item) => <div key={`${item.badgePremiumId}-${item.achievementDate}`} className="rounded-3 border p-3"><p className="small fw-bold mb-1">{item.name}</p><p className="fs-xs text-muted mb-1">{item.description || item.criteriaDescription}</p><p className="fs-xs text-muted mb-0">{item.achievementDate ? new Date(item.achievementDate).toLocaleDateString() : '—'}</p></div>)}</div>}</Card></div>
-        <div className="col-lg-6"><Card className="h-100"><h2 className="mb-3 h6 fw-bold"><Target size={17} className="me-2 text-primary" />{t('tmWorkspace.developmentTimeline')}</h2>{timeline.length === 0 ? <p className="small text-muted mb-0">{t('tmWorkspace.noGoals')}</p> : <div className="d-flex flex-column gap-3">{timeline.map((item) => <div key={item.timelineId} className="d-flex gap-3"><div className="d-flex align-items-center justify-content-center rounded-circle bg-brand-light text-brand flex-shrink-0" style={{ width: 32, height: 32 }}><Clock3 size={15} /></div><div><p className="small fw-bold mb-0">{item.title}</p><p className="fs-xs text-muted mb-1">{item.type} · {item.status}</p>{item.expectedDate && <p className="fs-xs text-muted mb-0">{t('tmWorkspace.expected')}: {new Date(item.expectedDate).toLocaleDateString()}</p>}</div></div>)}</div>}</Card></div>
+        {talentView && <div className="col-lg-6"><Card className="h-100"><h2 className="mb-3 h6 fw-bold"><Target size={17} className="me-2 text-primary" />{t('tmWorkspace.developmentTimeline')}</h2>{timeline.length === 0 ? <p className="small text-muted mb-0">{t('tmWorkspace.noGoals')}</p> : <div className="d-flex flex-column gap-3">{timeline.map((item) => <div key={item.timelineId} className="d-flex gap-3"><div className="d-flex align-items-center justify-content-center rounded-circle bg-brand-light text-brand flex-shrink-0" style={{ width: 32, height: 32 }}><Clock3 size={15} /></div><div><p className="small fw-bold mb-0">{item.title}</p><p className="fs-xs text-muted mb-1">{item.type} · {item.status}</p>{item.expectedDate && <p className="fs-xs text-muted mb-0">{t('tmWorkspace.expected')}: {new Date(item.expectedDate).toLocaleDateString()}</p>}</div></div>)}</div>}</Card></div>}
       </div>}
 
       {/* Histórico de Candidaturas */}

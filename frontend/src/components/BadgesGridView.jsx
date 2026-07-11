@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Search, Coins, Award } from 'lucide-react'
 import { PageHeader, Spinner, ErrorState, EmptyState } from './ui'
 import { useAsync } from '../hooks/useAsync'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
@@ -17,12 +18,13 @@ const TECH_TINTS = {
 export default function BadgesGridView({ titulo, linkBase }) {
   const { t } = useTranslation() // <-- Inicializa a tradução
   const { data, loading, error, reload } = useAsync(() => api.getBadges())
+  useAutoRefresh(reload)
   const [q, setQ] = useState('')
 
   if (error) return <ErrorState onRetry={reload} />
   if (loading || !data) return <Spinner />
 
-  const lista = data.filter((b) => `${b.nome} ${b.nivel} ${b.fornecedor}`.toLowerCase().includes(q.toLowerCase()))
+  const lista = data.filter((b) => b.ativo !== false && `${b.nome} ${b.nivel} ${b.fornecedor}`.toLowerCase().includes(q.toLowerCase()))
 
   // Definimos o título final aqui para usar a tradução caso não venha nas props
   const tituloFinal = titulo || t('badgesGrid.tituloDefault')

@@ -10,6 +10,12 @@ import {
   getTalentWorkspace,
   invalidateTalentWorkspace,
 } from './talentWorkspace.js'
+import {
+  buildServiceLineReport,
+  filterServiceLineApplications,
+  getServiceLineWorkspace,
+  invalidateServiceLineWorkspace,
+} from './serviceLineWorkspace.js'
 
 const CODE_COR = {
   OPEN: 'gray', SUBMITTED: 'blue', IN_VALIDATION: 'amber', VALIDATED: 'indigo',
@@ -372,11 +378,13 @@ export async function getTalentCandidaturas(estado = 'pendentes') {
   return rows.map(localizeTalentRow)
 }
 export async function getCandidatura(id) {
+  const currentUser = getUser()
+  const isServiceLineLeader = (currentUser?.roles || [currentUser?.role]).includes('ServiceLineLeader')
   const [c, workspace] = await Promise.all([
     http(`/candidaturas/${id}`),
-    getTalentWorkspace().catch(() => null),
+    (isServiceLineLeader ? getServiceLineWorkspace() : getTalentWorkspace()).catch(() => null),
   ])
-  const enriched = workspace?.candidaturas.find((row) => Number(row.id) === Number(id))
+  const enriched = (workspace?.candidaturas || workspace?.applications || []).find((row) => Number(row.id) === Number(id))
   const code = c.status?.code || enriched?.status?.code
   return {
     id: c.id,
@@ -390,7 +398,7 @@ export async function getCandidatura(id) {
       nivel: enriched?.nivel || (c.Badge?.nivelId != null ? i18next.t('api.generic.nivel', { nivel: c.Badge.nivelId }) : '—'),
       descricao: c.Badge?.descricao || '',
       pontos: c.Badge?.ponto ?? enriched?.pontos ?? 0,
-      requisitos: enriched?.requirements || [],
+      requisitos: enriched?.requirements || enriched?.requisitos || [],
       tint: tintFor(c.Badge?.fornecedor || c.Badge?.nome || ''),
     },
     evidencias: (c.evidencias || []).map((e) => ({
@@ -399,9 +407,14 @@ export async function getCandidatura(id) {
       requisito: e.Requirement?.titulo || e.Requirement?.descricao || e.descricao || '—',
       validado: e.validado === true ? true : e.validado === false ? false : null,
     })),
-    historico: enriched?.historico?.map((h) => ({ ...h, estado: statusName(h.code, h.estado), data: dataPT(h.data) })) || (c.history || []).map((h) => ({
-      estado: i18next.t('api.generic.atualizacaoEstado', { defaultValue: 'Atualização de estado' }), data: dataPT(h.createdAt), motivo: h.motivo || h.reason || '',
-    })),
+    historico: (c.history || []).map((h) => ({
+      estado: statusName(h.newStatus?.code, h.newStatus?.name || i18next.t('api.generic.atualizacaoEstado', { defaultValue: 'Atualização de estado' })),
+      estadoAnterior: statusName(h.oldStatus?.code, h.oldStatus?.name || ''),
+      code: h.newStatus?.code,
+      autor: h.responsavel?.nome || '',
+      data: dataPT(h.createdAt),
+      motivo: h.motivo || h.reason || '',
+    })).sort((a, b) => String(a.data).localeCompare(String(b.data))),
   }
 }
 export async function validarTalentManager(id, { decisao, comentario } = {}) {
@@ -450,49 +463,71 @@ export async function refreshTalentWorkspace() {
 // automaticamente restringidos pelo backend à Service Line do SLL
 // autenticado (Admin/TalentManager continuam a ver tudo).
 export async function getServiceLineDashboard() {
-  const [consultants, pendentes, badgesSemana] = await Promise.all([
-    http('/consultants').catch(() => ({ data: [], total: 0 })),
-    http('/candidaturas/serviceline/pendentes').catch(() => []),
-    http('/candidaturas/badges-semana').catch(() => [0, 0, 0, 0, 0, 0, 0]),
-  ])
-  const cons = consultants?.data || []
-  const totalBadgesAtribuidos = cons.reduce((s, c) => s + (c.badges || 0), 0)
+  const workspace = await getServiceLineWorkspace()
+  const cons = workspace.consultants
+  const pendentes = workspace.applications.filter((row) => row.status.code === 'VALIDATED')
+  const totalBadgesAtribuidos = workspace.awards.length
   return {
     stats: [
-      { label: i18next.t('api.sll.stats.consultores'), value: String(consultants?.total ?? cons.length), delta: '', tint: 'sky' },
+      { label: i18next.t('api.sll.stats.consultores'), value: String(cons.length), delta: '', tint: 'sky' },
       { label: i18next.t('api.sll.stats.badgesAtribuidos'), value: String(totalBadgesAtribuidos), delta: '', tint: 'violet' },
       { label: i18next.t('api.sll.stats.pedidosBadges'), value: String((pendentes || []).length), delta: '', tint: 'amber' },
       { label: i18next.t('api.sll.stats.pontosAtribuidos'), value: String(cons.reduce((s, c) => s + (c.points || 0), 0)), delta: '', tint: 'emerald' },
     ],
-    pontuacaoMensal: cons.slice(0, 6).map((c, i) => ({ rank: i + 1, nome: c.name, badges: c.badges, pontos: c.points })),
-    badgesAtribuidos: Array.isArray(badgesSemana) && badgesSemana.length === 7 ? badgesSemana : [0, 0, 0, 0, 0, 0, 0],
-    atividadeRecente: (pendentes || []).slice(0, 5).map((c) => ({
-      nome: c.Consultant?.User?.nome || i18next.t('api.generic.consultor'),
-      texto: i18next.t('api.sll.atividade', { nome: c.Badge?.nome || '' }),
+    ranking: cons.slice(0, 8).map((c, i) => ({ rank: i + 1, nome: c.name, badges: c.badges, pontos: c.points, progress: c.progress, area: c.area })),
+    consultantProgress: cons.slice().sort((a, b) => b.progress - a.progress || b.points - a.points),
+    badgesAtribuidos: workspace.badgesWeek,
+    atividadeRecente: workspace.applications.slice(0, 5).map((c) => ({
+      nome: c.consultor || i18next.t('api.generic.consultor'),
+      texto: `${c.badge} · ${statusName(c.status.code, c.status.name)}`,
     })),
   }
 }
 // Histórico completo dos pedidos da Service Line do SLL (todos os estados,
 // não só os pendentes de aprovação final) — guião: "visualização do status
 // dos pedidos... em tempo real" + "histórico de badges... obtidos e em processo".
-export async function getServiceLinePedidos() {
-  const rows = await http('/candidaturas/serviceline/todas').catch(() => [])
-  return (rows || []).map((c) => {
-    const code = c.status?.code || 'VALIDATED'
-    return {
-      id: c.id,
-      trackingId: `#${String(c.id).padStart(5, '0')}`,
-      badge: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }),
-      consultor: c.Consultant?.User?.nome || i18next.t('api.generic.consultorId', { id: c.consultorId }),
-      data: c.dataSubmicao ? new Date(c.dataSubmicao).toLocaleDateString('pt-PT') : '—',
-      nivel: c.Badge?.nivelId != null ? String(c.Badge.nivelId) : '—',
-      pontos: c.Badge?.ponto ?? 0,
-      status: { code, name: c.status?.name || i18next.t('api.status.validada'), cor: CODE_COR[code] || 'gray' },
-    }
-  })
+export async function getServiceLinePedidos(filters = {}) {
+  const rows = filterServiceLineApplications((await getServiceLineWorkspace()).applications, filters)
+  return rows.map((row) => ({
+    ...row,
+    status: { ...row.status, name: statusName(row.status.code, row.status.name), cor: CODE_COR[row.status.code] || 'gray' },
+  }))
+}
+export async function getServiceLineReports(filters = {}) {
+  const report = buildServiceLineReport(await getServiceLineWorkspace(), filters)
+  return {
+    ...report,
+    applications: report.applications.map((row) => ({ ...row, status: { ...row.status, name: statusName(row.status.code, row.status.name), cor: CODE_COR[row.status.code] || 'gray' } })),
+    approvals: report.approvals.map((row) => ({ ...row, status: { ...row.status, name: statusName(row.status.code, row.status.name), cor: CODE_COR[row.status.code] || 'gray' } })),
+    rejections: report.rejections.map((row) => ({ ...row, status: { ...row.status, name: statusName(row.status.code, row.status.name), cor: CODE_COR[row.status.code] || 'gray' } })),
+    statusBreakdown: report.statusBreakdown.map((row) => ({ ...row, label: statusName(row.code, row.label) })),
+  }
+}
+export async function refreshServiceLineWorkspace() {
+  return getServiceLineWorkspace(true)
 }
 export async function validarServiceLine(id, { decisao, comentario } = {}) {
-  return http(`/candidaturas/serviceline/${id}/validar`, { method: 'PUT', body: { decisao, comentario } })
+  const result = await http(`/candidaturas/serviceline/${id}/validar`, { method: 'PUT', body: { decisao, comentario } })
+  invalidateServiceLineWorkspace()
+  invalidateTalentWorkspace()
+  return result
+}
+
+export async function downloadManagerCertificate(consultantId, badgeId) {
+  const token = getToken()
+  const response = await api.get(`/relatorios/certificado-gestao/${consultantId}/${badgeId}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    responseType: 'blob',
+  })
+  const disposition = response.headers['content-disposition'] || ''
+  const filename = disposition.match(/filename="?([^";]+)"?/i)?.[1] || `certificado-${badgeId}.pdf`
+  const url = URL.createObjectURL(response.data)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+  return { ok: true }
 }
 
 // ---------- Admin (CRUD genérico via catálogo) ----------

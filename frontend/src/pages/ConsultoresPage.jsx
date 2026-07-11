@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Search, Star, Medal, Users } from 'lucide-react'
 import { PageHeader, Card, Spinner, EmptyState, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
@@ -10,8 +11,18 @@ const iniciais = (n = '') => n.split(' ').map((p) => p[0]).slice(0, 2).join('').
 
 export default function ConsultoresPage({ linkBase }) {
   const { t } = useTranslation() // <-- Inicializa a tradução
+  const [searchParams, setSearchParams] = useSearchParams()
   const { data, loading, error, reload } = useAsync(() => api.getConsultants())
-  const [pesquisa, setPesquisa] = useState('')
+  useAutoRefresh(reload)
+  const [pesquisa, setPesquisa] = useState(searchParams.get('search') || '')
+
+  const updateSearch = (value) => {
+    setPesquisa(value)
+    const next = new URLSearchParams(searchParams)
+    if (value) next.set('search', value)
+    else next.delete('search')
+    setSearchParams(next, { replace: true })
+  }
 
   const lista = (data || []).filter((c) =>
     `${c.name} ${c.area || ''} ${c.serviceLine || ''}`.toLowerCase().includes(pesquisa.toLowerCase())
@@ -28,7 +39,7 @@ export default function ConsultoresPage({ linkBase }) {
         <Search size={18} className="position-absolute text-secondary" style={{ left: '0.9rem', top: '50%', transform: 'translateY(-50%)' }} />
         <input
           value={pesquisa}
-          onChange={(e) => setPesquisa(e.target.value)}
+          onChange={(e) => updateSearch(e.target.value)}
           placeholder={t('diretorio.pesquisar')}
           className="form-control ps-5"
         />

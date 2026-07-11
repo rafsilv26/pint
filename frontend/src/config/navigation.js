@@ -34,6 +34,7 @@ export const getSllNav = (t) => [
   { to: '/sll/pedidos', label: t('nav.sll.pedidos'), icon: ClipboardCheck },
   { to: '/sll/relatorios', label: t('nav.sll.relatorios'), icon: FileBarChart },
   { to: '/sll/notificacoes', label: t('nav.sll.notificacoes'), icon: Bell },
+  { to: '/sll/informacoes', label: t('nav.sll.informacoes', { defaultValue: 'Informações' }), icon: Info },
 ]
 
 // ===== Sidebar do Administrador =====

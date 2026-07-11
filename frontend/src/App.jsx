@@ -140,6 +140,8 @@ export default function App() {
           <Route path="/sll/badges/:id" element={<ManagerBadgeDetailPage />} />
           <Route path="/sll/relatorios" element={<SLLRelatoriosPage />} />
           <Route path="/sll/notificacoes" element={<NotificationsPage />} />
+          <Route path="/sll/informacoes" element={<AdminResourcePage resourceKey="information" readOnly />} />
+          <Route path="/sll/assinatura" element={<EmailSignaturePage />} />
           <Route path="/sll/conta" element={<ManagerContaPage />} />
         </Route>
 

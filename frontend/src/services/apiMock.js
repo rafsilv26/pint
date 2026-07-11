@@ -323,15 +323,50 @@ export async function refreshTalentWorkspace() {
 // ---------- Service Line Leader ----------
 export async function getServiceLineDashboard() {
   await delay()
-  return clone(mockServiceLineDashboard)
+  const dashboard = clone(mockServiceLineDashboard)
+  const ranking = dashboard.ranking || dashboard.pontuacaoMensal || []
+  return {
+    ...dashboard,
+    ranking,
+    consultantProgress: ranking.map((row, index) => ({
+      id: index + 1,
+      name: row.nome,
+      area: 'LowCode',
+      points: row.pontos,
+      badges: row.badges,
+      progress: Math.min(100, row.badges * 10),
+      pathCompleted: row.badges,
+      pathTotal: 10,
+    })),
+  }
 }
 export async function getServiceLinePedidos() {
   await delay()
   return clone(mockServiceLinePedidos)
 }
+export async function getServiceLineReports() {
+  await delay()
+  const applications = clone(mockServiceLinePedidos)
+  const consultants = await getConsultants()
+  const approvals = applications.filter((row) => row.status?.code === 'APPROVED')
+  const rejections = applications.filter((row) => row.status?.code === 'REJECTED')
+  const comparison = consultants.map((row) => ({ ...row, progress: Math.min(100, (row.badges || 0) * 10), experienceMonths: 24, experienceBand: '12-35' }))
+  return {
+    applications, consultants, catalog: clone(mockBadges), awards: [], approvals, rejections,
+    specialAchievements: [], statusBreakdown: [], areaBreakdown: [], monthlyBreakdown: [], comparison,
+    filterOptions: { areas: [...new Set(consultants.map((row) => row.area).filter(Boolean))], experienceBands: ['12-35'] },
+    totals: { applications: applications.length, consultants: consultants.length, catalog: mockBadges.length, awards: 0, approvals: approvals.length, rejections: rejections.length, specialAchievements: 0, points: 0 },
+  }
+}
+export async function refreshServiceLineWorkspace() {
+  return { ok: true }
+}
 export async function validarServiceLine() {
   await delay(500)
   return { mensagem: i18next.t('api.mensagens.decisaoRegistada') }
+}
+export async function downloadManagerCertificate() {
+  return { ok: true }
 }
 
 // ---------- Admin (CRUD genérico, com store em memória) ----------

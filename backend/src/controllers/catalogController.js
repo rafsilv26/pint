@@ -49,20 +49,53 @@ const buildWhere = (query) => {
   return where;
 };
 
-// Por pedido explícito (a decisão foi tomada conscientemente, contrariando o
-// ponto do guião que permite a um Service Line Leader ver badges de outras
-// service lines): o catálogo de badges também fica restrito à service line
-// do SLL autenticado, tal como já acontece com consultores/candidaturas.
-// Admin/TalentManager/Consultor não são afetados.
-const restringirBadgesPorServiceLine = async (req, whereClause) => {
+const RECURSOS_DA_SERVICE_LINE = new Set([
+  'learning-paths', 'service-lines', 'areas', 'levels', 'requirements', 'badges'
+]);
+const RECURSOS_PERMITIDOS_AO_SLL = new Set([
+  ...RECURSOS_DA_SERVICE_LINE,
+  'badge-statuses',
+  'badge-premium',
+  'information'
+]);
+
+const assertResourceAccess = (req) => {
+  const roles = req.user?.roles || [];
+  const isRestrictedSll = roles.includes('ServiceLineLeader') && !roles.includes('Admin') && !roles.includes('TalentManager');
+  if (isRestrictedSll && !RECURSOS_PERMITIDOS_AO_SLL.has(req.params.resource)) {
+    const error = new Error('Este recurso não está disponível para o perfil Service Line Leader.');
+    error.statusCode = 403;
+    throw error;
+  }
+};
+
+// O SLL pode navegar por todas as áreas da sua Service Line, mas não deve
+// obter a hierarquia de outras linhas por chamadas diretas ao catálogo.
+const restringirCatalogoPorServiceLine = async (req, resource, whereClause) => {
   const serviceLineId = await getServiceLineScopeForUser(req.user);
-  if (!serviceLineId) return whereClause;
-  const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
-  return { ...whereClause, id: { [Op.in]: badgeIds.length ? badgeIds : [-1] } };
+  if (!serviceLineId || !RECURSOS_DA_SERVICE_LINE.has(resource)) return whereClause;
+
+  const areas = await models.Area.findAll({ where: { serviceLineId }, attributes: ['id'] });
+  const areaIds = areas.map((row) => row.id);
+  const levels = await models.Level.findAll({ where: { areaId: { [Op.in]: areaIds.length ? areaIds : [-1] } }, attributes: ['id'] });
+  const levelIds = levels.map((row) => row.id);
+
+  if (resource === 'service-lines') return { ...whereClause, id: serviceLineId };
+  if (resource === 'areas') return { ...whereClause, serviceLineId };
+  if (resource === 'levels') return { ...whereClause, areaId: { [Op.in]: areaIds.length ? areaIds : [-1] } };
+  if (resource === 'requirements') return { ...whereClause, nivelId: { [Op.in]: levelIds.length ? levelIds : [-1] } };
+  if (resource === 'badges') {
+    const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
+    return { ...whereClause, id: { [Op.in]: badgeIds.length ? badgeIds : [-1] } };
+  }
+
+  const serviceLine = await models.ServiceLine.findByPk(serviceLineId, { attributes: ['learningPathId'] });
+  return { ...whereClause, id: serviceLine?.learningPathId || -1 };
 };
 
 exports.listResources = async (req, res) => {
   try {
+    assertResourceAccess(req);
     const config = getConfig(req, res);
     if (!config) return;
 
@@ -74,8 +107,8 @@ exports.listResources = async (req, res) => {
       whereClause.deletedAt = null;
     }
 
-    if (req.params.resource === 'badges' && req.user) {
-      whereClause = await restringirBadgesPorServiceLine(req, whereClause);
+    if (req.user) {
+      whereClause = await restringirCatalogoPorServiceLine(req, req.params.resource, whereClause);
     }
 
     // As aceitações de RGPD são dados pessoais: um consultor só pode ver as
@@ -92,12 +125,13 @@ exports.listResources = async (req, res) => {
 
     res.json(rows);
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao listar recurso.', details: error.message });
+    res.status(error.statusCode || 500).json({ erro: error.message || 'Erro ao listar recurso.', details: error.message });
   }
 };
 
 exports.getResource = async (req, res) => {
   try {
+    assertResourceAccess(req);
     const config = getConfig(req, res);
     if (!config) return;
 
@@ -106,19 +140,18 @@ exports.getResource = async (req, res) => {
       return res.status(404).json({ erro: 'Registo não encontrado.' });
     }
 
-    if (req.params.resource === 'badges' && req.user) {
-      const serviceLineId = await getServiceLineScopeForUser(req.user);
-      if (serviceLineId) {
-        const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
-        if (!badgeIds.includes(row.id)) {
-          return res.status(404).json({ erro: 'Registo não encontrado.' });
-        }
+    if (req.user && RECURSOS_DA_SERVICE_LINE.has(req.params.resource)) {
+      const scopedWhere = await restringirCatalogoPorServiceLine(req, req.params.resource, {});
+      const primaryKey = config.model.primaryKeyAttribute;
+      const allowed = await config.model.findAll({ where: scopedWhere, attributes: [primaryKey] });
+      if (!allowed.some((item) => String(item.get(primaryKey)) === String(row.get(primaryKey)))) {
+        return res.status(404).json({ erro: 'Registo não encontrado.' });
       }
     }
 
     res.json(row);
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao obter recurso.', details: error.message });
+    res.status(error.statusCode || 500).json({ erro: error.message || 'Erro ao obter recurso.', details: error.message });
   }
 };
 

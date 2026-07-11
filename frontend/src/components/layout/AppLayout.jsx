@@ -22,7 +22,7 @@ export default function AppLayout() {
         {bloqueado ? null : <Outlet />}
       </main>
       {bloqueadoPassword && <ChangePasswordModal />}
-      {bloqueadoRgpd && <RgpdPolicyModal policies={pendingPolicies} />}
+      {bloqueadoRgpd && <RgpdPolicyModal key={pendingPolicies[0]?.policyId} policies={pendingPolicies} />}
     </div>
   )
 }

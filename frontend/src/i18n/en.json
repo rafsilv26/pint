@@ -757,7 +757,8 @@
       "badges": "Badges",
       "pedidos": "Requests",
       "relatorios": "Reports",
-      "notificacoes": "Notifications"
+      "notificacoes": "Notifications",
+      "informacoes": "Information"
     },
     "admin": {
       "dashboard": "Dashboard",
@@ -843,6 +844,12 @@
   "sllDashboard": {
     "titulo": "Dashboard",
     "pontuacaoMensal": "Monthly Score",
+    "rankingServiceLine": "Service Line ranking",
+    "verConsultores": "View consultants",
+    "progressoConsultores": "Consultant progress",
+    "progressoDescricao": "Progress through the badges available for each area in your Service Line.",
+    "abrirRelatorios": "Open reports",
+    "badgesConcluidas": "{{completed}} of {{total}} badges completed",
     "tabela": {
       "posicao": "#",
       "nome": "Name",
@@ -864,6 +871,12 @@
     "aprovar": "Approve",
     "rejeitar": "Reject",
     "devolver": "Send Back",
+    "feedback": {
+      "aprovada": "You approved the «{{badge}}» badge.",
+      "rejeitada": "You rejected the «{{badge}}» badge.",
+      "devolvida": "You sent the «{{badge}}» badge back to the consultant.",
+      "registada": "The final decision was recorded."
+    },
     "labels": {
       "motivoRejeicao": "Reason for rejection",
       "comentarioDevolucao": "Comment for consultant (send back)"
@@ -893,8 +906,12 @@
     "resumo": {
       "pendentes": "Pending",
       "aprovados": "Approved",
-      "rejeitados": "Rejected"
+      "rejeitados": "Rejected",
+      "devolvidos": "Sent back"
     },
+    "tabs": { "todos": "All", "pendentes": "Pending", "aprovados": "Approved", "rejeitados": "Rejected", "devolvidos": "Sent back" },
+    "pesquisar": "Search request",
+    "fecharAviso": "Close notification",
     "empty": {
       "titulo": "No requests",
       "descricao": "There are no requests for final approval."
@@ -912,6 +929,17 @@
   "sllRelatorios": {
     "titulo": "Reports",
     "subtitulo": "Reports and exports for your Service Line",
+    "filtros": { "area": "Area", "todasAreas": "All areas", "experiencia": "Experience", "todasExperiencias": "All", "estado": "Status", "todosEstados": "All statuses", "desde": "From", "ate": "To", "limpar": "Clear" },
+    "experiencia": { "0-11": "Less than 1 year", "12-35": "1 to 3 years", "36+": "More than 3 years" },
+    "mesesExperiencia": "{{count}} months",
+    "distribuicaoEstados": "Requests by status",
+    "distribuicaoAreas": "Activity by area",
+    "areaResumo": "{{applications}} requests · {{awards}} awarded",
+    "comparacaoTitulo": "Consultant comparison",
+    "premiumTitulo": "Service Line special achievements",
+    "exportacoesTitulo": "Exports",
+    "semDados": "No data for the selected filters.",
+    "semDadosDescricao": "Change the period or area to view other results.",
     "resumo": {
       "badgesAtribuidos": "Badges awarded",
       "totalPedidos": "Total requests",
@@ -951,6 +979,9 @@
       "area": "Area",
       "serviceLine": "Service Line",
       "badges": "Badges"
+      ,"progresso": "Progress",
+      "premium": "Premium",
+      "experiencia": "Experience"
     },
     "semDados": "No data to show."
   },

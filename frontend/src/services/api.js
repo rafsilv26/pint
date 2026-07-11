@@ -72,7 +72,10 @@ export const refreshTalentWorkspace = impl.refreshTalentWorkspace
 // Service Line Leader
 export const getServiceLineDashboard = impl.getServiceLineDashboard
 export const getServiceLinePedidos = impl.getServiceLinePedidos
+export const getServiceLineReports = impl.getServiceLineReports
+export const refreshServiceLineWorkspace = impl.refreshServiceLineWorkspace
 export const validarServiceLine = impl.validarServiceLine
+export const downloadManagerCertificate = impl.downloadManagerCertificate
 
 // Admin (CRUD genérico)
 export const listResource = impl.listResource

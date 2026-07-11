@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, FileText, Download, Check, X, Undo2 } from 'lucide-react'
 import { Card, Spinner, ErrorState, StatusPill } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
+import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import * as api from '../../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
@@ -25,6 +26,7 @@ export default function SLLPedidoDetailPage() {
   const [comentario, setComentario] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [msg, setMsg] = useState(null)
+  useAutoRefresh(reload, 30_000, !aprovando && !submitting)
 
   if (loading) return <Spinner />
   if (error) return <ErrorState onRetry={reload} />
@@ -34,8 +36,13 @@ export default function SLLPedidoDetailPage() {
     setSubmitting(true)
     setMsg(null)
     try {
-      await api.validarServiceLine(c.id, { decisao, comentario })
-      navigate('/sll/pedidos')
+      const result = await api.validarServiceLine(c.id, { decisao, comentario })
+      const config = {
+        APROVAR: { tab: 'APPROVED', type: 'success', title: t('sllPedidoDetail.feedback.aprovada', { badge: c.badge.nome }) },
+        REJEITAR: { tab: 'REJECTED', type: 'danger', title: t('sllPedidoDetail.feedback.rejeitada', { badge: c.badge.nome }) },
+        SEND_BACK: { tab: 'OPEN', type: 'warning', title: t('sllPedidoDetail.feedback.devolvida', { badge: c.badge.nome }) },
+      }[decisao]
+      navigate('/sll/pedidos', { replace: true, state: { tab: config.tab, feedback: { type: config.type, title: config.title, message: result?.mensagem || result?.message || t('sllPedidoDetail.feedback.registada') } } })
     } catch (e) {
       setMsg(e.message)
     } finally {
@@ -89,10 +96,10 @@ export default function SLLPedidoDetailPage() {
                   {submitting && <span className="spinner-border spinner-border-sm text-white" />}
                   {submitting ? t('sllPedidoDetail.aProcessar') : t('sllPedidoDetail.aprovar')}
                 </button>
-                <button onClick={() => setAcao('REJEITAR')} disabled={submitting} className="btn btn-danger fw-semibold">
+                <button onClick={() => { setAcao('REJEITAR'); setComentario('') }} disabled={submitting} className="btn btn-danger fw-semibold">
                   {t('sllPedidoDetail.rejeitar')}
                 </button>
-                <button onClick={() => setAcao('SEND_BACK')} disabled={submitting} className="btn btn-outline-warning bg-warning-subtle d-flex align-items-center gap-1 fw-semibold">
+                <button onClick={() => { setAcao('SEND_BACK'); setComentario('') }} disabled={submitting} className="btn btn-outline-warning bg-warning-subtle d-flex align-items-center gap-1 fw-semibold">
                   <Undo2 size={15} /> {t('sllPedidoDetail.devolver')}
                 </button>
               </div>
@@ -129,7 +136,7 @@ export default function SLLPedidoDetailPage() {
             </button>
             <button
               onClick={() => decidir(acao)}
-              disabled={submitting}
+              disabled={submitting || !comentario.trim()}
               className={`btn btn-sm d-flex align-items-center gap-2 fw-semibold text-white ${acao === 'REJEITAR' ? 'btn-danger' : 'btn-warning'}`}
             >
               {submitting && <span className="spinner-border spinner-border-sm text-white" />}
@@ -163,8 +170,9 @@ export default function SLLPedidoDetailPage() {
                 <li key={i} className="d-flex gap-3">
                   <span className="flex-shrink-0 rounded-circle bg-brand mt-1" style={{ height: '0.5rem', width: '0.5rem' }} />
                   <div>
-                    <p className="small fw-medium text-ink mb-0">{h.motivo || h.estado}</p>
-                    <p className="fs-xs text-muted mb-0">{h.data}</p>
+                    <p className="small fw-medium text-ink mb-0">{h.estadoAnterior ? `${h.estadoAnterior} → ${h.estado}` : h.estado}</p>
+                    {h.motivo && <p className="mt-1 small text-muted mb-0">{h.motivo}</p>}
+                    <p className="fs-xs text-muted mb-0">{[h.autor, h.data].filter(Boolean).join(' · ')}</p>
                   </div>
                 </li>
               ))}

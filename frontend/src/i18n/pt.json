@@ -747,7 +747,8 @@
       "badges": "Badges",
       "pedidos": "Pedidos",
       "relatorios": "Relatórios",
-      "notificacoes": "Notificações"
+      "notificacoes": "Notificações",
+      "informacoes": "Informações"
     },
     "admin": {
       "dashboard": "Painel de Controlo",
@@ -833,6 +834,12 @@
   "sllDashboard": {
     "titulo": "Painel de Controlo",
     "pontuacaoMensal": "Pontuação Mensal",
+    "rankingServiceLine": "Ranking da Service Line",
+    "verConsultores": "Ver consultores",
+    "progressoConsultores": "Progresso dos consultores",
+    "progressoDescricao": "Evolução nas badges disponíveis para cada área da tua Service Line.",
+    "abrirRelatorios": "Abrir relatórios",
+    "badgesConcluidas": "{{completed}} de {{total}} badges concluídas",
     "tabela": {
       "posicao": "#",
       "nome": "Nome",
@@ -854,6 +861,12 @@
     "aprovar": "Aprovar",
     "rejeitar": "Rejeitar",
     "devolver": "Devolver",
+    "feedback": {
+      "aprovada": "Aprovaste a badge «{{badge}}».",
+      "rejeitada": "Rejeitaste a badge «{{badge}}».",
+      "devolvida": "Devolveste a badge «{{badge}}» ao consultor.",
+      "registada": "A decisão final foi registada."
+    },
     "labels": {
       "motivoRejeicao": "Motivo da rejeição",
       "comentarioDevolucao": "Comentário para o consultor (devolução)"
@@ -883,8 +896,12 @@
     "resumo": {
       "pendentes": "Pendentes",
       "aprovados": "Aprovados",
-      "rejeitados": "Rejeitados"
+      "rejeitados": "Rejeitados",
+      "devolvidos": "Devolvidos"
     },
+    "tabs": { "todos": "Todos", "pendentes": "Pendentes", "aprovados": "Aprovados", "rejeitados": "Rejeitados", "devolvidos": "Devolvidos" },
+    "pesquisar": "Procurar pedido",
+    "fecharAviso": "Fechar aviso",
     "empty": {
       "titulo": "Sem pedidos",
       "descricao": "Não há pedidos para aprovação final."
@@ -902,6 +919,17 @@
   "sllRelatorios": {
     "titulo": "Relatórios",
     "subtitulo": "Relatórios e exportações da tua Service Line",
+    "filtros": { "area": "Área", "todasAreas": "Todas as áreas", "experiencia": "Experiência", "todasExperiencias": "Todas", "estado": "Estado", "todosEstados": "Todos os estados", "desde": "Desde", "ate": "Até", "limpar": "Limpar" },
+    "experiencia": { "0-11": "Menos de 1 ano", "12-35": "1 a 3 anos", "36+": "Mais de 3 anos" },
+    "mesesExperiencia": "{{count}} meses",
+    "distribuicaoEstados": "Pedidos por estado",
+    "distribuicaoAreas": "Atividade por área",
+    "areaResumo": "{{applications}} pedidos · {{awards}} atribuídas",
+    "comparacaoTitulo": "Comparação dos consultores",
+    "premiumTitulo": "Conquistas especiais da Service Line",
+    "exportacoesTitulo": "Exportações",
+    "semDados": "Sem dados para os filtros selecionados.",
+    "semDadosDescricao": "Altera o período ou a área para consultar outros resultados.",
     "resumo": {
       "badgesAtribuidos": "Badges atribuídos",
       "totalPedidos": "Total de pedidos",
@@ -941,6 +969,9 @@
       "area": "Área",
       "serviceLine": "Service Line",
       "badges": "Badges"
+      ,"progresso": "Progresso",
+      "premium": "Premium",
+      "experiencia": "Experiência"
     },
     "semDados": "Sem dados para mostrar."
   },
