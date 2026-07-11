@@ -67,16 +67,16 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid items-stretch gap-6 lg:grid-cols-2">
         {/* Pontuação Global */}
-        <Card>
+        <Card className="flex h-full flex-col">
           <h2 className="mb-4 font-semibold text-ink">{t('talentDashboard.pontuacaoGlobal')}</h2>
           <div className="grid grid-cols-[2rem_1fr_auto] gap-2 px-2 pb-2 text-xs font-medium text-muted">
             <span>{t('talentDashboard.tabela.posicao')}</span>
             <span>{t('talentDashboard.tabela.nome')}</span>
             <span>{t('talentDashboard.tabela.pontos')}</span>
           </div>
-          <div className="space-y-0.5">
+          <div className="flex-1 space-y-0.5">
             {data.pontuacaoGlobal.map((r) => (
               <div key={r.rank} className="grid grid-cols-[2rem_1fr_auto] items-center gap-2 rounded-lg px-2 py-2 hover:bg-gray-50">
                 <span className="text-sm font-bold text-muted">{r.rank}</span>
@@ -93,7 +93,7 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
         </Card>
 
         {/* Pedidos fechados + Atividade */}
-        <div className="space-y-6">
+        <div className="flex h-full flex-col space-y-6">
           <Card>
             <div className="mb-4 flex items-baseline justify-between">
               <h2 className="font-semibold text-ink">{t('talentDashboard.pedidosFechados')}</h2>
@@ -125,7 +125,7 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
           <Card>
             <h2 className="mb-3 font-semibold text-ink">{t('talentDashboard.atividadeRecente')}</h2>
             <div className="space-y-3">
-              {data.atividadeRecente.map((a, i) => (
+              {data.atividadeRecente.slice(0, 5).map((a, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-light text-xs font-semibold text-brand">
                     {iniciais(a.nome)}
