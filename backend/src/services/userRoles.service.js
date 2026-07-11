@@ -33,8 +33,17 @@ const getUserRoles = async (userId) => {
 
 // Aplica os perfis ao utilizador, criando ou eliminando as entradas nas tabelas correspondentes conforme necessário 
 // (ex: applyUserRoles(1, ['Admin', 'Consultor'], { areaId: 2 }) => o utilizador 1 passa a ter os perfis Admin e Consultor, e é criada uma entrada na tabela de Consultores com areaId 2)
-const applyUserRoles = async (userId, roles = [], options = {}) => {
+const applyUserRoles = async (userId, roles = [], options = {}, transaction) => {
   const normalizedRoles = normalizeRoles(roles);
+
+  // O ServiceLineLeader exige sempre uma service line (coluna NOT NULL na
+  // BD) — sem esta validação, o findOrCreate mais abaixo rebenta com um
+  // erro de constraint da BD, o utilizador já ficou criado sem perfil
+  // nenhum, e o erro que chega ao admin é confuso. Falhar cedo e a avisar
+  // claramente evita esse estado inconsistente.
+  if (normalizedRoles.includes('ServiceLineLeader') && !options.serviceLineId) {
+    throw new Error('É obrigatório indicar a Service Line para o perfil Service Line Leader.');
+  }
 
   await Promise.all(
     Object.entries(ROLE_MODELS).map(async ([role, config]) => {
@@ -51,12 +60,13 @@ const applyUserRoles = async (userId, roles = [], options = {}) => {
       if (normalizedRoles.includes(role)) {
         await config.model.findOrCreate({
           where: { [config.key]: userId },
-          defaults: payload
+          defaults: payload,
+          transaction
         });
         return;
       }
 
-      await config.model.destroy({ where: { [config.key]: userId } });
+      await config.model.destroy({ where: { [config.key]: userId }, transaction });
     })
   );
 
