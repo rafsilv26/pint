@@ -24,53 +24,53 @@ export default function PublicBadgePage() {
   const currentLocale = localeMap[i18n.language?.substring(0, 2)] || 'pt-PT'
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6">
-      <div className="mb-6 flex items-center gap-3 text-xl font-bold text-brand">
-        <span className="grid h-10 w-10 place-items-center rounded-lg bg-brand text-white">S</span>
+    <div className="d-flex min-vh-100 flex-column align-items-center justify-content-center bg-light p-4">
+      <div className="mb-4 d-flex align-items-center gap-3 fs-4 fw-bold text-brand">
+        <span className="d-flex align-items-center justify-content-center rounded-3 bg-brand text-white" style={{ height: '2.5rem', width: '2.5rem' }}>S</span>
         Softinsa Badges
       </div>
 
       {loading ? (
         <p className="text-muted">{t('publicBadge.verificando')}</p>
       ) : !data ? (
-        <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-          <ShieldX size={48} className="mx-auto text-red-500" />
-          <h1 className="mt-4 text-lg font-bold text-ink">{t('publicBadge.naoEncontradoTitulo')}</h1>
-          <p className="mt-1 text-sm text-muted">{t('publicBadge.naoEncontradoDesc')}</p>
+        <div className="w-100 rounded-4 border bg-white p-5 text-center shadow-sm" style={{ maxWidth: '28rem' }}>
+          <ShieldX size={48} className="mx-auto text-danger" />
+          <h1 className="mt-3 fs-5 fw-bold text-ink">{t('publicBadge.naoEncontradoTitulo')}</h1>
+          <p className="mt-1 small text-muted">{t('publicBadge.naoEncontradoDesc')}</p>
         </div>
       ) : (
-        <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto grid h-20 w-20 place-items-center rounded-2xl bg-brand-light text-brand">
+        <div className="w-100 rounded-4 border bg-white p-5 text-center shadow-sm" style={{ maxWidth: '28rem' }}>
+          <div className="mx-auto d-flex align-items-center justify-content-center rounded-4 bg-brand-light text-brand" style={{ height: '5rem', width: '5rem' }}>
             <Award size={40} />
           </div>
-          <h1 className="mt-5 text-xl font-bold text-ink">{data.badge.nome}</h1>
-          <p className="mt-1 text-sm text-muted">{data.badge.descricao}</p>
+          <h1 className="mt-4 fs-4 fw-bold text-ink">{data.badge.nome}</h1>
+          <p className="mt-1 small text-muted">{data.badge.descricao}</p>
 
           <div
-            className={`mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${
-              data.valido ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+            className={`mt-3 d-inline-flex align-items-center gap-2 rounded-pill px-3 py-1 small fw-semibold ${
+              data.valido ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'
             }`}
           >
             {data.valido ? <ShieldCheck size={16} /> : <ShieldX size={16} />}
             {data.valido ? t('publicBadge.valido') : t('publicBadge.expirado')}
           </div>
 
-          <dl className="mt-6 space-y-3 border-t border-gray-100 pt-6 text-left text-sm">
-            <div className="flex justify-between">
-              <dt className="text-muted">{t('publicBadge.atribuidoA')}</dt>
-              <dd className="font-semibold text-ink">{data.consultor?.nome}</dd>
+          <dl className="mt-4 d-flex flex-column gap-2 border-top pt-4 text-start small mb-0">
+            <div className="d-flex justify-content-between">
+              <dt className="text-muted fw-normal">{t('publicBadge.atribuidoA')}</dt>
+              <dd className="fw-semibold text-ink mb-0">{data.consultor?.nome}</dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-muted">{t('publicBadge.emissor')}</dt>
-              <dd className="font-semibold text-ink">{data.badge.fornecedor}</dd>
+            <div className="d-flex justify-content-between">
+              <dt className="text-muted fw-normal">{t('publicBadge.emissor')}</dt>
+              <dd className="fw-semibold text-ink mb-0">{data.badge.fornecedor}</dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-muted">{t('publicBadge.dataAtribuicao')}</dt>
-              <dd className="font-semibold text-ink">{formatarData(data.dataAtribuicao, currentLocale)}</dd>
+            <div className="d-flex justify-content-between">
+              <dt className="text-muted fw-normal">{t('publicBadge.dataAtribuicao')}</dt>
+              <dd className="fw-semibold text-ink mb-0">{formatarData(data.dataAtribuicao, currentLocale)}</dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-muted">{t('publicBadge.validade')}</dt>
-              <dd className="font-semibold text-ink">
+            <div className="d-flex justify-content-between">
+              <dt className="text-muted fw-normal">{t('publicBadge.validade')}</dt>
+              <dd className="fw-semibold text-ink mb-0">
                 {formatarData(data.dataExpiracao, currentLocale) || t('publicBadge.naoExpira')}
               </dd>
             </div>
@@ -78,7 +78,7 @@ export default function PublicBadgePage() {
         </div>
       )}
 
-      <p className="mt-6 text-xs text-gray-400">{t('publicBadge.footer')}</p>
+      <p className="mt-4 fs-xs text-secondary">{t('publicBadge.footer')}</p>
     </div>
   )
 }

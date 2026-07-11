@@ -26,10 +26,10 @@ export default function SLLRelatoriosPage() {
   const totalBadgesAtribuidos = consultores.reduce((s, c) => s + (c.badges || 0), 0)
 
   const resumo = [
-    { label: t('sllRelatorios.resumo.badgesAtribuidos'), value: totalBadgesAtribuidos, icon: Award, tint: 'bg-violet-100 text-violet-600' },
-    { label: t('sllRelatorios.resumo.totalPedidos'), value: pedidos.length, icon: FileBarChart, tint: 'bg-amber-100 text-amber-600' },
-    { label: t('sllRelatorios.resumo.aprovacoes'), value: aprovacoes.length, icon: CheckCircle2, tint: 'bg-green-100 text-green-600' },
-    { label: t('sllRelatorios.resumo.consultores'), value: consultores.length, icon: Users, tint: 'bg-sky-100 text-sky-600' },
+    { label: t('sllRelatorios.resumo.badgesAtribuidos'), value: totalBadgesAtribuidos, icon: Award, tint: { backgroundColor: '#ede9fe', color: '#7c3aed' } },
+    { label: t('sllRelatorios.resumo.totalPedidos'), value: pedidos.length, icon: FileBarChart, tint: { backgroundColor: '#fef3c7', color: '#d97706' } },
+    { label: t('sllRelatorios.resumo.aprovacoes'), value: aprovacoes.length, icon: CheckCircle2, tint: { backgroundColor: '#dcfce7', color: '#16a34a' } },
+    { label: t('sllRelatorios.resumo.consultores'), value: consultores.length, icon: Users, tint: { backgroundColor: '#e0f2fe', color: '#0284c7' } },
   ]
 
   const pedidosColumns = [
@@ -67,33 +67,37 @@ export default function SLLRelatoriosPage() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="d-flex flex-column gap-4">
       <div>
-        <h1 className="text-2xl font-bold text-ink">{t('sllRelatorios.titulo')}</h1>
-        <p className="text-sm text-muted">{t('sllRelatorios.subtitulo')}</p>
+        <h1 className="fs-2 fw-bold text-ink">{t('sllRelatorios.titulo')}</h1>
+        <p className="small text-muted">{t('sllRelatorios.subtitulo')}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
         {resumo.map((r) => (
-          <Card key={r.label} className="flex items-center gap-4">
-            <div className={`grid h-12 w-12 place-items-center rounded-xl ${r.tint}`}><r.icon size={22} /></div>
-            <div>
-              <p className="text-2xl font-bold text-ink">{r.value}</p>
-              <p className="text-sm text-muted">{r.label}</p>
-            </div>
-          </Card>
+          <div className="col" key={r.label}>
+            <Card className="d-flex align-items-center gap-3">
+              <div className="d-flex align-items-center justify-content-center rounded-3" style={{ height: '3rem', width: '3rem', ...r.tint }}><r.icon size={22} /></div>
+              <div>
+                <p className="fs-3 fw-bold text-ink mb-0">{r.value}</p>
+                <p className="small text-muted mb-0">{r.label}</p>
+              </div>
+            </Card>
+          </div>
         ))}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="row row-cols-1 row-cols-sm-2 g-3">
         {seccoes.map((s) => (
-          <Card key={s.key} className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="font-semibold text-ink">{t(`sllRelatorios.seccoes.${s.key}.titulo`)}</h2>
-              <p className="mt-0.5 text-sm text-muted">{t(`sllRelatorios.seccoes.${s.key}.descricao`)}</p>
-            </div>
-            <ExportButtons data={s.data} columns={s.columns} filename={s.filename} />
-          </Card>
+          <div className="col" key={s.key}>
+            <Card className="d-flex align-items-center justify-content-between gap-3">
+              <div>
+                <h2 className="fw-semibold text-ink mb-0">{t(`sllRelatorios.seccoes.${s.key}.titulo`)}</h2>
+                <p className="mt-1 small text-muted mb-0">{t(`sllRelatorios.seccoes.${s.key}.descricao`)}</p>
+              </div>
+              <ExportButtons data={s.data} columns={s.columns} filename={s.filename} />
+            </Card>
+          </div>
         ))}
       </div>
     </div>

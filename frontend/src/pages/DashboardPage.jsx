@@ -10,36 +10,39 @@ import * as api from '../services/api'
 
 const STAT_ICONS = [TrendingUp, Award, Clock, Trophy]
 const TINTS = {
-  violet: 'bg-violet-100 text-violet-600',
-  orange: 'bg-orange-100 text-orange-600',
-  emerald: 'bg-emerald-100 text-emerald-600',
-  sky: 'bg-sky-100 text-sky-600',
+  violet: { backgroundColor: '#ede9fe', color: '#7c3aed' },
+  orange: { backgroundColor: '#ffedd5', color: '#ea580c' },
+  emerald: { backgroundColor: '#d1fae5', color: '#059669' },
+  sky: { backgroundColor: '#e0f2fe', color: '#0284c7' },
 }
 const DELTA_TINTS = {
-  green: 'bg-green-100 text-green-700',
-  orange: 'bg-orange-100 text-orange-700',
+  green: { backgroundColor: '#dcfce7', color: '#15803d' },
+  orange: { backgroundColor: '#ffedd5', color: '#c2410c' },
 }
 const EVENTO_CORES = {
-  violet: 'border-violet-400',
-  blue: 'border-blue-400',
-  green: 'border-green-400',
+  violet: '#a78bfa',
+  blue: '#60a5fa',
+  green: '#4ade80',
 }
 
 function StatCard({ icon: Icon, label, value, delta, tint, deltaTint }) {
   return (
     <Card>
-      <div className="flex items-start justify-between">
-        <div className={`grid h-11 w-11 place-items-center rounded-xl ${TINTS[tint]}`}>
+      <div className="d-flex align-items-start justify-content-between">
+        <div
+          className="d-flex align-items-center justify-content-center rounded-3"
+          style={{ height: '2.75rem', width: '2.75rem', ...TINTS[tint] }}
+        >
           <Icon size={20} />
         </div>
         {delta && (
-          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${DELTA_TINTS[deltaTint]}`}>
+          <span className="rounded-pill px-2 py-1 fs-xs fw-semibold" style={DELTA_TINTS[deltaTint]}>
             {delta}
           </span>
         )}
       </div>
-      <p className="mt-3 text-2xl font-bold text-ink">{value}</p>
-      <p className="text-sm text-muted">{label}</p>
+      <p className="mt-3 mb-0 fs-3 fw-bold text-ink">{value}</p>
+      <p className="mb-0 small text-muted">{label}</p>
     </Card>
   )
 }
@@ -52,56 +55,61 @@ export default function DashboardPage() {
   if (loading || !data) return <Spinner />
 
   return (
-    <div className="space-y-6">
+    <div className="d-flex flex-column gap-4">
       {/* Cabeçalho */}
       <div>
-        <h1 className="text-2xl font-bold text-ink">
+        <h1 className="fs-2 fw-bold text-ink">
           {data.greeting}, {data.userName}! <span className="align-middle">👋</span>
         </h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 small text-muted">
           {t('dashboard.jornada')}
         </p>
       </div>
 
       {/* Estatísticas */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
         {data.stats.map((s, i) => (
-          <StatCard key={s.label} icon={STAT_ICONS[i]} {...s} />
+          <div className="col" key={s.label}>
+            <StatCard icon={STAT_ICONS[i]} {...s} />
+          </div>
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="row g-4">
         {/* Coluna principal */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="col-lg-8 d-flex flex-column gap-4">
 
           {/* Badges Recentes */}
           <Card>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-semibold text-ink">{t('dashboard.badgesRecentes')}</h2>
-              <Link to="/candidaturas" className="text-sm font-medium text-brand hover:underline">
+            <div className="mb-3 d-flex align-items-center justify-content-between">
+              <h2 className="fw-semibold text-ink mb-0">{t('dashboard.badgesRecentes')}</h2>
+              <Link to="/candidaturas" className="small fw-medium text-brand text-decoration-none">
                 {t('dashboard.verTodos')}
               </Link>
             </div>
-            <div className="space-y-3">
+            <div className="d-flex flex-column gap-3">
               {data.badgesRecentes.map((b) => (
-                <div key={b.id} className="flex items-center gap-4 rounded-xl border border-gray-100 p-3">
-                  <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-gray-700 to-gray-900 text-white">
+                <div key={b.id} className="d-flex align-items-center gap-3 rounded-3 border p-3">
+                  <div
+                    className="d-flex flex-shrink-0 align-items-center justify-content-center rounded-3 text-white"
+                    style={{ height: '3rem', width: '3rem', background: 'linear-gradient(135deg,#374151,#111827)' }}
+                  >
                     <Award size={22} />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="truncate font-semibold text-ink">{b.nome}</p>
+                  <div className="flex-grow-1 min-w-0">
+                    <div className="d-flex align-items-center justify-content-between gap-2">
+                      <p className="text-truncate fw-semibold text-ink mb-0">{b.nome}</p>
                       <StatusPill status={b.status} />
                     </div>
-                    <p className="text-xs text-muted">{b.nivel}</p>
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+                    <p className="fs-xs text-muted mb-0">{b.nivel}</p>
+                    <div className="mt-2 d-flex align-items-center gap-2">
+                      <div className="flex-grow-1 rounded-pill bg-light overflow-hidden" style={{ height: '0.375rem' }}>
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500"
-                          style={{ width: `${b.progresso}%` }}
+                          className="h-100 rounded-pill"
+                          style={{ width: `${b.progresso}%`, background: 'linear-gradient(90deg,#8b5cf6,#d946ef)' }}
                         />
                       </div>
-                      <span className="text-xs font-medium text-muted">{b.progresso}%</span>
+                      <span className="fs-xs fw-medium text-muted">{b.progresso}%</span>
                     </div>
                   </div>
                 </div>
@@ -111,38 +119,42 @@ export default function DashboardPage() {
 
           {/* Recomendados */}
           <Card>
-            <div className="mb-1 flex items-center justify-between">
-              <h2 className="font-semibold text-ink">{t('dashboard.recomendados')}</h2>
-              <Link to="/catalogo" className="text-sm font-medium text-brand hover:underline">
+            <div className="mb-1 d-flex align-items-center justify-content-between">
+              <h2 className="fw-semibold text-ink mb-0">{t('dashboard.recomendados')}</h2>
+              <Link to="/catalogo" className="small fw-medium text-brand text-decoration-none">
                 {t('dashboard.explorar')}
               </Link>
             </div>
-            <p className="mb-4 text-sm text-muted">{t('dashboard.baseadoPerfil')}</p>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <p className="mb-3 small text-muted">{t('dashboard.baseadoPerfil')}</p>
+            <div className="row row-cols-1 row-cols-sm-3 g-3">
               {data.recomendados.map((r) => (
-                <Link
-                  key={r.id}
-                  to={`/catalogo/${r.id}`}
-                  className="rounded-xl border border-gray-100 p-4 text-center transition hover:border-brand hover:shadow-sm"
-                >
-                  <div className={`mx-auto grid h-12 w-12 place-items-center rounded-xl ${TINTS[r.tint]}`}>
-                    <Award size={22} />
-                  </div>
-                  <p className="mt-3 font-semibold text-ink">{r.nome}</p>
-                  <p className="text-xs text-muted">{r.nivel}</p>
-                </Link>
+                <div className="col" key={r.id}>
+                  <Link
+                    to={`/catalogo/${r.id}`}
+                    className="d-block rounded-3 border p-3 text-center text-decoration-none hover-shadow"
+                  >
+                    <div
+                      className="mx-auto d-flex align-items-center justify-content-center rounded-3"
+                      style={{ height: '3rem', width: '3rem', ...TINTS[r.tint] }}
+                    >
+                      <Award size={22} />
+                    </div>
+                    <p className="mt-3 mb-0 fw-semibold text-ink">{r.nome}</p>
+                    <p className="fs-xs text-muted mb-0">{r.nivel}</p>
+                  </Link>
+                </div>
               ))}
             </div>
           </Card>
         </div>
 
         {/* Coluna lateral */}
-        <div className="space-y-6">
+        <div className="col-lg-4 d-flex flex-column gap-4">
 
           {/* Ações Rápidas */}
-          <div className="rounded-xl bg-gradient-to-br from-brand to-brand-accent p-5 text-white shadow-sm">
-            <h2 className="mb-4 font-semibold">{t('dashboard.acoesRapidas')}</h2>
-            <div className="space-y-2">
+          <div className="rounded-3 bg-gradient-brand p-4 text-white shadow-sm">
+            <h2 className="mb-3 fw-semibold">{t('dashboard.acoesRapidas')}</h2>
+            <div className="d-flex flex-column gap-2">
               {[
                 { to: '/notificacoes', icon: Bell, label: t('dashboard.verNotificacoes') },
                 { to: '/perfil/publico', icon: UserCircle, label: t('dashboard.verPerfilPublico') },
@@ -151,7 +163,7 @@ export default function DashboardPage() {
                 <Link
                   key={label}
                   to={to}
-                  className="flex items-center gap-3 rounded-lg bg-white/10 px-3 py-2.5 text-sm font-medium transition hover:bg-white/20"
+                  className="d-flex align-items-center gap-2 rounded-3 bg-white bg-opacity-10 px-3 py-2 small fw-medium text-white text-decoration-none"
                 >
                   <Icon size={18} />
                   {label}
@@ -162,32 +174,35 @@ export default function DashboardPage() {
 
           {/* Mini perfil */}
           <Card>
-            <div className="flex items-center gap-3">
-              <div className="grid h-12 w-12 place-items-center rounded-full bg-brand-light font-semibold text-brand">
+            <div className="d-flex align-items-center gap-3">
+              <div
+                className="d-flex align-items-center justify-content-center rounded-circle bg-brand-light fw-semibold text-brand"
+                style={{ height: '3rem', width: '3rem' }}
+              >
                 US
               </div>
               <div className="min-w-0">
-                <p className="truncate font-semibold text-ink">{data.perfil.nome}</p>
-                <p className="truncate text-xs text-muted">{data.perfil.cargo}</p>
+                <p className="text-truncate fw-semibold text-ink mb-0">{data.perfil.nome}</p>
+                <p className="text-truncate fs-xs text-muted mb-0">{data.perfil.cargo}</p>
               </div>
             </div>
-            <dl className="mt-4 space-y-2 border-t border-gray-100 pt-4 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-muted">{t('dashboard.nivel')}</dt>
-                <dd className="font-semibold text-ink">{data.perfil.nivel}</dd>
+            <dl className="mt-3 d-flex flex-column gap-2 border-top pt-3 small mb-0">
+              <div className="d-flex justify-content-between">
+                <dt className="text-muted fw-normal">{t('dashboard.nivel')}</dt>
+                <dd className="fw-semibold text-ink mb-0">{data.perfil.nivel}</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">{t('dashboard.pontosConquistados')}</dt>
-                <dd className="font-semibold text-ink">{data.perfil.pontos} pts</dd>
+              <div className="d-flex justify-content-between">
+                <dt className="text-muted fw-normal">{t('dashboard.pontosConquistados')}</dt>
+                <dd className="fw-semibold text-ink mb-0">{data.perfil.pontos} pts</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">{t('dashboard.posicao')}</dt>
-                <dd className="font-semibold text-brand">#{data.perfil.posicao}</dd>
+              <div className="d-flex justify-content-between">
+                <dt className="text-muted fw-normal">{t('dashboard.posicao')}</dt>
+                <dd className="fw-semibold text-brand mb-0">#{data.perfil.posicao}</dd>
               </div>
             </dl>
             <Link
               to="/perfil"
-              className="mt-4 flex items-center justify-center gap-1 text-sm font-medium text-brand hover:underline"
+              className="mt-3 d-flex align-items-center justify-content-center gap-1 small fw-medium text-brand text-decoration-none"
             >
               {t('dashboard.verPerfilCompleto')} <ChevronRight size={16} />
             </Link>
@@ -195,12 +210,16 @@ export default function DashboardPage() {
 
           {/* Próximos Eventos */}
           <Card>
-            <h2 className="mb-3 font-semibold text-ink">{t('dashboard.proximosEventos')}</h2>
-            <div className="space-y-2">
+            <h2 className="mb-3 fw-semibold text-ink">{t('dashboard.proximosEventos')}</h2>
+            <div className="d-flex flex-column gap-2">
               {data.eventos.map((e) => (
-                <div key={e.id} className={`rounded-r-lg border-l-4 bg-gray-50 px-3 py-2 ${EVENTO_CORES[e.cor]}`}>
-                  <p className="text-sm font-medium text-ink">{e.titulo}</p>
-                  <p className="mt-0.5 flex items-center gap-1 text-xs text-muted">
+                <div
+                  key={e.id}
+                  className="rounded-end px-3 py-2 bg-light"
+                  style={{ borderLeft: `4px solid ${EVENTO_CORES[e.cor]}` }}
+                >
+                  <p className="small fw-medium text-ink mb-0">{e.titulo}</p>
+                  <p className="mt-1 d-flex align-items-center gap-1 fs-xs text-muted mb-0">
                     <Calendar size={12} /> {e.data}
                   </p>
                 </div>

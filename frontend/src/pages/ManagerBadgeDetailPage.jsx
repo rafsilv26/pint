@@ -7,10 +7,10 @@ import * as api from '../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 const HERO_TINTS = {
-  salmon: 'from-orange-200 to-red-200',
-  sky: 'from-sky-200 to-blue-200',
-  emerald: 'from-emerald-200 to-green-200',
-  violet: 'from-violet-200 to-purple-200',
+  salmon: 'tint-salmon',
+  sky: 'tint-sky',
+  emerald: 'tint-emerald',
+  violet: 'tint-violet',
 }
 
 // Página de um badge vista por um perfil de gestão (só-leitura, sem candidatar).
@@ -27,47 +27,47 @@ export default function ManagerBadgeDetailPage() {
 
   return (
     <div>
-      <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
+      <button onClick={() => navigate(-1)} className="mb-3 btn btn-link p-0 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
         <ArrowLeft size={16} /> {t('managerBadge.voltar')}
       </button>
 
-      <div className={`overflow-hidden rounded-2xl bg-gradient-to-br ${HERO_TINTS[badge.tint] || HERO_TINTS.sky} p-6 sm:p-8`}>
-        <div className="flex items-center justify-between gap-6">
+      <div className={`overflow-hidden rounded-4 p-4 p-sm-5 ${HERO_TINTS[badge.tint] || HERO_TINTS.sky}`}>
+        <div className="d-flex align-items-center justify-content-between gap-4 flex-wrap">
           <div>
-            <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-white/70 px-2.5 py-0.5 text-xs font-semibold text-ink">{badge.nivel}</span>
-              <span className="flex items-center gap-1 rounded-full bg-white/70 px-2.5 py-0.5 text-xs font-semibold text-ink">
+            <div className="d-flex flex-wrap gap-2">
+              <span className="rounded-pill bg-white bg-opacity-75 px-2 py-1 fs-xs fw-semibold text-ink">{badge.nivel}</span>
+              <span className="d-flex align-items-center gap-1 rounded-pill bg-white bg-opacity-75 px-2 py-1 fs-xs fw-semibold text-ink">
                 <Coins size={12} /> {badge.ponto} {t('managerBadge.pontos')}
               </span>
             </div>
-            <h1 className="mt-3 text-2xl font-bold text-ink sm:text-3xl">{t('managerBadge.badgeDe')} {badge.nome}</h1>
+            <h1 className="mt-3 fs-2 fs-sm-1 fw-bold text-ink">{t('managerBadge.badgeDe')} {badge.nome}</h1>
           </div>
-          <div className="hidden shrink-0 text-center sm:block">
-            <div className="grid h-24 w-24 place-items-center rounded-full bg-white text-4xl font-bold text-ink shadow">{badge.nome[0]}</div>
-            <p className="mt-2 text-sm font-medium text-ink/70">{badge.fornecedor}</p>
+          <div className="d-none d-sm-block flex-shrink-0 text-center">
+            <div className="d-flex align-items-center justify-content-center rounded-circle bg-white fs-1 fw-bold text-ink shadow" style={{ height: '6rem', width: '6rem' }}>{badge.nome[0]}</div>
+            <p className="mt-2 small fw-medium text-ink">{badge.fornecedor}</p>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <section>
-          <h2 className="mb-3 font-semibold text-ink">{t('managerBadge.descricao')}</h2>
-          <p className="text-sm leading-relaxed text-muted">{badge.descricao}</p>
+      <div className="mt-4 row g-4">
+        <section className="col-lg-6">
+          <h2 className="mb-3 fw-semibold text-ink">{t('managerBadge.descricao')}</h2>
+          <p className="small text-muted" style={{ lineHeight: 1.6 }}>{badge.descricao}</p>
         </section>
-        <section>
-          <h2 className="mb-3 font-semibold text-ink">{t('managerBadge.requisitos')}</h2>
+        <section className="col-lg-6">
+          <h2 className="mb-3 fw-semibold text-ink">{t('managerBadge.requisitos')}</h2>
           {badge.requisitos.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-gray-200 p-4 text-sm text-muted">{t('managerBadge.semRequisitos')}</p>
+            <p className="rounded-3 border border-dashed p-3 small text-muted">{t('managerBadge.semRequisitos')}</p>
           ) : (
-            <div className="space-y-2">
+            <div className="d-flex flex-column gap-2">
               {badge.requisitos.map((req, i) => (
-                <div key={req.id ?? i} className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-                  <button onClick={() => setAberto(aberto === i ? -1 : i)} className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left text-sm font-medium text-ink">
+                <div key={req.id ?? i} className="overflow-hidden rounded-3 border bg-white">
+                  <button onClick={() => setAberto(aberto === i ? -1 : i)} className="d-flex w-100 align-items-center justify-content-between gap-2 px-3 py-2 text-start small fw-medium text-ink btn btn-link text-decoration-none">
                     {i + 1}. {req.titulo}
-                    <ChevronDown size={18} className={`shrink-0 text-muted transition ${aberto === i ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={18} className="flex-shrink-0 text-muted" style={{ transform: aberto === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                   </button>
                   {aberto === i && (
-                    <p className="border-t border-gray-100 px-4 py-3 text-sm text-muted">
+                    <p className="border-top px-3 py-2 small text-muted mb-0">
                       {t('managerBadge.requisitoTextoExtra')}
                     </p>
                   )}

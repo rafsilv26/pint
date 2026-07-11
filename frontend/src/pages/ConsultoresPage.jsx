@@ -19,18 +19,18 @@ export default function ConsultoresPage({ linkBase }) {
 
   return (
     <div>
-      <PageHeader 
-        title={t('diretorio.titulo')} 
-        subtitle={t('diretorio.subtitulo')} 
+      <PageHeader
+        title={t('diretorio.titulo')}
+        subtitle={t('diretorio.subtitulo')}
       />
 
-      <div className="relative mb-6 max-w-md">
-        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+      <div className="position-relative mb-4" style={{ maxWidth: '28rem' }}>
+        <Search size={18} className="position-absolute text-secondary" style={{ left: '0.9rem', top: '50%', transform: 'translateY(-50%)' }} />
         <input
           value={pesquisa}
           onChange={(e) => setPesquisa(e.target.value)}
           placeholder={t('diretorio.pesquisar')}
-          className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+          className="form-control ps-5"
         />
       </div>
 
@@ -39,35 +39,38 @@ export default function ConsultoresPage({ linkBase }) {
       ) : error ? (
         <ErrorState onRetry={reload} />
       ) : lista.length === 0 ? (
-        <EmptyState 
-          icon={Users} 
-          title={t('diretorio.vazioTitulo')} 
-          description={t('diretorio.vazioDesc')} 
+        <EmptyState
+          icon={Users}
+          title={t('diretorio.vazioTitulo')}
+          description={t('diretorio.vazioDesc')}
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
           {lista.map((c) => {
             const conteudo = (
-              <Card className={`flex items-center gap-3 ${linkBase ? 'transition hover:border-brand hover:shadow-md' : ''} ${c.isCurrentUser ? 'ring-2 ring-brand/30' : ''}`}>
-                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-light text-sm font-semibold text-brand">
+              <Card
+                className={`d-flex align-items-center gap-3 ${linkBase ? 'hover-shadow' : ''}`}
+                style={c.isCurrentUser ? { boxShadow: '0 0 0 3px rgba(30,108,171,0.25)' } : undefined}
+              >
+                <div className="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-brand-light fs-xs fw-semibold text-brand" style={{ height: '3rem', width: '3rem' }}>
                   {iniciais(c.name)}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold text-ink">
+                <div className="flex-grow-1 min-w-0">
+                  <p className="text-truncate fw-semibold text-ink mb-0">
                     {c.name}
-                    {c.isCurrentUser && <span className="ml-1 text-xs font-normal text-brand">{t('diretorio.tu')}</span>}
+                    {c.isCurrentUser && <span className="ms-1 fs-xs fw-normal text-brand">{t('diretorio.tu')}</span>}
                   </p>
-                  <p className="truncate text-xs text-muted">{c.area || c.serviceLine || t('diretorio.consultorDefault')}</p>
-                  <div className="mt-1 flex gap-3 text-xs text-muted">
-                    <span className="flex items-center gap-1"><Star size={12} className="text-amber-500" /> {c.points}</span>
-                    <span className="flex items-center gap-1"><Medal size={12} className="text-orange-500" /> {c.badges}</span>
+                  <p className="text-truncate fs-xs text-muted mb-0">{c.area || c.serviceLine || t('diretorio.consultorDefault')}</p>
+                  <div className="mt-1 d-flex gap-3 fs-xs text-muted">
+                    <span className="d-flex align-items-center gap-1"><Star size={12} className="text-warning" /> {c.points}</span>
+                    <span className="d-flex align-items-center gap-1"><Medal size={12} style={{ color: '#fb923c' }} /> {c.badges}</span>
                   </div>
                 </div>
-                {c.rank ? <span className="text-sm font-bold text-muted">#{c.rank}</span> : null}
+                {c.rank ? <span className="small fw-bold text-muted">#{c.rank}</span> : null}
               </Card>
             )
             return linkBase
-              ? <Link key={c.id} to={`${linkBase}/${c.id}`} className="block">{conteudo}</Link>
+              ? <Link key={c.id} to={`${linkBase}/${c.id}`} className="d-block text-decoration-none">{conteudo}</Link>
               : <div key={c.id}>{conteudo}</div>
           })}
         </div>

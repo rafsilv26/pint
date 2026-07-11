@@ -29,16 +29,16 @@ export default function RoleGuard({ allowedRoles }) {
     // paramos o redirecionamento e mostramos o erro para não encravar o browser!
     if (location.pathname === fallback || fallback === '/') {
       return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 p-6 text-center">
-          <div className="max-w-md rounded-2xl bg-white p-8 shadow-xl">
-            <h1 className="text-2xl font-bold text-red-600">{t('roleGuard.acessoNegado')}</h1>
-            <p className="mt-4 text-gray-600">
+        <div className="d-flex min-vh-100 align-items-center justify-content-center bg-light p-4 text-center">
+          <div className="rounded-4 bg-white p-5 shadow" style={{ maxWidth: '28rem' }}>
+            <h1 className="h3 fw-bold text-danger">{t('roleGuard.acessoNegado')}</h1>
+            <p className="mt-4 text-secondary">
               {t('roleGuard.aTentarAceder')} <strong>{location.pathname}</strong>
             </p>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-secondary">
               {t('roleGuard.perfilAtual')} <strong className="text-brand">{userRole}</strong>
             </p>
-            <p className="mt-2 text-sm text-gray-400">
+            <p className="mt-2 small text-secondary">
               {t('roleGuard.perfisPermitidos', { perfis: allowedRoles.join(', ') })}
             </p>
           </div>

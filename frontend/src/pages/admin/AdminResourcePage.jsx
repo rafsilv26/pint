@@ -3,12 +3,12 @@ import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { PageHeader, Card, Spinner, ErrorState, EmptyState, Button } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
-import { getAdminResources } from '../../config/adminResources'; 
+import { getAdminResources } from '../../config/adminResources';
 import { useTranslation } from 'react-i18next';
 
 export default function AdminResourcePage({ resourceKey, readOnly = false }) {
   const { t } = useTranslation();
-  
+
   const allResources = getAdminResources(t);
   const cfg = allResources[resourceKey];
   const { data, loading, error, reload } = useAsync(() => api.listResource(cfg.resource), [resourceKey])
@@ -18,7 +18,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
   const [saving, setSaving] = useState(false)
   const [erroForm, setErroForm] = useState(null)
   const [confirmar, setConfirmar] = useState(null)
-  const [erroDelete, setErroDelete] = useState(null) 
+  const [erroDelete, setErroDelete] = useState(null)
   const [dropdownOptions, setDropdownOptions] = useState({})
 
   const rows = data || []
@@ -30,7 +30,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
   useEffect(() => {
     async function loadOptions() {
       const newOptions = {}
-      
+
       let areasMap = {};
       try {
         const areas = await api.listResource('areas');
@@ -59,7 +59,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
     setForm(row ? { ...row } : {})
     setErroForm(null)
   }
-  
+
   function fechar() { setEditing(null); setForm({}); }
 
   async function guardar(e) {
@@ -103,27 +103,27 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
       />
 
       <Card className="overflow-hidden p-0">
-        {loading ? <div className="p-6"><Spinner /></div> : error ? <div className="p-6"><ErrorState onRetry={reload} /></div> : rows.length === 0 ? (
-          <div className="p-6"><EmptyState title={t('adminResource.semRegistos', { titulo: tituloTraduzido.toLowerCase() })} description={t('adminResource.adicionaPrimeiro')} /></div>
+        {loading ? <div className="p-4"><Spinner /></div> : error ? <div className="p-4"><ErrorState onRetry={reload} /></div> : rows.length === 0 ? (
+          <div className="p-4"><EmptyState title={t('adminResource.semRegistos', { titulo: tituloTraduzido.toLowerCase() })} description={t('adminResource.adicionaPrimeiro')} /></div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-gray-100 bg-gray-50 text-left text-xs font-medium text-muted">
-                <tr>
-                  {cfg.colunas.map((c) => <th key={c.key} className="px-4 py-3">{t(c.label)}</th>)}
-                  {!readOnly && <th className="px-4 py-3 text-right">{t('adminResource.acoes')}</th>}
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0 small">
+              <thead className="table-light">
+                <tr className="fs-xs fw-medium text-muted">
+                  {cfg.colunas.map((c) => <th key={c.key} className="px-3 py-2">{t(c.label)}</th>)}
+                  {!readOnly && <th className="px-3 py-2 text-end">{t('adminResource.acoes')}</th>}
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={getPrimaryKey(r)} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
+                  <tr key={getPrimaryKey(r)}>
                     {cfg.colunas.map((c) => (
-                      <td key={c.key} className="max-w-xs truncate px-4 py-3 text-ink">{String(r[c.key] ?? '—')}</td>
+                      <td key={c.key} className="text-truncate px-3 py-2 text-ink" style={{ maxWidth: '20rem' }}>{String(r[c.key] ?? '—')}</td>
                     ))}
                     {!readOnly && (
-                      <td className="px-4 py-3 text-right">
-                        <button onClick={() => abrir(r)} className="mr-3 text-muted hover:text-brand"><Pencil size={16} /></button>
-                        <button onClick={() => setConfirmar({ id: getPrimaryKey(r) })} className="text-muted hover:text-red-600"><Trash2 size={16} /></button>
+                      <td className="px-3 py-2 text-end">
+                        <button onClick={() => abrir(r)} className="btn btn-link p-0 me-3 text-muted"><Pencil size={16} /></button>
+                        <button onClick={() => setConfirmar({ id: getPrimaryKey(r) })} className="btn btn-link p-0 text-muted"><Trash2 size={16} /></button>
                       </td>
                     )}
                   </tr>
@@ -136,24 +136,24 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
 
       {/* Modal Edição */}
       {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <form onSubmit={guardar} className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
-            <h2 className="mb-4 text-lg font-bold">{editing.id ? t('adminResource.editar', { singular: singularTraduzido }) : t('adminResource.adicionar', { singular: singularTraduzido })}</h2>
-            {erroForm && <div className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erroForm}</div>}
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3" style={{ zIndex: 1050, backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <form onSubmit={guardar} className="w-100 rounded-4 bg-white p-4 shadow-lg" style={{ maxWidth: '32rem' }}>
+            <h2 className="mb-3 fs-5 fw-bold">{editing.id ? t('adminResource.editar', { singular: singularTraduzido }) : t('adminResource.adicionar', { singular: singularTraduzido })}</h2>
+            {erroForm && <div className="mb-3 rounded-3 bg-danger-subtle px-3 py-2 small text-danger">{erroForm}</div>}
             {cfg.campos.map((f) => (
-              <label key={f.key} className="block mb-3">
-                <span className="block text-sm font-medium mb-1">{t(f.label)}</span>
+              <label key={f.key} className="d-block mb-3">
+                <span className="d-block small fw-medium mb-1">{t(f.label)}</span>
                 {f.type === 'select' ? (
-                  <select value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="w-full border p-2 rounded-lg">
+                  <select value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="form-select">
                     <option value="">{t('adminResource.selecione')}</option>
                     {(f.options || dropdownOptions[f.key] || []).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 ) : (
-                  <input type={f.type || 'text'} value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="w-full border p-2 rounded-lg" />
+                  <input type={f.type || 'text'} value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="form-control" />
                 )}
               </label>
             ))}
-            <div className="flex justify-end gap-2 mt-5">
+            <div className="d-flex justify-content-end gap-2 mt-4">
               <Button variant="secondary" onClick={fechar}>{t('adminResource.cancelar')}</Button>
               <Button type="submit">{saving ? t('adminResource.guardando') : t('adminResource.guardar')}</Button>
             </div>
@@ -163,14 +163,14 @@ export default function AdminResourcePage({ resourceKey, readOnly = false }) {
 
       {/* Modal Confirmar Eliminar */}
       {confirmar && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white p-6 rounded-2xl w-full max-w-sm text-center">
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3" style={{ zIndex: 1050, backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="bg-white p-4 rounded-4 w-100 text-center" style={{ maxWidth: '24rem' }}>
             <p>{t('adminResource.eliminarTitulo')}</p>
-            <p className="text-sm text-muted mt-1">{t('adminResource.eliminarAviso')}</p>
-            {erroDelete && <p className="text-red-600 text-sm mt-2">{erroDelete}</p>}
-            <div className="flex justify-center gap-2 mt-4">
+            <p className="small text-muted mt-1">{t('adminResource.eliminarAviso')}</p>
+            {erroDelete && <p className="text-danger small mt-2">{erroDelete}</p>}
+            <div className="d-flex justify-content-center gap-2 mt-3">
               <Button variant="secondary" onClick={() => setConfirmar(null)}>{t('adminResource.cancelar')}</Button>
-              <button onClick={apagar} className="bg-red-600 text-white px-4 py-2 rounded-lg">{t('adminResource.eliminar')}</button>
+              <button onClick={apagar} className="btn btn-danger px-4 py-2">{t('adminResource.eliminar')}</button>
             </div>
           </div>
         </div>

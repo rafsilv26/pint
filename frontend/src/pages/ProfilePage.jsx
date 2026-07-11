@@ -67,126 +67,132 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="d-flex flex-column gap-4">
       <div>
-        <h1 className="text-2xl font-bold text-ink">{t('perfil.titulo')}</h1>
-        <p className="mt-1 text-sm text-muted">{t('perfil.subtitulo')}</p>
+        <h1 className="fs-2 fw-bold text-ink">{t('perfil.titulo')}</h1>
+        <p className="mt-1 small text-muted">{t('perfil.subtitulo')}</p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="row g-4">
         {/* Cartão lateral */}
-        <Card className="text-center">
-          <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-brand-light text-2xl font-bold text-brand">
-            {iniciais}
-          </div>
-          <p className="mt-3 font-semibold text-ink">{form.nome}</p>
-          <p className="text-sm text-muted">{form.email}</p>
-          {tags.length > 0 && (
-            <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-              {tags.map((t) => (
-                <span key={t} className="rounded-full bg-brand-light px-2 py-0.5 text-xs font-medium text-brand">{t}</span>
-              ))}
+        <div className="col-lg-4">
+          <Card className="text-center">
+            <div className="mx-auto d-flex align-items-center justify-content-center rounded-circle bg-brand-light fs-2 fw-bold text-brand" style={{ height: '5rem', width: '5rem' }}>
+              {iniciais}
             </div>
-          )}
-          <Link to="/perfil/publico" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand hover:underline">
-            {t('perfil.verPerfilPublico')} <ExternalLink size={14} />
-          </Link>
+            <p className="mt-3 fw-semibold text-ink mb-0">{form.nome}</p>
+            <p className="small text-muted">{form.email}</p>
+            {tags.length > 0 && (
+              <div className="mt-2 d-flex flex-wrap justify-content-center gap-1">
+                {tags.map((tag) => (
+                  <span key={tag} className="rounded-pill bg-brand-light px-2 py-1 fs-xs fw-medium text-brand">{tag}</span>
+                ))}
+              </div>
+            )}
+            <Link to="/perfil/publico" className="mt-2 d-inline-flex align-items-center gap-1 small fw-medium text-brand text-decoration-none">
+              {t('perfil.verPerfilPublico')} <ExternalLink size={14} />
+            </Link>
 
-          <div className="mt-5 flex justify-center gap-6 border-t border-gray-100 pt-4">
-            <div>
-              <p className="text-xl font-bold text-brand">{loading ? '—' : pontos}</p>
-              <p className="text-xs text-muted">{t('perfil.pontos')}</p>
+            <div className="mt-4 d-flex justify-content-center gap-5 border-top pt-3">
+              <div>
+                <p className="fs-4 fw-bold text-brand mb-0">{loading ? '—' : pontos}</p>
+                <p className="fs-xs text-muted mb-0">{t('perfil.pontos')}</p>
+              </div>
+              <div>
+                <p className="fs-4 fw-bold text-brand mb-0">{loading ? '—' : badges}</p>
+                <p className="fs-xs text-muted mb-0">{t('perfil.badges')}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xl font-bold text-brand">{loading ? '—' : badges}</p>
-              <p className="text-xs text-muted">{t('perfil.badges')}</p>
-            </div>
-          </div>
 
-          <button
-            type="button"
-            onClick={() => { logout(); navigate('/login') }}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-          >
-            <LogOut size={16} /> {t('perfil.terminarSessao')}
-          </button>
-        </Card>
+            <button
+              type="button"
+              onClick={() => { logout(); navigate('/login') }}
+              className="mt-4 btn btn-outline-danger bg-white w-100 d-flex align-items-center justify-content-center gap-2"
+            >
+              <LogOut size={16} /> {t('perfil.terminarSessao')}
+            </button>
+          </Card>
+        </div>
 
         {/* Formulário */}
-        <Card className="lg:col-span-2">
-          <form onSubmit={guardarAlteracoes} className="space-y-4">
-            <h2 className="mb-2 font-semibold text-ink">{t('perfil.informacoesConta')}</h2>
+        <div className="col-lg-8">
+          <Card>
+            <form onSubmit={guardarAlteracoes} className="d-flex flex-column gap-3">
+              <h2 className="mb-1 fw-semibold text-ink">{t('perfil.informacoesConta')}</h2>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block">
-                <span className="mb-1.5 block text-sm font-medium text-ink">{t('perfil.nomeCompleto')}</span>
-                <input
-                  value={form.nome}
-                  onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                  required
-                  className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              <div className="row g-3">
+                <label className="col-sm-6 d-block">
+                  <span className="mb-2 d-block small fw-medium text-ink">{t('perfil.nomeCompleto')}</span>
+                  <input
+                    value={form.nome}
+                    onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                    required
+                    className="form-control"
+                  />
+                </label>
+
+                <label className="col-sm-6 d-block">
+                  <span className="mb-2 d-block small fw-medium text-ink">{t('perfil.email')}</span>
+                  <input
+                    type="email"
+                    value={form.email}
+                    disabled
+                    className="form-control bg-light text-muted border-dashed"
+                  />
+                </label>
+              </div>
+
+              <label className="d-block">
+                <span className="mb-2 d-block small fw-medium text-ink">{t('perfil.biografia')}</span>
+                <textarea
+                  rows={3}
+                  value={form.biografia}
+                  onChange={(e) => setForm({ ...form, biografia: e.target.value })}
+                  placeholder={t('perfil.biografiaPlaceholder')}
+                  className="form-control"
                 />
               </label>
 
-              <label className="block">
-                <span className="mb-1.5 block text-sm font-medium text-ink">{t('perfil.email')}</span>
+              <label className="d-block">
+                <span className="mb-2 d-block small fw-medium text-ink">{t('perfil.linkedin')}</span>
                 <input
-                  type="email"
-                  value={form.email}
-                  disabled
-                  className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-sm text-muted outline-none cursor-not-allowed border-dashed"
+                  value={form.linkedinUrl}
+                  onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })}
+                  placeholder={t('perfil.linkedinPlaceholder')}
+                  className="form-control"
                 />
               </label>
-            </div>
 
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-ink">{t('perfil.biografia')}</span>
-              <textarea
-                rows={3}
-                value={form.biografia}
-                onChange={(e) => setForm({ ...form, biografia: e.target.value })}
-                placeholder={t('perfil.biografiaPlaceholder')}
-                className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-              />
-            </label>
-
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-ink">{t('perfil.linkedin')}</span>
-              <input
-                value={form.linkedinUrl}
-                onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })}
-                placeholder={t('perfil.linkedinPlaceholder')}
-                className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-              />
-            </label>
-
-            <div className="mt-5 flex justify-end">
-              <button
-                type="submit"
-                disabled={saving || loading}
-                className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {saving ? t('perfil.aguardar') : t('perfil.guardar')}
-              </button>
-            </div>
-          </form>
-        </Card>
+              <div className="mt-2 d-flex justify-content-end">
+                <button
+                  type="submit"
+                  disabled={saving || loading}
+                  className="btn btn-brand"
+                >
+                  {saving ? t('perfil.aguardar') : t('perfil.guardar')}
+                </button>
+              </div>
+            </form>
+          </Card>
+        </div>
       </div>
 
       {/* Ações */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="row row-cols-1 row-cols-sm-2 g-3">
         {ACOES.map((a) => (
-          <Link key={a.to} to={a.to}>
-            <Card className="flex h-full items-center gap-4 transition hover:border-brand hover:shadow-md">
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-light text-brand">
-                <a.icon size={20} />
-              </div>
-              <div>
-                <p className="font-semibold text-ink">{a.title}</p>
-                <p className="text-sm text-muted">{a.desc}</p>
-              </div>
-            </Card>
-          </Link>
+          <div className="col" key={a.to}>
+            <Link to={a.to} className="text-decoration-none">
+              <Card className="d-flex h-100 align-items-center gap-3 hover-shadow">
+                <div className="d-flex flex-shrink-0 align-items-center justify-content-center rounded-3 bg-brand-light text-brand" style={{ height: '2.75rem', width: '2.75rem' }}>
+                  <a.icon size={20} />
+                </div>
+                <div>
+                  <p className="fw-semibold text-ink mb-0">{a.title}</p>
+                  <p className="small text-muted mb-0">{a.desc}</p>
+                </div>
+              </Card>
+            </Link>
+          </div>
         ))}
       </div>
     </div>

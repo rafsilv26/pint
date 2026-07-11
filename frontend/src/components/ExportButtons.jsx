@@ -72,22 +72,22 @@ export default function ExportButtons({ data, columns, filename }) {
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="d-flex gap-2">
       <button
         onClick={exportarExcel}
         disabled={busy}
-        className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:bg-gray-50 disabled:opacity-60"
+        className="btn btn-outline-secondary bg-white d-inline-flex align-items-center gap-2 fw-semibold"
       >
-        <FileSpreadsheet size={16} className="text-green-600" /> 
+        <FileSpreadsheet size={16} className="text-success" />
         {busy === 'excel' ? t('exportButtons.processando') : t('exportButtons.excel')}
       </button>
 
       <button
         onClick={exportarPDF}
         disabled={busy}
-        className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:bg-gray-50 disabled:opacity-60"
+        className="btn btn-outline-secondary bg-white d-inline-flex align-items-center gap-2 fw-semibold"
       >
-        <FileText size={16} className="text-red-600" /> 
+        <FileText size={16} className="text-danger" />
         {busy === 'pdf' ? t('exportButtons.processando') : t('exportButtons.pdf')}
       </button>
     </div>

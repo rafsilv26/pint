@@ -10,9 +10,9 @@ export default function AppLayout() {
   const bloqueado = Boolean(user?.mustChangePassword)
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8]">
+    <div className="min-vh-100">
       <Topnav />
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="container-xxl px-4 py-4 py-md-5">
         {bloqueado ? null : <Outlet />}
       </main>
       {bloqueado && <ChangePasswordModal />}

@@ -4,15 +4,12 @@ import { useTranslation } from 'react-i18next'
 export function ErrorState({ message, onRetry }) {
   const { t } = useTranslation()
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-red-100 bg-red-50/50 py-12 text-center">
-      <AlertCircle size={36} className="mb-3 text-red-400" />
-      <p className="font-semibold text-ink">{message || t('ui.error.defaultMessage')}</p>
-      <p className="mt-1 max-w-sm text-sm text-muted">{t('ui.error.hint')}</p>
+    <div className="d-flex flex-column align-items-center justify-content-center rounded-3 border border-danger-subtle bg-danger-subtle py-5 text-center">
+      <AlertCircle size={36} className="mb-3 text-danger" />
+      <p className="fw-semibold text-ink mb-0">{message || t('ui.error.defaultMessage')}</p>
+      <p className="mt-1 mb-0 text-muted small" style={{ maxWidth: '24rem' }}>{t('ui.error.hint')}</p>
       {onRetry && (
-        <button
-          onClick={onRetry}
-          className="mt-4 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark"
-        >
+        <button onClick={onRetry} className="btn btn-primary btn-sm mt-3">
           {t('ui.error.retry')}
         </button>
       )}
@@ -22,10 +19,10 @@ export function ErrorState({ message, onRetry }) {
 
 export function PageHeader({ title, subtitle, action }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="mb-4 d-flex flex-wrap align-items-end justify-content-between gap-3">
       <div>
-        <h1 className="text-2xl font-bold text-ink">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
+        <h1 className="h3 fw-bold text-ink mb-0">{title}</h1>
+        {subtitle && <p className="mt-1 mb-0 text-muted small">{subtitle}</p>}
       </div>
       {action}
     </div>
@@ -34,7 +31,7 @@ export function PageHeader({ title, subtitle, action }) {
 
 export function Card({ children, className = '' }) {
   return (
-    <div className={`rounded-xl border border-gray-200 bg-white p-5 shadow-sm ${className}`}>
+    <div className={`card border rounded-3 shadow-sm p-4 ${className}`}>
       {children}
     </div>
   )
@@ -43,8 +40,8 @@ export function Card({ children, className = '' }) {
 export function Spinner({ label }) {
   const { t } = useTranslation()
   return (
-    <div className="flex items-center gap-3 py-10 text-muted">
-      <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-brand" />
+    <div className="d-flex align-items-center gap-3 py-5 text-muted">
+      <span className="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true" />
       {label || t('ui.spinner.loading')}
     </div>
   )
@@ -52,27 +49,27 @@ export function Spinner({ label }) {
 
 export function EmptyState({ icon: Icon, title, description }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white py-12 text-center">
-      {Icon && <Icon size={36} className="mb-3 text-gray-400" />}
-      <p className="font-semibold text-ink">{title}</p>
-      {description && <p className="mt-1 max-w-sm text-sm text-muted">{description}</p>}
+    <div className="d-flex flex-column align-items-center justify-content-center rounded-3 border border-dashed bg-white py-5 text-center">
+      {Icon && <Icon size={36} className="mb-3 text-secondary" />}
+      <p className="fw-semibold text-ink mb-0">{title}</p>
+      {description && <p className="mt-1 mb-0 text-muted small" style={{ maxWidth: '24rem' }}>{description}</p>}
     </div>
   )
 }
 
 const STATUS_CORES = {
-  gray: 'bg-gray-100 text-gray-700',
-  blue: 'bg-blue-100 text-blue-700',
-  amber: 'bg-amber-100 text-amber-800',
-  indigo: 'bg-indigo-100 text-indigo-700',
-  green: 'bg-green-100 text-green-700',
-  red: 'bg-red-100 text-red-700',
+  gray: 'text-bg-secondary',
+  blue: 'text-bg-primary',
+  amber: 'text-bg-warning',
+  indigo: 'text-bg-info',
+  green: 'text-bg-success',
+  red: 'text-bg-danger',
 }
 
 export function StatusPill({ status }) {
   const cor = STATUS_CORES[status?.cor] || STATUS_CORES.gray
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${cor}`}>
+    <span className={`badge rounded-pill fw-medium ${cor}`}>
       {status?.name || '—'}
     </span>
   )
@@ -80,34 +77,33 @@ export function StatusPill({ status }) {
 
 export function Field({ label, hint, icon: Icon, ...props }) {
   return (
-    <label className="block">
-      {label && <span className="mb-1.5 block text-sm font-medium text-ink">{label}</span>}
-      <span className="relative block">
-        {Icon && (
-          <Icon size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        )}
-        <input
-          className={`w-full rounded-lg border border-gray-300 py-2.5 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 ${
-            Icon ? 'pl-10 pr-3.5' : 'px-3.5'
-          }`}
-          {...props}
-        />
-      </span>
-      {hint && <span className="mt-1 block text-xs text-muted">{hint}</span>}
+    <label className="d-block">
+      {label && <span className="mb-1 d-block small fw-medium text-ink">{label}</span>}
+      {Icon ? (
+        <div className="input-group">
+          <span className="input-group-text bg-white">
+            <Icon size={16} className="text-secondary" />
+          </span>
+          <input className="form-control" {...props} />
+        </div>
+      ) : (
+        <input className="form-control" {...props} />
+      )}
+      {hint && <span className="mt-1 d-block fs-xs text-muted">{hint}</span>}
     </label>
   )
 }
 
 export function Button({ children, variant = 'primary', className = '', ...props }) {
   const variantes = {
-    primary: 'bg-brand text-white hover:bg-brand-dark',
-    secondary: 'border border-gray-300 bg-white text-ink hover:bg-gray-50',
-    ghost: 'text-brand hover:bg-brand-light',
-    danger: 'border border-red-200 bg-white text-red-600 hover:bg-red-50',
+    primary: 'btn-primary',
+    secondary: 'btn-outline-secondary bg-white',
+    ghost: 'btn-link text-decoration-none',
+    danger: 'btn-outline-danger bg-white',
   }
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${variantes[variant]} ${className}`}
+      className={`btn d-inline-flex align-items-center justify-content-center gap-2 fw-semibold ${variantes[variant]} ${className}`}
       {...props}
     >
       {children}
@@ -117,20 +113,15 @@ export function Button({ children, variant = 'primary', className = '', ...props
 
 export function Toggle({ checked, onChange }) {
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition ${
-        checked ? 'bg-brand' : 'bg-gray-300'
-      }`}
-    >
-      <span
-        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
-          checked ? 'translate-x-5' : 'translate-x-0.5'
-        }`}
+    <div className="form-check form-switch mb-0">
+      <input
+        className="form-check-input"
+        type="checkbox"
+        role="switch"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        style={{ cursor: 'pointer' }}
       />
-    </button>
+    </div>
   )
 }

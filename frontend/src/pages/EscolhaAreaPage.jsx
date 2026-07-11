@@ -4,11 +4,11 @@ import { ArrowLeft, Diamond, Code, Hexagon, Rocket, Boxes, Check, Info } from 'l
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 const TINTS = {
-  sky: 'bg-sky-100 text-sky-600',
-  amber: 'bg-amber-100 text-amber-600',
-  emerald: 'bg-emerald-100 text-emerald-600',
-  salmon: 'bg-red-100 text-red-500',
-  violet: 'bg-violet-100 text-violet-600',
+  sky: { backgroundColor: '#e0f2fe', color: '#0284c7' },
+  amber: { backgroundColor: '#fef3c7', color: '#d97706' },
+  emerald: { backgroundColor: '#d1fae5', color: '#059669' },
+  salmon: { backgroundColor: '#fee2e2', color: '#ef4444' },
+  violet: { backgroundColor: '#ede9fe', color: '#7c3aed' },
 }
 
 export default function EscolhaAreaPage() {
@@ -27,46 +27,47 @@ export default function EscolhaAreaPage() {
 
   return (
     <div>
-      <Link to="/perfil" className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
+      <Link to="/perfil" className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
         <ArrowLeft size={16} /> {t('escolhaArea.voltar')}
       </Link>
 
-      <div className="mb-6 text-center">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-xl bg-brand text-white">
+      <div className="mb-4 text-center">
+        <div className="mx-auto d-flex align-items-center justify-content-center rounded-3 bg-brand text-white" style={{ height: '3.5rem', width: '3.5rem' }}>
           <Boxes size={26} />
         </div>
-        <h1 className="mt-3 text-2xl font-bold text-ink">{t('escolhaArea.titulo')}</h1>
-        <p className="mt-1 text-sm text-muted">
+        <h1 className="mt-3 fs-2 fw-bold text-ink">{t('escolhaArea.titulo')}</h1>
+        <p className="mt-1 small text-muted">
           {t('escolhaArea.subtitulo')}
         </p>
       </div>
 
-      <div className="mx-auto max-w-3xl space-y-3">
+      <div className="mx-auto d-flex flex-column gap-2" style={{ maxWidth: '48rem' }}>
         {AREAS.map((a) => {
           const ativa = selecionada === a.id
           return (
             <button
               key={a.id}
               onClick={() => setSelecionada(a.id)}
-              className={`flex w-full items-center gap-4 rounded-2xl border bg-white p-4 text-left shadow-sm transition ${
-                ativa ? 'border-brand ring-2 ring-brand/20' : 'border-gray-100 hover:border-gray-300'
+              className={`w-100 d-flex align-items-center gap-3 rounded-4 border bg-white p-3 text-start shadow-sm ${
+                ativa ? 'border-brand' : ''
               }`}
+              style={ativa ? { boxShadow: '0 0 0 3px rgba(30,108,171,0.2)' } : undefined}
             >
-              <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ${TINTS[a.tint]}`}>
+              <div className="d-flex flex-shrink-0 align-items-center justify-content-center rounded-3" style={{ height: '3rem', width: '3rem', ...TINTS[a.tint] }}>
                 <a.icon size={24} />
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-ink">{a.nome}</p>
-                <p className="text-sm text-muted">{a.desc}</p>
-                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                  {a.tags.map((t) => (
-                    <span key={t} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-muted">{t}</span>
+              <div className="flex-grow-1 min-w-0">
+                <p className="fw-semibold text-ink mb-0">{a.nome}</p>
+                <p className="small text-muted mb-0">{a.desc}</p>
+                <div className="mt-1 d-flex flex-wrap align-items-center gap-1">
+                  {a.tags.map((tag) => (
+                    <span key={tag} className="rounded-pill bg-light px-2 py-1 fs-xs fw-medium text-muted">{tag}</span>
                   ))}
-                  <span className="text-xs text-muted">· {a.badges} {t('escolhaArea.badgesCount')}</span>
+                  <span className="fs-xs text-muted">· {a.badges} {t('escolhaArea.badgesCount')}</span>
                 </div>
               </div>
               {ativa && (
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand text-white">
+                <span className="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-brand text-white" style={{ height: '1.75rem', width: '1.75rem' }}>
                   <Check size={16} />
                 </span>
               )}
@@ -74,15 +75,15 @@ export default function EscolhaAreaPage() {
           )
         })}
 
-        <div className="flex items-start gap-2 rounded-xl bg-brand-50 p-4 text-sm text-muted">
-          <Info size={16} className="mt-0.5 shrink-0 text-brand" />
+        <div className="d-flex align-items-start gap-2 rounded-3 bg-brand-light p-3 small text-muted">
+          <Info size={16} className="mt-1 flex-shrink-0 text-brand" />
           {t('escolhaArea.dica')}
         </div>
 
         <button
           disabled={!selecionada}
           onClick={() => navigate('/perfil')}
-          className="w-full rounded-lg bg-brand py-3 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-gray-300"
+          className="btn btn-brand w-100 py-2 fw-semibold"
         >
           {t('escolhaArea.botao')}
         </button>

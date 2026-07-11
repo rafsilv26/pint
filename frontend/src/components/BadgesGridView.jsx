@@ -7,10 +7,10 @@ import * as api from '../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 const TECH_TINTS = {
-  salmon: 'from-red-100 to-orange-50',
-  sky: 'from-sky-100 to-blue-50',
-  emerald: 'from-emerald-100 to-green-50',
-  violet: 'from-violet-100 to-purple-50',
+  salmon: 'tint-salmon-soft',
+  sky: 'tint-sky-soft',
+  emerald: 'tint-emerald-soft',
+  violet: 'tint-violet-soft',
 }
 
 // Grelha de badges só-leitura (para Talent Manager / Service Line Leader).
@@ -30,41 +30,45 @@ export default function BadgesGridView({ titulo, linkBase }) {
   return (
     <div>
       <PageHeader title={tituloFinal} />
-      <div className="relative mb-6 max-w-sm">
-        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+      <div className="position-relative mb-4" style={{ maxWidth: '24rem' }}>
+        <Search size={18} className="position-absolute text-secondary" style={{ left: '0.9rem', top: '50%', transform: 'translateY(-50%)' }} />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={t('badgesGrid.pesquisar')}
-          className="w-full rounded-full border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+          className="form-control rounded-pill ps-5"
         />
       </div>
       {lista.length === 0 ? (
-        <EmptyState 
-          icon={Award} 
-          title={t('badgesGrid.vazioTitulo')} 
-          description={t('badgesGrid.vazioDesc')} 
+        <EmptyState
+          icon={Award}
+          title={t('badgesGrid.vazioTitulo')}
+          description={t('badgesGrid.vazioDesc')}
         />
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
           {lista.map((b) => {
             const conteudo = (
               <>
-                <div className={`flex h-24 items-center justify-center bg-gradient-to-br ${TECH_TINTS[b.tint] || TECH_TINTS.sky}`}>
-                  <div className="grid h-14 w-14 place-items-center rounded-full bg-white text-xl font-bold text-ink shadow-sm">{b.nome[0]}</div>
+                <div className={`d-flex align-items-center justify-content-center ${TECH_TINTS[b.tint] || TECH_TINTS.sky}`} style={{ height: '6rem' }}>
+                  <div className="avatar-circle bg-white fs-4" style={{ height: '3.5rem', width: '3.5rem' }}>{b.nome[0]}</div>
                 </div>
-                <div className="p-4 text-center">
-                  <p className="font-semibold text-ink">{b.nome} - {t('badgesGrid.nivel')} {b.nivel}</p>
-                  <p className="mt-1 flex items-center justify-center gap-1 text-sm font-medium text-amber-600">
+                <div className="p-3 text-center">
+                  <p className="fw-semibold text-ink mb-0">{b.nome} - {t('badgesGrid.nivel')} {b.nivel}</p>
+                  <p className="mt-1 mb-0 d-flex align-items-center justify-content-center gap-1 small fw-medium text-warning-emphasis">
                     <Coins size={14} /> {b.ponto} {t('badgesGrid.pontos')}
                   </p>
                 </div>
               </>
             )
-            const cls = `block overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm ${linkBase ? 'transition hover:-translate-y-0.5 hover:shadow-md' : ''}`
-            return linkBase
-              ? <Link key={b.id} to={`${linkBase}/${b.id}`} className={cls}>{conteudo}</Link>
-              : <div key={b.id} className={cls}>{conteudo}</div>
+            const cls = `d-block overflow-hidden rounded-4 border bg-white shadow-sm text-decoration-none ${linkBase ? 'hover-shadow' : ''}`
+            return (
+              <div key={b.id} className="col">
+                {linkBase
+                  ? <Link to={`${linkBase}/${b.id}`} className={cls}>{conteudo}</Link>
+                  : <div className={cls}>{conteudo}</div>}
+              </div>
+            )
           })}
         </div>
       )}

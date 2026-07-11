@@ -19,11 +19,11 @@ export default function AtualizarPasswordPage() {
   }
 
   return (
-    <AuthShell 
-      title={t('atualizarPassword.titulo')} 
+    <AuthShell
+      title={t('atualizarPassword.titulo')}
       subtitle={t('atualizarPassword.subtitulo')}
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="d-flex flex-column gap-4">
         <Field
           label={t('atualizarPassword.campos.passwordLabel')}
           type="password"
@@ -36,7 +36,7 @@ export default function AtualizarPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mx-auto block rounded-full bg-brand px-12 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
+          className="btn btn-brand rounded-pill px-5 py-2 fw-semibold mx-auto"
         >
           {loading ? t('atualizarPassword.botoes.guardando') : t('atualizarPassword.botoes.entrar')}
         </button>

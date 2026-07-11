@@ -38,20 +38,23 @@ export default function ChangePasswordModal() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <div className="mb-1 flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-brand-light text-brand">
+    <div
+      className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
+      style={{ zIndex: 1050, backgroundColor: 'rgba(0,0,0,0.5)' }}
+    >
+      <div className="w-100 rounded-4 bg-white p-4 shadow-lg" style={{ maxWidth: '28rem' }}>
+        <div className="mb-1 d-flex align-items-center gap-2">
+          <div className="avatar-circle" style={{ height: '2.25rem', width: '2.25rem' }}>
             <Lock size={18} />
           </div>
-          <h2 className="text-lg font-bold text-ink">{t('changePasswordModal.titulo')}</h2>
+          <h2 className="h5 fw-bold text-ink mb-0">{t('changePasswordModal.titulo')}</h2>
         </div>
-        <p className="mb-4 text-sm text-muted">
+        <p className="mb-4 small text-muted">
           {t('changePasswordModal.descricao')}
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {erro && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</div>}
+        <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
+          {erro && <div className="rounded-3 bg-danger-subtle px-3 py-2 small text-danger">{erro}</div>}
           <Field
             label={t('changePasswordModal.campos.atualLabel')}
             type="password"
@@ -78,18 +81,14 @@ export default function ChangePasswordModal() {
             onChange={(e) => setConfirmar(e.target.value)}
             required
           />
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
-          >
+          <button type="submit" disabled={loading} className="btn btn-primary w-100">
             {loading ? t('changePasswordModal.botoes.guardando') : t('changePasswordModal.botoes.guardar')}
           </button>
         </form>
 
         <button
           onClick={() => { logout(); navigate('/login') }}
-          className="mt-3 w-full text-center text-sm text-muted transition hover:text-brand"
+          className="btn btn-link mt-2 w-100 text-center text-muted text-decoration-none"
         >
           {t('changePasswordModal.botoes.sair')}
         </button>

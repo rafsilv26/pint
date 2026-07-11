@@ -12,49 +12,49 @@ export default function AdminPedidosPage() {
 
   return (
     <div>
-      <PageHeader 
-        title={t('adminPedidos.titulo')} 
+      <PageHeader
+        title={t('adminPedidos.titulo')}
         subtitle={t('adminPedidos.subtitulo')}
         action={<ExportButtons />}
       />
 
       <Card className="overflow-hidden p-0">
         {loading ? (
-          <div className="p-6"><Spinner /></div>
+          <div className="p-4"><Spinner /></div>
         ) : error ? (
-          <div className="p-6"><ErrorState onRetry={reload} /></div>
+          <div className="p-4"><ErrorState onRetry={reload} /></div>
         ) : lista.length === 0 ? (
-          <div className="p-6">
-            <EmptyState 
-              icon={FileText} 
-              title={t('adminPedidos.vazioTitulo')} 
-              description={t('adminPedidos.vazioDesc')} 
+          <div className="p-4">
+            <EmptyState
+              icon={FileText}
+              title={t('adminPedidos.vazioTitulo')}
+              description={t('adminPedidos.vazioDesc')}
             />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-gray-100 bg-gray-50 text-left text-xs font-medium text-muted">
-                <tr>
-                  <th className="px-4 py-3">{t('adminPedidos.tabela.trackingId')}</th>
-                  <th className="px-4 py-3">{t('adminPedidos.tabela.consultor')}</th>
-                  <th className="px-4 py-3">{t('adminPedidos.tabela.badge')}</th>
-                  <th className="px-4 py-3">{t('adminPedidos.tabela.nivel')}</th>
-                  <th className="px-4 py-3">{t('adminPedidos.tabela.pontos')}</th>
-                  <th className="px-4 py-3">{t('adminPedidos.tabela.data')}</th>
-                  <th className="px-4 py-3">{t('adminPedidos.tabela.estado')}</th>
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0 small">
+              <thead className="table-light">
+                <tr className="fs-xs fw-medium text-muted">
+                  <th className="px-3 py-2">{t('adminPedidos.tabela.trackingId')}</th>
+                  <th className="px-3 py-2">{t('adminPedidos.tabela.consultor')}</th>
+                  <th className="px-3 py-2">{t('adminPedidos.tabela.badge')}</th>
+                  <th className="px-3 py-2">{t('adminPedidos.tabela.nivel')}</th>
+                  <th className="px-3 py-2">{t('adminPedidos.tabela.pontos')}</th>
+                  <th className="px-3 py-2">{t('adminPedidos.tabela.data')}</th>
+                  <th className="px-3 py-2">{t('adminPedidos.tabela.estado')}</th>
                 </tr>
               </thead>
               <tbody>
                 {lista.map((c) => (
-                  <tr key={c.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-                    <td className="px-4 py-3 font-medium text-ink">{c.trackingId}</td>
-                    <td className="px-4 py-3 text-ink">{c.consultor}</td>
-                    <td className="px-4 py-3 text-ink">{c.badge}</td>
-                    <td className="px-4 py-3 text-muted">{c.nivel}</td>
-                    <td className="px-4 py-3 text-muted">{c.pontos}</td>
-                    <td className="px-4 py-3 text-muted">{c.data}</td>
-                    <td className="px-4 py-3"><StatusPill status={c.status} /></td>
+                  <tr key={c.id}>
+                    <td className="px-3 py-2 fw-medium text-ink">{c.trackingId}</td>
+                    <td className="px-3 py-2 text-ink">{c.consultor}</td>
+                    <td className="px-3 py-2 text-ink">{c.badge}</td>
+                    <td className="px-3 py-2 text-muted">{c.nivel}</td>
+                    <td className="px-3 py-2 text-muted">{c.pontos}</td>
+                    <td className="px-3 py-2 text-muted">{c.data}</td>
+                    <td className="px-3 py-2"><StatusPill status={c.status} /></td>
                   </tr>
                 ))}
               </tbody>

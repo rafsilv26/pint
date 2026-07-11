@@ -22,14 +22,14 @@ export default function TalentCandidaturasPage() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex rounded-lg bg-white p-1 ring-1 ring-gray-200">
+      <div className="mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div className="d-flex rounded-3 bg-white p-1 border">
           {TABS.map((tItem) => (
             <button
               key={tItem.key}
               onClick={() => setTab(tItem.key)}
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition ${
-                tab === tItem.key ? 'bg-brand text-white' : 'text-muted hover:text-ink'
+              className={`btn btn-sm rounded-2 fw-medium ${
+                tab === tItem.key ? 'btn-brand' : 'btn-link text-muted text-decoration-none'
               }`}
             >
               {tItem.label}
@@ -41,44 +41,44 @@ export default function TalentCandidaturasPage() {
 
       <Card className="overflow-hidden p-0">
         {loading ? (
-          <div className="p-6"><Spinner /></div>
+          <div className="p-4"><Spinner /></div>
         ) : error ? (
-          <div className="p-6"><ErrorState onRetry={reload} /></div>
+          <div className="p-4"><ErrorState onRetry={reload} /></div>
         ) : lista.length === 0 ? (
-          <div className="p-6">
-            <EmptyState 
-              icon={FileText} 
-              title={t('talentCandidaturas.empty.titulo')} 
-              description={t('talentCandidaturas.empty.descricao')} 
+          <div className="p-4">
+            <EmptyState
+              icon={FileText}
+              title={t('talentCandidaturas.empty.titulo')}
+              description={t('talentCandidaturas.empty.descricao')}
             />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-gray-100 bg-gray-50 text-left text-xs font-medium text-muted">
-                <tr>
-                  <th className="px-4 py-3">{t('talentCandidaturas.tabela.trackingId')}</th>
-                  <th className="px-4 py-3">{t('talentCandidaturas.tabela.consultor')}</th>
-                  <th className="px-4 py-3">{t('talentCandidaturas.tabela.badge')}</th>
-                  <th className="px-4 py-3">{t('talentCandidaturas.tabela.nivel')}</th>
-                  <th className="px-4 py-3">{t('talentCandidaturas.tabela.data')}</th>
-                  <th className="px-4 py-3">{t('talentCandidaturas.tabela.estado')}</th>
-                  <th className="px-4 py-3" />
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0 small">
+              <thead className="table-light">
+                <tr className="fs-xs fw-medium text-muted">
+                  <th className="px-3 py-2">{t('talentCandidaturas.tabela.trackingId')}</th>
+                  <th className="px-3 py-2">{t('talentCandidaturas.tabela.consultor')}</th>
+                  <th className="px-3 py-2">{t('talentCandidaturas.tabela.badge')}</th>
+                  <th className="px-3 py-2">{t('talentCandidaturas.tabela.nivel')}</th>
+                  <th className="px-3 py-2">{t('talentCandidaturas.tabela.data')}</th>
+                  <th className="px-3 py-2">{t('talentCandidaturas.tabela.estado')}</th>
+                  <th className="px-3 py-2" />
                 </tr>
               </thead>
               <tbody>
                 {lista.map((c) => (
-                  <tr key={c.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-                    <td className="px-4 py-3 font-medium text-ink">{c.trackingId}</td>
-                    <td className="px-4 py-3 text-ink">{c.consultor}</td>
-                    <td className="px-4 py-3 text-ink">{c.badge}</td>
-                    <td className="px-4 py-3 text-muted">{c.nivel}</td>
-                    <td className="px-4 py-3 text-muted">{c.data}</td>
-                    <td className="px-4 py-3"><StatusPill status={c.status} /></td>
-                    <td className="px-4 py-3 text-right">
+                  <tr key={c.id}>
+                    <td className="px-3 py-2 fw-medium text-ink">{c.trackingId}</td>
+                    <td className="px-3 py-2 text-ink">{c.consultor}</td>
+                    <td className="px-3 py-2 text-ink">{c.badge}</td>
+                    <td className="px-3 py-2 text-muted">{c.nivel}</td>
+                    <td className="px-3 py-2 text-muted">{c.data}</td>
+                    <td className="px-3 py-2"><StatusPill status={c.status} /></td>
+                    <td className="px-3 py-2 text-end">
                       <Link
                         to={`/tm/candidaturas/${c.id}`}
-                        className="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-dark"
+                        className="btn btn-brand btn-sm d-inline-flex align-items-center gap-1"
                       >
                         {t('talentCandidaturas.tabela.verCandidatura')} <ChevronRight size={14} />
                       </Link>

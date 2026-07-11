@@ -6,10 +6,10 @@ import { useTranslation } from 'react-i18next'
 
 function ToggleRow({ label, desc, checked, onChange }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-gray-100 py-3 last:border-0">
+    <div className="d-flex align-items-center justify-content-between gap-3 border-bottom py-3">
       <div>
-        <p className="text-sm font-medium text-ink">{label}</p>
-        {desc && <p className="text-xs text-muted">{desc}</p>}
+        <p className="small fw-medium text-ink mb-0">{label}</p>
+        {desc && <p className="fs-xs text-muted mb-0">{desc}</p>}
       </div>
       <Toggle checked={checked} onChange={onChange} />
     </div>
@@ -18,19 +18,18 @@ function ToggleRow({ label, desc, checked, onChange }) {
 
 function Segmented({ options, value, onChange }) {
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="row row-cols-3 g-2">
       {options.map((o) => (
-        <button
-          key={o.value}
-          onClick={() => onChange(o.value)}
-          className={`flex items-center justify-center gap-1.5 rounded-lg border py-2.5 text-sm font-medium transition ${
-            value === o.value
-              ? 'border-brand bg-brand-light text-brand'
-              : 'border-gray-200 text-muted hover:border-gray-300'
-          }`}
-        >
-          {o.icon && <o.icon size={16} />} {o.label}
-        </button>
+        <div className="col" key={o.value}>
+          <button
+            onClick={() => onChange(o.value)}
+            className={`w-100 d-flex align-items-center justify-content-center gap-2 rounded-3 border py-2 small fw-medium ${
+              value === o.value ? 'border-brand bg-brand-light text-brand' : 'text-muted'
+            }`}
+          >
+            {o.icon && <o.icon size={16} />} {o.label}
+          </button>
+        </div>
       ))}
     </div>
   )
@@ -60,23 +59,23 @@ export default function PreferencesPage() {
 
   return (
     <div>
-      <Link to="/perfil" className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
+      <Link to="/perfil" className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
         <ArrowLeft size={16} /> {t('preferencias.voltar')}
       </Link>
 
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-ink">
+      <div className="mb-4">
+        <h1 className="d-flex align-items-center gap-2 fs-2 fw-bold text-ink">
           <Settings className="text-brand" /> {t('preferencias.titulo')}
         </h1>
-        <p className="mt-1 text-sm text-muted">{t('preferencias.subtitulo')}</p>
+        <p className="mt-1 small text-muted">{t('preferencias.subtitulo')}</p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+      <div className="row g-4">
+        <div className="col-lg-8 d-flex flex-column gap-4">
 
           {/* Notificações */}
           <Card>
-            <h2 className="mb-2 flex items-center gap-2 font-semibold text-ink">
+            <h2 className="mb-2 d-flex align-items-center gap-2 fw-semibold text-ink">
               <Bell size={18} className="text-brand" /> {t('preferencias.notificacoes.titulo')}
             </h2>
             <ToggleRow label={t('preferencias.notificacoes.email')} desc={t('preferencias.notificacoes.emailDesc')} checked={notif.email} onChange={upd(notif, setNotif, 'email')} />
@@ -90,12 +89,12 @@ export default function PreferencesPage() {
 
           {/* Visualização */}
           <Card>
-            <h2 className="mb-4 flex items-center gap-2 font-semibold text-ink">
+            <h2 className="mb-3 d-flex align-items-center gap-2 fw-semibold text-ink">
               <Eye size={18} className="text-brand" /> {t('preferencias.visualizacao.titulo')}
             </h2>
 
             {/* Seletor de Idioma */}
-            <p className="mb-2 text-sm font-medium text-ink">{t('preferencias.visualizacao.idioma')}</p>
+            <p className="mb-2 small fw-medium text-ink">{t('preferencias.visualizacao.idioma')}</p>
             <Segmented
               options={[
                 { value: 'pt', label: '🇵🇹 Português' },
@@ -107,7 +106,7 @@ export default function PreferencesPage() {
             />
 
             {/* Tema */}
-            <p className="mb-2 mt-5 text-sm font-medium text-ink">{t('preferencias.visualizacao.tema')}</p>
+            <p className="mb-2 mt-4 small fw-medium text-ink">{t('preferencias.visualizacao.tema')}</p>
             <Segmented
               options={[
                 { value: 'claro', label: t('preferencias.visualizacao.claro'), icon: Sun },
@@ -118,16 +117,16 @@ export default function PreferencesPage() {
               onChange={setTema}
             />
 
-            <div className="mt-5">
-              <div className="mb-1 flex items-center justify-between text-sm">
-                <span className="font-medium text-ink">{t('preferencias.visualizacao.badgesPorPagina')}</span>
+            <div className="mt-4">
+              <div className="mb-1 d-flex align-items-center justify-content-between small">
+                <span className="fw-medium text-ink">{t('preferencias.visualizacao.badgesPorPagina')}</span>
                 <span className="text-muted">{badgesPorPagina}</span>
               </div>
               <input
                 type="range" min="6" max="24" step="6"
                 value={badgesPorPagina}
                 onChange={(e) => setBadgesPorPagina(Number(e.target.value))}
-                className="w-full accent-[var(--color-brand)]"
+                className="form-range"
               />
             </div>
 
@@ -142,7 +141,7 @@ export default function PreferencesPage() {
 
           {/* Privacidade */}
           <Card>
-            <h2 className="mb-2 flex items-center gap-2 font-semibold text-ink">
+            <h2 className="mb-2 d-flex align-items-center gap-2 fw-semibold text-ink">
               <Shield size={18} className="text-brand" /> {t('preferencias.privacidade.titulo')}
             </h2>
             <ToggleRow label={t('preferencias.privacidade.perfilPublico')} desc={t('preferencias.privacidade.perfilPublicoDesc')} checked={priv.publico} onChange={upd(priv, setPriv, 'publico')} />
@@ -153,32 +152,32 @@ export default function PreferencesPage() {
         </div>
 
         {/* Coluna lateral */}
-        <div className="space-y-6">
-          <Card className="bg-brand-50">
-            <h3 className="font-semibold text-ink">{t('preferencias.resumo.titulo')}</h3>
-            <dl className="mt-3 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-muted">{t('preferencias.resumo.notifEmail')}</dt>
-                <dd className="font-medium text-ink">
+        <div className="col-lg-4 d-flex flex-column gap-4">
+          <Card className="bg-brand-light">
+            <h3 className="fw-semibold text-ink">{t('preferencias.resumo.titulo')}</h3>
+            <dl className="mt-2 d-flex flex-column gap-2 small mb-0">
+              <div className="d-flex justify-content-between">
+                <dt className="text-muted fw-normal">{t('preferencias.resumo.notifEmail')}</dt>
+                <dd className="fw-medium text-ink mb-0">
                   {notif.email ? t('preferencias.resumo.ativadas') : t('preferencias.resumo.desativadas')}
                 </dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">{t('preferencias.resumo.idioma')}</dt>
-                <dd className="font-medium text-ink">
+              <div className="d-flex justify-content-between">
+                <dt className="text-muted fw-normal">{t('preferencias.resumo.idioma')}</dt>
+                <dd className="fw-medium text-ink mb-0">
                   {i18n.language.startsWith('pt') ? '🇵🇹 Português' : i18n.language.startsWith('en') ? '🇬🇧 English' : '🇪🇸 Español'}
                 </dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">{t('preferencias.resumo.tema')}</dt>
-                <dd className="font-medium text-ink capitalize">
+              <div className="d-flex justify-content-between">
+                <dt className="text-muted fw-normal">{t('preferencias.resumo.tema')}</dt>
+                <dd className="fw-medium text-ink text-capitalize mb-0">
                   {/* Busca a tradução do tema atual dinamicamente */}
                   {t(`preferencias.visualizacao.${tema}`)}
                 </dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">{t('preferencias.resumo.perfilPublico')}</dt>
-                <dd className="font-medium text-ink">
+              <div className="d-flex justify-content-between">
+                <dt className="text-muted fw-normal">{t('preferencias.resumo.perfilPublico')}</dt>
+                <dd className="fw-medium text-ink mb-0">
                   {priv.publico ? t('preferencias.resumo.sim') : t('preferencias.resumo.nao')}
                 </dd>
               </div>
@@ -186,35 +185,35 @@ export default function PreferencesPage() {
           </Card>
 
           <Card>
-            <h3 className="font-semibold text-ink">{t('preferencias.estatisticas.titulo')}</h3>
-            <dl className="mt-3 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-muted">{t('preferencias.estatisticas.pontos')}</dt>
-                <dd className="font-semibold text-brand">1250</dd>
+            <h3 className="fw-semibold text-ink">{t('preferencias.estatisticas.titulo')}</h3>
+            <dl className="mt-2 d-flex flex-column gap-2 small mb-0">
+              <div className="d-flex justify-content-between">
+                <dt className="text-muted fw-normal">{t('preferencias.estatisticas.pontos')}</dt>
+                <dd className="fw-semibold text-brand mb-0">1250</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">{t('preferencias.estatisticas.badges')}</dt>
-                <dd className="font-semibold text-ink">8</dd>
+              <div className="d-flex justify-content-between">
+                <dt className="text-muted fw-normal">{t('preferencias.estatisticas.badges')}</dt>
+                <dd className="fw-semibold text-ink mb-0">8</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">{t('preferencias.estatisticas.ranking')}</dt>
-                <dd className="font-semibold text-brand">#12</dd>
+              <div className="d-flex justify-content-between">
+                <dt className="text-muted fw-normal">{t('preferencias.estatisticas.ranking')}</dt>
+                <dd className="fw-semibold text-brand mb-0">#12</dd>
               </div>
             </dl>
           </Card>
 
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">
-            <p className="flex items-center gap-1.5 font-semibold text-amber-900">
+          <div className="rounded-3 border border-warning-subtle bg-warning-subtle p-3 small">
+            <p className="d-flex align-items-center gap-2 fw-semibold text-warning-emphasis mb-0">
               <Info size={15} /> {t('preferencias.dica.titulo')}
             </p>
-            <p className="mt-1 text-xs text-amber-800/80">{t('preferencias.dica.texto')}</p>
+            <p className="mt-1 fs-xs text-warning-emphasis mb-0">{t('preferencias.dica.texto')}</p>
           </div>
         </div>
       </div>
 
       <button
         onClick={() => { setGuardado(true); setTimeout(() => setGuardado(false), 2000) }}
-        className="mt-6 w-full rounded-lg bg-brand py-3 text-sm font-semibold text-white transition hover:bg-brand-dark"
+        className="mt-4 btn btn-brand w-100 py-2 fw-semibold"
       >
         {guardado ? t('preferencias.guardado') : t('preferencias.guardar')}
       </button>

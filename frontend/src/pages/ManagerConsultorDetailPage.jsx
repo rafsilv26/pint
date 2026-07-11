@@ -35,74 +35,76 @@ export default function ManagerConsultorDetailPage() {
 
   return (
     <div>
-      <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
+      <button onClick={() => navigate(-1)} className="mb-3 btn btn-link p-0 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
         <ArrowLeft size={16} /> {t('managerConsultor.voltar')}
       </button>
 
       <Card className="p-0">
-        <div className="h-24 rounded-t-xl bg-gradient-to-r from-brand to-brand-accent" />
-        <div className="px-6 pb-5">
-          <div className="-mt-9 flex flex-wrap items-end justify-between gap-3">
-            <div className="flex items-end gap-4">
-              <div className="grid h-20 w-20 place-items-center rounded-full border-4 border-white bg-brand-light text-2xl font-bold text-brand">{iniciais}</div>
+        <div className="rounded-top-4 bg-gradient-brand" style={{ height: '6rem' }} />
+        <div className="px-4 pb-4">
+          <div className="d-flex flex-wrap align-items-end justify-content-between gap-3" style={{ marginTop: '-2.25rem' }}>
+            <div className="d-flex align-items-end gap-3">
+              <div className="d-flex align-items-center justify-content-center rounded-circle border border-4 border-white bg-brand-light fs-3 fw-bold text-brand" style={{ height: '5rem', width: '5rem' }}>{iniciais}</div>
               <div className="pb-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-xl font-bold text-ink">{c.name}</h1>
+                <div className="d-flex flex-wrap align-items-center gap-2">
+                  <h1 className="fs-4 fw-bold text-ink mb-0">{c.name}</h1>
                   {c.rank ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                    <span className="d-inline-flex align-items-center gap-1 rounded-pill px-2 py-1 fs-xs fw-semibold" style={{ backgroundColor: '#fef3c7', color: '#b45309' }}>
                       <Trophy size={12} /> {t('managerConsultor.ranking', { posicao: c.rank })}
                     </span>
                   ) : null}
                 </div>
-                <p className="text-sm text-muted">
+                <p className="small text-muted mb-0">
                   {c.role || t('managerConsultor.defaultRole')}
                   {c.area ? ` · ${c.area}` : ''}
                   {c.serviceLine ? ` · ${c.serviceLine}` : ''}
                 </p>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-3 pb-1 text-sm text-muted">
+            <div className="d-flex flex-wrap align-items-center gap-3 pb-1 small text-muted">
               {c.serviceLine && (
-                <span className="flex items-center gap-1"><Network size={14} /> {c.serviceLine}</span>
+                <span className="d-flex align-items-center gap-1"><Network size={14} /> {c.serviceLine}</span>
               )}
               {c.linkedinUrl && (
                 <a
                   href={c.linkedinUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1 text-brand hover:underline"
+                  className="d-flex align-items-center gap-1 text-brand text-decoration-none"
                 >
                   <ExternalLink size={14} /> {t('managerConsultor.linkedin')}
                 </a>
               )}
-              {c.email && <p className="flex items-center gap-1"><Mail size={14} /> {c.email}</p>}
+              {c.email && <p className="d-flex align-items-center gap-1 mb-0"><Mail size={14} /> {c.email}</p>}
             </div>
           </div>
         </div>
       </Card>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
         {stats.map((s) => (
-          <Card key={s.label} className="flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-xl bg-brand-light text-brand"><s.icon size={20} /></div>
-            <div>
-              <p className="text-xl font-bold text-ink">{s.value}</p>
-              <p className="text-xs text-muted">{s.label}</p>
-            </div>
-          </Card>
+          <div className="col" key={s.label}>
+            <Card className="d-flex align-items-center gap-3">
+              <div className="d-flex align-items-center justify-content-center rounded-3 bg-brand-light text-brand flex-shrink-0" style={{ height: '2.75rem', width: '2.75rem' }}><s.icon size={20} /></div>
+              <div>
+                <p className="fs-4 fw-bold text-ink mb-0">{s.value}</p>
+                <p className="fs-xs text-muted mb-0">{s.label}</p>
+              </div>
+            </Card>
+          </div>
         ))}
       </div>
 
       {c.biography && (
-        <Card className="mt-6">
-          <h2 className="mb-2 font-semibold text-ink">{t('managerConsultor.sobre')}</h2>
-          <p className="text-sm leading-relaxed text-muted">{c.biography}</p>
+        <Card className="mt-4">
+          <h2 className="mb-2 fw-semibold text-ink">{t('managerConsultor.sobre')}</h2>
+          <p className="small text-muted" style={{ lineHeight: 1.6 }}>{c.biography}</p>
         </Card>
       )}
 
       {/* Badges Conquistados */}
-      <Card className="mt-6">
-        <h2 className="mb-3 font-semibold text-ink">{t('managerConsultor.badgesConquistados.titulo')}</h2>
+      <Card className="mt-4">
+        <h2 className="mb-3 fw-semibold text-ink">{t('managerConsultor.badgesConquistados.titulo')}</h2>
         {badgesConquistados.length === 0 ? (
           <EmptyState
             icon={Award}
@@ -110,23 +112,25 @@ export default function ManagerConsultorDetailPage() {
             description={t('managerConsultor.badgesConquistados.vazioDesc')}
           />
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
             {badgesConquistados.map((b) => (
-              <div key={`${b.id}-${b.obtidoEm}`} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-brand-light text-sm font-bold text-brand">
-                  {(b.nome || 'B')[0]}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-ink">{b.nome}</p>
-                  <p className="text-xs text-muted">
-                    {t('managerConsultor.badgesConquistados.pontos', { pontos: b.pontos })}
-                    {b.obtidoEm ? ` · ${new Date(b.obtidoEm).toLocaleDateString('pt-PT')}` : ''}
-                  </p>
-                  {!b.valido && (
-                    <span className="mt-0.5 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
-                      {t('managerConsultor.badgesConquistados.expirado')}
-                    </span>
-                  )}
+              <div className="col" key={`${b.id}-${b.obtidoEm}`}>
+                <div className="d-flex align-items-center gap-3 rounded-3 border bg-white p-3">
+                  <div className="d-flex flex-shrink-0 align-items-center justify-content-center rounded-3 bg-brand-light small fw-bold text-brand" style={{ height: '2.75rem', width: '2.75rem' }}>
+                    {(b.nome || 'B')[0]}
+                  </div>
+                  <div className="flex-grow-1 min-w-0">
+                    <p className="text-truncate small fw-semibold text-ink mb-0">{b.nome}</p>
+                    <p className="fs-xs text-muted mb-0">
+                      {t('managerConsultor.badgesConquistados.pontos', { pontos: b.pontos })}
+                      {b.obtidoEm ? ` · ${new Date(b.obtidoEm).toLocaleDateString('pt-PT')}` : ''}
+                    </p>
+                    {!b.valido && (
+                      <span className="mt-1 d-inline-block rounded-pill bg-light px-2 py-1 fw-medium text-secondary" style={{ fontSize: '0.625rem' }}>
+                        {t('managerConsultor.badgesConquistados.expirado')}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -135,12 +139,12 @@ export default function ManagerConsultorDetailPage() {
       </Card>
 
       {/* Histórico de Candidaturas */}
-      <Card className="mt-6 overflow-hidden p-0">
-        <h2 className="px-5 pt-5 font-semibold text-ink">{t('managerConsultor.historico.titulo')}</h2>
+      <Card className="mt-4 overflow-hidden p-0">
+        <h2 className="px-4 pt-4 fw-semibold text-ink">{t('managerConsultor.historico.titulo')}</h2>
         {loadingHistorico ? (
-          <div className="p-6"><Spinner /></div>
+          <div className="p-4"><Spinner /></div>
         ) : listaHistorico.length === 0 ? (
-          <div className="p-6">
+          <div className="p-4">
             <EmptyState
               icon={FileText}
               title={t('managerConsultor.historico.vazioTitulo')}
@@ -148,28 +152,28 @@ export default function ManagerConsultorDetailPage() {
             />
           </div>
         ) : (
-          <div className="mt-3 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-gray-100 bg-gray-50 text-left text-xs font-medium text-muted">
-                <tr>
-                  <th className="px-5 py-3">{t('managerConsultor.historico.tabela.trackingId')}</th>
-                  <th className="px-5 py-3">{t('managerConsultor.historico.tabela.badge')}</th>
-                  <th className="px-5 py-3">{t('managerConsultor.historico.tabela.nivel')}</th>
-                  <th className="px-5 py-3">{t('managerConsultor.historico.tabela.data')}</th>
-                  <th className="px-5 py-3">{t('managerConsultor.historico.tabela.estado')}</th>
-                  <th className="px-5 py-3" />
+          <div className="mt-3 table-responsive">
+            <table className="table table-hover align-middle mb-0 small">
+              <thead className="table-light">
+                <tr className="fs-xs fw-medium text-muted">
+                  <th className="px-4 py-2">{t('managerConsultor.historico.tabela.trackingId')}</th>
+                  <th className="px-4 py-2">{t('managerConsultor.historico.tabela.badge')}</th>
+                  <th className="px-4 py-2">{t('managerConsultor.historico.tabela.nivel')}</th>
+                  <th className="px-4 py-2">{t('managerConsultor.historico.tabela.data')}</th>
+                  <th className="px-4 py-2">{t('managerConsultor.historico.tabela.estado')}</th>
+                  <th className="px-4 py-2" />
                 </tr>
               </thead>
               <tbody>
                 {listaHistorico.map((h) => (
-                  <tr key={h.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-                    <td className="px-5 py-3 font-medium text-ink">{h.trackingId}</td>
-                    <td className="px-5 py-3 text-ink">{h.badge}</td>
-                    <td className="px-5 py-3 text-muted">{h.nivel}</td>
-                    <td className="px-5 py-3 text-muted">{h.data}</td>
-                    <td className="px-5 py-3"><StatusPill status={h.status} /></td>
-                    <td className="px-5 py-3 text-right">
-                      <Link to={linkCandidatura(h.id)} className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline">
+                  <tr key={h.id}>
+                    <td className="px-4 py-2 fw-medium text-ink">{h.trackingId}</td>
+                    <td className="px-4 py-2 text-ink">{h.badge}</td>
+                    <td className="px-4 py-2 text-muted">{h.nivel}</td>
+                    <td className="px-4 py-2 text-muted">{h.data}</td>
+                    <td className="px-4 py-2"><StatusPill status={h.status} /></td>
+                    <td className="px-4 py-2 text-end">
+                      <Link to={linkCandidatura(h.id)} className="d-inline-flex align-items-center gap-1 fs-xs fw-semibold text-brand text-decoration-none">
                         {t('managerConsultor.historico.ver')} <ChevronRight size={14} />
                       </Link>
                     </td>

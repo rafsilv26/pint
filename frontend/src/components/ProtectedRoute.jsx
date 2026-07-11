@@ -9,7 +9,7 @@ export default function ProtectedRoute({ children }) {
   const location = useLocation()
 
   if (loading) {
-    return <div className="grid h-screen place-items-center text-muted">{t('protectedRoute.carregando')}</div>
+    return <div className="d-flex min-vh-100 align-items-center justify-content-center text-muted">{t('protectedRoute.carregando')}</div>
   }
 
   if (!isAuthenticated) {

@@ -1,0 +1,29 @@
+// ===== Tema Bootstrap da Softinsa =====
+// Sobrescreve as variáveis Sass do Bootstrap ANTES de importar o Bootstrap,
+// para que componentes nativos (btn-primary, bg-primary, text-primary,
+// border-primary, links, foco de formulários, etc.) usem já a cor de marca
+// e a tipografia do projeto, sem precisar de classes custom à parte.
+
+$primary: #1e6cab;
+$secondary: #6b7280;
+$success: #16a34a;
+$danger: #dc2626;
+$warning: #f59e0b;
+$info: #0ea5e9;
+$light: #f8f9fa;
+$dark: #1f2330;
+
+$body-bg: #f5f6f8;
+$body-color: #1f2330;
+
+$font-family-sans-serif: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+$border-radius: 0.5rem;
+$border-radius-sm: 0.375rem;
+$border-radius-lg: 0.75rem;
+$border-radius-xl: 1rem;
+$border-radius-2xl: 1.25rem;
+
+$link-decoration: none;
+
+@import "bootstrap/scss/bootstrap";

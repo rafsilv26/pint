@@ -14,15 +14,18 @@ export default function NotificationsBell() {
     <NavLink
       to="/notificacoes"
       className={({ isActive }) =>
-        `relative rounded-full p-2 transition ${
-          isActive ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
+        `position-relative rounded-circle p-2 text-decoration-none ${
+          isActive ? 'bg-white bg-opacity-25 text-white' : 'text-white-50'
         }`
       }
       aria-label={t('notificationsBell.ariaLabel')}
     >
       <Bell size={18} />
       {naoLidas > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+        <span
+          className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+          style={{ fontSize: '0.625rem' }}
+        >
           {naoLidas > 9 ? '9+' : naoLidas}
         </span>
       )}

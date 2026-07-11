@@ -14,7 +14,7 @@ export default function ManagerLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const bloqueado = Boolean(user?.mustChangePassword)
-  
+
   // Obter o painel dinâmico já com os labels traduzidos
   const panel = getPanelForPath(location.pathname, t)
   const base = '/' + (location.pathname.split('/')[1] || '')
@@ -23,23 +23,26 @@ export default function ManagerLayout() {
     .split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f5f6f8]">
+    <div className="d-flex vh-100 overflow-hidden">
       {/* Sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col bg-gradient-to-b from-brand-dark via-brand to-brand-accent text-white md:flex">
-        <div className="px-6 py-5">
-          <Logo className="h-7 w-auto" />
-          <p className="mt-1 text-xs text-white/60">{panel.label}</p>
+      <aside
+        className="d-none d-md-flex flex-shrink-0 flex-column bg-gradient-brand text-white"
+        style={{ width: '16rem' }}
+      >
+        <div className="px-4 py-4">
+          <Logo height={28} />
+          <p className="mt-1 mb-0 small text-white-50">{panel.label}</p>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-2">
+        <nav className="flex-grow-1 d-flex flex-column gap-1 px-2 py-2">
           {panel.nav.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
-                  isActive ? 'bg-white text-brand shadow-sm' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                `d-flex align-items-center gap-2 rounded-3 px-3 py-2 small fw-medium text-decoration-none ${
+                  isActive ? 'bg-white text-brand shadow-sm' : 'text-white-50'
                 }`
               }
             >
@@ -49,17 +52,25 @@ export default function ManagerLayout() {
           ))}
         </nav>
 
-        <div className="border-t border-white/10 px-3 py-3">
-          <NavLink to={`${base}/conta`} className="flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-white/10">
-            <div className="grid h-9 w-9 place-items-center rounded-full bg-white/15 text-sm font-semibold">{iniciais}</div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{user?.nome}</p>
-              <p className="truncate text-xs text-white/60">{panel.label}</p>
+        <div className="border-top border-white border-opacity-10 px-2 py-3">
+          <NavLink
+            to={`${base}/conta`}
+            className="d-flex align-items-center gap-2 rounded-3 px-2 py-2 text-decoration-none text-white"
+          >
+            <div
+              className="d-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25 small fw-semibold flex-shrink-0"
+              style={{ height: '2.25rem', width: '2.25rem' }}
+            >
+              {iniciais}
+            </div>
+            <div className="flex-grow-1 min-w-0">
+              <p className="text-truncate small fw-semibold mb-0">{user?.nome}</p>
+              <p className="text-truncate small text-white-50 mb-0">{panel.label}</p>
             </div>
           </NavLink>
           <button
             onClick={() => { logout(); navigate('/login') }}
-            className="mt-1 flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm text-white/80 transition hover:bg-white/10"
+            className="btn btn-link d-flex align-items-center gap-2 w-100 mt-1 px-2 py-2 small text-white-50 text-decoration-none"
           >
             <LogOut size={18} /> {t('managerLayout.terminarSessao')}
           </button>
@@ -67,17 +78,24 @@ export default function ManagerLayout() {
       </aside>
 
       {/* Main */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 shrink-0 items-center gap-4 border-b border-gray-200 bg-white px-6">
-          <div className="relative w-full max-w-md">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+      <div className="d-flex flex-grow-1 flex-column overflow-hidden">
+        <header
+          className="d-flex flex-shrink-0 align-items-center gap-3 border-bottom bg-white px-4"
+          style={{ height: '4rem' }}
+        >
+          <div className="position-relative w-100" style={{ maxWidth: '28rem' }}>
+            <Search
+              size={18}
+              className="position-absolute text-secondary"
+              style={{ left: '0.9rem', top: '50%', transform: 'translateY(-50%)' }}
+            />
             <input
               placeholder={t('managerLayout.procurar')}
-              className="w-full rounded-full border border-gray-300 py-2 pl-10 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              className="form-control rounded-pill ps-5"
             />
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+        <main className="flex-grow-1 overflow-y-auto p-4 p-lg-5">
           {bloqueado ? null : <Outlet />}
         </main>
       </div>

@@ -36,9 +36,9 @@ export default function LoginPage() {
       title={t('login.titulo')}
       subtitle={t('login.subtitulo')}
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
         {erro && (
-          <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</div>
+          <div className="rounded-3 bg-danger-subtle px-3 py-2 small text-danger">{erro}</div>
         )}
         <Field
           label={t('login.campos.emailLabel')}
@@ -59,12 +59,12 @@ export default function LoginPage() {
           required
         />
 
-        <div className="flex items-center justify-between text-sm">
-          <label className="flex items-center gap-2 text-muted">
-            <input type="checkbox" className="rounded border-gray-300 text-brand focus:ring-brand" />
+        <div className="d-flex align-items-center justify-content-between small">
+          <label className="form-check d-flex align-items-center gap-2 text-muted mb-0">
+            <input type="checkbox" className="form-check-input" />
             {t('login.lembrarMe')}
           </label>
-          <Link to="/recuperar-password" className="text-brand hover:underline">
+          <Link to="/recuperar-password" className="text-brand text-decoration-none">
             {t('login.esqueceuPassword')}
           </Link>
         </div>
@@ -72,7 +72,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mx-auto block rounded-full bg-brand px-12 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
+          className="btn btn-brand rounded-pill px-5 py-2 fw-semibold mx-auto"
         >
           {loading ? t('login.botoes.entrando') : t('login.botoes.entrar')}
         </button>

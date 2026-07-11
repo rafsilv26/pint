@@ -11,13 +11,13 @@ const iniciais = (nome) =>
 // O componente Segmented foi ajustado para receber { value, label }
 function Segmented({ options, value, onChange }) {
   return (
-    <div className="flex rounded-lg bg-white p-1 ring-1 ring-gray-200">
+    <div className="d-flex rounded-3 bg-white p-1 border">
       {options.map((o) => (
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
-          className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-            value === o.value ? 'bg-brand text-white' : 'text-muted hover:text-ink'
+          className={`btn btn-sm rounded-2 fw-medium ${
+            value === o.value ? 'btn-brand' : 'btn-link text-muted text-decoration-none'
           }`}
         >
           {o.label}
@@ -28,16 +28,16 @@ function Segmented({ options, value, onChange }) {
 }
 
 const PODIO = {
-  1: { base: 'bg-amber-400', ring: 'ring-amber-400', h: 'h-28' },
-  2: { base: 'bg-gray-300', ring: 'ring-gray-300', h: 'h-20' },
-  3: { base: 'bg-orange-400', ring: 'ring-orange-400', h: 'h-16' },
+  1: { color: '#fbbf24', h: '7rem' },
+  2: { color: '#d1d5db', h: '5rem' },
+  3: { color: '#fb923c', h: '4rem' },
 }
 
 export default function RankingPage() {
   const { t } = useTranslation() // <-- Inicializa a tradução
 
   const { data, loading, error, reload } = useAsync(() => getGamification())
-  
+
   // O estado agora guarda as chaves
   const [periodo, setPeriodo] = useState('total')
   const [categoria, setCategoria] = useState('pontos')
@@ -60,101 +60,111 @@ export default function RankingPage() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="d-flex flex-column gap-4">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-ink">
-          <Trophy className="text-amber-500" /> {t('ranking.titulo')}
+        <h1 className="d-flex align-items-center gap-2 fs-2 fw-bold text-ink">
+          <Trophy className="text-warning" /> {t('ranking.titulo')}
         </h1>
-        <p className="mt-1 text-sm text-muted">{t('ranking.subtitulo')}</p>
+        <p className="mt-1 small text-muted">{t('ranking.subtitulo')}</p>
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-wrap items-center gap-3">
-        <Segmented 
+      <div className="d-flex flex-wrap align-items-center gap-3">
+        <Segmented
           options={[
             { value: 'semana', label: t('ranking.periodos.semana') },
             { value: 'mes', label: t('ranking.periodos.mes') },
             { value: 'ano', label: t('ranking.periodos.ano') },
             { value: 'total', label: t('ranking.periodos.total') },
-          ]} 
-          value={periodo} 
-          onChange={setPeriodo} 
+          ]}
+          value={periodo}
+          onChange={setPeriodo}
         />
-        <Segmented 
+        <Segmented
           options={[
             { value: 'pontos', label: t('ranking.categorias.pontos') },
             { value: 'badges', label: t('ranking.categorias.badges') },
             { value: 'dias', label: t('ranking.categorias.dias') },
-          ]} 
-          value={categoria} 
-          onChange={setCategoria} 
+          ]}
+          value={categoria}
+          onChange={setCategoria}
         />
       </div>
 
       {/* Banner de estatísticas */}
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-white/10 bg-gradient-to-br from-brand to-brand-accent text-white shadow-sm sm:grid-cols-3 lg:grid-cols-5">
+      <div className="row row-cols-2 row-cols-sm-3 row-cols-lg-5 g-0 overflow-hidden rounded-4 bg-gradient-brand text-white shadow-sm">
         {stats.map((s) => (
-          <div key={s.label} className="p-5">
-            <s.icon size={18} className="text-white/70" />
-            <p className="mt-2 text-2xl font-bold">{s.value}</p>
-            <p className="text-sm text-white/80">{s.label}</p>
-            {s.hint && <p className="text-xs text-white/60">{s.hint}</p>}
+          <div key={s.label} className="col p-4">
+            <s.icon size={18} className="text-white-50" />
+            <p className="mt-2 fs-3 fw-bold mb-0">{s.value}</p>
+            <p className="small text-white-50 mb-0">{s.label}</p>
+            {s.hint && <p className="fs-xs text-white-50 mb-0">{s.hint}</p>}
           </div>
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="row g-4">
         {/* Rankings completos */}
-        <Card className="lg:col-span-2">
-          <h2 className="mb-4 flex items-center gap-2 font-semibold text-ink">
-            <Award size={18} /> {t('ranking.completos')}
-          </h2>
-          <div className="space-y-2">
-            {lista.map((c) => (
-              <div key={c.rank} className="flex items-center gap-3 rounded-xl border border-gray-100 p-3">
-                <span className="w-8 text-center text-sm font-bold text-muted">#{c.rank}</span>
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-light text-xs font-semibold text-brand">
-                  {iniciais(c.nome)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold text-ink">{c.nome}</p>
-                  <p className="truncate text-xs text-muted">{t('ranking.consultorDefault')}</p>
-                </div>
-                <div className="hidden items-center gap-1 text-sm text-ink sm:flex">
-                  <Star size={14} className="text-amber-500" /> {c.pontos}
-                </div>
-                <div className="hidden items-center gap-1 text-sm text-ink sm:flex">
-                  <Medal size={14} className="text-orange-500" /> {c.badges}
-                </div>
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">
-                  {c.delta || '-'}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Top 3 pódio */}
-        <Card>
-          <h2 className="mb-4 text-center font-semibold text-ink">{t('ranking.top3')}</h2>
-          <div className="flex items-end justify-center gap-3">
-            {top3.map((c) => {
-              const p = PODIO[c.rank] || PODIO[2]
-              return (
-                <div key={c.rank} className="flex w-1/3 flex-col items-center">
-                  <div className={`grid h-12 w-12 place-items-center rounded-full bg-brand-light text-xs font-bold text-brand ring-2 ${p.ring}`}>
+        <div className="col-lg-8">
+          <Card>
+            <h2 className="mb-3 d-flex align-items-center gap-2 fw-semibold text-ink">
+              <Award size={18} /> {t('ranking.completos')}
+            </h2>
+            <div className="d-flex flex-column gap-2">
+              {lista.map((c) => (
+                <div key={c.rank} className="d-flex align-items-center gap-3 rounded-3 border p-3">
+                  <span className="text-center small fw-bold text-muted" style={{ width: '2rem' }}>#{c.rank}</span>
+                  <div className="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-brand-light fs-xs fw-semibold text-brand" style={{ height: '2.5rem', width: '2.5rem' }}>
                     {iniciais(c.nome)}
                   </div>
-                  <p className="mt-2 truncate text-center text-xs font-semibold text-ink">{c.nome}</p>
-                  <div className={`mt-2 flex w-full flex-col items-center justify-center rounded-t-lg ${p.base} ${p.h} text-white`}>
-                    <span className="text-sm font-bold">#{c.rank}</span>
-                    <span className="text-xs">{c.pontos} {t('ranking.pts')}</span>
+                  <div className="flex-grow-1 min-w-0">
+                    <p className="text-truncate fw-semibold text-ink mb-0">{c.nome}</p>
+                    <p className="text-truncate fs-xs text-muted mb-0">{t('ranking.consultorDefault')}</p>
                   </div>
+                  <div className="d-none d-sm-flex align-items-center gap-1 small text-ink">
+                    <Star size={14} className="text-warning" /> {c.pontos}
+                  </div>
+                  <div className="d-none d-sm-flex align-items-center gap-1 small text-ink">
+                    <Medal size={14} style={{ color: '#fb923c' }} /> {c.badges}
+                  </div>
+                  <span className="rounded-pill bg-light px-2 py-1 fs-xs fw-semibold text-secondary">
+                    {c.delta || '-'}
+                  </span>
                 </div>
-              )
-            })}
-          </div>
-        </Card>
+              ))}
+            </div>
+          </Card>
+        </div>
+
+        {/* Top 3 pódio */}
+        <div className="col-lg-4">
+          <Card>
+            <h2 className="mb-3 text-center fw-semibold text-ink">{t('ranking.top3')}</h2>
+            <div className="d-flex align-items-end justify-content-center gap-3">
+              {top3.map((c) => {
+                const p = PODIO[c.rank] || PODIO[2]
+                return (
+                  <div key={c.rank} className="d-flex flex-column align-items-center" style={{ width: '33%' }}>
+                    <div
+                      className="d-flex align-items-center justify-content-center rounded-circle bg-brand-light fs-xs fw-bold text-brand"
+                      style={{ height: '3rem', width: '3rem', boxShadow: `0 0 0 2px ${p.color}` }}
+                    >
+                      {iniciais(c.nome)}
+                    </div>
+                    <p className="mt-2 text-truncate text-center fs-xs fw-semibold text-ink mb-0">{c.nome}</p>
+                    <div
+                      className="mt-2 d-flex w-100 flex-column align-items-center justify-content-center rounded-top-3 text-white"
+                      style={{ backgroundColor: p.color, height: p.h }}
+                    >
+                      <span className="small fw-bold">#{c.rank}</span>
+                      <span className="fs-xs">{c.pontos} {t('ranking.pts')}</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   )

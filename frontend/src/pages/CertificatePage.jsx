@@ -23,56 +23,73 @@ export default function CertificatePage() {
   const currentLocale = localeMap[i18n.language?.substring(0, 2)] || 'pt-PT'
 
   if (loading) {
-    return <div className="grid min-h-screen place-items-center text-muted">{t('certificado.gerando')}</div>
+    return <div className="d-flex min-vh-100 align-items-center justify-content-center text-muted">{t('certificado.gerando')}</div>
   }
   if (!data) {
     return (
-      <div className="grid min-h-screen place-items-center text-muted">
-        {t('certificado.naoEncontrado')} <Link to="/" className="ml-1 text-brand hover:underline">{t('certificado.voltarInicio')}</Link>
+      <div className="d-flex min-vh-100 align-items-center justify-content-center text-muted">
+        {t('certificado.naoEncontrado')} <Link to="/" className="ms-1 text-brand text-decoration-none">{t('certificado.voltarInicio')}</Link>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-8">
-      <div className="mx-auto max-w-3xl">
-        <div className="mb-4 flex items-center justify-between print:hidden">
-          <Link to="/historico" className="inline-flex items-center gap-1 text-sm text-muted hover:text-brand">
+    <div className="min-vh-100 bg-light px-3 py-4">
+      <div className="mx-auto" style={{ maxWidth: '48rem' }}>
+        <div className="mb-3 d-flex align-items-center justify-content-between d-print-none">
+          <Link to="/historico" className="d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
             <ArrowLeft size={16} /> {t('certificado.voltar')}
           </Link>
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
+            className="btn btn-brand d-flex align-items-center gap-2"
           >
             <Download size={16} /> {t('certificado.imprimir')}
           </button>
         </div>
 
         {/* Certificado */}
-        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-10 shadow-lg">
+        <div className="position-relative overflow-hidden rounded-4 border bg-white p-5 shadow-lg">
           {/* faixas douradas */}
-          <div className="absolute left-0 top-0 h-24 w-44 -translate-x-10 -translate-y-12 rotate-[-25deg] bg-gradient-to-r from-amber-300 to-yellow-500" />
-          <div className="absolute bottom-0 right-0 h-20 w-56 translate-x-12 translate-y-10 rotate-[-25deg] bg-gradient-to-r from-amber-300 to-yellow-500" />
+          <div
+            className="position-absolute"
+            style={{
+              left: 0, top: 0, height: '6rem', width: '11rem',
+              transform: 'translate(-2.5rem, -3rem) rotate(-25deg)',
+              background: 'linear-gradient(90deg,#fcd34d,#eab308)',
+            }}
+          />
+          <div
+            className="position-absolute"
+            style={{
+              right: 0, bottom: 0, height: '5rem', width: '14rem',
+              transform: 'translate(3rem, 2.5rem) rotate(-25deg)',
+              background: 'linear-gradient(90deg,#fcd34d,#eab308)',
+            }}
+          />
 
-          <div className="relative">
-            <p className="text-3xl font-extrabold tracking-tight text-ink">
+          <div className="position-relative">
+            <p className="fs-2 fw-bold text-ink" style={{ letterSpacing: '-0.02em' }}>
               {t('certificado.titulo')} <span className="text-brand">SOFTINSA</span>
             </p>
 
-            <p className="mt-8 max-w-xl text-sm leading-relaxed text-muted">
+            <p className="mt-4 small text-muted" style={{ maxWidth: '32rem', lineHeight: 1.6 }}>
               {t('certificado.texto1.inicio')} <strong className="text-ink">{data.consultor?.nome}</strong> {t('certificado.texto1.meio')}{' '}
               <strong className="text-ink">{data.badge?.nome}</strong> ({data.badge?.fornecedor}) {t('certificado.texto1.fim')}{' '}
               <strong className="text-ink">{formatar(data.dataAtribuicao, currentLocale)}</strong>.
             </p>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
+            <p className="mt-2 small text-muted" style={{ maxWidth: '32rem', lineHeight: 1.6 }}>
               {t('certificado.texto2')}
             </p>
 
-            <div className="mt-10 flex items-end justify-between">
-              <div className="grid h-16 w-16 place-items-center rounded-lg bg-gradient-to-br from-amber-300 to-yellow-500 text-white shadow">
+            <div className="mt-5 d-flex align-items-end justify-content-between">
+              <div
+                className="d-flex align-items-center justify-content-center rounded-3 text-white shadow"
+                style={{ height: '4rem', width: '4rem', background: 'linear-gradient(135deg,#fcd34d,#eab308)' }}
+              >
                 <Award size={30} />
               </div>
-              <p className="text-xl font-extrabold tracking-tight text-brand">SOFTINSA</p>
+              <p className="fs-4 fw-bold text-brand mb-0" style={{ letterSpacing: '-0.02em' }}>SOFTINSA</p>
             </div>
           </div>
         </div>

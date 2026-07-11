@@ -28,9 +28,9 @@ export default function NotificationsPage() {
 
   // As TAGS foram movidas para dentro para traduzir os labels
   const TAGS = {
-    info: { label: t('notificacoes.tags.info'), cls: 'bg-blue-100 text-blue-700' },
-    warning: { label: t('notificacoes.tags.aviso'), cls: 'bg-amber-100 text-amber-700' },
-    success: { label: t('notificacoes.tags.sucesso'), cls: 'bg-green-100 text-green-700' },
+    info: { label: t('notificacoes.tags.info'), cls: 'text-bg-primary' },
+    warning: { label: t('notificacoes.tags.aviso'), cls: 'text-bg-warning' },
+    success: { label: t('notificacoes.tags.sucesso'), cls: 'text-bg-success' },
   }
 
   const FILTROS = [
@@ -42,7 +42,7 @@ export default function NotificationsPage() {
     setLidas((a) => ({ ...a, [id]: true }))
     api.markNotificationRead(id).catch(() => {})
   }
-  
+
   function marcarTodas() {
     const todas = {}
     ;(data || []).forEach((n) => { todas[n.id] = true })
@@ -57,35 +57,36 @@ export default function NotificationsPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold text-ink">{t('notificacoes.titulo')}</h1>
+      <h1 className="mb-4 fs-2 fw-bold text-ink">{t('notificacoes.titulo')}</h1>
 
       {/* Filtros */}
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="flex rounded-lg bg-white p-1 ring-1 ring-gray-200">
+      <div className="mb-4 d-flex flex-wrap align-items-center gap-3">
+        <div className="d-flex rounded-3 bg-white p-1 border">
           {FILTROS.map((f) => (
             <button
               key={f.key}
               onClick={() => setFiltro(f.key)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-                filtro === f.key ? 'bg-brand text-white' : 'text-muted hover:text-ink'
+              className={`btn btn-sm rounded-2 fw-medium ${
+                filtro === f.key ? 'btn-brand' : 'btn-link text-muted text-decoration-none'
               }`}
             >
               {f.label}
             </button>
           ))}
         </div>
-        <div className="relative max-w-xs flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="position-relative flex-grow-1" style={{ maxWidth: '20rem' }}>
+          <Search size={16} className="position-absolute text-secondary" style={{ left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             value={pesquisa}
             onChange={(e) => setPesquisa(e.target.value)}
             placeholder={t('notificacoes.pesquisar')}
-            className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            className="form-control"
+            style={{ paddingLeft: '2.2rem' }}
           />
         </div>
         <button
           onClick={marcarTodas}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-muted transition hover:text-ink"
+          className="btn btn-outline-secondary bg-white fw-medium"
         >
           {t('notificacoes.marcarTodas')}
         </button>
@@ -96,13 +97,13 @@ export default function NotificationsPage() {
       ) : error ? (
         <ErrorState onRetry={reload} />
       ) : lista.length === 0 ? (
-        <EmptyState 
-          icon={Bell} 
-          title={t('notificacoes.vazioTitulo')} 
-          description={t('notificacoes.vazioDesc')} 
+        <EmptyState
+          icon={Bell}
+          title={t('notificacoes.vazioTitulo')}
+          description={t('notificacoes.vazioDesc')}
         />
       ) : (
-        <div className="space-y-3">
+        <div className="d-flex flex-column gap-2">
           {lista.map((n) => {
             const tag = TAGS[n.type] || TAGS.info
             const lida = n.lida || lidas[n.id]
@@ -110,18 +111,18 @@ export default function NotificationsPage() {
               <div
                 key={n.id}
                 onClick={() => marcarLida(n.id)}
-                className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition hover:shadow-sm ${
-                  lida ? 'border-gray-200 bg-gray-50' : 'border-brand/30 bg-white'
+                className={`d-flex cursor-pointer align-items-start gap-3 rounded-3 border p-3 ${
+                  lida ? 'bg-light' : 'bg-white border-brand border-opacity-25'
                 }`}
               >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${tag.cls}`}>{tag.label}</span>
-                    <p className="font-semibold text-ink">{n.title}</p>
-                    {!lida && <span className="h-2 w-2 rounded-full bg-brand" />}
+                <div className="flex-grow-1 min-w-0">
+                  <div className="d-flex align-items-center gap-2">
+                    <span className={`rounded-1 px-2 py-1 fw-bold ${tag.cls}`} style={{ fontSize: '0.625rem' }}>{tag.label}</span>
+                    <p className="fw-semibold text-ink mb-0">{n.title}</p>
+                    {!lida && <span className="rounded-circle bg-brand" style={{ height: '0.5rem', width: '0.5rem' }} />}
                   </div>
-                  <p className="mt-1 text-sm text-muted">{n.message}</p>
-                  <p className="mt-2 flex items-center gap-1 text-xs text-gray-400">
+                  <p className="mt-1 small text-muted mb-0">{n.message}</p>
+                  <p className="mt-2 d-flex align-items-center gap-1 fs-xs text-secondary mb-0">
                     <Calendar size={12} /> {formatar(n.createdAt, currentLocale)}
                   </p>
                 </div>
@@ -130,7 +131,7 @@ export default function NotificationsPage() {
                     e.stopPropagation()
                     setApagadas((a) => ({ ...a, [n.id]: true }))
                   }}
-                  className="text-gray-300 transition hover:text-red-600"
+                  className="btn btn-link p-0 text-secondary"
                   aria-label={t('notificacoes.apagar')}
                 >
                   <Trash2 size={16} />

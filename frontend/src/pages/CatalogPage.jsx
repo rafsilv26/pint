@@ -7,10 +7,10 @@ import * as api from '../services/api'
 import { useTranslation } from 'react-i18next' // <-- Importa o hook
 
 const TECH_TINTS = {
-  salmon: 'from-red-100 to-orange-50',
-  sky: 'from-sky-100 to-blue-50',
-  emerald: 'from-emerald-100 to-green-50',
-  violet: 'from-violet-100 to-purple-50',
+  salmon: 'tint-salmon-soft',
+  sky: 'tint-sky-soft',
+  emerald: 'tint-emerald-soft',
+  violet: 'tint-violet-soft',
 }
 
 const POR_PAGINA = 12
@@ -33,9 +33,9 @@ export default function CatalogPage() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div className="relative w-full max-w-sm">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+      <div className="mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div className="position-relative w-100" style={{ maxWidth: '24rem' }}>
+          <Search size={18} className="position-absolute text-secondary" style={{ left: '0.9rem', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             value={pesquisa}
             onChange={(e) => {
@@ -43,40 +43,41 @@ export default function CatalogPage() {
               setPagina(1)
             }}
             placeholder={t('catalogo.procurar')} // <-- Tradução aqui
-            className="w-full rounded-full border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            className="form-control rounded-pill ps-5"
           />
         </div>
         {totalPaginas > 1 && <Paginacao pagina={paginaAtual} total={totalPaginas} onChange={setPagina} />}
       </div>
 
       {visiveis.length === 0 ? (
-        <EmptyState 
-          icon={Award} 
+        <EmptyState
+          icon={Award}
           title={t('catalogo.vazioTitulo')} // <-- Tradução aqui
           description={t('catalogo.vazioDesc')} // <-- Tradução aqui
         />
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
           {visiveis.map((b) => (
-            <Link
-              key={b.id}
-              to={`/catalogo/${b.id}`}
-              className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <div className={`flex h-28 items-center justify-center bg-gradient-to-br ${TECH_TINTS[b.tint] || TECH_TINTS.sky}`}>
-                <div className="grid h-16 w-16 place-items-center rounded-full bg-white text-2xl font-bold text-ink shadow-sm">
-                  {b.nome[0]}
+            <div className="col" key={b.id}>
+              <Link
+                to={`/catalogo/${b.id}`}
+                className="d-block overflow-hidden rounded-4 border bg-white shadow-sm text-decoration-none hover-shadow"
+              >
+                <div className={`d-flex align-items-center justify-content-center ${TECH_TINTS[b.tint] || TECH_TINTS.sky}`} style={{ height: '7rem' }}>
+                  <div className="d-flex align-items-center justify-content-center rounded-circle bg-white fs-2 fw-bold text-ink shadow-sm" style={{ height: '4rem', width: '4rem' }}>
+                    {b.nome[0]}
+                  </div>
                 </div>
-              </div>
-              <div className="p-4 text-center">
-                <p className="font-semibold text-ink">
-                  {b.nome} - {t('catalogo.nivel')} {b.nivel} {/* <-- Tradução aqui */}
-                </p>
-                <p className="mt-1 flex items-center justify-center gap-1 text-sm font-medium text-amber-600">
-                  <Coins size={14} /> {b.ponto} {t('catalogo.pontos')} {/* <-- Tradução aqui */}
-                </p>
-              </div>
-            </Link>
+                <div className="p-3 text-center">
+                  <p className="fw-semibold text-ink mb-0">
+                    {b.nome} - {t('catalogo.nivel')} {b.nivel} {/* <-- Tradução aqui */}
+                  </p>
+                  <p className="mt-1 mb-0 d-flex align-items-center justify-content-center gap-1 small fw-medium text-warning-emphasis">
+                    <Coins size={14} /> {b.ponto} {t('catalogo.pontos')} {/* <-- Tradução aqui */}
+                  </p>
+                </div>
+              </Link>
+            </div>
           ))}
         </div>
       )}
@@ -87,7 +88,7 @@ export default function CatalogPage() {
 function Paginacao({ pagina, total, onChange }) {
   const paginas = Array.from({ length: total }, (_, i) => i + 1)
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="d-flex align-items-center gap-2">
       <PagBtn onClick={() => onChange(pagina - 1)} disabled={pagina === 1}>
         <ChevronLeft size={16} />
       </PagBtn>
@@ -95,9 +96,10 @@ function Paginacao({ pagina, total, onChange }) {
         <button
           key={p}
           onClick={() => onChange(p)}
-          className={`grid h-8 w-8 place-items-center rounded-full text-sm font-medium transition ${
-            p === pagina ? 'bg-brand text-white' : 'bg-white text-muted hover:bg-gray-100'
+          className={`d-flex align-items-center justify-content-center rounded-circle small fw-medium border-0 ${
+            p === pagina ? 'bg-brand text-white' : 'bg-white text-muted'
           }`}
+          style={{ height: '2rem', width: '2rem' }}
         >
           {p}
         </button>
@@ -113,7 +115,8 @@ function PagBtn({ children, ...props }) {
   return (
     <button
       {...props}
-      className="grid h-8 w-8 place-items-center rounded-full bg-white text-muted transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+      className="d-flex align-items-center justify-content-center rounded-circle bg-white text-muted border-0"
+      style={{ height: '2rem', width: '2rem' }}
     >
       {children}
     </button>

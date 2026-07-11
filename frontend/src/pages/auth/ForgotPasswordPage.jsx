@@ -30,14 +30,14 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <AuthShell 
-      title={t('forgotPassword.titulo')} 
+    <AuthShell
+      title={t('forgotPassword.titulo')}
       subtitle={t('forgotPassword.subtitulo')}
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {erro && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</div>}
+      <form onSubmit={handleSubmit} className="d-flex flex-column gap-4">
+        {erro && <div className="rounded-3 bg-danger-subtle px-3 py-2 small text-danger">{erro}</div>}
         {mensagem && (
-          <div className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700">{mensagem}</div>
+          <div className="rounded-3 bg-success-subtle px-3 py-2 small text-success">{mensagem}</div>
         )}
         <Field
           label={t('forgotPassword.campos.emailLabel')}
@@ -48,18 +48,18 @@ export default function ForgotPasswordPage() {
           placeholder={t('forgotPassword.campos.emailPlaceholder')}
           required
         />
-        <div className="flex justify-center gap-3">
+        <div className="d-flex justify-content-center gap-2">
           <button
             type="button"
             onClick={() => navigate('/login')}
-            className="rounded-full border border-gray-300 px-8 py-2.5 text-sm font-semibold text-ink transition hover:bg-gray-50"
+            className="btn btn-outline-secondary bg-white rounded-pill px-4 py-2 fw-semibold"
           >
             {t('forgotPassword.botoes.voltar')}
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-brand px-8 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
+            className="btn btn-brand rounded-pill px-4 py-2 fw-semibold"
           >
             {loading ? t('forgotPassword.botoes.enviando') : t('forgotPassword.botoes.enviar')}
           </button>
