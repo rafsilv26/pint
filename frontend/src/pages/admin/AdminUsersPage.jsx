@@ -9,12 +9,14 @@ import { useTranslation } from 'react-i18next' // <-- Import do hook
 export default function AdminUsersPage() {
   const { t } = useTranslation() // <-- Inicializa a tradução
   const { data, loading, error, reload } = useAsync(() => api.getUsers())
+  const { data: serviceLines } = useAsync(() => api.listResource('service-lines'))
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState({})
   const [saving, setSaving] = useState(false)
   const [erroForm, setErroForm] = useState(null)
   const [confirmar, setConfirmar] = useState(null)
   const rows = data || []
+  const serviceLineOptions = serviceLines || []
 
   // Lista de Roles movida para dentro para suportar traduções
   const ROLES = [
@@ -28,21 +30,26 @@ export default function AdminUsersPage() {
   function abrir(u) {
     setEditing(u || {})
     setForm(u
-      ? { nome: u.nome, email: u.email, role: (u.roles || [])[0] || 'Consultor', ativo: u.ativo }
-      : { nome: '', email: '', password: '', role: 'Consultor' })
+      ? { nome: u.nome, email: u.email, role: (u.roles || [])[0] || 'Consultor', ativo: u.ativo, serviceLineId: u.serviceLineId || '' }
+      : { nome: '', email: '', password: '', role: 'Consultor', serviceLineId: '' })
     setErroForm(null)
   }
   function fechar() { setEditing(null); setForm({}) }
 
   async function guardar(e) {
     e.preventDefault()
+    if (form.role === 'ServiceLineLeader' && !form.serviceLineId) {
+      setErroForm(t('adminUsers.modal.serviceLineObrigatoria'))
+      return
+    }
     setSaving(true)
     setErroForm(null)
     try {
+      const serviceLineId = form.role === 'ServiceLineLeader' ? Number(form.serviceLineId) : undefined
       if (editing?.id) {
-        await api.updateUser(editing.id, { nome: form.nome, email: form.email, roles: [form.role], ativo: form.ativo })
+        await api.updateUser(editing.id, { nome: form.nome, email: form.email, roles: [form.role], ativo: form.ativo, serviceLineId })
       } else {
-        await api.createUser({ nome: form.nome, email: form.email, password: form.password, roles: [form.role] })
+        await api.createUser({ nome: form.nome, email: form.email, password: form.password, roles: [form.role], serviceLineId })
       }
       fechar()
       reload()
@@ -139,6 +146,20 @@ export default function AdminUsersPage() {
                   {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
                 </select>
               </label>
+              {form.role === 'ServiceLineLeader' && (
+                <label className="block">
+                  <span className="mb-1 block text-sm font-medium text-ink">{t('adminUsers.modal.serviceLine')}</span>
+                  <select
+                    value={form.serviceLineId || ''}
+                    onChange={(e) => setForm({ ...form, serviceLineId: e.target.value })}
+                    required
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand"
+                  >
+                    <option value="">{t('adminUsers.modal.serviceLineEscolher')}</option>
+                    {serviceLineOptions.map((sl) => <option key={sl.id} value={sl.id}>{sl.nome}</option>)}
+                  </select>
+                </label>
+              )}
               {editing.id && (
                 <label className="flex items-center gap-2 text-sm text-ink">
                   <input type="checkbox" checked={!!form.ativo} onChange={(e) => setForm({ ...form, ativo: e.target.checked })} /> {t('adminUsers.modal.ativo')}

@@ -1,18 +1,32 @@
+const sequelize = require('../config/database');
 const User = require('../models/User');
+const { ServiceLineLeader, Consultant } = require('../models');
 const { getUserRoles, applyUserRoles } = require('../services/userRoles.service');
 
 // Função auxiliar para serializar o utilizador com os seus perfis
-const serializeUser = async (user) => ({
-    id: user.id,
-    nome: user.nome,
-    email: user.email,
-    fotoPerfil: user.fotoPerfil,
-    idioma: user.idioma,
-    ativo: user.ativo,
-    mustChangePassword: user.mustChangePassword,
-    createdAt: user.createdAt,
-    roles: await getUserRoles(user.id)
-});
+// Inclui serviceLineId/areaId (se aplicável) para que o formulário de edição
+// consiga pré-preencher estes campos corretamente.
+const serializeUser = async (user) => {
+    const [roles, ssl, consultor] = await Promise.all([
+        getUserRoles(user.id),
+        ServiceLineLeader.findByPk(user.id),
+        Consultant.findByPk(user.id)
+    ]);
+
+    return {
+        id: user.id,
+        nome: user.nome,
+        email: user.email,
+        fotoPerfil: user.fotoPerfil,
+        idioma: user.idioma,
+        ativo: user.ativo,
+        mustChangePassword: user.mustChangePassword,
+        createdAt: user.createdAt,
+        roles,
+        serviceLineId: ssl?.serviceLineId ?? null,
+        areaId: consultor?.areaId ?? null
+    };
+};
 
 // Controladores para gestão de utilizadores
 exports.getAllUsers = async (_req, res) => {
@@ -72,10 +86,21 @@ exports.updateUser = async (req, res) => {
         if (mustChangePassword !== undefined) user.mustChangePassword = mustChangePassword;
         user.updatedAt = new Date();
 
-        await user.save();
+        // Transação: se a atualização dos dados base ou a atribuição de
+        // perfis falhar (ex: ServiceLineLeader sem serviceLineId), nada fica
+        // gravado — evita utilizadores com dados a meio ou sem perfil.
+        const t = await sequelize.transaction();
+        try {
+            await user.save({ transaction: t });
 
-        if (roles !== undefined) {
-            await applyUserRoles(user.id, roles, { areaId, serviceLineId });
+            if (roles !== undefined) {
+                await applyUserRoles(user.id, roles, { areaId, serviceLineId }, t);
+            }
+
+            await t.commit();
+        } catch (error) {
+            await t.rollback();
+            throw error;
         }
 
         res.json({

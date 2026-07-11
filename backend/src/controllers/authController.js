@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const sequelize = require('../config/database');
 const User = require('../models/User');
 const { applyUserRoles, getUserRoles, normalizeRoles } = require('../services/userRoles.service');
 
@@ -42,8 +43,21 @@ exports.register = async (req, res) => {
             return res.status(400).json({ message: 'Este email já está registado.' });
         }
 
-        const newUser = await User.create({ nome, email, password });
-        const assignedRoles = await applyUserRoles(newUser.id, normalizedRoles, { areaId, serviceLineId });
+        // Envolvemos a criação do utilizador + atribuição de perfis numa
+        // transação: se a atribuição do perfil falhar (ex: ServiceLineLeader
+        // sem serviceLineId), o utilizador criado é revertido também, em vez
+        // de ficar "órfão" na BD sem perfil nenhum atribuído.
+        const t = await sequelize.transaction();
+        let newUser;
+        let assignedRoles;
+        try {
+            newUser = await User.create({ nome, email, password }, { transaction: t });
+            assignedRoles = await applyUserRoles(newUser.id, normalizedRoles, { areaId, serviceLineId }, t);
+            await t.commit();
+        } catch (error) {
+            await t.rollback();
+            throw error;
+        }
 
         res.status(201).json({
             message: 'Utilizador registado com sucesso!',
