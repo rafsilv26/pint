@@ -379,6 +379,24 @@ export async function getServiceLinePedidos() {
   await delay()
   return clone(mockServiceLinePedidos)
 }
+export async function getServiceLineDecisionHistory() {
+  await delay()
+  return clone(mockServiceLinePedidos)
+    .filter((row) => ['APPROVED', 'REJECTED'].includes(row.status?.code))
+    .map((row, index) => ({
+      id: `${row.id}-current`,
+      requestId: row.id,
+      trackingId: row.trackingId,
+      badge: row.badge,
+      consultor: row.consultor,
+      code: row.status.code,
+      statusName: row.status.name,
+      status: row.status,
+      decidedAt: new Date(2026, 6, 10 - index).toISOString(),
+      author: 'Service Line Leader',
+      comment: '',
+    }))
+}
 export async function getServiceLineReports() {
   await delay()
   const applications = clone(mockServiceLinePedidos)

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Clock, CheckCircle2, XCircle, FileText, ChevronRight, Search, Undo2, X } from 'lucide-react'
+import { Clock, CheckCircle2, XCircle, FileText, ChevronRight, History, Search, Undo2, X } from 'lucide-react'
 import { Card, Spinner, ErrorState, EmptyState, StatusPill } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
@@ -9,19 +9,27 @@ import ExportButtons from '../../components/ExportButtons'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 export default function SLLPedidosPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const [status, setStatus] = useState(location.state?.tab || 'ALL')
   const [search, setSearch] = useState('')
+  const [historyStatus, setHistoryStatus] = useState('ALL')
   const [feedback, setFeedback] = useState(location.state?.feedback || null)
   const { data, loading, error, reload } = useAsync(() => api.getServiceLinePedidos())
-  useAutoRefresh(reload)
+  const { data: decisionHistory, loading: historyLoading, error: historyError, reload: reloadHistory } = useAsync(() => api.getServiceLineDecisionHistory())
+  useAutoRefresh(() => { reload(); reloadHistory() })
   const allRows = data || []
   const lista = allRows
     .filter((row) => status === 'ALL' || row.status.code === status)
     .filter((row) => `${row.trackingId} ${row.consultor} ${row.badge} ${row.area}`.toLowerCase().includes(search.toLowerCase()))
   const cont = (code) => allRows.filter((c) => c.status.code === code).length
+  const historyRows = (decisionHistory || []).filter((row) => historyStatus === 'ALL' || row.code === historyStatus)
+  const formatDecisionDate = (value) => {
+    const date = new Date(value)
+    if (!value || Number.isNaN(date.getTime())) return '—'
+    return new Intl.DateTimeFormat(i18n.resolvedLanguage || i18n.language, { dateStyle: 'short', timeStyle: 'short' }).format(date)
+  }
 
   useEffect(() => {
     if (!location.state?.feedback) return
@@ -42,6 +50,12 @@ export default function SLLPedidosPage() {
     ['APPROVED', t('sllPedidos.tabs.aprovados')],
     ['REJECTED', t('sllPedidos.tabs.rejeitados')],
     ['OPEN', t('sllPedidos.tabs.devolvidos')],
+  ]
+  const historyTabs = [
+    ['ALL', t('sllPedidos.historico.tabs.todas')],
+    ['APPROVED', t('sllPedidos.historico.tabs.aprovacoes')],
+    ['REJECTED', t('sllPedidos.historico.tabs.rejeicoes')],
+    ['OPEN', t('sllPedidos.historico.tabs.devolucoes')],
   ]
 
   const exportColumns = [
@@ -133,6 +147,60 @@ export default function SLLPedidosPage() {
           </div>
         )}
       </Card>
+
+      <section className="mt-4" aria-labelledby="sll-decision-history-title">
+        <div className="mb-3 d-flex flex-wrap align-items-end justify-content-between gap-3">
+          <div>
+            <h2 id="sll-decision-history-title" className="h4 fw-bold text-ink mb-0 d-flex align-items-center gap-2">
+              <History size={21} className="text-brand" aria-hidden="true" />
+              {t('sllPedidos.historico.titulo')}
+            </h2>
+            <p className="small text-muted mt-1 mb-0">{t('sllPedidos.historico.subtitulo')}</p>
+          </div>
+          <div className="d-flex flex-wrap rounded-3 border bg-white p-1" role="group" aria-label={t('sllPedidos.historico.filtro')}>
+            {historyTabs.map(([code, label]) => (
+              <button key={code} type="button" onClick={() => setHistoryStatus(code)} className={`btn btn-sm ${historyStatus === code ? 'btn-brand' : 'btn-link text-muted text-decoration-none'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Card className="overflow-hidden p-0">
+          {historyLoading ? (
+            <div className="p-4"><Spinner /></div>
+          ) : historyError ? (
+            <div className="p-4"><ErrorState message={historyError} onRetry={reloadHistory} /></div>
+          ) : historyRows.length === 0 ? (
+            <div className="p-4">
+              <EmptyState icon={History} title={t('sllPedidos.historico.vazioTitulo')} description={t('sllPedidos.historico.vazioDescricao')} />
+            </div>
+          ) : (
+            <div className="list-group list-group-flush">
+              {historyRows.map((row) => (
+                <button key={row.id} type="button" onClick={() => navigate(`/sll/pedidos/${row.requestId}`)} className="list-group-item list-group-item-action border-start-0 border-end-0 px-3 py-3 text-start">
+                  <div className="row g-2 align-items-center">
+                    <div className="col-6 col-lg-2">
+                      <p className="fw-semibold text-brand mb-0">{row.trackingId}</p>
+                      <p className="fs-xs text-muted mb-0">{formatDecisionDate(row.decidedAt)}</p>
+                    </div>
+                    <div className="col-6 col-lg-2"><StatusPill status={{ ...row.status, name: t(`sllPedidos.historico.estados.${row.code}`, { defaultValue: row.status?.name }) }} /></div>
+                    <div className="col-12 col-md-6 col-lg-3">
+                      <p className="small fw-semibold text-ink mb-0">{row.badge}</p>
+                      <p className="fs-xs text-muted mb-0">{row.consultor}</p>
+                    </div>
+                    <div className="col-11 col-md-5 col-lg-4">
+                      <p className="small text-muted mb-0 text-break">{row.comment || t('sllPedidos.historico.semComentario')}</p>
+                      {row.author && <p className="fs-xs text-muted mb-0">{t('sllPedidos.historico.por', { nome: row.author })}</p>}
+                    </div>
+                    <div className="col-1 text-end text-brand"><ChevronRight size={17} aria-hidden="true" /></div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </Card>
+      </section>
     </div>
   )
 }

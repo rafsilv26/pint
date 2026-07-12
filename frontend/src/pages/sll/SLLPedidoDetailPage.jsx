@@ -38,9 +38,9 @@ export default function SLLPedidoDetailPage() {
     try {
       const result = await api.validarServiceLine(c.id, { decisao, comentario })
       const config = {
-        APROVAR: { tab: 'APPROVED', type: 'success', title: t('sllPedidoDetail.feedback.aprovada', { badge: c.badge.nome }) },
-        REJEITAR: { tab: 'REJECTED', type: 'danger', title: t('sllPedidoDetail.feedback.rejeitada', { badge: c.badge.nome }) },
-        SEND_BACK: { tab: 'OPEN', type: 'warning', title: t('sllPedidoDetail.feedback.devolvida', { badge: c.badge.nome }) },
+        APROVAR: { tab: 'APPROVED', type: 'success', title: t('sllPedidoDetail.feedback.aprovada', { pedido: c.numero, badge: c.badge.nome }) },
+        REJEITAR: { tab: 'REJECTED', type: 'danger', title: t('sllPedidoDetail.feedback.rejeitada', { pedido: c.numero, badge: c.badge.nome }) },
+        SEND_BACK: { tab: 'OPEN', type: 'warning', title: t('sllPedidoDetail.feedback.devolvida', { pedido: c.numero, badge: c.badge.nome }) },
       }[decisao]
       navigate('/sll/pedidos', { replace: true, state: { tab: config.tab, feedback: { type: config.type, title: config.title, message: result?.mensagem || result?.message || t('sllPedidoDetail.feedback.registada') } } })
     } catch (e) {

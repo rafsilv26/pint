@@ -923,9 +923,9 @@
     "rejeitar": "Reject",
     "devolver": "Send Back",
     "feedback": {
-      "aprovada": "You approved the «{{badge}}» badge.",
-      "rejeitada": "You rejected the «{{badge}}» badge.",
-      "devolvida": "You sent the «{{badge}}» badge back to the consultant.",
+      "aprovada": "You approved request {{pedido}} for the «{{badge}}» badge.",
+      "rejeitada": "You rejected request {{pedido}} for the «{{badge}}» badge.",
+      "devolvida": "You sent request {{pedido}} for the «{{badge}}» badge back to the consultant.",
       "registada": "The final decision was recorded."
     },
     "labels": {
@@ -963,6 +963,17 @@
     "tabs": { "todos": "All", "pendentes": "Pending", "aprovados": "Approved", "rejeitados": "Rejected", "devolvidos": "Sent back" },
     "pesquisar": "Search request",
     "fecharAviso": "Close notification",
+    "historico": {
+      "titulo": "Decision history",
+      "subtitulo": "Latest approvals, rejections and returns, from newest to oldest.",
+      "filtro": "Filter decision history",
+      "tabs": { "todas": "All", "aprovacoes": "Approvals", "rejeicoes": "Rejections", "devolucoes": "Sent back" },
+      "estados": { "APPROVED": "Approved", "REJECTED": "Rejected", "OPEN": "Sent back" },
+      "vazioTitulo": "No decisions recorded",
+      "vazioDescricao": "There are no decisions of this type in your Service Line yet.",
+      "semComentario": "No comment.",
+      "por": "By {{nome}}"
+    },
     "empty": {
       "titulo": "No requests",
       "descricao": "There are no requests for final approval."

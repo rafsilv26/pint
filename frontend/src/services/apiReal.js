@@ -12,6 +12,7 @@ import {
   invalidateTalentWorkspace,
 } from './talentWorkspace.js'
 import {
+  buildServiceLineDecisionHistory,
   buildServiceLineProfile,
   buildServiceLineReport,
   filterServiceLineApplications,
@@ -404,7 +405,7 @@ export async function getCandidatura(id) {
   const code = c.status?.code || enriched?.status?.code
   return {
     id: c.id,
-    numero: `#${String(c.id).padStart(6, '0')}`,
+    numero: `#${String(c.id).padStart(5, '0')}`,
     estado: { code, name: statusName(code, c.status?.name || code || '—'), cor: CODE_COR[code] || 'gray' },
     consultor: c.Consultant?.User?.nome || i18next.t('api.generic.consultorId', { id: c.consultorId }),
     submissao: dataPT(c.dataSubmicao),
@@ -423,14 +424,14 @@ export async function getCandidatura(id) {
       requisito: e.Requirement?.titulo || e.Requirement?.descricao || e.descricao || '—',
       validado: e.validado === true ? true : e.validado === false ? false : null,
     })),
-    historico: (c.history || []).map((h) => ({
+    historico: (c.history || []).slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((h) => ({
       estado: statusName(h.newStatus?.code, h.newStatus?.name || i18next.t('api.generic.atualizacaoEstado', { defaultValue: 'Atualização de estado' })),
       estadoAnterior: statusName(h.oldStatus?.code, h.oldStatus?.name || ''),
       code: h.newStatus?.code,
       autor: h.responsavel?.nome || '',
       data: dataPT(h.createdAt),
       motivo: h.motivo || h.reason || '',
-    })).sort((a, b) => String(a.data).localeCompare(String(b.data))),
+    })),
   }
 }
 export async function validarTalentManager(id, { decisao, comentario } = {}) {
@@ -510,6 +511,16 @@ export async function getServiceLinePedidos(filters = {}) {
   return rows.map((row) => ({
     ...row,
     status: { ...row.status, name: statusName(row.status.code, row.status.name), cor: CODE_COR[row.status.code] || 'gray' },
+  }))
+}
+export async function getServiceLineDecisionHistory() {
+  return buildServiceLineDecisionHistory((await getServiceLineWorkspace()).applications).map((row) => ({
+    ...row,
+    status: {
+      code: row.code,
+      name: statusName(row.code, row.statusName),
+      cor: row.code === 'OPEN' ? 'blue' : CODE_COR[row.code] || 'gray',
+    },
   }))
 }
 export async function getServiceLineReports(filters = {}) {
