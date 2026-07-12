@@ -323,6 +323,25 @@ export function filterTalentCandidaturas(rows, filters = {}) {
   })
 }
 
+export function buildTalentProfile(workspace) {
+  const candidaturas = array(workspace?.candidaturas)
+
+  return {
+    serviceLines: array(workspace?.serviceLines).map((row) => ({ id: row.id, nome: row.nome })),
+    learningPaths: array(workspace?.learningPaths).map((row) => ({ id: row.id, nome: row.nome })),
+    areas: array(workspace?.areas).map((row) => ({ id: row.id, nome: row.nome })),
+    stats: {
+      consultants: array(workspace?.consultants).length,
+      serviceLines: array(workspace?.serviceLines).length,
+      availableBadges: array(workspace?.catalog).filter((badge) => badge.ativo !== false).length,
+      pendingValidations: candidaturas.filter((row) => row.status?.code === 'SUBMITTED').length,
+      awardedBadges: array(workspace?.awards).length,
+      expiringBadges: array(workspace?.expiring).length,
+    },
+    generatedAt: workspace?.generatedAt || null,
+  }
+}
+
 export function buildTalentReport(workspace, filters = {}) {
   const candidaturas = filterTalentCandidaturas(workspace.candidaturas, filters)
   const consultants = workspace.consultants.filter((consultant) =>

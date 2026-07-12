@@ -343,6 +343,46 @@
     "confirmarLogout": "Tens a certeza de que pretendes terminar a sessão?",
     "sucessoMsg": "Palavra-passe alterada com sucesso.",
     "alterarPassword": "Alterar Palavra-passe",
+    "roles": {
+      "Admin": "Administrador",
+      "TalentManager": "Talent Manager",
+      "ServiceLineLeader": "Service Line Leader"
+    },
+    "talent": {
+      "eyebrow": "Âmbito do Talent Manager",
+      "title": "Gestão global de talento",
+      "subtitle": "Visão transversal da estrutura, do catálogo e das candidaturas sob a tua gestão.",
+      "globalScope": "Âmbito global",
+      "loading": "A carregar os dados de gestão de talento…",
+      "serviceLines": "Service Lines",
+      "learningPaths": "Learning Paths",
+      "areas": "Áreas abrangidas",
+      "empty": "Sem dados associados.",
+      "stats": {
+        "consultants": "Consultores",
+        "serviceLines": "Service Lines",
+        "availableBadges": "Badges disponíveis",
+        "pendingValidations": "Aguardam validação",
+        "awardedBadges": "Badges atribuídas",
+        "expiringBadges": "A expirar ou expiradas"
+      }
+    },
+    "serviceLine": {
+      "eyebrow": "A minha Service Line",
+      "subtitle": "Âmbito de responsabilidade associado à tua conta.",
+      "notAssigned": "Sem Service Line associada",
+      "notAvailable": "Não disponível",
+      "loading": "A carregar os dados da Service Line…",
+      "learningPath": "Learning Path",
+      "areas": "Áreas abrangidas",
+      "emptyAreas": "Sem áreas associadas.",
+      "stats": {
+        "consultants": "Consultores",
+        "availableBadges": "Badges disponíveis",
+        "pendingApprovals": "Aguardam decisão",
+        "awardedBadges": "Badges atribuídas"
+      }
+    },
     "labels": {
       "atual": "Palavra-passe atual",
       "nova": "Nova palavra-passe",

@@ -149,6 +149,34 @@ export function filterServiceLineApplications(rows, filters = {}) {
   })
 }
 
+export function buildServiceLineProfile(workspace) {
+  const serviceLine = array(workspace?.serviceLines)[0] || null
+  const learningPath = array(workspace?.learningPaths).find(
+    (row) => Number(row.id) === Number(serviceLine?.learningPathId),
+  ) || null
+  const applications = array(workspace?.applications)
+
+  return {
+    serviceLine: serviceLine ? {
+      id: serviceLine.id,
+      nome: serviceLine.nome,
+      descricao: serviceLine.descricao || '',
+    } : null,
+    learningPath: learningPath ? {
+      id: learningPath.id,
+      nome: learningPath.nome,
+    } : null,
+    areas: array(workspace?.areas).map((area) => ({ id: area.id, nome: area.nome })),
+    stats: {
+      consultants: array(workspace?.consultants).length,
+      availableBadges: array(workspace?.catalog).filter((badge) => badge.ativo !== false).length,
+      pendingApprovals: applications.filter((row) => row.status?.code === 'VALIDATED').length,
+      awardedBadges: array(workspace?.awards).length,
+    },
+    generatedAt: workspace?.generatedAt || null,
+  }
+}
+
 export function buildServiceLineReport(workspace, filters = {}) {
   const applications = filterServiceLineApplications(workspace.applications, filters)
   const consultants = workspace.consultants.filter((row) =>

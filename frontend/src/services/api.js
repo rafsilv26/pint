@@ -59,6 +59,7 @@ export const verificarBadge = impl.verificarBadge
 
 // Talent Manager
 export const getTalentDashboard = impl.getTalentDashboard
+export const getTalentProfile = impl.getTalentProfile
 export const getTalentCandidaturas = impl.getTalentCandidaturas
 export const getCandidatura = impl.getCandidatura
 export const validarTalentManager = impl.validarTalentManager
@@ -71,6 +72,7 @@ export const refreshTalentWorkspace = impl.refreshTalentWorkspace
 
 // Service Line Leader
 export const getServiceLineDashboard = impl.getServiceLineDashboard
+export const getServiceLineProfile = impl.getServiceLineProfile
 export const getServiceLinePedidos = impl.getServiceLinePedidos
 export const getServiceLineReports = impl.getServiceLineReports
 export const refreshServiceLineWorkspace = impl.refreshServiceLineWorkspace

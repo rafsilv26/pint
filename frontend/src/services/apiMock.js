@@ -316,6 +316,23 @@ export async function getTalentReports(filters = {}) {
   }
 }
 
+export async function getTalentProfile() {
+  const report = await getTalentReports()
+  return {
+    serviceLines: report.filterOptions.serviceLines.map((nome, index) => ({ id: index + 1, nome })),
+    learningPaths: report.filterOptions.learningPaths.map((nome, index) => ({ id: index + 1, nome })),
+    areas: report.filterOptions.areas.map((nome, index) => ({ id: index + 1, nome })),
+    stats: {
+      consultants: report.totals.consultants,
+      serviceLines: report.filterOptions.serviceLines.length,
+      availableBadges: mockBadges.filter((badge) => badge.ativo !== false).length,
+      pendingValidations: report.candidaturas.filter((row) => row.status?.code === 'SUBMITTED').length,
+      awardedBadges: report.totals.awards,
+      expiringBadges: 0,
+    },
+  }
+}
+
 export async function refreshTalentWorkspace() {
   return { ok: true }
 }
@@ -338,6 +355,20 @@ export async function getServiceLineDashboard() {
       pathCompleted: row.badges,
       pathTotal: 10,
     })),
+  }
+}
+export async function getServiceLineProfile() {
+  await delay()
+  return {
+    serviceLine: { id: 1, nome: 'Technology', descricao: '' },
+    learningPath: { id: 1, nome: 'Engineering' },
+    areas: [{ id: 1, nome: 'LowCode' }],
+    stats: {
+      consultants: 4,
+      availableBadges: mockBadges.length,
+      pendingApprovals: mockServiceLinePedidos.filter((row) => row.status?.code === 'VALIDATED').length,
+      awardedBadges: 0,
+    },
   }
 }
 export async function getServiceLinePedidos() {

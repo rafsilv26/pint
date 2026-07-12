@@ -6,11 +6,13 @@
 import { http, getUser, getToken, api } from './http.js'
 import i18next from 'i18next' // <-- Import da instância global para ficheiros JS puros
 import {
+  buildTalentProfile,
   buildTalentReport,
   getTalentWorkspace,
   invalidateTalentWorkspace,
 } from './talentWorkspace.js'
 import {
+  buildServiceLineProfile,
   buildServiceLineReport,
   filterServiceLineApplications,
   getServiceLineWorkspace,
@@ -349,6 +351,9 @@ export async function getTalentDashboard() {
     generatedAt: workspace.generatedAt,
   }
 }
+export async function getTalentProfile() {
+  return buildTalentProfile(await getTalentWorkspace())
+}
 // ---------- Admin: Dashboard (painel de controlo) ----------
 // Reutiliza as mesmas estatísticas/leaderboard do TM, mas troca a
 // "Atividade Recente" pelo feed real e transversal (utilizadores,
@@ -485,6 +490,9 @@ export async function getServiceLineDashboard() {
       texto: `${c.badge} · ${statusName(c.status.code, c.status.name)}`,
     })),
   }
+}
+export async function getServiceLineProfile() {
+  return buildServiceLineProfile(await getServiceLineWorkspace())
 }
 // Histórico completo dos pedidos da Service Line do SLL (todos os estados,
 // não só os pendentes de aprovação final) — guião: "visualização do status
