@@ -297,7 +297,19 @@
     "naoExpira": "não expira",
     "pontos": "pts",
     "certificado": "Certificado",
-    "paginaPublica": "Página pública"
+    "paginaPublica": "Página pública",
+    "partilhar": "Partilhar"
+  },
+  "dashboardAlertas": {
+    "marcoTitulo": "Marco alcançado! 🎉",
+    "marcoTexto": "Já conquistaste {{count}} badge!",
+    "marcoTexto_other": "Já conquistaste {{count}} badges!",
+    "marcoDispensar": "Dispensar",
+    "expiraTitulo": "Badges a expirar",
+    "expiraItem": "{{nome}} — expira em {{dias}} dia",
+    "expiraItem_other": "{{nome}} — expira em {{dias}} dias",
+    "expiraHoje": "{{nome}} — expira hoje",
+    "verHistorico": "Ver histórico"
   },
   "managerBadge": {
     "naoEncontrado": "Badge não encontrado.",

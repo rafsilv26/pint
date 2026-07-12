@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { Award, Download, ExternalLink, ShieldCheck } from 'lucide-react'
 import { PageHeader, Card, Spinner, EmptyState, ErrorState } from '../components/ui'
+import LinkedinGlyph from '../components/LinkedinGlyph'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
+import { partilharLinkedin } from '../utils/share'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 // Função adaptada para receber o idioma atual (locale)
@@ -84,6 +86,16 @@ export default function HistoryPage() {
                     >
                       <ExternalLink size={16} /> {t('historico.paginaPublica')}
                     </Link>
+                    {b.valid && !expirado && (
+                      <button
+                        onClick={() => partilharLinkedin(b.publicToken)}
+                        className="btn btn-sm d-inline-flex align-items-center gap-1 text-white ms-auto"
+                        style={{ backgroundColor: '#0a66c2' }}
+                        title={t('historico.partilhar')}
+                      >
+                        <LinkedinGlyph size={15} /> {t('historico.partilhar')}
+                      </button>
+                    )}
                   </div>
                 </Card>
               </div>

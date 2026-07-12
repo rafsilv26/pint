@@ -4,6 +4,7 @@ import {
   ChevronRight, Calendar,
 } from 'lucide-react'
 import { Card, Spinner, StatusPill, ErrorState } from '../components/ui'
+import DashboardAlerts from '../components/DashboardAlerts'
 import { useAsync } from '../hooks/useAsync'
 import { useTranslation } from 'react-i18next'
 import * as api from '../services/api'
@@ -65,6 +66,9 @@ export default function DashboardPage() {
           {t('dashboard.jornada')}
         </p>
       </div>
+
+      {/* Alertas: marcos alcançados + badges a expirar */}
+      <DashboardAlerts />
 
       {/* Estatísticas */}
       <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">

@@ -297,7 +297,19 @@
     "naoExpira": "no expira",
     "pontos": "pts",
     "certificado": "Certificado",
-    "paginaPublica": "Página pública"
+    "paginaPublica": "Página pública",
+    "partilhar": "Compartir"
+  },
+  "dashboardAlertas": {
+    "marcoTitulo": "¡Hito alcanzado! 🎉",
+    "marcoTexto": "¡Ya has conseguido {{count}} insignia!",
+    "marcoTexto_other": "¡Ya has conseguido {{count}} insignias!",
+    "marcoDispensar": "Descartar",
+    "expiraTitulo": "Insignias por caducar",
+    "expiraItem": "{{nome}} — caduca en {{dias}} día",
+    "expiraItem_other": "{{nome}} — caduca en {{dias}} días",
+    "expiraHoje": "{{nome}} — caduca hoy",
+    "verHistorico": "Ver historial"
   },
   "managerBadge": {
     "naoEncontrado": "Insignia no encontrada.",

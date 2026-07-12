@@ -184,7 +184,7 @@ export async function getMinhasCandidaturas() {
     const code = c.status?.code || c.BadgeStatus?.code
     return {
       id: c.id,
-      badge: { id: c.Badge?.id ?? c.badgeId, nome: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }) },
+      badge: { id: c.Badge?.id ?? c.badgeId, nome: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }), publicToken: c.Badge?.publicToken || '' },
       tags: [],
       status: { code, name: statusName(code, c.status?.name || code || '—'), cor: CODE_COR[code] || 'gray' },
       progresso: CODE_PROGRESSO[code] ?? 0,

@@ -297,7 +297,19 @@
     "naoExpira": "does not expire",
     "pontos": "pts",
     "certificado": "Certificate",
-    "paginaPublica": "Public page"
+    "paginaPublica": "Public page",
+    "partilhar": "Share"
+  },
+  "dashboardAlertas": {
+    "marcoTitulo": "Milestone reached! 🎉",
+    "marcoTexto": "You've earned {{count}} badge!",
+    "marcoTexto_other": "You've earned {{count}} badges!",
+    "marcoDispensar": "Dismiss",
+    "expiraTitulo": "Badges expiring soon",
+    "expiraItem": "{{nome}} — expires in {{dias}} day",
+    "expiraItem_other": "{{nome}} — expires in {{dias}} days",
+    "expiraHoje": "{{nome}} — expires today",
+    "verHistorico": "View history"
   },
   "managerBadge": {
     "naoEncontrado": "Badge not found.",

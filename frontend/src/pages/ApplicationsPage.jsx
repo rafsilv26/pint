@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Calendar, Clock, FileText, Award, Plus, RefreshCw, Share2 } from 'lucide-react'
+import { Search, Calendar, Clock, FileText, Award, Plus, RefreshCw } from 'lucide-react'
 import { Spinner, EmptyState, StatusPill, ErrorState } from '../components/ui'
+import LinkedinGlyph from '../components/LinkedinGlyph'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
+import { partilharLinkedin } from '../utils/share'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 const CARD_TINT = {
@@ -39,9 +41,15 @@ function Acoes({ c }) {
     return (
       <>
         {detalhes}
-        <button className="btn btn-brand d-flex align-items-center gap-1 fs-xs fw-semibold">
-          <Share2 size={14} /> {t('candidaturas.acoes.partilhar')}
-        </button>
+        {c.badge.publicToken && (
+          <button
+            onClick={() => partilharLinkedin(c.badge.publicToken)}
+            className="btn d-flex align-items-center gap-1 fs-xs fw-semibold text-white"
+            style={{ backgroundColor: '#0a66c2' }}
+          >
+            <LinkedinGlyph size={14} /> {t('candidaturas.acoes.partilhar')}
+          </button>
+        )}
       </>
     )
   }
