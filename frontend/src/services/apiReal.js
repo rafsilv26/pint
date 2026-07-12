@@ -56,6 +56,14 @@ export async function register(dados) {
   return http('/auth/register', { method: 'POST', body: dados })
 }
 
+// Auto-registo público de consultor + lista de áreas para o formulário.
+export async function signup(dados) {
+  return http('/auth/signup', { method: 'POST', body: dados, auth: false })
+}
+export async function getAreasPublicas() {
+  return http('/auth/areas', { auth: false }).catch(() => [])
+}
+
 export async function recuperarPassword({ email }) {
   return http('/auth/forgot-password', { method: 'POST', body: { email }, auth: false })
 }

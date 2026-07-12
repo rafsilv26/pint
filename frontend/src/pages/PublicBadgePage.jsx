@@ -79,6 +79,9 @@ export default function PublicBadgePage() {
       )}
 
       <p className="mt-4 fs-xs text-secondary">{t('publicBadge.footer')}</p>
+      <a href="https://www.softinsa.pt" target="_blank" rel="noopener noreferrer" className="fs-xs fw-medium text-brand text-decoration-none">
+        {t('publicBadge.competenciasSoftinsa')} →
+      </a>
     </div>
   )
 }

@@ -19,6 +19,8 @@ const impl = USE_REAL_API ? real : mock
 // Autenticação
 export const login = impl.login
 export const register = impl.register
+export const signup = impl.signup
+export const getAreasPublicas = impl.getAreasPublicas
 export const recuperarPassword = impl.recuperarPassword
 export const resetPassword = impl.resetPassword
 export const confirmarEmail = impl.confirmarEmail

@@ -187,7 +187,8 @@
     "opcional": "Opcional",
     "validade": "Vigencia",
     "naoExpira": "No caduca",
-    "todosRequisitos": "Cumple todos los requisitos obligatorios para obtener esta insignia."
+    "todosRequisitos": "Cumple todos los requisitos obligatorios para obtener esta insignia.",
+    "competenciasSoftinsa": "Competencias Softinsa"
   },
   "certificado": {
     "gerando": "Generando certificado…",
@@ -546,7 +547,8 @@
     "dataAtribuicao": "Fecha de obtención",
     "validade": "Validez",
     "naoExpira": "No expira",
-    "footer": "Verificado por Softinsa · Plataforma de Insignias"
+    "footer": "Verificado por Softinsa · Plataforma de Insignias",
+    "competenciasSoftinsa": "Ver competencias Softinsa"
   },
   "perfilPublico": {
     "voltar": "Volver al Perfil",
@@ -927,10 +929,35 @@
     },
     "lembrarMe": "Recuérdame",
     "esqueceuPassword": "¿Has olvidado tu contraseña?",
+    "semConta": "¿Aún no tienes cuenta?",
+    "criarConta": "Crear cuenta",
     "botoes": {
       "entrando": "Entrando…",
       "entrar": "Entrar"
     }
+  },
+  "registo": {
+    "titulo": "Crear cuenta",
+    "subtitulo": "Regístrate como consultor de Softinsa",
+    "nome": "Nombre completo",
+    "nomePlaceholder": "Tu nombre",
+    "email": "Correo electrónico",
+    "emailPlaceholder": "Introducir correo electrónico",
+    "password": "Contraseña",
+    "passwordPlaceholder": "Mínimo 8 caracteres",
+    "confirmar": "Confirmar contraseña",
+    "confirmarPlaceholder": "Repite la contraseña",
+    "mostrarPassword": "Mostrar contraseña",
+    "area": "Área",
+    "areaPlaceholder": "Elige tu área",
+    "criar": "Crear cuenta",
+    "aCriar": "Creando…",
+    "erroComprimento": "La contraseña debe tener al menos 8 caracteres.",
+    "erroCoincidem": "Las contraseñas no coinciden.",
+    "sucesso": "Cuenta creada. Confirma tu correo para poder entrar.",
+    "irLogin": "Ir al inicio de sesión",
+    "jaTens": "¿Ya tienes cuenta?",
+    "entrar": "Entrar"
   },
   "sllDashboard": {
     "titulo": "Panel de Control",

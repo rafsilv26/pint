@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Coins, Award, Clock, ChevronRight, CheckCircle2, ListChecks } from 'lucide-react'
+import { ArrowLeft, Coins, Award, Clock, ChevronRight, CheckCircle2, ListChecks, ExternalLink } from 'lucide-react'
 import { Spinner, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
@@ -93,6 +93,14 @@ export default function BadgeDetailPage() {
           <p className="text-muted border-start border-3 border-brand ps-3" style={{ lineHeight: 1.7 }}>
             {t('badgeDetail.descTextoExtra')}
           </p>
+          <a
+            href="https://www.softinsa.pt"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 d-inline-flex align-items-center gap-2 small fw-medium text-brand text-decoration-none"
+          >
+            <ExternalLink size={15} /> {t('badgeDetail.competenciasSoftinsa')}
+          </a>
         </section>
 
         <section className="col-lg-7">

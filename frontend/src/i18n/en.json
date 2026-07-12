@@ -187,7 +187,8 @@
     "opcional": "Optional",
     "validade": "Validity",
     "naoExpira": "No expiry",
-    "todosRequisitos": "Meet all mandatory requirements to earn this badge."
+    "todosRequisitos": "Meet all mandatory requirements to earn this badge.",
+    "competenciasSoftinsa": "Softinsa competencies"
   },
   "certificado": {
     "gerando": "Generating certificate…",
@@ -546,7 +547,8 @@
     "dataAtribuicao": "Award date",
     "validade": "Valid until",
     "naoExpira": "Does not expire",
-    "footer": "Verified by Softinsa · Badges Platform"
+    "footer": "Verified by Softinsa · Badges Platform",
+    "competenciasSoftinsa": "View Softinsa competencies"
   },
   "perfilPublico": {
     "voltar": "Back to Profile",
@@ -927,10 +929,35 @@
     },
     "lembrarMe": "Remember me",
     "esqueceuPassword": "Forgot your password?",
+    "semConta": "Don't have an account?",
+    "criarConta": "Create account",
     "botoes": {
       "entrando": "Logging in…",
       "entrar": "Login"
     }
+  },
+  "registo": {
+    "titulo": "Create account",
+    "subtitulo": "Sign up as a Softinsa consultant",
+    "nome": "Full name",
+    "nomePlaceholder": "Your name",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Minimum 8 characters",
+    "confirmar": "Confirm password",
+    "confirmarPlaceholder": "Repeat the password",
+    "mostrarPassword": "Show password",
+    "area": "Area",
+    "areaPlaceholder": "Choose your area",
+    "criar": "Create account",
+    "aCriar": "Creating…",
+    "erroComprimento": "Password must be at least 8 characters.",
+    "erroCoincidem": "Passwords do not match.",
+    "sucesso": "Account created. Confirm your email to sign in.",
+    "irLogin": "Go to login",
+    "jaTens": "Already have an account?",
+    "entrar": "Login"
   },
   "sllDashboard": {
     "titulo": "Dashboard",

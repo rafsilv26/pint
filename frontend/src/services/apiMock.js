@@ -35,6 +35,20 @@ export async function register(dados) {
   return { message: i18next.t('api.mensagens.contaCriada') }
 }
 
+export async function signup(dados) {
+  await delay(600)
+  if (!dados?.nome || !dados?.email || !dados?.password) throw new Error(i18next.t('api.validacao.registoCampos'))
+  return { message: 'Conta criada. Confirma o teu email.' }
+}
+export async function getAreasPublicas() {
+  await delay()
+  return [
+    { id: 1, nome: 'Low Code (OutSystems)' },
+    { id: 2, nome: 'DevSecOps & IT Automation' },
+    { id: 3, nome: 'Talent Management' },
+  ]
+}
+
 export async function recuperarPassword({ email }) {
   await delay()
   if (!email) throw new Error(i18next.t('api.validacao.indicaEmail'))

@@ -187,7 +187,8 @@
     "opcional": "Opcional",
     "validade": "Validade",
     "naoExpira": "Não expira",
-    "todosRequisitos": "Cumpre todos os requisitos obrigatórios para obteres este badge."
+    "todosRequisitos": "Cumpre todos os requisitos obrigatórios para obteres este badge.",
+    "competenciasSoftinsa": "Competências Softinsa"
   },
   "certificado": {
     "gerando": "A gerar certificado…",
@@ -536,7 +537,8 @@
     "dataAtribuicao": "Data de atribuição",
     "validade": "Validade",
     "naoExpira": "Não expira",
-    "footer": "Verificado por Softinsa · Plataforma de Badges"
+    "footer": "Verificado por Softinsa · Plataforma de Badges",
+    "competenciasSoftinsa": "Ver competências Softinsa"
   },
   "perfilPublico": {
     "voltar": "Voltar ao Perfil",
@@ -917,10 +919,35 @@
     },
     "lembrarMe": "Lembrar-me",
     "esqueceuPassword": "Esqueceu-se da password?",
+    "semConta": "Ainda não tens conta?",
+    "criarConta": "Criar conta",
     "botoes": {
       "entrando": "A entrar…",
       "entrar": "Entrar"
     }
+  },
+  "registo": {
+    "titulo": "Criar conta",
+    "subtitulo": "Regista-te como consultor da Softinsa",
+    "nome": "Nome completo",
+    "nomePlaceholder": "O teu nome",
+    "email": "Email",
+    "emailPlaceholder": "Introduzir o email",
+    "password": "Password",
+    "passwordPlaceholder": "Mínimo 8 caracteres",
+    "confirmar": "Confirmar password",
+    "confirmarPlaceholder": "Repete a password",
+    "mostrarPassword": "Mostrar password",
+    "area": "Área",
+    "areaPlaceholder": "Escolhe a tua área",
+    "criar": "Criar conta",
+    "aCriar": "A criar…",
+    "erroComprimento": "A password deve ter pelo menos 8 caracteres.",
+    "erroCoincidem": "As passwords não coincidem.",
+    "sucesso": "Conta criada. Confirma o teu email para poderes entrar.",
+    "irLogin": "Ir para o login",
+    "jaTens": "Já tens conta?",
+    "entrar": "Entrar"
   },
   "sllDashboard": {
     "titulo": "Painel de Controlo",

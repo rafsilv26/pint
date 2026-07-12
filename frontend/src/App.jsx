@@ -7,6 +7,7 @@ import AppLayout from './components/layout/AppLayout'
 import ManagerLayout from './components/layout/ManagerLayout'
 
 import LoginPage from './pages/auth/LoginPage'
+import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import AtualizarPasswordPage from './pages/auth/AtualizarPasswordPage'
 import ConfirmarEmailPage from './pages/auth/ConfirmarEmailPage'
@@ -67,6 +68,7 @@ export default function App() {
     <Routes>
       {/* ---- Rotas públicas ---- */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/registar" element={<RegisterPage />} />
       <Route path="/recuperar-password" element={<ForgotPasswordPage />} />
       <Route path="/atualizar-password" element={<AtualizarPasswordPage />} />
       <Route path="/confirmar-email" element={<ConfirmarEmailPage />} />

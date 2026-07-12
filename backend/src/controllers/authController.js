@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const sequelize = require('../config/database');
 const User = require('../models/User');
+const { Area } = require('../models');
 const PolicyRGPD = require('../models/PolicyRGPD');
 const PolicyRGPDAcceptance = require('../models/PolicyRGPDAcceptance');
 const { applyUserRoles, getUserRoles, normalizeRoles } = require('../services/userRoles.service');
@@ -114,6 +115,60 @@ exports.register = async (req, res) => {
     }
 };
 
+// Auto-registo público de um CONSULTOR (guião req 1). O próprio escolhe a
+// área; recebe um email de confirmação e só pode entrar depois de confirmar.
+exports.signup = async (req, res) => {
+    try {
+        const { nome, email, password, areaId } = req.body;
+        if (!nome || !email || !password) {
+            return res.status(400).json({ message: 'Nome, email e password são obrigatórios.' });
+        }
+        if (String(password).length < 8) {
+            return res.status(400).json({ message: 'A password deve ter pelo menos 8 caracteres.' });
+        }
+
+        const userExists = await User.findOne({ where: { email } });
+        if (userExists) {
+            return res.status(400).json({ message: 'Este email já está registado.' });
+        }
+
+        const confirmToken = crypto.randomBytes(32).toString('hex');
+        const t = await sequelize.transaction();
+        let newUser;
+        try {
+            newUser = await User.create({
+                nome,
+                email,
+                password,
+                emailConfirmationToken: hashToken(confirmToken)
+            }, { transaction: t });
+            // Perfil Consultor + área escolhida (areaId é opcional na tabela).
+            await applyUserRoles(newUser.id, ['Consultor'], { areaId }, t);
+            await t.commit();
+        } catch (error) {
+            await t.rollback();
+            throw error;
+        }
+
+        emailBoasVindas(newUser, `${frontendUrl()}/login`, `${frontendUrl()}/confirmar-email?token=${confirmToken}`)
+            .catch((erro) => console.error('Erro ao enviar email de boas-vindas:', erro.message));
+
+        res.status(201).json({ message: 'Conta criada. Confirma o teu email para poderes entrar.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao criar a conta.', details: error.message });
+    }
+};
+
+// Lista pública das áreas — para o formulário de auto-registo escolher a área.
+exports.listarAreasPublicas = async (_req, res) => {
+    try {
+        const areas = await Area.findAll({ attributes: ['id', 'nome'], order: [['nome', 'ASC']] });
+        res.json(areas);
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao listar áreas.', details: error.message });
+    }
+};
+
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -128,6 +183,12 @@ exports.login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Credenciais inválidas.' });
+        }
+
+        // Bloqueia enquanto o email não estiver confirmado (guião req 1). Só
+        // afeta quem tem confirmação pendente — contas legadas sem token passam.
+        if (user.emailConfirmed === false && user.emailConfirmationToken) {
+            return res.status(403).json({ message: 'Confirma o teu email antes de entrar. Verifica a tua caixa de correio.', emailConfirmacaoPendente: true });
         }
 
         // gerar token JWT e obter os perfis do utilizador

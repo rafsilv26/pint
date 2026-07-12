@@ -5,6 +5,9 @@ const { protect, authorize } = require('../middlewares/authMiddleware');
 
 // O registo de utilizadores é feito por um administrador autenticado.
 router.post('/register', protect, authorize('Admin'), authController.register);
+// Auto-registo público de consultor + lista de áreas para o formulário.
+router.post('/signup', authController.signup);
+router.get('/areas', authController.listarAreasPublicas);
 router.post('/login', authController.login);
 // Recuperação de password (fluxo público: pedir link por email + repor)
 router.post('/forgot-password', authController.forgotPassword);
