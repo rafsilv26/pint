@@ -1166,6 +1166,7 @@
     }
   },
   "talentCandidaturas": {
+    "verMais": "Show {{count}} more",
     "tabs": {
       "pendentes": "Pending",
       "validadas": "Validated",
@@ -1179,6 +1180,17 @@
       "rejeitadaTitulo": "You rejected the «{{badge}}» badge.",
       "rejeitadaDescricao": "The application was rejected and recorded in your history.",
       "fechar": "Close notification"
+    },
+    "historico": {
+      "titulo": "Decision history",
+      "subtitulo": "Latest validations and rejections, from newest to oldest.",
+      "filtro": "Filter decision history",
+      "tabs": { "todas": "All", "validadas": "Validated", "rejeitadas": "Rejected" },
+      "estados": { "VALIDATED": "Validated", "REJECTED": "Rejected" },
+      "vazioTitulo": "No decisions recorded",
+      "vazioDescricao": "There are no decisions of this type in your history yet.",
+      "semComentario": "No comment.",
+      "por": "By {{nome}}"
     },
     "empty": {
       "titulo": "No applications",

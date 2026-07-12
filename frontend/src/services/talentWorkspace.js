@@ -66,6 +66,50 @@ export function getTalentApplicationTabCounts(rows, userId) {
     }), {})
 }
 
+export function buildTalentDecisionHistory(rows, userId) {
+  return array(rows).flatMap((application) => {
+    const decisions = array(application.historico).filter((event) =>
+      event.previousCode === 'SUBMITTED' &&
+      ['VALIDATED', 'REJECTED'].includes(event.code) &&
+      (userId == null || event.userId == null || Number(event.userId) === Number(userId))
+    )
+
+    if (decisions.length > 0) {
+      return decisions.map((event, index) => ({
+        id: event.id ?? `${application.id}-${index}`,
+        requestId: application.id,
+        trackingId: application.trackingId || `#${String(application.id).padStart(5, '0')}`,
+        badge: application.badge,
+        consultor: application.consultor,
+        area: application.area,
+        code: event.code,
+        decidedAt: event.data || event.createdAt,
+        author: event.autor || '',
+        comment: event.motivo || '',
+      }))
+    }
+
+    if (userId != null && Number(application.talentManagerId) !== Number(userId)) return []
+    const code = application.status?.code === 'REJECTED'
+      ? 'REJECTED'
+      : ['VALIDATED', 'IN_APPROVAL', 'APPROVED'].includes(application.status?.code) ? 'VALIDATED' : null
+    if (!code) return []
+
+    return [{
+      id: `${application.id}-current`,
+      requestId: application.id,
+      trackingId: application.trackingId || `#${String(application.id).padStart(5, '0')}`,
+      badge: application.badge,
+      consultor: application.consultor,
+      area: application.area,
+      code,
+      decidedAt: application.decisionAt,
+      author: '',
+      comment: application.comentario || '',
+    }]
+  }).sort((a, b) => dateValue(b.decidedAt) - dateValue(a.decidedAt))
+}
+
 export function getExpirationState(expirationDate, valid = true, now = new Date()) {
   const expiration = toDate(expirationDate)
   if (!expiration) return { code: valid === false ? 'expired' : 'permanent', days: null }
@@ -195,14 +239,16 @@ export function normalizeTalentWorkspace(raw, now = new Date()) {
     const consultant = consultantMap.get(Number(candidate.consultorId)) || {}
     const badge = badgeMap.get(Number(candidate.badgeId)) || candidate.Badge || {}
     const history = array(candidate.history).map((item) => {
-      const status = statusById.get(Number(item.estadoNovo)) || {}
+      const oldStatus = item.oldStatus || statusById.get(Number(item.estadoAnterior)) || {}
+      const status = item.newStatus || statusById.get(Number(item.estadoNovo)) || {}
       return {
         ...item,
         estado: STATUS_META[status.code]?.name || status.name || 'Atualizacao de estado',
         code: status.code,
+        previousCode: oldStatus.code,
         data: item.createdAt,
         motivo: item.motivo || '',
-        autor: userMap.get(Number(item.userId))?.nome || '',
+        autor: item.responsavel?.nome || userMap.get(Number(item.userId))?.nome || '',
       }
     }).sort((a, b) => dateValue(a.data) - dateValue(b.data))
     candidateMap.set(Number(candidate.id), {

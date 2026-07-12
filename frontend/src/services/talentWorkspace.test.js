@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildTalentProfile, buildTalentReport, filterTalentApplicationsByTab, filterTalentCandidaturas, getEvidenceCoverage, getExpirationState, getTalentApplicationTabCounts, normalizeTalentWorkspace } from './talentWorkspace'
+import { buildTalentDecisionHistory, buildTalentProfile, buildTalentReport, filterTalentApplicationsByTab, filterTalentCandidaturas, getEvidenceCoverage, getExpirationState, getTalentApplicationTabCounts, normalizeTalentWorkspace } from './talentWorkspace'
 
 const raw = {
   consultants: { data: [{ id: 7, name: 'Rafael Teste', area: 'Mobile', serviceLine: 'Technology', points: 200, badgesConquistados: [{ id: 10, nome: 'Flutter', obtidoEm: '2026-01-01', expiraEm: '2026-08-01', valido: true }] }] },
@@ -86,5 +86,38 @@ describe('talent workspace', () => {
     expect(filterTalentApplicationsByTab(rows, 'validadas', 8).map((row) => row.id)).toEqual([1, 2])
     expect(filterTalentApplicationsByTab(rows, 'rejeitadas', 8).map((row) => row.id)).toEqual([4])
     expect(getTalentApplicationTabCounts(rows, 8)).toMatchObject({ validadas: 2, rejeitadas: 1, aprovadas: 2, todas: 4 })
+  })
+
+  it('builds the current Talent Manager history from newest to oldest', () => {
+    const rows = [
+      {
+        id: 1,
+        trackingId: '#00001',
+        badge: 'Flutter',
+        consultor: 'Ana',
+        historico: [
+          { id: 10, userId: 8, previousCode: 'SUBMITTED', code: 'VALIDATED', data: '2026-07-10T10:00:00Z', autor: 'Talent Manager' },
+        ],
+      },
+      {
+        id: 2,
+        trackingId: '#00002',
+        badge: 'API',
+        consultor: 'Bruno',
+        historico: [
+          { id: 11, userId: 8, previousCode: 'SUBMITTED', code: 'REJECTED', data: '2026-07-12T10:00:00Z', motivo: 'Documento inválido' },
+        ],
+      },
+      {
+        id: 3,
+        historico: [
+          { id: 12, userId: 9, previousCode: 'SUBMITTED', code: 'VALIDATED', data: '2026-07-13T10:00:00Z' },
+        ],
+      },
+    ]
+
+    const history = buildTalentDecisionHistory(rows, 8)
+    expect(history.map((row) => [row.requestId, row.code])).toEqual([[2, 'REJECTED'], [1, 'VALIDATED']])
+    expect(history[0]).toMatchObject({ trackingId: '#00002', comment: 'Documento inválido' })
   })
 })

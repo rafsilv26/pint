@@ -71,6 +71,7 @@ export const verificarBadge = impl.verificarBadge
 export const getTalentDashboard = impl.getTalentDashboard
 export const getTalentProfile = impl.getTalentProfile
 export const getTalentCandidaturas = impl.getTalentCandidaturas
+export const getTalentDecisionHistory = impl.getTalentDecisionHistory
 export const getCandidatura = impl.getCandidatura
 export const validarTalentManager = impl.validarTalentManager
 export const validarEvidencia = impl.validarEvidencia

@@ -268,6 +268,24 @@ export async function getTalentCandidaturas(estado = 'pendentes') {
   }
   return clone(mockTalentCandidaturas)
 }
+export async function getTalentDecisionHistory() {
+  await delay()
+  return clone(mockTalentCandidaturas)
+    .filter((row) => ['VALIDATED', 'REJECTED'].includes(row.status?.code))
+    .map((row, index) => ({
+      id: `${row.id}-decision`,
+      requestId: row.id,
+      trackingId: row.trackingId,
+      badge: row.badge,
+      consultor: row.consultor,
+      area: row.area || '—',
+      code: row.status.code,
+      decidedAt: new Date(2026, 6, 12 - index).toISOString(),
+      author: 'Talent Manager',
+      comment: '',
+      status: row.status,
+    }))
+}
 export async function getCandidatura(id) {
   await delay()
   const base = mockTalentCandidaturas.find((c) => c.id === Number(id))

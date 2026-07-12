@@ -1166,6 +1166,7 @@
     }
   },
   "talentCandidaturas": {
+    "verMais": "Ver {{count}} más",
     "tabs": {
       "pendentes": "Pendientes",
       "validadas": "Validadas",
@@ -1179,6 +1180,17 @@
       "rejeitadaTitulo": "Has rechazado la insignia «{{badge}}».",
       "rejeitadaDescricao": "La candidatura fue rechazada y registrada en tu historial.",
       "fechar": "Cerrar aviso"
+    },
+    "historico": {
+      "titulo": "Historial de decisiones",
+      "subtitulo": "Últimas validaciones y rechazos, de la más reciente a la más antigua.",
+      "filtro": "Filtrar historial de decisiones",
+      "tabs": { "todas": "Todas", "validadas": "Validadas", "rejeitadas": "Rechazadas" },
+      "estados": { "VALIDATED": "Validada", "REJECTED": "Rechazada" },
+      "vazioTitulo": "Sin decisiones registradas",
+      "vazioDescricao": "Todavía no hay decisiones de este tipo en tu historial.",
+      "semComentario": "Sin comentario.",
+      "por": "Por {{nome}}"
     },
     "empty": {
       "titulo": "Sin candidaturas",

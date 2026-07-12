@@ -6,6 +6,7 @@
 import { http, getUser, getToken, api } from './http.js'
 import i18next from 'i18next' // <-- Import da instância global para ficheiros JS puros
 import {
+  buildTalentDecisionHistory,
   buildTalentProfile,
   buildTalentReport,
   getTalentWorkspace,
@@ -429,6 +430,17 @@ export async function getTalentCandidaturas(estado = 'pendentes') {
   const codes = filters[estado]
   const rows = codes ? workspace.candidaturas.filter((row) => codes.includes(row.status.code)) : workspace.candidaturas
   return rows.map(localizeTalentRow)
+}
+export async function getTalentDecisionHistory() {
+  const currentUser = getUser()
+  return buildTalentDecisionHistory((await getTalentWorkspace()).candidaturas, currentUser?.id).map((row) => ({
+    ...row,
+    status: {
+      code: row.code,
+      name: statusName(row.code),
+      cor: CODE_COR[row.code] || 'gray',
+    },
+  }))
 }
 export async function getCandidatura(id) {
   const currentUser = getUser()

@@ -1156,6 +1156,7 @@
     }
   },
   "talentCandidaturas": {
+    "verMais": "Ver mais {{count}}",
     "tabs": {
       "pendentes": "Pendentes",
       "validadas": "Validadas",
@@ -1169,6 +1170,17 @@
       "rejeitadaTitulo": "Rejeitaste a badge «{{badge}}».",
       "rejeitadaDescricao": "A candidatura foi rejeitada e ficou registada no teu histórico.",
       "fechar": "Fechar aviso"
+    },
+    "historico": {
+      "titulo": "Histórico de decisões",
+      "subtitulo": "Últimas validações e rejeições, da mais recente para a mais antiga.",
+      "filtro": "Filtrar histórico de decisões",
+      "tabs": { "todas": "Todas", "validadas": "Validadas", "rejeitadas": "Rejeitadas" },
+      "estados": { "VALIDATED": "Validada", "REJECTED": "Rejeitada" },
+      "vazioTitulo": "Sem decisões registadas",
+      "vazioDescricao": "Ainda não existem decisões deste tipo no teu histórico.",
+      "semComentario": "Sem comentário.",
+      "por": "Por {{nome}}"
     },
     "empty": {
       "titulo": "Sem candidaturas",
