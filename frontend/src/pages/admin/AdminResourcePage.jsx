@@ -218,29 +218,43 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
       {/* Modal Edição */}
       {editing && (
         <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3" style={{ zIndex: 1050, backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <form onSubmit={guardar} className="w-100 rounded-4 bg-white p-4 shadow-lg" style={{ maxWidth: '32rem' }}>
-            <h2 className="mb-3 fs-5 fw-bold">{editing.id ? t('adminResource.editar', { singular: singularTraduzido }) : t('adminResource.adicionar', { singular: singularTraduzido })}</h2>
-            {erroForm && <div className="mb-3 rounded-3 bg-danger-subtle px-3 py-2 small text-danger">{erroForm}</div>}
-            {cfg.campos.map((f) => (
-              <label key={f.key} className="d-block mb-3">
-                <span className="d-block small fw-medium mb-1">{t(f.label)}</span>
-                {f.type === 'select' ? (
-                  <select value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="form-select">
-                    <option value="">{t('adminResource.selecione')}</option>
-                    {f.allOption && <option value="__ALL__">{f.allOption}</option>}
-                    {(f.options || dropdownOptions[f.key] || []).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                ) : (
-                  <input
-                    type={f.type || 'text'}
-                    value={f.type === 'date' ? String(form[f.key] ?? '').substring(0, 10) : (form[f.key] ?? '')}
-                    onChange={(e) => setForm({...form, [f.key]: e.target.value})}
-                    className="form-control"
-                  />
-                )}
-              </label>
-            ))}
-            <div className="d-flex justify-content-end gap-2 mt-4">
+          <form onSubmit={guardar} className="w-100 d-flex flex-column rounded-4 bg-white shadow-lg" style={{ maxWidth: '34rem', maxHeight: '90vh' }}>
+            {/* Cabeçalho fixo */}
+            <div className="flex-shrink-0 border-bottom px-4 pt-4 pb-3">
+              <h2 className="fs-5 fw-bold mb-0">{editing.id ? t('adminResource.editar', { singular: singularTraduzido }) : t('adminResource.adicionar', { singular: singularTraduzido })}</h2>
+            </div>
+            {/* Campos com scroll */}
+            <div className="flex-grow-1 overflow-auto px-4 py-3">
+              {erroForm && <div className="mb-3 rounded-3 bg-danger-subtle px-3 py-2 small text-danger">{erroForm}</div>}
+              <div className="row g-3">
+                {cfg.campos.map((f) => {
+                  const largo = f.type === 'textarea' || f.key === 'nome' || f.key === 'title' || f.key === 'message'
+                  return (
+                    <label key={f.key} className={largo ? 'col-12' : 'col-12 col-sm-6'}>
+                      <span className="d-block small fw-medium mb-1">{t(f.label)}</span>
+                      {f.type === 'select' ? (
+                        <select value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="form-select">
+                          <option value="">{t('adminResource.selecione')}</option>
+                          {f.allOption && <option value="__ALL__">{f.allOption}</option>}
+                          {(f.options || dropdownOptions[f.key] || []).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                        </select>
+                      ) : f.type === 'textarea' ? (
+                        <textarea rows={3} value={form[f.key] ?? ''} onChange={(e) => setForm({...form, [f.key]: e.target.value})} className="form-control" />
+                      ) : (
+                        <input
+                          type={f.type || 'text'}
+                          value={f.type === 'date' ? String(form[f.key] ?? '').substring(0, 10) : (form[f.key] ?? '')}
+                          onChange={(e) => setForm({...form, [f.key]: e.target.value})}
+                          className="form-control"
+                        />
+                      )}
+                    </label>
+                  )
+                })}
+              </div>
+            </div>
+            {/* Rodapé fixo */}
+            <div className="flex-shrink-0 d-flex justify-content-end gap-2 border-top px-4 py-3">
               <Button variant="secondary" onClick={fechar}>{t('adminResource.cancelar')}</Button>
               <Button type="submit">{saving ? t('adminResource.guardando') : t('adminResource.guardar')}</Button>
             </div>
