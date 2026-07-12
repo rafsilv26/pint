@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Clock, Bell } from 'lucide-react'
-import { PageHeader, Card, Toggle } from '../../components/ui'
+import { PageHeader, Card, Toggle, Spinner } from '../../components/ui'
+import { useAsync } from '../../hooks/useAsync'
+import * as api from '../../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 function ToggleRow({ label, desc, checked, onChange }) {
@@ -17,9 +19,32 @@ function ToggleRow({ label, desc, checked, onChange }) {
 
 export default function AdminDefinicoesPage() {
   const { t } = useTranslation() // <-- Inicializa a tradução
+  const { data, loading } = useAsync(() => api.getDefinicoes())
   const [sla, setSla] = useState({ dias: 5, alertas: true })
   const [notif, setNotif] = useState({ email: true, push: false })
   const [guardado, setGuardado] = useState(false)
+  const [guardando, setGuardando] = useState(false)
+
+  // Preenche com as definições guardadas assim que carregam.
+  useEffect(() => {
+    if (data) {
+      setSla((s) => ({ ...s, dias: data.daysBefore ?? s.dias }))
+      setNotif({ email: data.emailEnabled !== false, push: Boolean(data.pushEnabled) })
+    }
+  }, [data])
+
+  async function guardar() {
+    setGuardando(true)
+    try {
+      await api.saveDefinicoes({ emailEnabled: notif.email, pushEnabled: notif.push, daysBefore: sla.dias })
+      setGuardado(true)
+      setTimeout(() => setGuardado(false), 2000)
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  if (loading) return <Spinner />
 
   return (
     <div className="mx-auto" style={{ maxWidth: '42rem' }}>
@@ -67,7 +92,8 @@ export default function AdminDefinicoesPage() {
       </Card>
 
       <button
-        onClick={() => { setGuardado(true); setTimeout(() => setGuardado(false), 2000) }}
+        onClick={guardar}
+        disabled={guardando}
         className="mt-4 btn btn-brand w-100 py-2 fw-semibold"
       >
         {guardado ? t('adminDefinicoes.botoes.guardado') : t('adminDefinicoes.botoes.guardar')}

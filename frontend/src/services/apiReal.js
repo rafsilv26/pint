@@ -234,6 +234,14 @@ export async function apagarEvidencia(id) {
   return http(`/candidaturas/evidencias/${id}`, { method: 'DELETE' })
 }
 
+// ---------- Definições globais de notificações (Admin) ----------
+export async function getDefinicoes() {
+  return http('/notifications/config').catch(() => ({ emailEnabled: true, pushEnabled: false, daysBefore: 5 }))
+}
+export async function saveDefinicoes(body) {
+  return http('/notifications/config', { method: 'PUT', body })
+}
+
 // ---------- Objetivos / Timeline (lembretes) ----------
 export async function getMeusObjetivos() {
   return http('/timeline/minha').catch(() => [])

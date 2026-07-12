@@ -1,6 +1,40 @@
-const { Notice } = require('../models');
+const { Notice, NotificationConfig } = require('../models');
 const { verificarLigacao, enviarEmail } = require('../services/email.service');
 const { getPrefs, savePrefs } = require('../services/notificationPrefs.service');
+
+// Configuração global de notificações da plataforma (singleton type='global').
+// Usada pelas Definições do Admin (req 7 do guião).
+const CONFIG_GLOBAL = 'global';
+
+exports.getConfigGlobal = async (_req, res) => {
+  try {
+    const [cfg] = await NotificationConfig.findOrCreate({
+      where: { type: CONFIG_GLOBAL },
+      defaults: { type: CONFIG_GLOBAL, emailEnabled: true, pushEnabled: false, daysBefore: 5 }
+    });
+    res.json({ emailEnabled: cfg.emailEnabled, pushEnabled: cfg.pushEnabled, daysBefore: cfg.daysBefore });
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao obter definições.', details: error.message });
+  }
+};
+
+exports.saveConfigGlobal = async (req, res) => {
+  try {
+    const { emailEnabled, pushEnabled, daysBefore } = req.body;
+    const [cfg] = await NotificationConfig.findOrCreate({
+      where: { type: CONFIG_GLOBAL },
+      defaults: { type: CONFIG_GLOBAL }
+    });
+    await cfg.update({
+      emailEnabled: Boolean(emailEnabled),
+      pushEnabled: Boolean(pushEnabled),
+      daysBefore: daysBefore != null ? Number(daysBefore) : cfg.daysBefore
+    });
+    res.json({ mensagem: 'Definições guardadas.' });
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao guardar definições.', details: error.message });
+  }
+};
 const { verificarSLA } = require('../services/sla.service');
 
 // Preferências de notificação por email do utilizador autenticado.

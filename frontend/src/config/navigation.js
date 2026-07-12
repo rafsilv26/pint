@@ -44,6 +44,7 @@ export const getAdminNav = (t) => [
   { to: '/admin/utilizadores', label: t('nav.admin.utilizadores'), icon: Users },
   { to: '/admin/badges', label: t('nav.admin.badges'), icon: Award },
   { to: '/admin/pedidos', label: t('nav.admin.pedidos'), icon: ClipboardCheck },
+  { to: '/admin/relatorios', label: t('nav.admin.relatorios'), icon: FileBarChart },
   { to: '/admin/learning-paths', label: t('nav.admin.learningPaths'), icon: Route },
   { to: '/admin/service-lines', label: t('nav.admin.serviceLines'), icon: Network },
   { to: '/admin/areas', label: t('nav.admin.areas'), icon: Boxes },

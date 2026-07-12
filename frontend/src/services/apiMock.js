@@ -122,6 +122,16 @@ export async function apagarEvidencia() {
 let _mockObjetivos = [
   { id: 1, title: 'Obter badge Outsystems Júnior', description: '', expectedDate: new Date(Date.now() + 6 * 86400000).toISOString(), completionDate: null, status: 'Pendente', priority: 2, concluido: false },
 ]
+let _mockDefinicoes = { emailEnabled: true, pushEnabled: false, daysBefore: 5 }
+export async function getDefinicoes() {
+  await delay()
+  return clone(_mockDefinicoes)
+}
+export async function saveDefinicoes(body) {
+  await delay()
+  _mockDefinicoes = { ..._mockDefinicoes, ...body }
+  return { mensagem: 'ok' }
+}
 export async function getMeusObjetivos() {
   await delay()
   return clone(_mockObjetivos)

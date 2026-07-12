@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { PageHeader, Card, Spinner, ErrorState, EmptyState, Button } from '../../components/ui'
+import ExportButtons from '../../components/ExportButtons'
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import { getAdminResources } from '../../config/adminResources';
@@ -137,11 +138,20 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
     <div>
       <PageHeader
         title={tituloTraduzido}
-        action={readOnly ? null : (
-          <Button onClick={() => abrir(null)}>
-            <Plus size={16} /> {t('adminResource.adicionar', { singular: singularTraduzido })}
-          </Button>
-        )}
+        action={
+          <div className="d-flex gap-2">
+            <ExportButtons
+              data={rows}
+              columns={cfg.colunas.map((c) => ({ key: c.key, label: t(c.label) }))}
+              filename={cfg.resource}
+            />
+            {!readOnly && (
+              <Button onClick={() => abrir(null)}>
+                <Plus size={16} /> {t('adminResource.adicionar', { singular: singularTraduzido })}
+              </Button>
+            )}
+          </div>
+        }
       />
 
       {variants && variants.length > 1 && (
