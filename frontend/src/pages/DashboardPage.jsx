@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import {
   TrendingUp, Award, Clock, Trophy, Bell, UserCircle, Compass,
-  ChevronRight, Calendar,
+  ChevronRight,
 } from 'lucide-react'
 import { Card, Spinner, StatusPill, ErrorState } from '../components/ui'
 import DashboardAlerts from '../components/DashboardAlerts'
@@ -19,11 +19,6 @@ const TINTS = {
 const DELTA_TINTS = {
   green: { backgroundColor: '#dcfce7', color: '#15803d' },
   orange: { backgroundColor: '#ffedd5', color: '#c2410c' },
-}
-const EVENTO_CORES = {
-  violet: '#a78bfa',
-  blue: '#60a5fa',
-  green: '#4ade80',
 }
 
 function StatCard({ icon: Icon, label, value, delta, tint, deltaTint }) {
@@ -216,25 +211,6 @@ export default function DashboardPage() {
             >
               {t('dashboard.verPerfilCompleto')} <ChevronRight size={16} />
             </Link>
-          </Card>
-
-          {/* Próximos Eventos */}
-          <Card>
-            <h2 className="mb-3 fw-semibold text-ink">{t('dashboard.proximosEventos')}</h2>
-            <div className="d-flex flex-column gap-2">
-              {data.eventos.map((e) => (
-                <div
-                  key={e.id}
-                  className="rounded-end px-3 py-2 bg-light"
-                  style={{ borderLeft: `4px solid ${EVENTO_CORES[e.cor]}` }}
-                >
-                  <p className="small fw-medium text-ink mb-0">{e.titulo}</p>
-                  <p className="mt-1 d-flex align-items-center gap-1 fs-xs text-muted mb-0">
-                    <Calendar size={12} /> {e.data}
-                  </p>
-                </div>
-              ))}
-            </div>
           </Card>
         </div>
       </div>
