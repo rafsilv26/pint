@@ -593,6 +593,11 @@
     "prontoSubmeter": "Todo listo — puedes enviar la candidatura.",
     "botaoSubmeter": "Enviar candidatura",
     "botaoSubmetendo": "Enviando…",
+    "botaoGuardar": "Guardar borrador",
+    "guardando": "Guardando…",
+    "rascunhoGuardado": "Borrador guardado ✓",
+    "jaAnexada": "Ya adjuntada",
+    "retomarInfo": "Retomaste un borrador — continúa y envía cuando esté completo.",
     "sucessoTitulo": "¡Candidatura enviada!",
     "sucessoDesc": "Redirigiendo a tus candidaturas…"
   },

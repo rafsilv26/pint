@@ -97,6 +97,10 @@ export async function submeterCandidatura({ badgeId }) {
   if (!badgeId) throw new Error(i18next.t('api.validacao.selecionaBadge'))
   return { mensagem: i18next.t('api.mensagens.candidaturaSubmetida'), candidaturaId: Math.floor(Math.random() * 1000) + 200 }
 }
+export async function getRascunho() {
+  await delay()
+  return null
+}
 
 // ---------- Badges conquistados ----------
 export async function getMeusBadges() {

@@ -593,6 +593,11 @@
     "prontoSubmeter": "All set — you can submit the application.",
     "botaoSubmeter": "Submit application",
     "botaoSubmetendo": "Submitting…",
+    "botaoGuardar": "Save draft",
+    "guardando": "Saving…",
+    "rascunhoGuardado": "Draft saved ✓",
+    "jaAnexada": "Already attached",
+    "retomarInfo": "You resumed a draft — continue and submit when complete.",
     "sucessoTitulo": "Application submitted!",
     "sucessoDesc": "Redirecting to your applications…"
   },

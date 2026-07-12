@@ -141,6 +141,9 @@ exports.submeterCandidatura = async (req, res) => {
   try {
     // Extrair dados da requisição
     const { badgeId, requisitoIds = [], descricao } = req.body;
+    // rascunho === true -> "Guardar": fica no estado OPEN, aceita evidências
+    // parciais e NÃO exige cobertura dos requisitos obrigatórios.
+    const rascunho = String(req.body.rascunho) === 'true';
     const consultorId = req.user.id;
     const ficheiros = req.files || [];
 
@@ -157,91 +160,123 @@ exports.submeterCandidatura = async (req, res) => {
     }
 
     const statuses = await getStatuses([STATUS.OPEN, STATUS.SUBMITTED, STATUS.IN_VALIDATION, STATUS.VALIDATED, STATUS.IN_APPROVAL]);
-    const estadoIdsPendentes = Object.values(statuses).map((status) => status.statusId);
+    const openId = statuses[STATUS.OPEN].statusId;
+    const submitted = statuses[STATUS.SUBMITTED] || await getStatus(STATUS.SUBMITTED);
 
-    // Verificar se já existe uma candidatura pendente para esta badge
-    const candidaturaExistente = await Candidatura.findOne({
-      where: {
-        consultorId,
-        badgeId,
-        estadoId: { [Op.in]: estadoIdsPendentes }
-      }
+    // Bloqueia se já existe candidatura ATIVA e já submetida (não-OPEN). Um
+    // rascunho OPEN não bloqueia — é reaproveitado abaixo.
+    const idsAtivosNaoOpen = Object.values(statuses)
+      .map((s) => s.statusId)
+      .filter((id) => id !== openId);
+    const jaSubmetida = await Candidatura.findOne({
+      where: { consultorId, badgeId, estadoId: { [Op.in]: idsAtivosNaoOpen } }
     });
-
-    if (candidaturaExistente) {
+    if (jaSubmetida) {
       return res.status(400).json({ erro: 'Já existe uma candidatura pendente para esta badge.' });
     }
 
-    // Emparelha cada ficheiro com o requisito que evidencia (mesma ordem em
-    // que o frontend os envia). Um ficheiro sem requisito não é aceite.
+    // Rascunho OPEN já existente para (consultor, badge) — reaproveita.
+    let candidatura = await Candidatura.findOne({
+      where: { consultorId, badgeId, estadoId: openId }
+    });
+
+    // Emparelha cada NOVO ficheiro com o requisito que evidencia (mesma ordem).
     const idsRequisitos = (Array.isArray(requisitoIds) ? requisitoIds : [requisitoIds])
       .map((id) => Number(id))
       .filter((id) => Number.isInteger(id));
-
-    if (ficheiros.length === 0) {
-      return res.status(400).json({ erro: 'Tens de anexar pelo menos uma evidência.' });
-    }
     if (idsRequisitos.length !== ficheiros.length) {
       return res.status(400).json({ erro: 'Cada evidência tem de estar associada a um requisito.' });
     }
 
-    // Requisitos do nível deste badge — fonte da regra do guião "para obter um
-    // badge, o consultor tem de cumprir todos os requisitos desse nível".
+    // Requisitos do nível deste badge.
     const requisitosDoNivel = await Requirement.findAll({
       where: { nivelId: badge.nivelId, deletedAt: null },
       attributes: ['id', 'obrigatorio']
     });
     const idsValidos = new Set(requisitosDoNivel.map((r) => r.id));
-
-    // Todas as evidências têm de apontar para um requisito deste nível.
     if (idsRequisitos.some((id) => !idsValidos.has(id))) {
       return res.status(400).json({ erro: 'Uma das evidências está associada a um requisito que não pertence a este badge.' });
     }
 
-    // Regra central: todos os requisitos OBRIGATÓRIOS do nível têm de ter, pelo
-    // menos, uma evidência para a candidatura poder ser submetida.
-    const submetidos = new Set(idsRequisitos);
-    const obrigatoriosEmFalta = requisitosDoNivel.filter(
-      (r) => r.obrigatorio !== false && !submetidos.has(r.id)
-    );
-    if (obrigatoriosEmFalta.length > 0) {
-      return res.status(400).json({
-        erro: 'Tens de submeter evidência para todos os requisitos obrigatórios deste badge.',
-        requisitosEmFalta: obrigatoriosEmFalta.map((r) => r.id)
+    // Requisitos já cobertos por evidências do rascunho existente + os novos.
+    const evidenciasExistentes = candidatura
+      ? await Evidencia.findAll({ where: { candidaturaId: candidatura.id }, attributes: ['id', 'requisitoId'] })
+      : [];
+    const requisitosCobertos = new Set(evidenciasExistentes.map((e) => e.requisitoId));
+    idsRequisitos.forEach((id) => requisitosCobertos.add(id));
+
+    // Mínimo: pelo menos uma evidência (tanto para Guardar como para Submeter).
+    if (requisitosCobertos.size === 0) {
+      return res.status(400).json({ erro: 'Tens de anexar pelo menos uma evidência.' });
+    }
+
+    // Só na SUBMISSÃO: todos os requisitos obrigatórios têm de estar cobertos.
+    if (!rascunho) {
+      const obrigatoriosEmFalta = requisitosDoNivel.filter(
+        (r) => r.obrigatorio !== false && !requisitosCobertos.has(r.id)
+      );
+      if (obrigatoriosEmFalta.length > 0) {
+        return res.status(400).json({
+          erro: 'Tens de submeter evidência para todos os requisitos obrigatórios deste badge.',
+          requisitosEmFalta: obrigatoriosEmFalta.map((r) => r.id)
+        });
+      }
+    }
+
+    // Cria a candidatura (estado OPEN) se ainda não existir rascunho.
+    if (!candidatura) {
+      candidatura = await Candidatura.create({
+        consultorId,
+        badgeId,
+        estadoId: openId,
+        dataSubmicao: new Date()
       });
     }
 
-    // Criar candidatura só depois de tudo validado, para não deixar
-    // candidaturas órfãs (sem evidências) em caso de erro de validação.
-    const submitted = statuses[STATUS.SUBMITTED] || await getStatus(STATUS.SUBMITTED);
-    const candidatura = await Candidatura.create({
-      consultorId,
-      badgeId,
-      estadoId: submitted.statusId,
-      dataSubmicao: new Date()
-    });
+    // Novo ficheiro para um requisito substitui a evidência anterior desse
+    // requisito (o consultor trocou o documento).
+    if (idsRequisitos.length > 0) {
+      await Evidencia.destroy({ where: { candidaturaId: candidatura.id, requisitoId: { [Op.in]: idsRequisitos } } });
+      await Promise.all(
+        ficheiros.map(async (ficheiro, index) => {
+          const url = await uploadFicheiro(ficheiro);
+          return Evidencia.create({
+            url,
+            nomeFicheiro: ficheiro.originalname,
+            tipo: ficheiro.mimetype === 'application/pdf' ? 'PDF' : 'IMAGEM',
+            candidaturaId: candidatura.id,
+            requisitoId: idsRequisitos[index],
+            descricao,
+            uploadedBy: consultorId
+          });
+        })
+      );
+    }
 
-    // Fazer upload dos ficheiros e criar evidências associadas
-    await Promise.all(
-      ficheiros.map(async (ficheiro, index) => {
-        const url = await uploadFicheiro(ficheiro);
-        return Evidencia.create({
-          url,
-          nomeFicheiro: ficheiro.originalname,
-          tipo: ficheiro.mimetype === 'application/pdf' ? 'PDF' : 'IMAGEM',
-          candidaturaId: candidatura.id,
-          requisitoId: idsRequisitos[index],
-          descricao,
-          uploadedBy: consultorId
-        });
-      })
-    );
+    // "Guardar": mantém OPEN e termina aqui (sem emails de submissão).
+    if (rascunho) {
+      await HistoricoCandidatura.create({
+        candidaturaId: candidatura.id,
+        userId: consultorId,
+        estadoAnterior: openId,
+        estadoNovo: openId,
+        motivo: 'Rascunho guardado'
+      });
+      return res.status(200).json({
+        mensagem: 'Rascunho guardado.',
+        candidaturaId: candidatura.id,
+        estado: STATUS.OPEN
+      });
+    }
+
+    // "Submeter": passa OPEN -> SUBMITTED.
+    await candidatura.update({ estadoId: submitted.statusId, dataSubmicao: new Date() });
 
     // Criar histórico da candidatura
     await HistoricoCandidatura.create({
       candidaturaId: candidatura.id,
       userId: consultorId,
-      estadoAnterior: submitted.statusId,
+      estadoAnterior: openId,
       estadoNovo: submitted.statusId,
       motivo: 'Candidatura submetida'
     });
@@ -285,6 +320,36 @@ exports.listarMinhasCandidaturas = async (req, res) => {
     res.json(candidaturas);
   } catch (erro) {
     res.status(500).json({ erro: 'Erro ao listar candidaturas.', details: erro.message });
+  }
+};
+
+// Rascunho (candidatura OPEN) do consultor para um badge, com as evidências já
+// anexadas — para o consultor retomar a candidatura onde a deixou.
+exports.getRascunho = async (req, res) => {
+  try {
+    const consultorId = req.user.id;
+    const { badgeId } = req.query;
+    if (!badgeId) return res.json(null);
+
+    const open = await getStatus(STATUS.OPEN);
+    const candidatura = await Candidatura.findOne({
+      where: { consultorId, badgeId, estadoId: open.statusId },
+      include: [{ model: Evidencia, as: 'evidencias' }]
+    });
+    if (!candidatura) return res.json(null);
+
+    res.json({
+      id: candidatura.id,
+      estado: STATUS.OPEN,
+      evidencias: (candidatura.evidencias || []).map((e) => ({
+        id: e.id,
+        requisitoId: e.requisitoId,
+        nomeFicheiro: e.nomeFicheiro,
+        url: e.url
+      }))
+    });
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao obter rascunho.', details: erro.message });
   }
 };
 

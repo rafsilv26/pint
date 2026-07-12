@@ -195,12 +195,14 @@ export async function getMinhasCandidaturas() {
   })
 }
 
-// Submete a candidatura com as evidências (só ficheiros). Cada evidência é
-// enviada emparelhada com o requisito que comprova, pela MESMA ordem — o
-// backend associa evidencias[i] a requisitoIds[i].
-export async function submeterCandidatura({ badgeId, descricao, ficheiros = [] }) {
+// Submete (ou guarda como rascunho) a candidatura com as evidências (só
+// ficheiros). Cada evidência é enviada emparelhada com o requisito que
+// comprova, pela MESMA ordem — o backend associa evidencias[i] a requisitoIds[i].
+// rascunho=true -> "Guardar": fica no estado OPEN, sem exigir todos os requisitos.
+export async function submeterCandidatura({ badgeId, descricao, ficheiros = [], rascunho = false }) {
   const form = new FormData()
   form.append('badgeId', badgeId)
+  if (rascunho) form.append('rascunho', 'true')
   if (descricao) form.append('descricao', descricao)
   ficheiros
     .filter((ev) => ev.file && ev.requisitoId != null)
@@ -209,6 +211,12 @@ export async function submeterCandidatura({ badgeId, descricao, ficheiros = [] }
       form.append('requisitoIds', ev.requisitoId)
     })
   return http('/candidaturas', { method: 'POST', body: form, isForm: true })
+}
+
+// Rascunho OPEN do consultor para um badge (evidências já anexadas), ou null.
+export async function getRascunho(badgeId) {
+  if (!badgeId) return null
+  return http(`/candidaturas/rascunho?badgeId=${badgeId}`).catch(() => null)
 }
 
 // ---------- Badges conquistados ----------

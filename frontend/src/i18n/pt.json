@@ -583,6 +583,11 @@
     "prontoSubmeter": "Tudo pronto — podes submeter a candidatura.",
     "botaoSubmeter": "Submeter candidatura",
     "botaoSubmetendo": "A submeter…",
+    "botaoGuardar": "Guardar rascunho",
+    "guardando": "A guardar…",
+    "rascunhoGuardado": "Rascunho guardado ✓",
+    "jaAnexada": "Já anexada",
+    "retomarInfo": "Retomaste um rascunho — continua e submete quando estiver completo.",
     "sucessoTitulo": "Candidatura submetida!",
     "sucessoDesc": "A redirecionar para as tuas candidaturas…"
   },

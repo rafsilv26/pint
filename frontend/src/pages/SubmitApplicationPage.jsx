@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import {
   ArrowLeft, UploadCloud, Send, CheckCircle2, Info, Trash2,
-  FileText, AlertTriangle, ClipboardCheck,
+  FileText, AlertTriangle, ClipboardCheck, Save,
 } from 'lucide-react'
 import { Spinner, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
@@ -18,10 +18,12 @@ export default function SubmitApplicationPage() {
   const { data: badges, loading, error, reload } = useAsync(() => api.getBadges())
 
   const [badgeId, setBadgeId] = useState(searchParams.get('badge') || '')
-  // Evidências anexadas, indexadas pelo id do requisito: { [requisitoId]: File }
+  // Evidências NOVAS anexadas nesta sessão, por id de requisito: { [requisitoId]: File }
   const [evidencias, setEvidencias] = useState({})
   const [enviando, setEnviando] = useState(false)
+  const [guardando, setGuardando] = useState(false)
   const [sucesso, setSucesso] = useState(false)
+  const [rascunhoOk, setRascunhoOk] = useState(false)
   const [erroSubmit, setErroSubmit] = useState(null)
   const [erroFicheiro, setErroFicheiro] = useState('')
 
@@ -30,17 +32,34 @@ export default function SubmitApplicationPage() {
     () => (badgeId ? api.getBadge(badgeId) : Promise.resolve(null)),
     [badgeId]
   )
+  // Rascunho OPEN existente (evidências já anexadas antes)
+  const { data: rascunho, reload: reloadRascunho } = useAsync(
+    () => (badgeId ? api.getRascunho(badgeId) : Promise.resolve(null)),
+    [badgeId]
+  )
+
   const requisitos = badgeDetalhe?.requisitos || []
   const obrigatorios = requisitos.filter((r) => r.obrigatorio !== false)
-  const obrigatoriosFeitos = obrigatorios.filter((r) => evidencias[r.id]).length
-  const podeSubmeter =
-    requisitos.length > 0 && obrigatorios.every((r) => evidencias[r.id]) && Object.keys(evidencias).length > 0
+
+  // requisitos já cobertos por evidências do rascunho guardado
+  const existentes = {}
+  ;(rascunho?.evidencias || []).forEach((e) => { existentes[e.requisitoId] = e })
+
+  const temLocal = (id) => Boolean(evidencias[id])
+  const temExistente = (id) => Boolean(existentes[id])
+  const coberto = (id) => temLocal(id) || temExistente(id)
+
+  const obrigatoriosFeitos = obrigatorios.filter((r) => coberto(r.id)).length
+  const novos = Object.keys(evidencias).length
+  const podeSubmeter = requisitos.length > 0 && obrigatorios.every((r) => coberto(r.id)) && obrigatorios.length > 0
+  const podeGuardar = novos > 0
 
   if (loading) return <Spinner />
   if (error) return <ErrorState onRetry={reload} />
 
   function anexar(requisitoId, file) {
     setErroFicheiro('')
+    setRascunhoOk(false)
     if (!file) return
     if (!TIPOS_ACEITES.includes(file.type)) {
       setErroFicheiro(t('submeterCandidatura.erroFicheiroTipo'))
@@ -62,17 +81,33 @@ export default function SubmitApplicationPage() {
     setEvidencias({})
     setErroSubmit(null)
     setErroFicheiro('')
+    setRascunhoOk(false)
+  }
+
+  const novosFicheiros = () =>
+    Object.entries(evidencias).map(([requisitoId, file]) => ({ requisitoId: Number(requisitoId), file }))
+
+  async function guardar() {
+    setGuardando(true)
+    setErroSubmit(null)
+    setRascunhoOk(false)
+    try {
+      await api.submeterCandidatura({ badgeId: Number(badgeId), ficheiros: novosFicheiros(), rascunho: true })
+      setEvidencias({})
+      reloadRascunho()
+      setRascunhoOk(true)
+    } catch (err) {
+      setErroSubmit(err.message)
+    } finally {
+      setGuardando(false)
+    }
   }
 
   async function submeter() {
     setEnviando(true)
     setErroSubmit(null)
     try {
-      const ficheiros = Object.entries(evidencias).map(([requisitoId, file]) => ({
-        requisitoId: Number(requisitoId),
-        file,
-      }))
-      await api.submeterCandidatura({ badgeId: Number(badgeId), descricao: '', ficheiros })
+      await api.submeterCandidatura({ badgeId: Number(badgeId), ficheiros: novosFicheiros(), rascunho: false })
       setSucesso(true)
       setTimeout(() => navigate('/candidaturas'), 1600)
     } catch (err) {
@@ -138,6 +173,12 @@ export default function SubmitApplicationPage() {
               </h2>
               <p className="small text-muted">{t('submeterCandidatura.requisitosIntro')}</p>
 
+              {rascunho && (
+                <p className="d-flex align-items-center gap-2 rounded-3 bg-brand-light text-brand px-3 py-2 fs-xs">
+                  <Info size={14} className="flex-shrink-0" /> {t('submeterCandidatura.retomarInfo')}
+                </p>
+              )}
+
               {requisitos.length === 0 ? (
                 <div className="rounded-3 border border-warning-subtle bg-warning-subtle p-3 d-flex align-items-center gap-2 small text-warning-emphasis mb-0">
                   <AlertTriangle size={16} /> {t('submeterCandidatura.semRequisitos')}
@@ -145,14 +186,16 @@ export default function SubmitApplicationPage() {
               ) : (
                 <div className="d-flex flex-column gap-3">
                   {requisitos.map((req) => {
-                    const file = evidencias[req.id]
+                    const local = evidencias[req.id]
+                    const existente = existentes[req.id]
                     const isObrigatorio = req.obrigatorio !== false
+                    const feito = Boolean(local || existente)
                     return (
-                      <div key={req.id} className={`rounded-3 border p-3 ${file ? 'border-success border-opacity-50 bg-success-subtle bg-opacity-25' : ''}`}>
+                      <div key={req.id} className={`rounded-3 border p-3 ${feito ? 'border-success border-opacity-50 bg-success-subtle bg-opacity-25' : ''}`}>
                         <div className="d-flex align-items-start justify-content-between gap-2">
                           <div className="min-w-0">
                             <p className="fw-semibold text-ink mb-1 d-flex align-items-center gap-2">
-                              {file && <CheckCircle2 size={16} className="text-success flex-shrink-0" />}
+                              {feito && <CheckCircle2 size={16} className="text-success flex-shrink-0" />}
                               {req.titulo}
                             </p>
                             {req.descricao && <p className="small text-muted mb-0">{req.descricao}</p>}
@@ -162,11 +205,11 @@ export default function SubmitApplicationPage() {
                           </span>
                         </div>
 
-                        {file ? (
+                        {local ? (
                           <div className="mt-3 d-flex align-items-center justify-content-between gap-2 rounded-3 bg-white border px-3 py-2 small">
                             <span className="d-flex align-items-center gap-2 min-w-0 text-ink">
                               <FileText size={15} className="text-brand flex-shrink-0" />
-                              <span className="text-truncate">{file.name}</span>
+                              <span className="text-truncate">{local.name}</span>
                             </span>
                             <div className="d-flex align-items-center gap-2 flex-shrink-0">
                               <label className="btn btn-link btn-sm p-0 text-muted text-decoration-none">
@@ -177,6 +220,18 @@ export default function SubmitApplicationPage() {
                                 <Trash2 size={15} />
                               </button>
                             </div>
+                          </div>
+                        ) : existente ? (
+                          <div className="mt-3 d-flex align-items-center justify-content-between gap-2 rounded-3 bg-white border px-3 py-2 small">
+                            <span className="d-flex align-items-center gap-2 min-w-0 text-ink">
+                              <FileText size={15} className="text-success flex-shrink-0" />
+                              <span className="text-truncate">{existente.nomeFicheiro}</span>
+                              <span className="badge rounded-pill text-bg-success flex-shrink-0">{t('submeterCandidatura.jaAnexada')}</span>
+                            </span>
+                            <label className="btn btn-link btn-sm p-0 text-muted text-decoration-none flex-shrink-0">
+                              {t('submeterCandidatura.trocar')}
+                              <input type="file" className="d-none" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => anexar(req.id, e.target.files?.[0])} />
+                            </label>
                           </div>
                         ) : (
                           <label className="mt-3 d-flex cursor-pointer align-items-center justify-content-center gap-2 rounded-3 border border-dashed py-3 small text-muted">
@@ -195,7 +250,7 @@ export default function SubmitApplicationPage() {
             </div>
           </div>
 
-          {/* Resumo / submeter */}
+          {/* Resumo / ações */}
           <div className="col-lg-4">
             <div className="rounded-4 border bg-white p-4 shadow-sm" style={{ position: 'sticky', top: '1rem' }}>
               <h2 className="fw-semibold text-ink mb-3">{t('submeterCandidatura.resumoTitulo')}</h2>
@@ -217,11 +272,19 @@ export default function SubmitApplicationPage() {
                 {podeSubmeter ? t('submeterCandidatura.prontoSubmeter') : t('submeterCandidatura.avisoObrigatorios')}
               </p>
 
+              {rascunhoOk && <p className="rounded-3 bg-success-subtle px-3 py-2 fs-xs text-success-emphasis">{t('submeterCandidatura.rascunhoGuardado')}</p>}
               {erroSubmit && <p className="rounded-3 bg-danger-subtle px-3 py-2 fs-xs text-danger">{erroSubmit}</p>}
 
               <button
+                onClick={guardar}
+                disabled={!podeGuardar || guardando || enviando}
+                className="btn btn-outline-secondary bg-white w-100 d-flex align-items-center justify-content-center gap-2 mb-2"
+              >
+                <Save size={16} /> {guardando ? t('submeterCandidatura.guardando') : t('submeterCandidatura.botaoGuardar')}
+              </button>
+              <button
                 onClick={submeter}
-                disabled={!podeSubmeter || enviando}
+                disabled={!podeSubmeter || enviando || guardando}
                 className="btn btn-brand w-100 d-flex align-items-center justify-content-center gap-2"
               >
                 <Send size={16} /> {enviando ? t('submeterCandidatura.botaoSubmetendo') : t('submeterCandidatura.botaoSubmeter')}

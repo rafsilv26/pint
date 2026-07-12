@@ -5,8 +5,10 @@ const upload = require('../middlewares/upload.middleware');
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
 
-router.post('/', authorize('Consultor'), upload.array('evidencias', 5), candidaturaController.submeterCandidatura);
+router.post('/', authorize('Consultor'), upload.array('evidencias', 10), candidaturaController.submeterCandidatura);
 router.get('/minhas', candidaturaController.listarMinhasCandidaturas);
+// Rascunho OPEN do consultor para um badge (retomar candidatura)
+router.get('/rascunho', authorize('Consultor'), candidaturaController.getRascunho);
 
 // ADMIN: todos os pedidos de badges, em qualquer estado do workflow (não só
 // os pendentes de validação/aprovação, ao contrário dos endpoints abaixo)
