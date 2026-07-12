@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildServiceLineProfile, buildServiceLineReport, filterServiceLineApplications, normalizeServiceLineWorkspace } from './serviceLineWorkspace'
+import { buildServiceLineDecisionHistory, buildServiceLineProfile, buildServiceLineReport, filterServiceLineApplications, normalizeServiceLineWorkspace } from './serviceLineWorkspace'
 
 const raw = {
   consultants: { data: [
@@ -47,5 +47,39 @@ describe('service line workspace', () => {
       areas: [{ id: 3, nome: 'Mobile' }],
       stats: { consultants: 2, availableBadges: 2, pendingApprovals: 1, awardedBadges: 1 },
     })
+  })
+
+  it('ordena o histórico de decisões do SLL da mais recente para a mais antiga', () => {
+    const decisions = buildServiceLineDecisionHistory([
+      {
+        id: 20,
+        trackingId: '#00020',
+        badge: 'Flutter',
+        consultor: 'Ana',
+        status: { code: 'APPROVED' },
+        history: [
+          { id: 1, createdAt: '2026-07-01T10:00:00Z', oldStatus: { code: 'VALIDATED' }, newStatus: { code: 'OPEN', name: 'Devolvida' }, motivo: 'Corrigir certificado' },
+          { id: 2, createdAt: '2026-07-03T10:00:00Z', oldStatus: { code: 'VALIDATED' }, newStatus: { code: 'APPROVED', name: 'Aprovada' } },
+        ],
+      },
+      {
+        id: 22,
+        trackingId: '#00022',
+        badge: 'API',
+        consultor: 'Bruno',
+        status: { code: 'REJECTED' },
+        history: [
+          { id: 3, createdAt: '2026-07-04T10:00:00Z', oldStatus: { code: 'VALIDATED' }, newStatus: { code: 'REJECTED', name: 'Rejeitada' }, motivo: 'Documento inválido' },
+        ],
+      },
+      { id: 23, status: { code: 'OPEN' }, history: [] },
+    ])
+
+    expect(decisions.map((row) => [row.requestId, row.code])).toEqual([
+      [22, 'REJECTED'],
+      [20, 'APPROVED'],
+      [20, 'OPEN'],
+    ])
+    expect(decisions[0]).toMatchObject({ trackingId: '#00022', comment: 'Documento inválido' })
   })
 })

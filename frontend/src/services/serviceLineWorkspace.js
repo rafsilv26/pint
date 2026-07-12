@@ -149,6 +149,49 @@ export function filterServiceLineApplications(rows, filters = {}) {
   })
 }
 
+export function buildServiceLineDecisionHistory(rows) {
+  const decisionCodes = new Set(['APPROVED', 'REJECTED', 'OPEN'])
+
+  return array(rows).flatMap((application) => {
+    const decisions = array(application.history).filter((event) =>
+      event.oldStatus?.code === 'VALIDATED' && decisionCodes.has(event.newStatus?.code)
+    )
+
+    if (decisions.length > 0) {
+      return decisions.map((event, index) => ({
+        id: event.id ?? `${application.id}-${index}`,
+        requestId: application.id,
+        trackingId: application.trackingId || `#${String(application.id).padStart(5, '0')}`,
+        badge: application.badge,
+        consultor: application.consultor,
+        code: event.newStatus.code,
+        statusName: event.newStatus.name || event.newStatus.code,
+        decidedAt: event.createdAt,
+        author: event.responsavel?.nome || '',
+        comment: event.motivo || event.reason || '',
+      }))
+    }
+
+    const code = application.status?.code
+    const isFinalDecision = ['APPROVED', 'REJECTED'].includes(code)
+    const isReturned = code === 'OPEN' && (application.serviceLineLeaderId != null || application.comentario)
+    if (!isFinalDecision && !isReturned) return []
+
+    return [{
+      id: `${application.id}-current`,
+      requestId: application.id,
+      trackingId: application.trackingId || `#${String(application.id).padStart(5, '0')}`,
+      badge: application.badge,
+      consultor: application.consultor,
+      code,
+      statusName: application.status?.name || code,
+      decidedAt: application.decisionAt || application.updatedAt,
+      author: '',
+      comment: application.comentario || '',
+    }]
+  }).sort((a, b) => dateValue(b.decidedAt) - dateValue(a.decidedAt))
+}
+
 export function buildServiceLineProfile(workspace) {
   const serviceLine = array(workspace?.serviceLines)[0] || null
   const learningPath = array(workspace?.learningPaths).find(

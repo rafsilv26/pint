@@ -918,9 +918,9 @@
     "rejeitar": "Rechazar",
     "devolver": "Devolver",
     "feedback": {
-      "aprovada": "Has aprobado la insignia «{{badge}}».",
-      "rejeitada": "Has rechazado la insignia «{{badge}}».",
-      "devolvida": "Has devuelto la insignia «{{badge}}» al consultor.",
+      "aprovada": "Has aprobado la solicitud {{pedido}} para la insignia «{{badge}}».",
+      "rejeitada": "Has rechazado la solicitud {{pedido}} para la insignia «{{badge}}».",
+      "devolvida": "Has devuelto la solicitud {{pedido}} de la insignia «{{badge}}» al consultor.",
       "registada": "La decisión final fue registrada."
     },
     "labels": {
@@ -958,6 +958,17 @@
     "tabs": { "todos": "Todos", "pendentes": "Pendientes", "aprovados": "Aprobados", "rejeitados": "Rechazados", "devolvidos": "Devueltos" },
     "pesquisar": "Buscar solicitud",
     "fecharAviso": "Cerrar aviso",
+    "historico": {
+      "titulo": "Historial de decisiones",
+      "subtitulo": "Últimas aprobaciones, rechazos y devoluciones, de la más reciente a la más antigua.",
+      "filtro": "Filtrar historial de decisiones",
+      "tabs": { "todas": "Todas", "aprovacoes": "Aprobaciones", "rejeicoes": "Rechazos", "devolucoes": "Devoluciones" },
+      "estados": { "APPROVED": "Aprobada", "REJECTED": "Rechazada", "OPEN": "Devuelta" },
+      "vazioTitulo": "Sin decisiones registradas",
+      "vazioDescricao": "Todavía no hay decisiones de este tipo en tu Service Line.",
+      "semComentario": "Sin comentario.",
+      "por": "Por {{nome}}"
+    },
     "empty": {
       "titulo": "Sin solicitudes",
       "descricao": "No hay solicitudes para aprobación final."

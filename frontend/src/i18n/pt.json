@@ -908,9 +908,9 @@
     "rejeitar": "Rejeitar",
     "devolver": "Devolver",
     "feedback": {
-      "aprovada": "Aprovaste a badge «{{badge}}».",
-      "rejeitada": "Rejeitaste a badge «{{badge}}».",
-      "devolvida": "Devolveste a badge «{{badge}}» ao consultor.",
+      "aprovada": "Aprovaste o pedido {{pedido}} para a badge «{{badge}}».",
+      "rejeitada": "Rejeitaste o pedido {{pedido}} para a badge «{{badge}}».",
+      "devolvida": "Devolveste o pedido {{pedido}} da badge «{{badge}}» ao consultor.",
       "registada": "A decisão final foi registada."
     },
     "labels": {
@@ -948,6 +948,17 @@
     "tabs": { "todos": "Todos", "pendentes": "Pendentes", "aprovados": "Aprovados", "rejeitados": "Rejeitados", "devolvidos": "Devolvidos" },
     "pesquisar": "Procurar pedido",
     "fecharAviso": "Fechar aviso",
+    "historico": {
+      "titulo": "Histórico de decisões",
+      "subtitulo": "Últimas aprovações, rejeições e devoluções, da mais recente para a mais antiga.",
+      "filtro": "Filtrar histórico de decisões",
+      "tabs": { "todas": "Todas", "aprovacoes": "Aprovações", "rejeicoes": "Rejeições", "devolucoes": "Devoluções" },
+      "estados": { "APPROVED": "Aprovada", "REJECTED": "Rejeitada", "OPEN": "Devolvida" },
+      "vazioTitulo": "Sem decisões registadas",
+      "vazioDescricao": "Ainda não existem decisões deste tipo na tua Service Line.",
+      "semComentario": "Sem comentário.",
+      "por": "Por {{nome}}"
+    },
     "empty": {
       "titulo": "Sem pedidos",
       "descricao": "Não há pedidos para aprovação final."
