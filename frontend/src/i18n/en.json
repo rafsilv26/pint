@@ -962,6 +962,7 @@
     },
     "tabs": { "todos": "All", "pendentes": "Pending", "aprovados": "Approved", "rejeitados": "Rejected", "devolvidos": "Sent back" },
     "pesquisar": "Search request",
+    "verMais": "Show {{count}} more",
     "fecharAviso": "Close notification",
     "historico": {
       "titulo": "Decision history",

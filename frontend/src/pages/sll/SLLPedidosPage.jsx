@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Clock, CheckCircle2, XCircle, FileText, ChevronRight, History, Search, Undo2, X } from 'lucide-react'
+import { Clock, CheckCircle2, XCircle, FileText, ChevronDown, ChevronRight, History, Search, Undo2, X } from 'lucide-react'
 import { Card, Spinner, ErrorState, EmptyState, StatusPill } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
@@ -14,15 +14,18 @@ export default function SLLPedidosPage() {
   const location = useLocation()
   const [status, setStatus] = useState(location.state?.tab || 'ALL')
   const [search, setSearch] = useState('')
+  const [visibleCount, setVisibleCount] = useState(10)
   const [historyStatus, setHistoryStatus] = useState('ALL')
   const [feedback, setFeedback] = useState(location.state?.feedback || null)
   const { data, loading, error, reload } = useAsync(() => api.getServiceLinePedidos())
   const { data: decisionHistory, loading: historyLoading, error: historyError, reload: reloadHistory } = useAsync(() => api.getServiceLineDecisionHistory())
   useAutoRefresh(() => { reload(); reloadHistory() })
   const allRows = data || []
-  const lista = allRows
+  const filteredRows = allRows
     .filter((row) => status === 'ALL' || row.status.code === status)
     .filter((row) => `${row.trackingId} ${row.consultor} ${row.badge} ${row.area}`.toLowerCase().includes(search.toLowerCase()))
+  const lista = status === 'ALL' ? filteredRows.slice(0, visibleCount) : filteredRows
+  const remainingRows = Math.max(0, filteredRows.length - lista.length)
   const cont = (code) => allRows.filter((c) => c.status.code === code).length
   const historyRows = (decisionHistory || []).filter((row) => historyStatus === 'ALL' || row.code === historyStatus)
   const formatDecisionDate = (value) => {
@@ -67,7 +70,7 @@ export default function SLLPedidosPage() {
     { key: 'pontos', label: t('sllPedidos.tabela.pontos') },
     { key: 'estadoTexto', label: t('sllPedidos.tabela.estado') },
   ]
-  const exportData = lista.map((c) => ({ ...c, estadoTexto: c.status?.name || c.status?.code || '' }))
+  const exportData = filteredRows.map((c) => ({ ...c, estadoTexto: c.status?.name || c.status?.code || '' }))
 
   return (
     <div>
@@ -92,9 +95,9 @@ export default function SLLPedidosPage() {
 
       <div className="mb-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
         <div className="d-flex flex-wrap rounded-3 border bg-white p-1">
-          {tabs.map(([code, label]) => <button key={code} type="button" onClick={() => setStatus(code)} className={`btn btn-sm ${status === code ? 'btn-brand' : 'btn-link text-muted text-decoration-none'}`}>{label}<span className={`ms-2 badge rounded-pill ${status === code ? 'text-bg-light text-dark' : 'text-bg-secondary'}`}>{code === 'ALL' ? allRows.length : cont(code)}</span></button>)}
+          {tabs.map(([code, label]) => <button key={code} type="button" onClick={() => { setStatus(code); setVisibleCount(10) }} className={`btn btn-sm ${status === code ? 'btn-brand' : 'btn-link text-muted text-decoration-none'}`}>{label}<span className={`ms-2 badge rounded-pill ${status === code ? 'text-bg-light text-dark' : 'text-bg-secondary'}`}>{code === 'ALL' ? allRows.length : cont(code)}</span></button>)}
         </div>
-        <div className="position-relative" style={{ width: 'min(100%, 22rem)' }}><Search size={16} className="position-absolute text-muted" style={{ left: 13, top: 11 }} /><input className="form-control ps-5" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t('sllPedidos.pesquisar')} /></div>
+        <div className="position-relative" style={{ width: 'min(100%, 22rem)' }}><Search size={16} className="position-absolute text-muted" style={{ left: 13, top: 11 }} /><input className="form-control ps-5" value={search} onChange={(event) => { setSearch(event.target.value); setVisibleCount(10) }} placeholder={t('sllPedidos.pesquisar')} /></div>
       </div>
 
       <Card className="overflow-hidden p-0">
@@ -111,8 +114,9 @@ export default function SLLPedidosPage() {
             />
           </div>
         ) : (
-          <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0 small">
+          <>
+            <div className="table-responsive">
+              <table className="table table-hover align-middle mb-0 small">
               <thead className="table-light">
                 <tr className="fs-xs fw-medium text-muted">
                   <th className="px-3 py-2">{t('sllPedidos.tabela.trackingId')}</th>
@@ -143,8 +147,17 @@ export default function SLLPedidosPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+              </table>
+            </div>
+            {status === 'ALL' && remainingRows > 0 && (
+              <div className="border-top p-3 text-center">
+                <button type="button" className="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onClick={() => setVisibleCount((count) => count + 10)}>
+                  {t('sllPedidos.verMais', { count: Math.min(10, remainingRows) })}
+                  <ChevronDown size={16} aria-hidden="true" />
+                </button>
+              </div>
+            )}
+          </>
         )}
       </Card>
 
