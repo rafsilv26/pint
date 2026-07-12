@@ -16,6 +16,7 @@ export default function SLLPedidosPage() {
   const [search, setSearch] = useState('')
   const [visibleCount, setVisibleCount] = useState(10)
   const [historyStatus, setHistoryStatus] = useState('ALL')
+  const [historyVisibleCount, setHistoryVisibleCount] = useState(10)
   const [feedback, setFeedback] = useState(location.state?.feedback || null)
   const { data, loading, error, reload } = useAsync(() => api.getServiceLinePedidos())
   const { data: decisionHistory, loading: historyLoading, error: historyError, reload: reloadHistory } = useAsync(() => api.getServiceLineDecisionHistory())
@@ -24,10 +25,12 @@ export default function SLLPedidosPage() {
   const filteredRows = allRows
     .filter((row) => status === 'ALL' || row.status.code === status)
     .filter((row) => `${row.trackingId} ${row.consultor} ${row.badge} ${row.area}`.toLowerCase().includes(search.toLowerCase()))
-  const lista = status === 'ALL' ? filteredRows.slice(0, visibleCount) : filteredRows
+  const lista = filteredRows.slice(0, visibleCount)
   const remainingRows = Math.max(0, filteredRows.length - lista.length)
   const cont = (code) => allRows.filter((c) => c.status.code === code).length
-  const historyRows = (decisionHistory || []).filter((row) => historyStatus === 'ALL' || row.code === historyStatus)
+  const filteredHistoryRows = (decisionHistory || []).filter((row) => historyStatus === 'ALL' || row.code === historyStatus)
+  const historyRows = filteredHistoryRows.slice(0, historyVisibleCount)
+  const remainingHistoryRows = Math.max(0, filteredHistoryRows.length - historyRows.length)
   const formatDecisionDate = (value) => {
     const date = new Date(value)
     if (!value || Number.isNaN(date.getTime())) return '—'
@@ -149,7 +152,7 @@ export default function SLLPedidosPage() {
               </tbody>
               </table>
             </div>
-            {status === 'ALL' && remainingRows > 0 && (
+            {remainingRows > 0 && (
               <div className="border-top p-3 text-center">
                 <button type="button" className="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onClick={() => setVisibleCount((count) => count + 10)}>
                   {t('sllPedidos.verMais', { count: Math.min(10, remainingRows) })}
@@ -172,7 +175,7 @@ export default function SLLPedidosPage() {
           </div>
           <div className="d-flex flex-wrap rounded-3 border bg-white p-1" role="group" aria-label={t('sllPedidos.historico.filtro')}>
             {historyTabs.map(([code, label]) => (
-              <button key={code} type="button" onClick={() => setHistoryStatus(code)} className={`btn btn-sm ${historyStatus === code ? 'btn-brand' : 'btn-link text-muted text-decoration-none'}`}>
+              <button key={code} type="button" onClick={() => { setHistoryStatus(code); setHistoryVisibleCount(10) }} className={`btn btn-sm ${historyStatus === code ? 'btn-brand' : 'btn-link text-muted text-decoration-none'}`}>
                 {label}
               </button>
             ))}
@@ -189,8 +192,9 @@ export default function SLLPedidosPage() {
               <EmptyState icon={History} title={t('sllPedidos.historico.vazioTitulo')} description={t('sllPedidos.historico.vazioDescricao')} />
             </div>
           ) : (
-            <div className="list-group list-group-flush">
-              {historyRows.map((row) => (
+            <>
+              <div className="list-group list-group-flush">
+                {historyRows.map((row) => (
                 <button key={row.id} type="button" onClick={() => navigate(`/sll/pedidos/${row.requestId}`)} className="list-group-item list-group-item-action border-start-0 border-end-0 px-3 py-3 text-start">
                   <div className="row g-2 align-items-center">
                     <div className="col-6 col-lg-2">
@@ -209,8 +213,17 @@ export default function SLLPedidosPage() {
                     <div className="col-1 text-end text-brand"><ChevronRight size={17} aria-hidden="true" /></div>
                   </div>
                 </button>
-              ))}
-            </div>
+                ))}
+              </div>
+              {remainingHistoryRows > 0 && (
+                <div className="border-top p-3 text-center">
+                  <button type="button" className="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onClick={() => setHistoryVisibleCount((count) => count + 10)}>
+                    {t('sllPedidos.verMais', { count: Math.min(10, remainingHistoryRows) })}
+                    <ChevronDown size={16} aria-hidden="true" />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </Card>
       </section>
