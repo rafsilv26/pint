@@ -91,10 +91,6 @@ export default function LoginPage() {
         >
           {loading ? t('login.botoes.entrando') : t('login.botoes.entrar')}
         </button>
-
-        <p className="text-center small text-muted mb-0">
-          {t('login.semConta')} <Link to="/registar" className="text-brand text-decoration-none">{t('login.criarConta')}</Link>
-        </p>
       </form>
     </AuthShell>
   )
