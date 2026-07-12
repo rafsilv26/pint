@@ -34,7 +34,9 @@ function BreakdownTable({ title, rows, labelKey, emptyLabel, extra }) {
   )
 }
 
-export default function TalentReportsPage() {
+// soIndicadores: esconde as tabelas de dados (candidaturas/badges/consultores…)
+// — usado no Admin, que já tem abas próprias para essas listas.
+export default function TalentReportsPage({ soIndicadores = false }) {
   const { t, i18n } = useTranslation()
   const labels = t('tmWorkspace', { returnObjects: true })
   const [filters, setFilters] = useState({
@@ -172,6 +174,7 @@ export default function TalentReportsPage() {
         <div className="col-lg-4"><BreakdownTable title={labels.reports.badgeDistribution} rows={report.badgeBreakdown.slice(0, 10)} labelKey="badge" emptyLabel={labels.common.semDados} extra={(row) => `${row.points} ${labels.common.pontos.toLowerCase()}`} /></div>
       </div>
 
+      {!soIndicadores && (
       <Card className="p-0 overflow-hidden">
         <div className="p-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-3">
           <div className="d-flex flex-wrap gap-1" role="tablist">{tabs.map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={dataset === key} className={`btn btn-sm ${dataset === key ? 'btn-brand' : 'btn-outline-secondary'}`} onClick={() => setDataset(key)}>{label}</button>)}</div>
@@ -181,6 +184,7 @@ export default function TalentReportsPage() {
           <div className="table-responsive"><table className="table table-hover align-middle mb-0 small"><thead className="table-light"><tr>{columns.map((column) => <th className="px-3 py-2" key={column.key}>{column.label}</th>)}</tr></thead><tbody>{datasets[dataset].map((row, index) => <tr key={row.id || `${dataset}-${index}`}>{columns.map((column) => <td className="px-3 py-2" key={column.key}>{row[column.key] ?? '—'}</td>)}</tr>)}</tbody></table></div>
         )}
       </Card>
+      )}
     </div>
   )
 }
