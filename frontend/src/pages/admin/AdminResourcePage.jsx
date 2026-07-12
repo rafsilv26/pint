@@ -24,6 +24,18 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
 
   const rows = data || []
 
+  // As rotas /admin/* renderizam TODAS este mesmo componente, por isso o React
+  // reutiliza a instância ao navegar (ex: Níveis -> Avisos) e o `activeKey`
+  // (useState) ficava preso no recurso anterior. Sincroniza quando a rota muda.
+  useEffect(() => {
+    setActiveKey(resourceKey)
+    setEditing(null)
+    setForm({})
+    setErroForm(null)
+    setConfirmar(null)
+    setErroDelete(null)
+  }, [resourceKey])
+
   // Função auxiliar para detetar a chave primária real
   const getPrimaryKey = (row) =>
     row?.policyId ?? row?.noticeId ?? row?.infoId ?? row?.areaId ?? row?.badgePremiumId ?? row?.id ?? null;
