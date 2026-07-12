@@ -389,6 +389,45 @@
         "data": "Date",
         "estado": "Status"
       }
+    },
+    "report": {
+      "title": "Complete consultant report",
+      "documentTitle": "Complete report - {{nome}}",
+      "subtitle": "Profile, badges, applications, evidence and complete history.",
+      "download": "Download complete report",
+      "generating": "Generating report…",
+      "generatedAt": "Generated on",
+      "erroSemDados": "There is no consultant data available for the report.",
+      "erroDownload": "The report could not be generated.",
+      "noData": "No data recorded in this section.",
+      "page": "Page {{page}} of {{pages}}",
+      "sections": {
+        "profile": "Professional profile",
+        "summary": "General summary",
+        "badges": "Earned badges",
+        "applications": "Applications",
+        "applicationHistory": "Application history",
+        "evidences": "Submitted evidence",
+        "specialAchievements": "Special achievements",
+        "timeline": "Development timeline"
+      },
+      "fields": {
+        "field": "Field", "value": "Value", "role": "Role", "rank": "Ranking",
+        "linkedin": "LinkedIn", "biography": "Biography",
+        "name": "Name", "email": "Email", "area": "Area", "serviceLine": "Service Line",
+        "learningPath": "Learning Path", "startDate": "Consultant since", "points": "Points",
+        "badges": "Badges", "applications": "Applications", "approved": "Approved",
+        "rejected": "Rejected", "inProgress": "In progress", "progress": "Progress",
+        "badge": "Badge", "level": "Level", "obtainedAt": "Earned on", "expiresAt": "Expires on",
+        "validity": "Validity", "trackingId": "Request", "status": "Status",
+        "submittedAt": "Submitted on", "decisionAt": "Decision on", "comment": "Comment",
+        "transition": "Transition", "author": "Owner", "date": "Date", "reason": "Reason",
+        "file": "File", "requirement": "Requirement", "validation": "Validation", "url": "URL",
+        "achievement": "Achievement", "description": "Description", "goal": "Goal", "type": "Type",
+        "expectedDate": "Expected date"
+      },
+      "validity": { "valid": "Valid", "soon": "Expiring", "expired": "Expired", "permanent": "No expiration" },
+      "evidence": { "validated": "Validated", "rejected": "Rejected", "pending": "Pending" }
     }
   },
   "managerConta": {

@@ -78,6 +78,7 @@ export const validarEvidencia = impl.validarEvidencia
 export const getTalentReports = impl.getTalentReports
 export const getTalentConsultants = impl.getTalentConsultants
 export const getTalentConsultant = impl.getTalentConsultant
+export const getTalentConsultantReport = impl.getTalentConsultantReport
 export const getTalentCatalog = impl.getTalentCatalog
 export const refreshTalentWorkspace = impl.refreshTalentWorkspace
 

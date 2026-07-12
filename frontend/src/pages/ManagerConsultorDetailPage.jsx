@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
-import { ArrowLeft, Award, Star, Sparkles, Calendar, Mail, ExternalLink, Network, Trophy, FileText, ChevronRight, Download, Clock3, Target } from 'lucide-react'
+import { ArrowLeft, Award, Star, Sparkles, Calendar, Mail, ExternalLink, Network, Trophy, FileText, FileDown, ChevronRight, Download, Clock3, Target } from 'lucide-react'
 import { Card, Spinner, ErrorState, EmptyState, StatusPill } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
+import { downloadTalentConsultantReport } from '../utils/talentConsultantReport'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 // Perfil de um consultor visto por um perfil de gestão (TM / SLL / Admin).
 export default function ManagerConsultorDetailPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t, i18n } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -19,6 +20,8 @@ export default function ManagerConsultorDetailPage() {
   const { data: historico, loading: loadingHistorico, reload: reloadHistorico } = useAsync(() => api.getConsultantCandidaturas(id), [id])
   const [certificateId, setCertificateId] = useState(null)
   const [certificateError, setCertificateError] = useState('')
+  const [reportBusy, setReportBusy] = useState(false)
+  const [reportError, setReportError] = useState('')
   useAutoRefresh(() => { reload(); reloadHistorico() })
 
   if (loading) return <Spinner />
@@ -54,6 +57,22 @@ export default function ManagerConsultorDetailPage() {
     }
   }
 
+  const downloadCompleteReport = async () => {
+    setReportBusy(true)
+    setReportError('')
+    try {
+      const report = await api.getTalentConsultantReport(c.id)
+      downloadTalentConsultantReport(report, {
+        t,
+        locale: i18n.resolvedLanguage || i18n.language || 'pt-PT',
+      })
+    } catch (downloadError) {
+      setReportError(downloadError.message || t('managerConsultor.report.erroDownload'))
+    } finally {
+      setReportBusy(false)
+    }
+  }
+
   return (
     <div>
       <button onClick={() => navigate(-1)} className="mb-3 btn btn-link p-0 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
@@ -83,6 +102,12 @@ export default function ManagerConsultorDetailPage() {
               </div>
             </div>
             <div className="d-flex flex-wrap align-items-center gap-3 pb-1 small text-muted">
+              {talentView && (
+                <button type="button" className="btn btn-brand d-inline-flex align-items-center gap-2" onClick={downloadCompleteReport} disabled={reportBusy}>
+                  {reportBusy ? <span className="spinner-border spinner-border-sm" aria-hidden="true" /> : <FileDown size={16} />}
+                  {reportBusy ? t('managerConsultor.report.generating') : t('managerConsultor.report.download')}
+                </button>
+              )}
               {c.serviceLine && (
                 <span className="d-flex align-items-center gap-1"><Network size={14} /> {c.serviceLine}</span>
               )}
@@ -101,6 +126,7 @@ export default function ManagerConsultorDetailPage() {
           </div>
         </div>
       </Card>
+      {reportError && <div className="mt-3 alert alert-danger py-2 small" role="alert">{reportError}</div>}
 
       <div className="mt-4 row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
         {stats.map((s) => (

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildTalentDecisionHistory, buildTalentProfile, buildTalentReport, filterTalentApplicationsByTab, filterTalentCandidaturas, getEvidenceCoverage, getExpirationState, getTalentApplicationTabCounts, normalizeTalentWorkspace } from './talentWorkspace'
+import { buildTalentConsultantReport, buildTalentDecisionHistory, buildTalentProfile, buildTalentReport, filterTalentApplicationsByTab, filterTalentCandidaturas, getEvidenceCoverage, getExpirationState, getTalentApplicationTabCounts, normalizeTalentWorkspace } from './talentWorkspace'
 
 const raw = {
   consultants: { data: [{ id: 7, name: 'Rafael Teste', area: 'Mobile', serviceLine: 'Technology', points: 200, badgesConquistados: [{ id: 10, nome: 'Flutter', obtidoEm: '2026-01-01', expiraEm: '2026-08-01', valido: true }] }] },
@@ -119,5 +119,19 @@ describe('talent workspace', () => {
     const history = buildTalentDecisionHistory(rows, 8)
     expect(history.map((row) => [row.requestId, row.code])).toEqual([[2, 'REJECTED'], [1, 'VALIDATED']])
     expect(history[0]).toMatchObject({ trackingId: '#00002', comment: 'Documento inválido' })
+  })
+
+  it('builds a complete consultant report with badges and application history', () => {
+    const workspace = normalizeTalentWorkspace(raw, new Date('2026-07-11'))
+    const report = buildTalentConsultantReport(workspace, 7)
+
+    expect(report.consultant).toMatchObject({ id: 7, name: 'Rafael Teste' })
+    expect(report.badges).toHaveLength(1)
+    expect(report.applications).toHaveLength(1)
+    expect(report.applicationHistory[0]).toMatchObject({ applicationId: 50, badge: 'Dart', code: 'SUBMITTED' })
+    expect(report.evidences).toEqual([])
+    expect(report.specialAchievements).toHaveLength(1)
+    expect(report.timeline).toHaveLength(1)
+    expect(report.totals).toMatchObject({ badges: 1, applications: 1, activeApplications: 1, points: 200 })
   })
 })

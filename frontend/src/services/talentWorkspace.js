@@ -388,6 +388,48 @@ export function buildTalentProfile(workspace) {
   }
 }
 
+export function buildTalentConsultantReport(workspace, consultantId) {
+  const consultant = array(workspace?.consultants).find((row) => Number(row.id) === Number(consultantId))
+  if (!consultant) return null
+
+  const applications = array(workspace?.candidaturas)
+    .filter((row) => Number(row.consultantId ?? row.consultorId) === Number(consultantId))
+    .sort((a, b) => dateValue(b.submittedAt) - dateValue(a.submittedAt))
+
+  return {
+    generatedAt: new Date(),
+    consultant,
+    badges: array(consultant.awards || consultant.badgesConquistados),
+    applications,
+    applicationHistory: applications.flatMap((application) =>
+      array(application.historico).map((event) => ({
+        ...event,
+        applicationId: application.id,
+        trackingId: application.trackingId,
+        badge: application.badge,
+      }))
+    ).sort((a, b) => dateValue(b.data || b.createdAt) - dateValue(a.data || a.createdAt)),
+    evidences: applications.flatMap((application) =>
+      array(application.evidencias).map((evidence) => ({
+        ...evidence,
+        applicationId: application.id,
+        trackingId: application.trackingId,
+        badge: application.badge,
+      }))
+    ),
+    specialAchievements: array(consultant.specialAchievements),
+    timeline: array(consultant.timeline).slice().sort((a, b) => dateValue(b.startDate) - dateValue(a.startDate)),
+    totals: {
+      badges: array(consultant.awards || consultant.badgesConquistados).length,
+      applications: applications.length,
+      approvedApplications: applications.filter((row) => row.status?.code === 'APPROVED').length,
+      rejectedApplications: applications.filter((row) => row.status?.code === 'REJECTED').length,
+      activeApplications: applications.filter((row) => !['APPROVED', 'REJECTED'].includes(row.status?.code)).length,
+      points: Number(consultant.points || 0),
+    },
+  }
+}
+
 export function buildTalentReport(workspace, filters = {}) {
   const candidaturas = filterTalentCandidaturas(workspace.candidaturas, filters)
   const consultants = workspace.consultants.filter((consultant) =>

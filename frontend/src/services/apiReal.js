@@ -6,6 +6,7 @@
 import { http, getUser, getToken, api } from './http.js'
 import i18next from 'i18next' // <-- Import da instância global para ficheiros JS puros
 import {
+  buildTalentConsultantReport,
   buildTalentDecisionHistory,
   buildTalentProfile,
   buildTalentReport,
@@ -513,6 +514,10 @@ export async function getTalentConsultants() {
 
 export async function getTalentConsultant(id) {
   return (await getTalentWorkspace()).consultants.find((consultant) => Number(consultant.id) === Number(id)) || null
+}
+
+export async function getTalentConsultantReport(id) {
+  return buildTalentConsultantReport(await getTalentWorkspace(), id)
 }
 
 export async function getTalentCatalog() {

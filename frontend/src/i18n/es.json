@@ -389,6 +389,45 @@
         "data": "Fecha",
         "estado": "Estado"
       }
+    },
+    "report": {
+      "title": "Informe completo del consultor",
+      "documentTitle": "Informe completo - {{nome}}",
+      "subtitle": "Perfil, insignias, solicitudes, evidencias e historial completo.",
+      "download": "Descargar informe completo",
+      "generating": "Generando informe…",
+      "generatedAt": "Generado el",
+      "erroSemDados": "No hay datos del consultor disponibles para generar el informe.",
+      "erroDownload": "No se pudo generar el informe.",
+      "noData": "No hay datos registrados en esta sección.",
+      "page": "Página {{page}} de {{pages}}",
+      "sections": {
+        "profile": "Perfil profesional",
+        "summary": "Resumen general",
+        "badges": "Insignias obtenidas",
+        "applications": "Solicitudes",
+        "applicationHistory": "Historial de solicitudes",
+        "evidences": "Evidencias enviadas",
+        "specialAchievements": "Logros especiales",
+        "timeline": "Cronología de desarrollo"
+      },
+      "fields": {
+        "field": "Campo", "value": "Valor", "role": "Función", "rank": "Ranking",
+        "linkedin": "LinkedIn", "biography": "Biografía",
+        "name": "Nombre", "email": "Email", "area": "Área", "serviceLine": "Service Line",
+        "learningPath": "Learning Path", "startDate": "Consultor desde", "points": "Puntos",
+        "badges": "Insignias", "applications": "Solicitudes", "approved": "Aprobadas",
+        "rejected": "Rechazadas", "inProgress": "En proceso", "progress": "Progreso",
+        "badge": "Insignia", "level": "Nivel", "obtainedAt": "Obtenida el", "expiresAt": "Caduca el",
+        "validity": "Validez", "trackingId": "Solicitud", "status": "Estado",
+        "submittedAt": "Enviada el", "decisionAt": "Decisión el", "comment": "Comentario",
+        "transition": "Transición", "author": "Responsable", "date": "Fecha", "reason": "Motivo",
+        "file": "Archivo", "requirement": "Requisito", "validation": "Validación", "url": "URL",
+        "achievement": "Logro", "description": "Descripción", "goal": "Objetivo", "type": "Tipo",
+        "expectedDate": "Fecha prevista"
+      },
+      "validity": { "valid": "Válida", "soon": "Próxima a caducar", "expired": "Caducada", "permanent": "Sin caducidad" },
+      "evidence": { "validated": "Validada", "rejected": "Rechazada", "pending": "Pendiente" }
     }
   },
   "managerConta": {

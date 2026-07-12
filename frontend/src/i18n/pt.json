@@ -379,6 +379,45 @@
         "data": "Data",
         "estado": "Estado"
       }
+    },
+    "report": {
+      "title": "Relatório completo do consultor",
+      "documentTitle": "Relatório completo - {{nome}}",
+      "subtitle": "Perfil, badges, candidaturas, evidências e histórico completo.",
+      "download": "Transferir relatório completo",
+      "generating": "A gerar relatório…",
+      "generatedAt": "Gerado em",
+      "erroSemDados": "Não existem dados do consultor para gerar o relatório.",
+      "erroDownload": "Não foi possível gerar o relatório.",
+      "noData": "Sem dados registados nesta secção.",
+      "page": "Página {{page}} de {{pages}}",
+      "sections": {
+        "profile": "Perfil profissional",
+        "summary": "Resumo geral",
+        "badges": "Badges conquistadas",
+        "applications": "Candidaturas",
+        "applicationHistory": "Histórico das candidaturas",
+        "evidences": "Evidências submetidas",
+        "specialAchievements": "Conquistas especiais",
+        "timeline": "Timeline de desenvolvimento"
+      },
+      "fields": {
+        "field": "Campo", "value": "Valor", "role": "Função", "rank": "Ranking",
+        "linkedin": "LinkedIn", "biography": "Biografia",
+        "name": "Nome", "email": "Email", "area": "Área", "serviceLine": "Service Line",
+        "learningPath": "Learning Path", "startDate": "Consultor desde", "points": "Pontos",
+        "badges": "Badges", "applications": "Candidaturas", "approved": "Aprovadas",
+        "rejected": "Rejeitadas", "inProgress": "Em processo", "progress": "Progresso",
+        "badge": "Badge", "level": "Nível", "obtainedAt": "Obtida em", "expiresAt": "Expira em",
+        "validity": "Validade", "trackingId": "Pedido", "status": "Estado",
+        "submittedAt": "Submetida em", "decisionAt": "Decisão em", "comment": "Comentário",
+        "transition": "Transição", "author": "Responsável", "date": "Data", "reason": "Motivo",
+        "file": "Ficheiro", "requirement": "Requisito", "validation": "Validação", "url": "URL",
+        "achievement": "Conquista", "description": "Descrição", "goal": "Objetivo", "type": "Tipo",
+        "expectedDate": "Data prevista"
+      },
+      "validity": { "valid": "Válida", "soon": "A expirar", "expired": "Expirada", "permanent": "Sem expiração" },
+      "evidence": { "validated": "Validada", "rejected": "Rejeitada", "pending": "Pendente" }
     }
   },
   "managerConta": {

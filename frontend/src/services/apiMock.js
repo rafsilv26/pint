@@ -336,6 +336,30 @@ export async function getTalentConsultant(id) {
   return rows.find((consultant) => Number(consultant.id) === Number(id)) || null
 }
 
+export async function getTalentConsultantReport(id) {
+  const consultant = await getTalentConsultant(id)
+  if (!consultant) return null
+  const applications = clone(mockTalentCandidaturas).filter((row) => Number(row.consultorId) === Number(id))
+  return {
+    generatedAt: new Date(),
+    consultant,
+    badges: consultant.awards || [],
+    applications,
+    applicationHistory: [],
+    evidences: [],
+    specialAchievements: consultant.specialAchievements || [],
+    timeline: consultant.timeline || [],
+    totals: {
+      badges: (consultant.awards || []).length,
+      applications: applications.length,
+      approvedApplications: applications.filter((row) => row.status?.code === 'APPROVED').length,
+      rejectedApplications: applications.filter((row) => row.status?.code === 'REJECTED').length,
+      activeApplications: applications.filter((row) => !['APPROVED', 'REJECTED'].includes(row.status?.code)).length,
+      points: Number(consultant.points || 0),
+    },
+  }
+}
+
 export async function getTalentCatalog() {
   return getBadges()
 }
