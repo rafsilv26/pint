@@ -172,7 +172,47 @@ exports.submeterCandidatura = async (req, res) => {
       return res.status(400).json({ erro: 'Já existe uma candidatura pendente para esta badge.' });
     }
 
-    // Criar candidatura
+    // Emparelha cada ficheiro com o requisito que evidencia (mesma ordem em
+    // que o frontend os envia). Um ficheiro sem requisito não é aceite.
+    const idsRequisitos = (Array.isArray(requisitoIds) ? requisitoIds : [requisitoIds])
+      .map((id) => Number(id))
+      .filter((id) => Number.isInteger(id));
+
+    if (ficheiros.length === 0) {
+      return res.status(400).json({ erro: 'Tens de anexar pelo menos uma evidência.' });
+    }
+    if (idsRequisitos.length !== ficheiros.length) {
+      return res.status(400).json({ erro: 'Cada evidência tem de estar associada a um requisito.' });
+    }
+
+    // Requisitos do nível deste badge — fonte da regra do guião "para obter um
+    // badge, o consultor tem de cumprir todos os requisitos desse nível".
+    const requisitosDoNivel = await Requirement.findAll({
+      where: { nivelId: badge.nivelId, deletedAt: null },
+      attributes: ['id', 'obrigatorio']
+    });
+    const idsValidos = new Set(requisitosDoNivel.map((r) => r.id));
+
+    // Todas as evidências têm de apontar para um requisito deste nível.
+    if (idsRequisitos.some((id) => !idsValidos.has(id))) {
+      return res.status(400).json({ erro: 'Uma das evidências está associada a um requisito que não pertence a este badge.' });
+    }
+
+    // Regra central: todos os requisitos OBRIGATÓRIOS do nível têm de ter, pelo
+    // menos, uma evidência para a candidatura poder ser submetida.
+    const submetidos = new Set(idsRequisitos);
+    const obrigatoriosEmFalta = requisitosDoNivel.filter(
+      (r) => r.obrigatorio !== false && !submetidos.has(r.id)
+    );
+    if (obrigatoriosEmFalta.length > 0) {
+      return res.status(400).json({
+        erro: 'Tens de submeter evidência para todos os requisitos obrigatórios deste badge.',
+        requisitosEmFalta: obrigatoriosEmFalta.map((r) => r.id)
+      });
+    }
+
+    // Criar candidatura só depois de tudo validado, para não deixar
+    // candidaturas órfãs (sem evidências) em caso de erro de validação.
     const submitted = statuses[STATUS.SUBMITTED] || await getStatus(STATUS.SUBMITTED);
     const candidatura = await Candidatura.create({
       consultorId,
@@ -180,12 +220,6 @@ exports.submeterCandidatura = async (req, res) => {
       estadoId: submitted.statusId,
       dataSubmicao: new Date()
     });
-
-    // Validar requisitoIds e associar evidências
-    const idsRequisitos = Array.isArray(requisitoIds) ? requisitoIds : [requisitoIds].filter(Boolean);
-    if (ficheiros.length > 0 && idsRequisitos.length === 0) {
-      return res.status(400).json({ erro: 'É obrigatório indicar requisitoIds para associar as evidências.' });
-    }
 
     // Fazer upload dos ficheiros e criar evidências associadas
     await Promise.all(
@@ -196,7 +230,7 @@ exports.submeterCandidatura = async (req, res) => {
           nomeFicheiro: ficheiro.originalname,
           tipo: ficheiro.mimetype === 'application/pdf' ? 'PDF' : 'IMAGEM',
           candidaturaId: candidatura.id,
-          requisitoId: idsRequisitos[index] || idsRequisitos[0],
+          requisitoId: idsRequisitos[index],
           descricao,
           uploadedBy: consultorId
         });

@@ -193,16 +193,19 @@ export async function getMinhasCandidaturas() {
   })
 }
 
+// Submete a candidatura com as evidências (só ficheiros). Cada evidência é
+// enviada emparelhada com o requisito que comprova, pela MESMA ordem — o
+// backend associa evidencias[i] a requisitoIds[i].
 export async function submeterCandidatura({ badgeId, descricao, ficheiros = [] }) {
   const form = new FormData()
   form.append('badgeId', badgeId)
   if (descricao) form.append('descricao', descricao)
-  ficheiros.forEach((ev) => {
-    if (ev.file) {
+  ficheiros
+    .filter((ev) => ev.file && ev.requisitoId != null)
+    .forEach((ev) => {
       form.append('evidencias', ev.file)
-      form.append('requisitoIds', ev.requisitoId ?? '')
-    }
-  })
+      form.append('requisitoIds', ev.requisitoId)
+    })
   return http('/candidaturas', { method: 'POST', body: form, isForm: true })
 }
 
