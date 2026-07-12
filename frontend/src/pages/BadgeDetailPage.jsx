@@ -1,10 +1,9 @@
-import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, ChevronDown, Coins } from 'lucide-react'
+import { ArrowLeft, Coins, Award, Clock, ChevronRight, CheckCircle2, ListChecks } from 'lucide-react'
 import { Spinner, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 const HERO_TINTS = {
   salmon: 'tint-salmon',
@@ -14,10 +13,9 @@ const HERO_TINTS = {
 }
 
 export default function BadgeDetailPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { id } = useParams()
   const { data: badge, loading, error, reload } = useAsync(() => api.getBadge(id), [id])
-  const [aberto, setAberto] = useState(0)
 
   const voltar = (
     <Link to="/catalogo" className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
@@ -31,77 +29,110 @@ export default function BadgeDetailPage() {
     return <div>{voltar}<p className="mt-3 text-muted">{t('badgeDetail.naoEncontrado')}</p></div>
   }
 
+  const trilho = [badge.learningPath, badge.serviceLine, badge.area].filter(Boolean)
+  const validade = badge.duracaoMeses
+    ? `${Math.max(1, Math.round(badge.duracaoMeses / 12))} ${t('badgeDetail.anos')}`
+    : t('badgeDetail.naoExpira')
+
+  const pill = 'rounded-pill bg-white bg-opacity-75 px-2 py-1 fs-xs fw-semibold text-ink'
+
   return (
     <div>
       {voltar}
 
       {/* Hero */}
       <div className={`overflow-hidden rounded-4 p-4 p-sm-5 ${HERO_TINTS[badge.tint] || HERO_TINTS.sky}`}>
+        {trilho.length > 0 && (
+          <div className="d-flex flex-wrap align-items-center gap-1 fs-xs fw-medium text-ink text-opacity-75 mb-3">
+            {trilho.map((n, i) => (
+              <span key={n} className="d-inline-flex align-items-center gap-1">
+                {i > 0 && <ChevronRight size={12} />}{n}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="d-flex align-items-center justify-content-between gap-4 flex-wrap">
-          <div>
+          <div className="flex-grow-1">
             <div className="d-flex flex-wrap gap-2">
-              <span className="rounded-pill bg-white bg-opacity-75 px-2 py-1 fs-xs fw-semibold text-ink">{badge.nivel}</span>
-              <span className="d-flex align-items-center gap-1 rounded-pill bg-white bg-opacity-75 px-2 py-1 fs-xs fw-semibold text-ink">
+              {badge.nivel && <span className={pill}>{badge.nivel}</span>}
+              <span className={`d-inline-flex align-items-center gap-1 ${pill}`}>
                 <Coins size={12} /> {badge.ponto} {t('badgeDetail.pontos')}
               </span>
-              {badge.duracaoMeses && (
-                <span className="rounded-pill bg-white bg-opacity-75 px-2 py-1 fs-xs fw-semibold text-ink">
-                  {t('badgeDetail.frequencia')}: {Math.round(badge.duracaoMeses / 12)} {t('badgeDetail.anos')}
-                </span>
-              )}
+              <span className={`d-inline-flex align-items-center gap-1 ${pill}`}>
+                <Clock size={12} /> {t('badgeDetail.validade')}: {validade}
+              </span>
             </div>
-            <h1 className="mt-3 fs-2 fs-sm-1 fw-bold text-ink">{t('badgeDetail.badgeDe')} {badge.nome}</h1>
+            <h1 className="mt-3 fs-2 fs-sm-1 fw-bold text-ink mb-0">{badge.nome}</h1>
+            {badge.fornecedor && (
+              <p className="mt-1 small text-ink text-opacity-75 mb-0">{t('badgeDetail.emitidoPor')} {badge.fornecedor}</p>
+            )}
             <Link
               to={`/candidaturas/nova?badge=${badge.id}`}
-              className="mt-4 d-inline-block rounded-3 btn btn-brand px-4 py-2 fw-semibold"
+              className="mt-4 d-inline-flex align-items-center gap-2 rounded-3 btn btn-brand px-4 py-2 fw-semibold"
             >
-              {t('badgeDetail.candidatar')}
+              <Award size={18} /> {t('badgeDetail.candidatar')}
             </Link>
           </div>
+
           <div className="d-none d-sm-block flex-shrink-0 text-center">
-            <div className="d-flex align-items-center justify-content-center rounded-circle bg-white fs-1 fw-bold text-ink shadow" style={{ height: '6rem', width: '6rem' }}>
-              {badge.nome[0]}
+            <div className="badge-seal mx-auto" style={{ height: '7rem', width: '7rem' }}>
+              {badge.imagem
+                ? <img src={badge.imagem} alt="" className="w-100 h-100 rounded-circle object-fit-cover" />
+                : <Award size={44} />}
             </div>
-            <p className="mt-2 small fw-medium text-ink">{badge.fornecedor}</p>
           </div>
         </div>
       </div>
 
       {/* Descrição + Requisitos */}
       <div className="mt-4 row g-4">
-        <section className="col-lg-6">
+        <section className="col-lg-5">
           <h2 className="mb-3 fw-semibold text-ink">{t('badgeDetail.descricao')}</h2>
-          <p className="small text-muted" style={{ lineHeight: 1.6 }}>{badge.descricao}</p>
-          <p className="mt-3 small text-muted" style={{ lineHeight: 1.6 }}>
+          {badge.descricao && <p className="text-muted" style={{ lineHeight: 1.7 }}>{badge.descricao}</p>}
+          <p className="text-muted border-start border-3 border-brand ps-3" style={{ lineHeight: 1.7 }}>
             {t('badgeDetail.descTextoExtra')}
           </p>
         </section>
 
-        <section className="col-lg-6">
-          <h2 className="mb-3 fw-semibold text-ink">{t('badgeDetail.requisitos')}</h2>
+        <section className="col-lg-7">
+          <div className="d-flex align-items-center justify-content-between mb-3">
+            <h2 className="fw-semibold text-ink mb-0 d-flex align-items-center gap-2">
+              <ListChecks size={20} className="text-brand" /> {t('badgeDetail.requisitos')}
+            </h2>
+          </div>
+
           {badge.requisitos.length === 0 ? (
-            <p className="rounded-3 border border-dashed p-3 small text-muted">
-              {t('badgeDetail.semRequisitos')}
-            </p>
+            <p className="rounded-3 border border-dashed p-3 small text-muted">{t('badgeDetail.semRequisitos')}</p>
           ) : (
-            <div className="d-flex flex-column gap-2">
-              {badge.requisitos.map((req, i) => (
-                <div key={req.id ?? i} className="overflow-hidden rounded-3 border bg-white">
-                  <button
-                    onClick={() => setAberto(aberto === i ? -1 : i)}
-                    className="d-flex w-100 align-items-center justify-content-between gap-2 px-3 py-2 text-start small fw-medium text-ink btn btn-link text-decoration-none"
-                  >
-                    {i + 1}. {req.titulo}
-                    <ChevronDown size={18} className="flex-shrink-0 text-muted" style={{ transform: aberto === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-                  </button>
-                  {aberto === i && (
-                    <p className="border-top px-3 py-2 small text-muted mb-0">
-                      {t('badgeDetail.requisitoTextoExtra')}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
+            <>
+              <div className="d-flex flex-column gap-2">
+                {badge.requisitos.map((req, i) => {
+                  const isObrigatorio = req.obrigatorio !== false
+                  return (
+                    <div key={req.id ?? i} className="rounded-3 border bg-white p-3 d-flex gap-3">
+                      <span className="badge-seal flex-shrink-0 fw-bold" style={{ height: '2rem', width: '2rem', fontSize: '0.85rem' }}>
+                        {i + 1}
+                      </span>
+                      <div className="flex-grow-1 min-w-0">
+                        <div className="d-flex align-items-start justify-content-between gap-2">
+                          <p className="fw-semibold text-ink mb-1">{req.titulo}</p>
+                          <span className={`badge rounded-pill flex-shrink-0 ${isObrigatorio ? 'text-bg-primary' : 'text-bg-secondary'}`}>
+                            {isObrigatorio ? t('badgeDetail.obrigatorio') : t('badgeDetail.opcional')}
+                          </span>
+                        </div>
+                        <p className="small text-muted mb-0" style={{ lineHeight: 1.6 }}>
+                          {req.descricao || t('badgeDetail.requisitoTextoExtra')}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <p className="mt-3 d-flex align-items-center gap-2 rounded-3 bg-brand-light text-brand px-3 py-2 fs-xs mb-0">
+                <CheckCircle2 size={14} className="flex-shrink-0" /> {t('badgeDetail.todosRequisitos')}
+              </p>
+            </>
           )}
         </section>
       </div>

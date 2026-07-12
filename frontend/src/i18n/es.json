@@ -137,11 +137,15 @@
     "proximosEventos": "Próximos Eventos"
   },
   "catalogo": {
+    "titulo": "Catálogo de Insignias",
+    "subtitulo": "Explora las credenciales disponibles y postúlate.",
     "procurar": "Buscar Insignias",
     "vazioTitulo": "No se encontraron insignias",
     "vazioDesc": "Intenta otra búsqueda.",
     "nivel": "Nivel",
-    "pontos": "puntos"
+    "pontos": "puntos",
+    "resultados": "{{count}} insignia",
+    "resultados_other": "{{count}} insignias"
   },
   "candidaturas": {
     "titulo": "Mis Insignias",
@@ -177,7 +181,13 @@
     "descTextoExtra": "Esta insignia reconoce habilidades prácticas y se valida en función de la evidencia enviada, de acuerdo con los requisitos de certificación de Softinsa.",
     "requisitos": "Requisitos",
     "semRequisitos": "No hay requisitos específicos definidos para esta insignia.",
-    "requisitoTextoExtra": "Para cumplir con este requisito, debes enviar evidencia que demuestre claramente la competencia indicada."
+    "requisitoTextoExtra": "Para cumplir con este requisito, debes enviar evidencia que demuestre claramente la competencia indicada.",
+    "emitidoPor": "Emitido por",
+    "obrigatorio": "Obligatorio",
+    "opcional": "Opcional",
+    "validade": "Vigencia",
+    "naoExpira": "No caduca",
+    "todosRequisitos": "Cumple todos los requisitos obligatorios para obtener esta insignia."
   },
   "certificado": {
     "gerando": "Generando certificado…",

@@ -137,11 +137,15 @@
     "proximosEventos": "Upcoming Events"
   },
   "catalogo": {
+    "titulo": "Badge Catalog",
+    "subtitulo": "Explore the available credentials and apply.",
     "procurar": "Search Badges",
     "vazioTitulo": "No badges found",
     "vazioDesc": "Try another search.",
     "nivel": "Level",
-    "pontos": "points"
+    "pontos": "points",
+    "resultados": "{{count}} badge",
+    "resultados_other": "{{count}} badges"
   },
   "candidaturas": {
     "titulo": "My Badges",
@@ -177,7 +181,13 @@
     "descTextoExtra": "This badge recognizes practical skills and is validated based on submitted evidence, according to Softinsa's certification requirements.",
     "requisitos": "Requirements",
     "semRequisitos": "No specific requirements defined for this badge.",
-    "requisitoTextoExtra": "To meet this requirement, you must submit evidence that clearly demonstrates the indicated competence."
+    "requisitoTextoExtra": "To meet this requirement, you must submit evidence that clearly demonstrates the indicated competence.",
+    "emitidoPor": "Issued by",
+    "obrigatorio": "Required",
+    "opcional": "Optional",
+    "validade": "Validity",
+    "naoExpira": "No expiry",
+    "todosRequisitos": "Meet all mandatory requirements to earn this badge."
   },
   "certificado": {
     "gerando": "Generating certificate…",

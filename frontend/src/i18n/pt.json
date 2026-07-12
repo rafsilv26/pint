@@ -137,11 +137,15 @@
     "proximosEventos": "Próximos Eventos"
   },
   "catalogo": {
+    "titulo": "Catálogo de Badges",
+    "subtitulo": "Explora as credenciais disponíveis e candidata-te.",
     "procurar": "Procurar Badges",
     "vazioTitulo": "Nenhum badge encontrado",
     "vazioDesc": "Tenta outra pesquisa.",
     "nivel": "Nível",
-    "pontos": "pontos"
+    "pontos": "pontos",
+    "resultados": "{{count}} badge",
+    "resultados_other": "{{count}} badges"
   },
   "candidaturas": {
     "titulo": "Meus Badges",
@@ -177,7 +181,13 @@
     "descTextoExtra": "Este badge reconhece competências práticas e é validado com base nas evidências submetidas, de acordo com os requisitos de certificação da Softinsa.",
     "requisitos": "Requisitos",
     "semRequisitos": "Sem requisitos específicos definidos para este badge.",
-    "requisitoTextoExtra": "Para cumprir este requisito deves submeter evidências que demonstrem, de forma clara, a competência indicada."
+    "requisitoTextoExtra": "Para cumprir este requisito deves submeter evidências que demonstrem, de forma clara, a competência indicada.",
+    "emitidoPor": "Emitido por",
+    "obrigatorio": "Obrigatório",
+    "opcional": "Opcional",
+    "validade": "Validade",
+    "naoExpira": "Não expira",
+    "todosRequisitos": "Cumpre todos os requisitos obrigatórios para obteres este badge."
   },
   "certificado": {
     "gerando": "A gerar certificado…",
