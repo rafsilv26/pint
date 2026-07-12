@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildTalentReport, filterTalentApplicationsByTab, filterTalentCandidaturas, getEvidenceCoverage, getExpirationState, getTalentApplicationTabCounts, normalizeTalentWorkspace } from './talentWorkspace'
+import { buildTalentProfile, buildTalentReport, filterTalentApplicationsByTab, filterTalentCandidaturas, getEvidenceCoverage, getExpirationState, getTalentApplicationTabCounts, normalizeTalentWorkspace } from './talentWorkspace'
 
 const raw = {
   consultants: { data: [{ id: 7, name: 'Rafael Teste', area: 'Mobile', serviceLine: 'Technology', points: 200, badgesConquistados: [{ id: 10, nome: 'Flutter', obtidoEm: '2026-01-01', expiraEm: '2026-08-01', valido: true }] }] },
@@ -48,6 +48,24 @@ describe('talent workspace', () => {
     const workspace = normalizeTalentWorkspace(raw, new Date('2026-07-11'))
     expect(filterTalentCandidaturas(workspace.candidaturas, { badgeId: 11, from: '2026-07-01', to: '2026-07-01' })).toHaveLength(1)
     expect(filterTalentCandidaturas(workspace.candidaturas, { from: '2026-07-02' })).toHaveLength(0)
+  })
+
+  it('builds a global Talent Manager profile from the workspace', () => {
+    const profile = buildTalentProfile(normalizeTalentWorkspace(raw, new Date('2026-07-11')))
+
+    expect(profile).toMatchObject({
+      serviceLines: [{ id: 2, nome: 'Technology' }],
+      learningPaths: [{ id: 1, nome: 'Engineering' }],
+      areas: [{ id: 3, nome: 'Mobile' }],
+      stats: {
+        consultants: 1,
+        serviceLines: 1,
+        availableBadges: 2,
+        pendingValidations: 1,
+        awardedBadges: 1,
+        expiringBadges: 1,
+      },
+    })
   })
 
   it('requires validated evidence for every mandatory requirement', () => {

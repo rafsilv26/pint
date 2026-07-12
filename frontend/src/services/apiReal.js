@@ -6,6 +6,7 @@
 import { http, getUser, getToken, api } from './http.js'
 import i18next from 'i18next' // <-- Import da instância global para ficheiros JS puros
 import {
+  buildTalentProfile,
   buildTalentReport,
   getTalentWorkspace,
   invalidateTalentWorkspace,
@@ -346,6 +347,9 @@ export async function getTalentDashboard() {
     conquistasEspeciais: cons.reduce((sum, c) => sum + c.specialAchievements.length, 0),
     generatedAt: workspace.generatedAt,
   }
+}
+export async function getTalentProfile() {
+  return buildTalentProfile(await getTalentWorkspace())
 }
 // ---------- Admin: Dashboard (painel de controlo) ----------
 // Reutiliza as mesmas estatísticas/leaderboard do TM, mas troca a

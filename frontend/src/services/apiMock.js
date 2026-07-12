@@ -316,6 +316,23 @@ export async function getTalentReports(filters = {}) {
   }
 }
 
+export async function getTalentProfile() {
+  const report = await getTalentReports()
+  return {
+    serviceLines: report.filterOptions.serviceLines.map((nome, index) => ({ id: index + 1, nome })),
+    learningPaths: report.filterOptions.learningPaths.map((nome, index) => ({ id: index + 1, nome })),
+    areas: report.filterOptions.areas.map((nome, index) => ({ id: index + 1, nome })),
+    stats: {
+      consultants: report.totals.consultants,
+      serviceLines: report.filterOptions.serviceLines.length,
+      availableBadges: mockBadges.filter((badge) => badge.ativo !== false).length,
+      pendingValidations: report.candidaturas.filter((row) => row.status?.code === 'SUBMITTED').length,
+      awardedBadges: report.totals.awards,
+      expiringBadges: 0,
+    },
+  }
+}
+
 export async function refreshTalentWorkspace() {
   return { ok: true }
 }

@@ -358,6 +358,25 @@
       "TalentManager": "Talent Manager",
       "ServiceLineLeader": "Service Line Leader"
     },
+    "talent": {
+      "eyebrow": "Talent Manager scope",
+      "title": "Global talent management",
+      "subtitle": "A cross-functional view of the structure, catalog and applications under your management.",
+      "globalScope": "Global scope",
+      "loading": "Loading talent management data…",
+      "serviceLines": "Service Lines",
+      "learningPaths": "Learning Paths",
+      "areas": "Covered areas",
+      "empty": "No associated data.",
+      "stats": {
+        "consultants": "Consultants",
+        "serviceLines": "Service Lines",
+        "availableBadges": "Available badges",
+        "pendingValidations": "Awaiting validation",
+        "awardedBadges": "Awarded badges",
+        "expiringBadges": "Expiring or expired"
+      }
+    },
     "serviceLine": {
       "eyebrow": "My Service Line",
       "subtitle": "Scope of responsibility associated with your account.",

@@ -59,6 +59,7 @@ export const verificarBadge = impl.verificarBadge
 
 // Talent Manager
 export const getTalentDashboard = impl.getTalentDashboard
+export const getTalentProfile = impl.getTalentProfile
 export const getTalentCandidaturas = impl.getTalentCandidaturas
 export const getCandidatura = impl.getCandidatura
 export const validarTalentManager = impl.validarTalentManager

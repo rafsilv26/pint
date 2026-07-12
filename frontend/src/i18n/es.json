@@ -358,6 +358,25 @@
       "TalentManager": "Talent Manager",
       "ServiceLineLeader": "Service Line Leader"
     },
+    "talent": {
+      "eyebrow": "Ámbito del Talent Manager",
+      "title": "Gestión global del talento",
+      "subtitle": "Visión transversal de la estructura, el catálogo y las solicitudes bajo tu gestión.",
+      "globalScope": "Ámbito global",
+      "loading": "Cargando datos de gestión del talento…",
+      "serviceLines": "Service Lines",
+      "learningPaths": "Learning Paths",
+      "areas": "Áreas incluidas",
+      "empty": "Sin datos asociados.",
+      "stats": {
+        "consultants": "Consultores",
+        "serviceLines": "Service Lines",
+        "availableBadges": "Insignias disponibles",
+        "pendingValidations": "Pendientes de validación",
+        "awardedBadges": "Insignias otorgadas",
+        "expiringBadges": "Próximas a vencer o vencidas"
+      }
+    },
     "serviceLine": {
       "eyebrow": "Mi Service Line",
       "subtitle": "Ámbito de responsabilidad asociado a tu cuenta.",

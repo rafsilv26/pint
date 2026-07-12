@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Award, BookOpen, Clock3, Globe2, KeyRound, LogOut, Network, PenLine, Users } from 'lucide-react'
+import { Award, BadgeCheck, BookOpen, Building2, Clock3, Globe2, KeyRound, Layers3, LogOut, Network, PenLine, TriangleAlert, Users } from 'lucide-react'
 import { PageHeader, Card, Field, Button, Spinner } from '../components/ui'
 import { useAuth } from '../context/useAuth'
 import { useAsync } from '../hooks/useAsync'
@@ -21,6 +21,15 @@ export default function ManagerContaPage() {
   const [erro, setErro] = useState(null)
   const [saving, setSaving] = useState(false)
   const {
+    data: talentProfile,
+    loading: loadingTalent,
+    error: talentError,
+    reload: reloadTalent,
+  } = useAsync(
+    () => isTalentManager ? api.getTalentProfile() : Promise.resolve(null),
+    [isTalentManager],
+  )
+  const {
     data: serviceLineProfile,
     loading: loadingServiceLine,
     error: serviceLineError,
@@ -30,6 +39,7 @@ export default function ManagerContaPage() {
     [isServiceLineLeader],
   )
 
+  useAutoRefresh(reloadTalent, 30_000, isTalentManager)
   useAutoRefresh(reloadServiceLine, 30_000, isServiceLineLeader)
 
   const iniciais = (user?.nome || 'U').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
@@ -39,7 +49,15 @@ export default function ManagerContaPage() {
     { key: 'consultants', icon: Users, value: serviceLineProfile.stats.consultants },
     { key: 'availableBadges', icon: Award, value: serviceLineProfile.stats.availableBadges },
     { key: 'pendingApprovals', icon: Clock3, value: serviceLineProfile.stats.pendingApprovals },
-    { key: 'awardedBadges', icon: Award, value: serviceLineProfile.stats.awardedBadges },
+    { key: 'awardedBadges', icon: BadgeCheck, value: serviceLineProfile.stats.awardedBadges },
+  ] : []
+  const talentStats = talentProfile ? [
+    { key: 'consultants', icon: Users, value: talentProfile.stats.consultants },
+    { key: 'serviceLines', icon: Building2, value: talentProfile.stats.serviceLines },
+    { key: 'availableBadges', icon: Award, value: talentProfile.stats.availableBadges },
+    { key: 'pendingValidations', icon: Clock3, value: talentProfile.stats.pendingValidations },
+    { key: 'awardedBadges', icon: BadgeCheck, value: talentProfile.stats.awardedBadges },
+    { key: 'expiringBadges', icon: TriangleAlert, value: talentProfile.stats.expiringBadges },
   ] : []
 
   async function alterar(e) {
@@ -83,8 +101,72 @@ export default function ManagerContaPage() {
               {serviceLineProfile.serviceLine.nome}
             </p>
           )}
+          {isTalentManager && talentProfile && (
+            <p className="small text-muted mt-1 mb-0 d-flex align-items-center gap-1">
+              <Globe2 size={14} aria-hidden="true" />
+              {t('managerConta.talent.globalScope')}
+            </p>
+          )}
         </div>
       </Card>
+
+      {isTalentManager && (
+        <Card className="mt-4">
+          <div>
+            <p className="small fw-semibold text-brand text-uppercase mb-1">{t('managerConta.talent.eyebrow')}</p>
+            <h2 className="h4 fw-bold text-ink mb-1 d-flex align-items-center gap-2">
+              <Globe2 size={22} className="text-brand" aria-hidden="true" />
+              {t('managerConta.talent.title')}
+            </h2>
+            <p className="small text-muted mb-0">{t('managerConta.talent.subtitle')}</p>
+          </div>
+
+          {loadingTalent && !talentProfile && <Spinner label={t('managerConta.talent.loading')} />}
+
+          {talentError && !talentProfile && (
+            <div className="alert alert-danger mt-4 mb-0 d-flex flex-wrap align-items-center justify-content-between gap-2" role="alert">
+              <span>{talentError}</span>
+              <button type="button" className="btn btn-sm btn-outline-danger" onClick={reloadTalent}>{t('ui.error.retry')}</button>
+            </div>
+          )}
+
+          {talentProfile && (
+            <>
+              <div className="row g-4 mt-1">
+                {[
+                  { key: 'serviceLines', icon: Building2, rows: talentProfile.serviceLines },
+                  { key: 'learningPaths', icon: BookOpen, rows: talentProfile.learningPaths },
+                  { key: 'areas', icon: Layers3, rows: talentProfile.areas },
+                ].map(({ key, icon: Icon, rows }) => (
+                  <div className="col-12 col-md-4" key={key}>
+                    <p className="small text-muted mb-2 d-flex align-items-center gap-2">
+                      <Icon size={16} aria-hidden="true" />
+                      {t(`managerConta.talent.${key}`)}
+                    </p>
+                    <div className="d-flex flex-wrap gap-2">
+                      {rows.length > 0
+                        ? rows.map((row) => <span key={row.id} className="badge rounded-pill bg-brand-light text-brand text-wrap text-start px-3 py-2">{row.nome}</span>)
+                        : <span className="small text-muted">{t('managerConta.talent.empty')}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="row g-3 mt-3 pt-3 border-top">
+                {talentStats.map(({ key, icon: Icon, value }) => (
+                  <div className="col-6 col-md-4" key={key}>
+                    <div className="d-flex align-items-center gap-2 mb-1 text-brand">
+                      <Icon size={17} aria-hidden="true" />
+                      <span className="h4 fw-bold mb-0">{value}</span>
+                    </div>
+                    <p className="small text-muted mb-0">{t(`managerConta.talent.stats.${key}`)}</p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </Card>
+      )}
 
       {isServiceLineLeader && (
         <Card className="mt-4">
@@ -126,7 +208,7 @@ export default function ManagerContaPage() {
                   <p className="small text-muted mb-2">{t('managerConta.serviceLine.areas')}</p>
                   <div className="d-flex flex-wrap gap-2">
                     {serviceLineProfile.areas.length > 0
-                      ? serviceLineProfile.areas.map((area) => <span key={area.id} className="badge rounded-pill bg-brand-light text-brand px-3 py-2">{area.nome}</span>)
+                      ? serviceLineProfile.areas.map((area) => <span key={area.id} className="badge rounded-pill bg-brand-light text-brand text-wrap text-start px-3 py-2">{area.nome}</span>)
                       : <span className="small text-muted">{t('managerConta.serviceLine.emptyAreas')}</span>}
                   </div>
                 </div>
