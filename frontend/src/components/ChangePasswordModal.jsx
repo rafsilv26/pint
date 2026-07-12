@@ -3,32 +3,43 @@ import { useNavigate } from 'react-router-dom'
 import { Lock } from 'lucide-react'
 import { Field } from './ui'
 import { useAuth } from '../context/useAuth'
+import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
 import { useTranslation } from 'react-i18next' // <-- Import do hook
 
 // Pop-up de primeira-troca de password (mostrado por cima da app quando
 // mustChangePassword está ativo). Bloqueia a app até estar trocada.
+// No primeiro acesso, o CONSULTOR escolhe aqui a sua área (guião req 2).
 export default function ChangePasswordModal() {
   const { t } = useTranslation() // <-- Inicializa a tradução
   const navigate = useNavigate()
-  const { markPasswordChanged, logout } = useAuth()
+  const { user, markPasswordChanged, logout } = useAuth()
+  const isConsultor = (user?.roles || []).includes('Consultor') || user?.role === 'Consultor'
+  const { data: areas } = useAsync(() => (isConsultor ? api.getAreasPublicas() : Promise.resolve([])))
+
   const [atual, setAtual] = useState('')
   const [nova, setNova] = useState('')
   const [confirmar, setConfirmar] = useState('')
+  const [areaId, setAreaId] = useState('')
   const [erro, setErro] = useState(null)
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
     setErro(null)
-    
+
     // Validações traduzidas
     if (nova.length < 8) return setErro(t('changePasswordModal.erros.comprimento'))
     if (nova !== confirmar) return setErro(t('changePasswordModal.erros.coincidem'))
-    
+    if (isConsultor && !areaId) return setErro(t('changePasswordModal.erros.area'))
+
     setLoading(true)
     try {
-      await api.changePassword({ currentPassword: atual, newPassword: nova })
+      await api.changePassword({
+        currentPassword: atual,
+        newPassword: nova,
+        areaId: isConsultor && areaId ? Number(areaId) : undefined,
+      })
       markPasswordChanged()
     } catch (err) {
       setErro(err.message)
@@ -81,6 +92,16 @@ export default function ChangePasswordModal() {
             onChange={(e) => setConfirmar(e.target.value)}
             required
           />
+          {isConsultor && (
+            <label className="d-block">
+              <span className="mb-1 d-block small fw-medium text-ink">{t('changePasswordModal.campos.areaLabel')}</span>
+              <select value={areaId} onChange={(e) => setAreaId(e.target.value)} className="form-select" required>
+                <option value="">{t('changePasswordModal.campos.areaPlaceholder')}</option>
+                {(areas || []).map((a) => <option key={a.id} value={a.id}>{a.nome}</option>)}
+              </select>
+              <span className="mt-1 d-block fs-xs text-muted">{t('changePasswordModal.campos.areaHint')}</span>
+            </label>
+          )}
           <button type="submit" disabled={loading} className="btn btn-primary w-100">
             {loading ? t('changePasswordModal.botoes.guardando') : t('changePasswordModal.botoes.guardar')}
           </button>

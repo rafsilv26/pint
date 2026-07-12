@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const sequelize = require('../config/database');
 const User = require('../models/User');
-const { Area } = require('../models');
+const { Area, Consultant } = require('../models');
 const PolicyRGPD = require('../models/PolicyRGPD');
 const PolicyRGPDAcceptance = require('../models/PolicyRGPDAcceptance');
 const { applyUserRoles, getUserRoles, normalizeRoles } = require('../services/userRoles.service');
@@ -98,7 +98,9 @@ exports.register = async (req, res) => {
 
         // Email de boas-vindas em background — o registo não deve falhar
         // nem atrasar por causa do SMTP.
-        emailBoasVindas(newUser, `${frontendUrl()}/login`, `${frontendUrl()}/confirmar-email?token=${confirmToken}`)
+        // A password temporária (a que o admin definiu) vai no email para o
+        // utilizador poder entrar no primeiro acesso.
+        emailBoasVindas(newUser, `${frontendUrl()}/login`, `${frontendUrl()}/confirmar-email?token=${confirmToken}`, password)
             .catch((erro) => console.error('Erro ao enviar email de boas-vindas:', erro.message));
 
         res.status(201).json({
@@ -373,7 +375,9 @@ exports.confirmEmail = async (req, res) => {
 
 exports.changePassword = async (req, res) => {
     try {
-        const { currentPassword, newPassword } = req.body;
+        // areaId (opcional): no primeiro acesso o consultor escolhe a sua área
+        // aqui, ao definir a nova password (guião req 2).
+        const { currentPassword, newPassword, areaId } = req.body;
 
         if (!currentPassword || !newPassword) {
             return res.status(400).json({ message: 'Password atual e nova password sao obrigatorias.' });
@@ -393,6 +397,15 @@ exports.changePassword = async (req, res) => {
         user.mustChangePassword = false;
         user.updatedAt = new Date();
         await user.save();
+
+        // Se for consultor e tiver escolhido área, guarda-a.
+        if (areaId) {
+            const consultant = await Consultant.findByPk(user.id);
+            if (consultant) {
+                consultant.areaId = areaId;
+                await consultant.save();
+            }
+        }
 
         res.json({ message: 'Password alterada com sucesso.' });
     } catch (error) {

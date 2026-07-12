@@ -720,6 +720,10 @@
       "papel": "Papel",
       "serviceLine": "Service Line",
       "serviceLineEscolher": "Elige una Service Line",
+      "area": "Área",
+      "areaEscolher": "Elige un área",
+      "areaOpcional": "opcional — el consultor la elige en el primer acceso",
+      "areaObrigatoria": "Debes elegir un área para el perfil Consultor.",
       "serviceLineObrigatoria": "Es obligatorio elegir una Service Line para el perfil Service Line Leader.",
       "ativo": "Ativo",
       "cancelar": "Cancelar",
@@ -751,14 +755,18 @@
     "descricao": "Es tu primer acceso — establece una contraseña personal para continuar.",
     "erros": {
       "comprimento": "La nueva contraseña debe tener al menos 8 caracteres.",
-      "coincidem": "Las contraseñas no coinciden."
+      "coincidem": "Las contraseñas no coinciden.",
+      "area": "Elige tu área para continuar."
     },
     "campos": {
       "atualLabel": "Contraseña actual (la que recibiste)",
       "atualPlaceholder": "Contraseña temporal",
       "novaLabel": "Nueva contraseña",
       "novaHint": "Mínimo 8 caracteres.",
-      "confirmarLabel": "Confirmar nueva contraseña"
+      "confirmarLabel": "Confirmar nueva contraseña",
+      "areaLabel": "Tu área",
+      "areaPlaceholder": "Elige tu área",
+      "areaHint": "Verás las insignias preferentes de esta área."
     },
     "botoes": {
       "guardando": "Guardando…",

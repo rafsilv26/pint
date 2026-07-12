@@ -246,7 +246,7 @@ const emailRecuperarPassword = async (user, link) => {
 
 // Email de boas-vindas quando o Admin regista um novo utilizador.
 // confirmLink (opcional): link para confirmar o endereço de email.
-const emailBoasVindas = async (user, loginLink, confirmLink) => {
+const emailBoasVindas = async (user, loginLink, confirmLink, tempPassword) => {
   await enviarEmail(
     user.email,
     '👋 A tua conta na Plataforma de Badges foi criada',
@@ -261,8 +261,11 @@ const emailBoasVindas = async (user, loginLink, confirmLink) => {
         <p>Foi criada uma conta para ti na Plataforma de Badges da Softinsa.</p>
         <div style="background-color: #e8f0fe; padding: 15px; border-radius: 5px; margin: 20px 0;">
           <p style="margin: 0;"><strong>Email de acesso:</strong> ${user.email}</p>
+          ${tempPassword ? `<p style="margin: 8px 0 0;"><strong>Password temporária:</strong> <code style="background:#fff;padding:2px 6px;border-radius:4px;">${tempPassword}</code></p>` : ''}
         </div>
-        <p>A password inicial é comunicada pelo administrador. No primeiro acesso vais ser convidado(a) a definir uma nova password.</p>
+        <p>${tempPassword
+          ? 'Usa a password temporária acima no primeiro acesso. Vais ser convidado(a) a definir uma nova password.'
+          : 'No primeiro acesso vais entrar com a password que definiste.'}</p>
         ${confirmLink ? `
         <p style="text-align: center; margin: 30px 0 10px;">
           <a href="${confirmLink}"

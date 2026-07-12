@@ -721,6 +721,10 @@
       "serviceLine": "Service Line",
       "serviceLineEscolher": "Choose a Service Line",
       "serviceLineObrigatoria": "You must choose a Service Line for the Service Line Leader role.",
+      "area": "Area",
+      "areaEscolher": "Choose an area",
+      "areaOpcional": "optional — the consultant chooses on first login",
+      "areaObrigatoria": "You must choose an area for the Consultant role.",
       "ativo": "Ativo",
       "cancelar": "Cancelar",
       "guardando": "A guardar…",
@@ -751,14 +755,18 @@
     "descricao": "This is your first login — set a personal password to continue.",
     "erros": {
       "comprimento": "The new password must be at least 8 characters long.",
-      "coincidem": "Passwords do not match."
+      "coincidem": "Passwords do not match.",
+      "area": "Choose your area to continue."
     },
     "campos": {
       "atualLabel": "Current password (the one you received)",
       "atualPlaceholder": "Temporary password",
       "novaLabel": "New password",
       "novaHint": "Minimum 8 characters.",
-      "confirmarLabel": "Confirm new password"
+      "confirmarLabel": "Confirm new password",
+      "areaLabel": "Your area",
+      "areaPlaceholder": "Choose your area",
+      "areaHint": "You'll see the preferred badges for this area."
     },
     "botoes": {
       "guardando": "Saving…",

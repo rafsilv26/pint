@@ -10,6 +10,7 @@ export default function AdminUsersPage() {
   const { t } = useTranslation() // <-- Inicializa a tradução
   const { data, loading, error, reload } = useAsync(() => api.getUsers())
   const { data: serviceLines } = useAsync(() => api.listResource('service-lines'))
+  const { data: areas } = useAsync(() => api.listResource('areas'))
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState({})
   const [saving, setSaving] = useState(false)
@@ -17,6 +18,7 @@ export default function AdminUsersPage() {
   const [confirmar, setConfirmar] = useState(null)
   const rows = data || []
   const serviceLineOptions = serviceLines || []
+  const areaOptions = areas || []
 
   // Lista de Roles movida para dentro para suportar traduções
   const ROLES = [
@@ -30,8 +32,8 @@ export default function AdminUsersPage() {
   function abrir(u) {
     setEditing(u || {})
     setForm(u
-      ? { nome: u.nome, email: u.email, role: (u.roles || [])[0] || 'Consultor', ativo: u.ativo, serviceLineId: u.serviceLineId || '' }
-      : { nome: '', email: '', password: '', role: 'Consultor', serviceLineId: '' })
+      ? { nome: u.nome, email: u.email, role: (u.roles || [])[0] || 'Consultor', ativo: u.ativo, serviceLineId: u.serviceLineId || '', areaId: u.areaId || '' }
+      : { nome: '', email: '', password: '', role: 'Consultor', serviceLineId: '', areaId: '' })
     setErroForm(null)
   }
   function fechar() { setEditing(null); setForm({}) }
@@ -46,10 +48,11 @@ export default function AdminUsersPage() {
     setErroForm(null)
     try {
       const serviceLineId = form.role === 'ServiceLineLeader' ? Number(form.serviceLineId) : undefined
+      const areaId = form.role === 'Consultor' ? Number(form.areaId) : undefined
       if (editing?.id) {
-        await api.updateUser(editing.id, { nome: form.nome, email: form.email, roles: [form.role], ativo: form.ativo, serviceLineId })
+        await api.updateUser(editing.id, { nome: form.nome, email: form.email, roles: [form.role], ativo: form.ativo, serviceLineId, areaId })
       } else {
-        await api.createUser({ nome: form.nome, email: form.email, password: form.password, roles: [form.role], serviceLineId })
+        await api.createUser({ nome: form.nome, email: form.email, password: form.password, roles: [form.role], serviceLineId, areaId })
       }
       fechar()
       reload()
@@ -157,6 +160,19 @@ export default function AdminUsersPage() {
                   >
                     <option value="">{t('adminUsers.modal.serviceLineEscolher')}</option>
                     {serviceLineOptions.map((sl) => <option key={sl.id} value={sl.id}>{sl.nome}</option>)}
+                  </select>
+                </label>
+              )}
+              {form.role === 'Consultor' && (
+                <label className="d-block">
+                  <span className="mb-1 d-block small fw-medium text-ink">{t('adminUsers.modal.area')} <span className="text-muted fw-normal">({t('adminUsers.modal.areaOpcional')})</span></span>
+                  <select
+                    value={form.areaId || ''}
+                    onChange={(e) => setForm({ ...form, areaId: e.target.value })}
+                    className="form-select"
+                  >
+                    <option value="">{t('adminUsers.modal.areaEscolher')}</option>
+                    {areaOptions.map((a) => <option key={a.id} value={a.id}>{a.nome}</option>)}
                   </select>
                 </label>
               )}

@@ -85,8 +85,8 @@ export async function saveNotificationPrefs(prefs) {
   return http('/notifications/preferences', { method: 'PUT', body: prefs })
 }
 
-export async function changePassword({ currentPassword, newPassword }) {
-  return http('/auth/change-password', { method: 'PUT', body: { currentPassword, newPassword } })
+export async function changePassword({ currentPassword, newPassword, areaId }) {
+  return http('/auth/change-password', { method: 'PUT', body: { currentPassword, newPassword, areaId } })
 }
 
 export async function me() {

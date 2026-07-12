@@ -711,6 +711,10 @@
       "serviceLine": "Service Line",
       "serviceLineEscolher": "Escolhe uma Service Line",
       "serviceLineObrigatoria": "É obrigatório escolher uma Service Line para o perfil Service Line Leader.",
+      "area": "Área",
+      "areaEscolher": "Escolhe uma área",
+      "areaOpcional": "opcional — o consultor escolhe no 1.º acesso",
+      "areaObrigatoria": "É obrigatório escolher uma área para o perfil Consultor.",
       "ativo": "Ativo",
       "cancelar": "Cancelar",
       "guardando": "A guardar…",
@@ -741,14 +745,18 @@
     "descricao": "É o teu primeiro acesso — define uma palavra-passe pessoal para continuar.",
     "erros": {
       "comprimento": "A nova palavra-passe deve ter pelo menos 8 caracteres.",
-      "coincidem": "As palavras-passe não coincidem."
+      "coincidem": "As palavras-passe não coincidem.",
+      "area": "Escolhe a tua área para continuar."
     },
     "campos": {
       "atualLabel": "Palavra-passe atual (a que recebeste)",
       "atualPlaceholder": "Palavra-passe temporária",
       "novaLabel": "Nova palavra-passe",
       "novaHint": "Mínimo 8 caracteres.",
-      "confirmarLabel": "Confirmar nova palavra-passe"
+      "confirmarLabel": "Confirmar nova palavra-passe",
+      "areaLabel": "A tua área",
+      "areaPlaceholder": "Escolhe a tua área",
+      "areaHint": "Vais ver os badges preferenciais desta área."
     },
     "botoes": {
       "guardando": "A guardar…",
