@@ -120,6 +120,7 @@ export async function getDashboard() {
       progresso: c.progresso,
       status: c.status,
     })),
+    areaNome: d.areaNome || '',
     recomendados: (d.recommendations || []).slice(0, 3).map((r, i) => ({
       id: r.id, nome: r.title, nivel: r.level || '', tint: TINTS[i % TINTS.length],
     })),

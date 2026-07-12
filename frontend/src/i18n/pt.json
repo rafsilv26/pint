@@ -126,6 +126,8 @@
     "recomendados": "Recomendados para Si",
     "explorar": "Explorar",
     "baseadoPerfil": "Baseado no seu perfil e interesses",
+    "baseadoArea": "Baseado na tua área: {{area}}",
+    "semRecomendados": "Ainda não há recomendações para a tua área.",
     "acoesRapidas": "Ações Rápidas",
     "verNotificacoes": "Ver Notificações",
     "verPerfilPublico": "Ver o seu Perfil Público",

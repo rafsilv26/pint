@@ -129,7 +129,12 @@ export default function DashboardPage() {
                 {t('dashboard.explorar')}
               </Link>
             </div>
-            <p className="mb-3 small text-muted">{t('dashboard.baseadoPerfil')}</p>
+            <p className="mb-3 small text-muted">
+              {data.areaNome ? t('dashboard.baseadoArea', { area: data.areaNome }) : t('dashboard.baseadoPerfil')}
+            </p>
+            {data.recomendados.length === 0 ? (
+              <p className="rounded-3 border border-dashed p-3 small text-muted mb-0">{t('dashboard.semRecomendados')}</p>
+            ) : (
             <div className="row row-cols-1 row-cols-sm-3 g-3">
               {data.recomendados.map((r) => (
                 <div className="col" key={r.id}>
@@ -149,6 +154,7 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
+            )}
           </Card>
         </div>
 

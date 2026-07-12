@@ -185,6 +185,7 @@ exports.getDashboard = async (req, res) => {
         noticeMessage: notice?.message || '',
         specialAchievementTitle: 'Conquistas especiais',
         specialAchievementMessage: `${premiumAwards.length} conquistas desbloqueadas!`,
+        areaNome: consultant?.Area?.nome || '',
         recommendations,
         badgesWon: awards.length,
         inProgress: applicationsInProgress.length,

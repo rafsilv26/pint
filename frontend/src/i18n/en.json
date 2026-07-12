@@ -126,6 +126,8 @@
     "recomendados": "Recommended for You",
     "explorar": "Explore",
     "baseadoPerfil": "Based on your profile and interests",
+    "baseadoArea": "Based on your area: {{area}}",
+    "semRecomendados": "No recommendations for your area yet.",
     "acoesRapidas": "Quick Actions",
     "verNotificacoes": "View Notifications",
     "verPerfilPublico": "View your Public Profile",
