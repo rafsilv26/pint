@@ -343,6 +343,27 @@
     "confirmarLogout": "Tens a certeza de que pretendes terminar a sessão?",
     "sucessoMsg": "Palavra-passe alterada com sucesso.",
     "alterarPassword": "Alterar Palavra-passe",
+    "roles": {
+      "Admin": "Administrador",
+      "TalentManager": "Talent Manager",
+      "ServiceLineLeader": "Service Line Leader"
+    },
+    "serviceLine": {
+      "eyebrow": "A minha Service Line",
+      "subtitle": "Âmbito de responsabilidade associado à tua conta.",
+      "notAssigned": "Sem Service Line associada",
+      "notAvailable": "Não disponível",
+      "loading": "A carregar os dados da Service Line…",
+      "learningPath": "Learning Path",
+      "areas": "Áreas abrangidas",
+      "emptyAreas": "Sem áreas associadas.",
+      "stats": {
+        "consultants": "Consultores",
+        "availableBadges": "Badges disponíveis",
+        "pendingApprovals": "Aguardam decisão",
+        "awardedBadges": "Badges atribuídas"
+      }
+    },
     "labels": {
       "atual": "Palavra-passe atual",
       "nova": "Nova palavra-passe",

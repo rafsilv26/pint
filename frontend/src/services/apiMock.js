@@ -340,6 +340,20 @@ export async function getServiceLineDashboard() {
     })),
   }
 }
+export async function getServiceLineProfile() {
+  await delay()
+  return {
+    serviceLine: { id: 1, nome: 'Technology', descricao: '' },
+    learningPath: { id: 1, nome: 'Engineering' },
+    areas: [{ id: 1, nome: 'LowCode' }],
+    stats: {
+      consultants: 4,
+      availableBadges: mockBadges.length,
+      pendingApprovals: mockServiceLinePedidos.filter((row) => row.status?.code === 'VALIDATED').length,
+      awardedBadges: 0,
+    },
+  }
+}
 export async function getServiceLinePedidos() {
   await delay()
   return clone(mockServiceLinePedidos)

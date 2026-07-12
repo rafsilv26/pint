@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Globe2, LogOut, KeyRound, PenLine } from 'lucide-react'
-import { PageHeader, Card, Field, Button } from '../components/ui'
+import { Award, BookOpen, Clock3, Globe2, KeyRound, LogOut, Network, PenLine, Users } from 'lucide-react'
+import { PageHeader, Card, Field, Button, Spinner } from '../components/ui'
 import { useAuth } from '../context/useAuth'
+import { useAsync } from '../hooks/useAsync'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 // Definições de conta dos perfis de gestão (Admin / TM / SLL).
 export default function ManagerContaPage() {
-  const { t, i18n } = useTranslation() // <-- Inicializa a tradução
+  const { t, i18n } = useTranslation()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -18,8 +20,27 @@ export default function ManagerContaPage() {
   const [msg, setMsg] = useState(null)
   const [erro, setErro] = useState(null)
   const [saving, setSaving] = useState(false)
+  const {
+    data: serviceLineProfile,
+    loading: loadingServiceLine,
+    error: serviceLineError,
+    reload: reloadServiceLine,
+  } = useAsync(
+    () => isServiceLineLeader ? api.getServiceLineProfile() : Promise.resolve(null),
+    [isServiceLineLeader],
+  )
+
+  useAutoRefresh(reloadServiceLine, 30_000, isServiceLineLeader)
 
   const iniciais = (user?.nome || 'U').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
+  const roles = (user?.roles || [user?.role]).filter(Boolean)
+  const roleLabel = roles.map((role) => t(`managerConta.roles.${role}`, { defaultValue: role })).join(', ')
+  const serviceLineStats = serviceLineProfile ? [
+    { key: 'consultants', icon: Users, value: serviceLineProfile.stats.consultants },
+    { key: 'availableBadges', icon: Award, value: serviceLineProfile.stats.availableBadges },
+    { key: 'pendingApprovals', icon: Clock3, value: serviceLineProfile.stats.pendingApprovals },
+    { key: 'awardedBadges', icon: Award, value: serviceLineProfile.stats.awardedBadges },
+  ] : []
 
   async function alterar(e) {
     e.preventDefault()
@@ -44,7 +65,7 @@ export default function ManagerContaPage() {
   }
 
   return (
-    <div className="mx-auto" style={{ maxWidth: '42rem' }}>
+    <div className="mx-auto" style={{ maxWidth: '56rem' }}>
       <PageHeader
         title={t('managerConta.titulo')}
         subtitle={t('managerConta.subtitulo')}
@@ -52,12 +73,80 @@ export default function ManagerContaPage() {
 
       <Card className="d-flex align-items-center gap-3">
         <div className="d-flex align-items-center justify-content-center rounded-circle bg-brand-light fs-5 fw-bold text-brand flex-shrink-0" style={{ height: '4rem', width: '4rem' }}>{iniciais}</div>
-        <div>
+        <div className="min-w-0">
           <p className="fs-5 fw-semibold text-ink mb-0">{user?.nome}</p>
-          <p className="small text-muted mb-0">{user?.email}</p>
-          <p className="mt-1 fs-xs fw-medium text-brand mb-0">{(user?.roles || [user?.role]).filter(Boolean).join(', ')}</p>
+          <p className="small text-muted mb-0 text-break">{user?.email}</p>
+          <p className="mt-1 fs-xs fw-medium text-brand mb-0">{roleLabel}</p>
+          {isServiceLineLeader && serviceLineProfile?.serviceLine?.nome && (
+            <p className="small text-muted mt-1 mb-0 d-flex align-items-center gap-1">
+              <Network size={14} aria-hidden="true" />
+              {serviceLineProfile.serviceLine.nome}
+            </p>
+          )}
         </div>
       </Card>
+
+      {isServiceLineLeader && (
+        <Card className="mt-4">
+          <div className="d-flex flex-wrap align-items-start justify-content-between gap-3">
+            <div>
+              <p className="small fw-semibold text-brand text-uppercase mb-1">{t('managerConta.serviceLine.eyebrow')}</p>
+              <h2 className="h4 fw-bold text-ink mb-1 d-flex align-items-center gap-2">
+                <Network size={22} className="text-brand" aria-hidden="true" />
+                {serviceLineProfile?.serviceLine?.nome || t('managerConta.serviceLine.notAssigned')}
+              </h2>
+              <p className="small text-muted mb-0">{t('managerConta.serviceLine.subtitle')}</p>
+            </div>
+          </div>
+
+          {loadingServiceLine && !serviceLineProfile && <Spinner label={t('managerConta.serviceLine.loading')} />}
+
+          {serviceLineError && !serviceLineProfile && (
+            <div className="alert alert-danger mt-4 mb-0 d-flex flex-wrap align-items-center justify-content-between gap-2" role="alert">
+              <span>{serviceLineError}</span>
+              <button type="button" className="btn btn-sm btn-outline-danger" onClick={reloadServiceLine}>{t('ui.error.retry')}</button>
+            </div>
+          )}
+
+          {serviceLineProfile && (
+            <>
+              {serviceLineProfile.serviceLine?.descricao && (
+                <p className="mt-3 mb-0 text-muted">{serviceLineProfile.serviceLine.descricao}</p>
+              )}
+
+              <div className="mt-4 row g-3">
+                <div className="col-12 col-md-5">
+                  <p className="small text-muted mb-1 d-flex align-items-center gap-2">
+                    <BookOpen size={16} aria-hidden="true" />
+                    {t('managerConta.serviceLine.learningPath')}
+                  </p>
+                  <p className="fw-semibold text-ink mb-0">{serviceLineProfile.learningPath?.nome || t('managerConta.serviceLine.notAvailable')}</p>
+                </div>
+                <div className="col-12 col-md-7">
+                  <p className="small text-muted mb-2">{t('managerConta.serviceLine.areas')}</p>
+                  <div className="d-flex flex-wrap gap-2">
+                    {serviceLineProfile.areas.length > 0
+                      ? serviceLineProfile.areas.map((area) => <span key={area.id} className="badge rounded-pill bg-brand-light text-brand px-3 py-2">{area.nome}</span>)
+                      : <span className="small text-muted">{t('managerConta.serviceLine.emptyAreas')}</span>}
+                  </div>
+                </div>
+              </div>
+
+              <div className="row g-3 mt-2 pt-3 border-top">
+                {serviceLineStats.map(({ key, icon: Icon, value }) => (
+                  <div className="col-6 col-md-3" key={key}>
+                    <div className="d-flex align-items-center gap-2 mb-1 text-brand">
+                      <Icon size={17} aria-hidden="true" />
+                      <span className="h4 fw-bold mb-0">{value}</span>
+                    </div>
+                    <p className="small text-muted mb-0">{t(`managerConta.serviceLine.stats.${key}`)}</p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </Card>
+      )}
 
       <Card className="mt-4">
         <h2 className="mb-3 d-flex align-items-center gap-2 fw-semibold text-ink"><Globe2 size={18} className="text-brand" />{t('managerConta.idioma')}</h2>

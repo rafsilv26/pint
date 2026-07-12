@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildServiceLineReport, filterServiceLineApplications, normalizeServiceLineWorkspace } from './serviceLineWorkspace'
+import { buildServiceLineProfile, buildServiceLineReport, filterServiceLineApplications, normalizeServiceLineWorkspace } from './serviceLineWorkspace'
 
 const raw = {
   consultants: { data: [
@@ -36,5 +36,16 @@ describe('service line workspace', () => {
     const report = buildServiceLineReport(normalizeServiceLineWorkspace(raw), { from: '2026-07-01' })
     expect(report.totals).toMatchObject({ applications: 1, approvals: 1, awards: 1, points: 100 })
     expect(report.comparison.map((row) => row.name)).toEqual(['Ana', 'Bruno'])
+  })
+
+  it('constrói o perfil da Service Line com dados do workspace', () => {
+    const profile = buildServiceLineProfile(normalizeServiceLineWorkspace(raw))
+
+    expect(profile).toMatchObject({
+      serviceLine: { id: 4, nome: 'Technology' },
+      learningPath: { id: 2, nome: 'Engineering' },
+      areas: [{ id: 3, nome: 'Mobile' }],
+      stats: { consultants: 2, availableBadges: 2, pendingApprovals: 1, awardedBadges: 1 },
+    })
   })
 })

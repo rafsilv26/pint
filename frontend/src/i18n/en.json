@@ -353,6 +353,27 @@
     "confirmarLogout": "Are you sure you want to log out?",
     "sucessoMsg": "Password successfully changed.",
     "alterarPassword": "Change Password",
+    "roles": {
+      "Admin": "Administrator",
+      "TalentManager": "Talent Manager",
+      "ServiceLineLeader": "Service Line Leader"
+    },
+    "serviceLine": {
+      "eyebrow": "My Service Line",
+      "subtitle": "Scope of responsibility associated with your account.",
+      "notAssigned": "No Service Line assigned",
+      "notAvailable": "Not available",
+      "loading": "Loading Service Line data…",
+      "learningPath": "Learning Path",
+      "areas": "Covered areas",
+      "emptyAreas": "No areas assigned.",
+      "stats": {
+        "consultants": "Consultants",
+        "availableBadges": "Available badges",
+        "pendingApprovals": "Awaiting decision",
+        "awardedBadges": "Awarded badges"
+      }
+    },
     "labels": {
       "atual": "Current password",
       "nova": "New password",

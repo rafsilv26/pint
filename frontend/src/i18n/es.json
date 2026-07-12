@@ -353,6 +353,27 @@
     "confirmarLogout": "¿Seguro que quieres cerrar sesión?",
     "sucessoMsg": "Contraseña cambiada con éxito.",
     "alterarPassword": "Cambiar Contraseña",
+    "roles": {
+      "Admin": "Administrador",
+      "TalentManager": "Talent Manager",
+      "ServiceLineLeader": "Service Line Leader"
+    },
+    "serviceLine": {
+      "eyebrow": "Mi Service Line",
+      "subtitle": "Ámbito de responsabilidad asociado a tu cuenta.",
+      "notAssigned": "Sin Service Line asignada",
+      "notAvailable": "No disponible",
+      "loading": "Cargando datos de la Service Line…",
+      "learningPath": "Learning Path",
+      "areas": "Áreas incluidas",
+      "emptyAreas": "Sin áreas asignadas.",
+      "stats": {
+        "consultants": "Consultores",
+        "availableBadges": "Insignias disponibles",
+        "pendingApprovals": "Pendientes de decisión",
+        "awardedBadges": "Insignias otorgadas"
+      }
+    },
     "labels": {
       "atual": "Contraseña actual",
       "nova": "Nueva contraseña",
