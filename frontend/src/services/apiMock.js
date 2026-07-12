@@ -105,6 +105,29 @@ export async function apagarEvidencia() {
   await delay()
   return {}
 }
+let _mockObjetivos = [
+  { id: 1, title: 'Obter badge Outsystems Júnior', description: '', expectedDate: new Date(Date.now() + 6 * 86400000).toISOString(), completionDate: null, status: 'Pendente', priority: 2, concluido: false },
+]
+export async function getMeusObjetivos() {
+  await delay()
+  return clone(_mockObjetivos)
+}
+export async function criarObjetivo(body) {
+  await delay()
+  const novo = { id: Date.now(), title: body.title, description: body.description || '', expectedDate: body.expectedDate || null, completionDate: null, status: 'Pendente', priority: body.priority || 3, concluido: false }
+  _mockObjetivos = [..._mockObjetivos, novo]
+  return clone(novo)
+}
+export async function concluirObjetivo(id, concluido = true) {
+  await delay()
+  _mockObjetivos = _mockObjetivos.map((o) => (o.id === id ? { ...o, concluido, completionDate: concluido ? new Date().toISOString() : null, status: concluido ? 'Concluído' : 'Pendente' } : o))
+  return clone(_mockObjetivos.find((o) => o.id === id))
+}
+export async function apagarObjetivo(id) {
+  await delay()
+  _mockObjetivos = _mockObjetivos.filter((o) => o.id !== id)
+  return {}
+}
 
 // ---------- Badges conquistados ----------
 export async function getMeusBadges() {

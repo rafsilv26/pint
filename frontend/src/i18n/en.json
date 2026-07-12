@@ -309,7 +309,30 @@
     "expiraItem": "{{nome}} — expires in {{dias}} day",
     "expiraItem_other": "{{nome}} — expires in {{dias}} days",
     "expiraHoje": "{{nome}} — expires today",
-    "verHistorico": "View history"
+    "verHistorico": "View history",
+    "objetivosTitulo": "Goal reminders",
+    "objetivoItem": "{{title}} — {{dias}} day left",
+    "objetivoItem_other": "{{title}} — {{dias}} days left",
+    "objetivoHoje": "{{title}} — due today",
+    "verObjetivos": "View goals"
+  },
+  "objetivos": {
+    "titulo": "My Goals",
+    "subtitulo": "Set goals and get reminders as the deadline approaches.",
+    "tituloLabel": "Goal",
+    "tituloPlaceholder": "Ex: Earn Outsystems Junior badge",
+    "prazoLabel": "Target date",
+    "prioridadeLabel": "Priority",
+    "prioridades": { "alta": "High", "media": "Medium", "baixa": "Low" },
+    "adicionar": "Add",
+    "vazioTitulo": "No goals",
+    "vazioDesc": "Create your first goal.",
+    "prazo": "Due:",
+    "semPrazo": "No deadline",
+    "concluidoEm": "Completed on",
+    "marcarConcluido": "Mark as done",
+    "reabrir": "Reopen",
+    "remover": "Remove"
   },
   "managerBadge": {
     "naoEncontrado": "Badge not found.",
@@ -804,6 +827,7 @@
       "inicio": "Home",
       "catalogo": "Badge Catalog",
       "meusBadges": "My Badges",
+      "objetivos": "Goals",
       "ranking": "Ranking",
       "perfil": "Profile"
     },

@@ -225,6 +225,20 @@ export async function apagarEvidencia(id) {
   return http(`/candidaturas/evidencias/${id}`, { method: 'DELETE' })
 }
 
+// ---------- Objetivos / Timeline (lembretes) ----------
+export async function getMeusObjetivos() {
+  return http('/timeline/minha').catch(() => [])
+}
+export async function criarObjetivo(body) {
+  return http('/timeline', { method: 'POST', body })
+}
+export async function concluirObjetivo(id, concluido = true) {
+  return http(`/timeline/${id}/concluir`, { method: 'PUT', body: { concluido } })
+}
+export async function apagarObjetivo(id) {
+  return http(`/timeline/${id}`, { method: 'DELETE' })
+}
+
 // ---------- Badges conquistados ----------
 export async function getMeusBadges() {
   const id = getUser()?.id

@@ -1,5 +1,5 @@
 import {
-  Home, LayoutGrid, Medal, Trophy, User,
+  Home, LayoutGrid, Medal, Trophy, User, Target,
   LayoutDashboard, ClipboardCheck, Route, Users, Award, FileBarChart, Bell, CalendarClock,
   ShieldCheck, Info, Settings, Network, Boxes, BarChart3, ListChecks,
 } from 'lucide-react'
@@ -9,6 +9,7 @@ export const getNavItems = (t) => [
   { to: '/', label: t('nav.consultor.inicio'), icon: Home, end: true },
   { to: '/catalogo', label: t('nav.consultor.catalogo'), icon: LayoutGrid },
   { to: '/candidaturas', label: t('nav.consultor.meusBadges'), icon: Medal },
+  { to: '/objetivos', label: t('nav.consultor.objetivos'), icon: Target },
   { to: '/ranking', label: t('nav.consultor.ranking'), icon: Trophy },
   { to: '/perfil', label: t('nav.consultor.perfil'), icon: User },
 ]

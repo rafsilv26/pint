@@ -309,7 +309,30 @@
     "expiraItem": "{{nome}} — caduca en {{dias}} día",
     "expiraItem_other": "{{nome}} — caduca en {{dias}} días",
     "expiraHoje": "{{nome}} — caduca hoy",
-    "verHistorico": "Ver historial"
+    "verHistorico": "Ver historial",
+    "objetivosTitulo": "Recordatorios de objetivos",
+    "objetivoItem": "{{title}} — queda {{dias}} día",
+    "objetivoItem_other": "{{title}} — quedan {{dias}} días",
+    "objetivoHoje": "{{title}} — el plazo es hoy",
+    "verObjetivos": "Ver objetivos"
+  },
+  "objetivos": {
+    "titulo": "Mis Objetivos",
+    "subtitulo": "Define metas y recibe recordatorios cuando se acerca el plazo.",
+    "tituloLabel": "Objetivo",
+    "tituloPlaceholder": "Ej: Obtener insignia Outsystems Junior",
+    "prazoLabel": "Fecha objetivo",
+    "prioridadeLabel": "Prioridad",
+    "prioridades": { "alta": "Alta", "media": "Media", "baixa": "Baja" },
+    "adicionar": "Añadir",
+    "vazioTitulo": "Sin objetivos",
+    "vazioDesc": "Crea tu primer objetivo.",
+    "prazo": "Plazo:",
+    "semPrazo": "Sin plazo",
+    "concluidoEm": "Completado el",
+    "marcarConcluido": "Marcar como hecho",
+    "reabrir": "Reabrir",
+    "remover": "Quitar"
   },
   "managerBadge": {
     "naoEncontrado": "Insignia no encontrada.",
@@ -804,6 +827,7 @@
       "inicio": "Inicio",
       "catalogo": "Catálogo de Insignias",
       "meusBadges": "Mis Insignias",
+      "objetivos": "Objetivos",
       "ranking": "Clasificación",
       "perfil": "Perfil"
     },

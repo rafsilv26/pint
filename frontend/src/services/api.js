@@ -36,6 +36,10 @@ export const getMinhasCandidaturas = impl.getMinhasCandidaturas
 export const submeterCandidatura = impl.submeterCandidatura
 export const getRascunho = impl.getRascunho
 export const apagarEvidencia = impl.apagarEvidencia
+export const getMeusObjetivos = impl.getMeusObjetivos
+export const criarObjetivo = impl.criarObjetivo
+export const concluirObjetivo = impl.concluirObjetivo
+export const apagarObjetivo = impl.apagarObjetivo
 export const getMeusBadges = impl.getMeusBadges
 
 // Notificações

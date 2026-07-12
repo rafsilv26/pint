@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Trophy, Clock, X } from 'lucide-react'
+import { Trophy, Clock, X, Target } from 'lucide-react'
 import { useAsync } from '../hooks/useAsync'
 import { useAuth } from '../context/useAuth'
 import { useTranslation } from 'react-i18next'
@@ -15,6 +15,7 @@ export default function DashboardAlerts() {
   const { t } = useTranslation()
   const { user } = useAuth()
   const { data: badges } = useAsync(() => api.getMeusBadges())
+  const { data: objetivos } = useAsync(() => api.getMeusObjetivos())
   const [marcoDispensado, setMarcoDispensado] = useState(false)
 
   if (!badges) return null
@@ -40,7 +41,14 @@ export default function DashboardAlerts() {
     .filter((b) => b.dias >= 0 && b.dias <= DIAS_ALERTA)
     .sort((a, b) => a.dias - b.dias)
 
-  if (!mostrarMarco && aExpirar.length === 0) return null
+  // 22 — Lembretes de objetivos: metas por concluir com prazo nos próximos N dias.
+  const objetivosAlerta = (objetivos || [])
+    .filter((o) => !o.concluido && o.expectedDate)
+    .map((o) => ({ ...o, dias: Math.ceil((new Date(o.expectedDate) - hoje) / 86400000) }))
+    .filter((o) => o.dias >= 0 && o.dias <= DIAS_ALERTA)
+    .sort((a, b) => a.dias - b.dias)
+
+  if (!mostrarMarco && aExpirar.length === 0 && objetivosAlerta.length === 0) return null
 
   return (
     <div className="d-flex flex-column gap-3">
@@ -73,6 +81,26 @@ export default function DashboardAlerts() {
           </ul>
           <Link to="/historico" className="small fw-medium text-warning-emphasis text-decoration-none">
             {t('dashboardAlertas.verHistorico')} →
+          </Link>
+        </div>
+      )}
+
+      {objetivosAlerta.length > 0 && (
+        <div className="rounded-3 border bg-white p-3 shadow-sm">
+          <p className="d-flex align-items-center gap-2 fw-semibold text-ink mb-2">
+            <Target size={16} className="text-brand" /> {t('dashboardAlertas.objetivosTitulo')}
+          </p>
+          <ul className="list-unstyled mb-2 d-flex flex-column gap-1 small text-muted">
+            {objetivosAlerta.map((o) => (
+              <li key={o.id}>
+                {o.dias === 0
+                  ? t('dashboardAlertas.objetivoHoje', { title: o.title })
+                  : t('dashboardAlertas.objetivoItem', { title: o.title, dias: o.dias, count: o.dias })}
+              </li>
+            ))}
+          </ul>
+          <Link to="/objetivos" className="small fw-medium text-brand text-decoration-none">
+            {t('dashboardAlertas.verObjetivos')} →
           </Link>
         </div>
       )}

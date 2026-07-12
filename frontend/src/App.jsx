@@ -16,6 +16,7 @@ import DashboardPage from './pages/DashboardPage'
 import CatalogPage from './pages/CatalogPage'
 import BadgeDetailPage from './pages/BadgeDetailPage'
 import SubmitApplicationPage from './pages/SubmitApplicationPage'
+import ObjetivosPage from './pages/ObjetivosPage'
 import ApplicationsPage from './pages/ApplicationsPage'
 import HistoryPage from './pages/HistoryPage'
 import NotificationsPage from './pages/NotificationsPage'
@@ -92,6 +93,7 @@ export default function App() {
           <Route path="/catalogo/:id" element={<BadgeDetailPage />} />
           <Route path="/candidaturas" element={<ApplicationsPage />} />
           <Route path="/candidaturas/nova" element={<SubmitApplicationPage />} />
+          <Route path="/objetivos" element={<ObjetivosPage />} />
           <Route path="/historico" element={<HistoryPage />} />
           <Route path="/notificacoes" element={<NotificationsPage />} />
           <Route path="/ranking" element={<RankingPage />} />

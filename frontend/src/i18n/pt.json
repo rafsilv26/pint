@@ -309,7 +309,30 @@
     "expiraItem": "{{nome}} — expira em {{dias}} dia",
     "expiraItem_other": "{{nome}} — expira em {{dias}} dias",
     "expiraHoje": "{{nome}} — expira hoje",
-    "verHistorico": "Ver histórico"
+    "verHistorico": "Ver histórico",
+    "objetivosTitulo": "Lembretes de objetivos",
+    "objetivoItem": "{{title}} — faltam {{dias}} dia",
+    "objetivoItem_other": "{{title}} — faltam {{dias}} dias",
+    "objetivoHoje": "{{title}} — o prazo é hoje",
+    "verObjetivos": "Ver objetivos"
+  },
+  "objetivos": {
+    "titulo": "Os Meus Objetivos",
+    "subtitulo": "Define metas e recebe lembretes quando o prazo se aproxima.",
+    "tituloLabel": "Objetivo",
+    "tituloPlaceholder": "Ex: Obter badge Outsystems Júnior",
+    "prazoLabel": "Data-alvo",
+    "prioridadeLabel": "Prioridade",
+    "prioridades": { "alta": "Alta", "media": "Média", "baixa": "Baixa" },
+    "adicionar": "Adicionar",
+    "vazioTitulo": "Sem objetivos",
+    "vazioDesc": "Cria o teu primeiro objetivo.",
+    "prazo": "Prazo:",
+    "semPrazo": "Sem prazo",
+    "concluidoEm": "Concluído em",
+    "marcarConcluido": "Marcar como concluído",
+    "reabrir": "Reabrir",
+    "remover": "Remover"
   },
   "managerBadge": {
     "naoEncontrado": "Badge não encontrado.",
@@ -794,6 +817,7 @@
       "inicio": "Início",
       "catalogo": "Catálogo de Badges",
       "meusBadges": "Meus Badges",
+      "objetivos": "Objetivos",
       "ranking": "Ranking",
       "perfil": "Perfil"
     },
