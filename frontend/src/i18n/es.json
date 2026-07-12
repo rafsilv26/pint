@@ -597,7 +597,11 @@
     "guardando": "Guardando…",
     "rascunhoGuardado": "Borrador guardado ✓",
     "jaAnexada": "Ya adjuntada",
+    "adicionarMais": "Añadir más",
     "retomarInfo": "Retomaste un borrador — continúa y envía cuando esté completo.",
+    "submetidaInfo": "Candidatura enviada — puedes añadir más evidencia hasta que el Talent Manager valide.",
+    "botaoAdicionar": "Añadir evidencia",
+    "evidenciasAdicionadas": "Evidencia añadida ✓",
     "sucessoTitulo": "¡Candidatura enviada!",
     "sucessoDesc": "Redirigiendo a tus candidaturas…"
   },

@@ -101,6 +101,10 @@ export async function getRascunho() {
   await delay()
   return null
 }
+export async function apagarEvidencia() {
+  await delay()
+  return {}
+}
 
 // ---------- Badges conquistados ----------
 export async function getMeusBadges() {

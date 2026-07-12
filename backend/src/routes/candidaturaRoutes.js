@@ -7,8 +7,10 @@ const { protect, authorize } = require('../middlewares/authMiddleware');
 
 router.post('/', authorize('Consultor'), upload.array('evidencias', 10), candidaturaController.submeterCandidatura);
 router.get('/minhas', candidaturaController.listarMinhasCandidaturas);
-// Rascunho OPEN do consultor para um badge (retomar candidatura)
+// Rascunho/candidatura editável do consultor para um badge (retomar/adicionar)
 router.get('/rascunho', authorize('Consultor'), candidaturaController.getRascunho);
+// Remover uma evidência (trocar/apagar) enquanto a candidatura é editável
+router.delete('/evidencias/:id', authorize('Consultor'), candidaturaController.apagarEvidencia);
 
 // ADMIN: todos os pedidos de badges, em qualquer estado do workflow (não só
 // os pendentes de validação/aprovação, ao contrário dos endpoints abaixo)

@@ -587,7 +587,11 @@
     "guardando": "A guardar…",
     "rascunhoGuardado": "Rascunho guardado ✓",
     "jaAnexada": "Já anexada",
+    "adicionarMais": "Adicionar mais",
     "retomarInfo": "Retomaste um rascunho — continua e submete quando estiver completo.",
+    "submetidaInfo": "Candidatura submetida — podes adicionar mais evidências até o Talent Manager validar.",
+    "botaoAdicionar": "Adicionar evidências",
+    "evidenciasAdicionadas": "Evidências adicionadas ✓",
     "sucessoTitulo": "Candidatura submetida!",
     "sucessoDesc": "A redirecionar para as tuas candidaturas…"
   },

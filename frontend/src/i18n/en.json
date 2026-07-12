@@ -597,7 +597,11 @@
     "guardando": "Saving…",
     "rascunhoGuardado": "Draft saved ✓",
     "jaAnexada": "Already attached",
+    "adicionarMais": "Add more",
     "retomarInfo": "You resumed a draft — continue and submit when complete.",
+    "submetidaInfo": "Application submitted — you can add more evidence until the Talent Manager validates.",
+    "botaoAdicionar": "Add evidence",
+    "evidenciasAdicionadas": "Evidence added ✓",
     "sucessoTitulo": "Application submitted!",
     "sucessoDesc": "Redirecting to your applications…"
   },

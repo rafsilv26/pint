@@ -214,10 +214,15 @@ export async function submeterCandidatura({ badgeId, descricao, ficheiros = [], 
   return http('/candidaturas', { method: 'POST', body: form, isForm: true })
 }
 
-// Rascunho OPEN do consultor para um badge (evidências já anexadas), ou null.
+// Candidatura editável (OPEN ou SUBMITTED) do consultor para um badge, ou null.
 export async function getRascunho(badgeId) {
   if (!badgeId) return null
   return http(`/candidaturas/rascunho?badgeId=${badgeId}`).catch(() => null)
+}
+
+// Remove uma evidência (trocar/apagar) enquanto a candidatura é editável.
+export async function apagarEvidencia(id) {
+  return http(`/candidaturas/evidencias/${id}`, { method: 'DELETE' })
 }
 
 // ---------- Badges conquistados ----------

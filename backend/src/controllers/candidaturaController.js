@@ -162,23 +162,27 @@ exports.submeterCandidatura = async (req, res) => {
     const statuses = await getStatuses([STATUS.OPEN, STATUS.SUBMITTED, STATUS.IN_VALIDATION, STATUS.VALIDATED, STATUS.IN_APPROVAL]);
     const openId = statuses[STATUS.OPEN].statusId;
     const submitted = statuses[STATUS.SUBMITTED] || await getStatus(STATUS.SUBMITTED);
+    const submittedId = submitted.statusId;
 
-    // Bloqueia se já existe candidatura ATIVA e já submetida (não-OPEN). Um
-    // rascunho OPEN não bloqueia — é reaproveitado abaixo.
-    const idsAtivosNaoOpen = Object.values(statuses)
-      .map((s) => s.statusId)
-      .filter((id) => id !== openId);
-    const jaSubmetida = await Candidatura.findOne({
-      where: { consultorId, badgeId, estadoId: { [Op.in]: idsAtivosNaoOpen } }
+    // A candidatura é EDITÁVEL enquanto está OPEN (rascunho) ou SUBMITTED (à
+    // espera do Talent Manager). Assim que o TM a valida, fica bloqueada.
+    const editableIds = [openId, submittedId];
+    const bloqueada = await Candidatura.findOne({
+      where: {
+        consultorId,
+        badgeId,
+        estadoId: { [Op.in]: Object.values(statuses).map((s) => s.statusId).filter((id) => !editableIds.includes(id)) }
+      }
     });
-    if (jaSubmetida) {
-      return res.status(400).json({ erro: 'Já existe uma candidatura pendente para esta badge.' });
+    if (bloqueada) {
+      return res.status(400).json({ erro: 'Esta candidatura já está em validação e não pode ser alterada.' });
     }
 
-    // Rascunho OPEN já existente para (consultor, badge) — reaproveita.
+    // Reaproveita a candidatura editável existente (OPEN ou SUBMITTED).
     let candidatura = await Candidatura.findOne({
-      where: { consultorId, badgeId, estadoId: openId }
+      where: { consultorId, badgeId, estadoId: { [Op.in]: editableIds } }
     });
+    const jaSubmetida = Boolean(candidatura) && candidatura.estadoId === submittedId;
 
     // Emparelha cada NOVO ficheiro com o requisito que evidencia (mesma ordem).
     const idsRequisitos = (Array.isArray(requisitoIds) ? requisitoIds : [requisitoIds])
@@ -198,20 +202,25 @@ exports.submeterCandidatura = async (req, res) => {
       return res.status(400).json({ erro: 'Uma das evidências está associada a um requisito que não pertence a este badge.' });
     }
 
-    // Requisitos já cobertos por evidências do rascunho existente + os novos.
+    // Evidências já existentes (pode haver várias por requisito).
     const evidenciasExistentes = candidatura
       ? await Evidencia.findAll({ where: { candidaturaId: candidatura.id }, attributes: ['id', 'requisitoId'] })
       : [];
     const requisitosCobertos = new Set(evidenciasExistentes.map((e) => e.requisitoId));
     idsRequisitos.forEach((id) => requisitosCobertos.add(id));
 
-    // Mínimo: pelo menos uma evidência (tanto para Guardar como para Submeter).
+    // Editar uma candidatura SUBMITTED só serve para ADICIONAR evidências.
+    if (jaSubmetida && ficheiros.length === 0) {
+      return res.status(400).json({ erro: 'Anexa pelo menos uma evidência para adicionar.' });
+    }
+
+    // Mínimo: pelo menos uma evidência no total.
     if (requisitosCobertos.size === 0) {
       return res.status(400).json({ erro: 'Tens de anexar pelo menos uma evidência.' });
     }
 
-    // Só na SUBMISSÃO: todos os requisitos obrigatórios têm de estar cobertos.
-    if (!rascunho) {
+    // Só ao SUBMETER um rascunho: todos os requisitos obrigatórios cobertos.
+    if (!rascunho && !jaSubmetida) {
       const obrigatoriosEmFalta = requisitosDoNivel.filter(
         (r) => r.obrigatorio !== false && !requisitosCobertos.has(r.id)
       );
@@ -223,7 +232,7 @@ exports.submeterCandidatura = async (req, res) => {
       }
     }
 
-    // Cria a candidatura (estado OPEN) se ainda não existir rascunho.
+    // Cria a candidatura (estado OPEN) se ainda não existir.
     if (!candidatura) {
       candidatura = await Candidatura.create({
         consultorId,
@@ -233,24 +242,33 @@ exports.submeterCandidatura = async (req, res) => {
       });
     }
 
-    // Novo ficheiro para um requisito substitui a evidência anterior desse
-    // requisito (o consultor trocou o documento).
-    if (idsRequisitos.length > 0) {
-      await Evidencia.destroy({ where: { candidaturaId: candidatura.id, requisitoId: { [Op.in]: idsRequisitos } } });
-      await Promise.all(
-        ficheiros.map(async (ficheiro, index) => {
-          const url = await uploadFicheiro(ficheiro);
-          return Evidencia.create({
-            url,
-            nomeFicheiro: ficheiro.originalname,
-            tipo: ficheiro.mimetype === 'application/pdf' ? 'PDF' : 'IMAGEM',
-            candidaturaId: candidatura.id,
-            requisitoId: idsRequisitos[index],
-            descricao,
-            uploadedBy: consultorId
-          });
-        })
-      );
+    // Multi-evidência: os novos ficheiros são ADICIONADOS (não substituem os
+    // existentes). Para trocar/remover, o consultor apaga a evidência à parte.
+    await Promise.all(
+      ficheiros.map(async (ficheiro, index) => {
+        const url = await uploadFicheiro(ficheiro);
+        return Evidencia.create({
+          url,
+          nomeFicheiro: ficheiro.originalname,
+          tipo: ficheiro.mimetype === 'application/pdf' ? 'PDF' : 'IMAGEM',
+          candidaturaId: candidatura.id,
+          requisitoId: idsRequisitos[index],
+          descricao,
+          uploadedBy: consultorId
+        });
+      })
+    );
+
+    // Adicionar evidências a uma candidatura JÁ SUBMETIDA — mantém SUBMITTED.
+    if (jaSubmetida) {
+      await HistoricoCandidatura.create({
+        candidaturaId: candidatura.id,
+        userId: consultorId,
+        estadoAnterior: submittedId,
+        estadoNovo: submittedId,
+        motivo: 'Evidências adicionadas'
+      });
+      return res.status(200).json({ mensagem: 'Evidências adicionadas.', candidaturaId: candidatura.id, estado: STATUS.SUBMITTED });
     }
 
     // "Guardar": mantém OPEN e termina aqui (sem emails de submissão).
@@ -262,22 +280,16 @@ exports.submeterCandidatura = async (req, res) => {
         estadoNovo: openId,
         motivo: 'Rascunho guardado'
       });
-      return res.status(200).json({
-        mensagem: 'Rascunho guardado.',
-        candidaturaId: candidatura.id,
-        estado: STATUS.OPEN
-      });
+      return res.status(200).json({ mensagem: 'Rascunho guardado.', candidaturaId: candidatura.id, estado: STATUS.OPEN });
     }
 
     // "Submeter": passa OPEN -> SUBMITTED.
-    await candidatura.update({ estadoId: submitted.statusId, dataSubmicao: new Date() });
-
-    // Criar histórico da candidatura
+    await candidatura.update({ estadoId: submittedId, dataSubmicao: new Date() });
     await HistoricoCandidatura.create({
       candidaturaId: candidatura.id,
       userId: consultorId,
       estadoAnterior: openId,
-      estadoNovo: submitted.statusId,
+      estadoNovo: submittedId,
       motivo: 'Candidatura submetida'
     });
 
@@ -323,24 +335,24 @@ exports.listarMinhasCandidaturas = async (req, res) => {
   }
 };
 
-// Rascunho (candidatura OPEN) do consultor para um badge, com as evidências já
-// anexadas — para o consultor retomar a candidatura onde a deixou.
+// Candidatura EDITÁVEL (OPEN rascunho ou SUBMITTED à espera do TM) do consultor
+// para um badge, com as evidências já anexadas — para retomar/adicionar.
 exports.getRascunho = async (req, res) => {
   try {
     const consultorId = req.user.id;
     const { badgeId } = req.query;
     if (!badgeId) return res.json(null);
 
-    const open = await getStatus(STATUS.OPEN);
+    const [open, submitted] = await Promise.all([getStatus(STATUS.OPEN), getStatus(STATUS.SUBMITTED)]);
     const candidatura = await Candidatura.findOne({
-      where: { consultorId, badgeId, estadoId: open.statusId },
+      where: { consultorId, badgeId, estadoId: { [Op.in]: [open.statusId, submitted.statusId] } },
       include: [{ model: Evidencia, as: 'evidencias' }]
     });
     if (!candidatura) return res.json(null);
 
     res.json({
       id: candidatura.id,
-      estado: STATUS.OPEN,
+      estado: candidatura.estadoId === submitted.statusId ? STATUS.SUBMITTED : STATUS.OPEN,
       evidencias: (candidatura.evidencias || []).map((e) => ({
         id: e.id,
         requisitoId: e.requisitoId,
@@ -350,6 +362,30 @@ exports.getRascunho = async (req, res) => {
     });
   } catch (erro) {
     res.status(500).json({ erro: 'Erro ao obter rascunho.', details: erro.message });
+  }
+};
+
+// Apaga uma evidência do consultor (para trocar/remover). Só permitido enquanto
+// a candidatura está editável (OPEN ou SUBMITTED); depois do TM validar, não.
+exports.apagarEvidencia = async (req, res) => {
+  try {
+    const consultorId = req.user.id;
+    const evidencia = await Evidencia.findByPk(req.params.id, {
+      include: [{ model: Candidatura, attributes: ['id', 'consultorId', 'estadoId'] }]
+    });
+    if (!evidencia || evidencia.Candidatura?.consultorId !== consultorId) {
+      return res.status(404).json({ erro: 'Evidência não encontrada.' });
+    }
+
+    const [open, submitted] = await Promise.all([getStatus(STATUS.OPEN), getStatus(STATUS.SUBMITTED)]);
+    if (![open.statusId, submitted.statusId].includes(evidencia.Candidatura.estadoId)) {
+      return res.status(400).json({ erro: 'Esta candidatura já está em validação e não pode ser alterada.' });
+    }
+
+    await evidencia.destroy();
+    res.json({ mensagem: 'Evidência removida.' });
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao remover evidência.', details: erro.message });
   }
 };
 
