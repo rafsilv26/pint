@@ -966,6 +966,7 @@
     },
     "tabs": { "todos": "Todos", "pendentes": "Pendientes", "aprovados": "Aprobados", "rejeitados": "Rechazados", "devolvidos": "Devueltos" },
     "pesquisar": "Buscar solicitud",
+    "verMais": "Ver {{count}} más",
     "fecharAviso": "Cerrar aviso",
     "historico": {
       "titulo": "Historial de decisiones",
