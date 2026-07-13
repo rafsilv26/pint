@@ -82,10 +82,10 @@ export default function ManagerConsultorDetailPage() {
       <Card className="p-0">
         <div className="rounded-top-4 bg-gradient-brand" style={{ height: '6rem' }} />
         <div className="px-4 pb-4">
-          <div className="d-flex flex-wrap align-items-end justify-content-between gap-3" style={{ marginTop: '-2.25rem' }}>
-            <div className="d-flex align-items-end gap-3">
-              <div className="d-flex align-items-center justify-content-center rounded-circle border border-4 border-white bg-brand-light fs-3 fw-bold text-brand" style={{ height: '5rem', width: '5rem' }}>{iniciais}</div>
-              <div className="pb-1">
+          <div className="d-flex flex-wrap align-items-start justify-content-between gap-3">
+            <div className="d-flex align-items-start gap-3">
+              <div className="d-flex align-items-center justify-content-center rounded-circle border border-4 border-white bg-brand-light fs-3 fw-bold text-brand flex-shrink-0" style={{ height: '5rem', width: '5rem', marginTop: '-2.25rem' }}>{iniciais}</div>
+              <div className="pt-3 pb-1 min-w-0">
                 <div className="d-flex flex-wrap align-items-center gap-2">
                   <h1 className="fs-4 fw-bold text-ink mb-0">{c.name}</h1>
                   {c.rank ? (
@@ -101,7 +101,7 @@ export default function ManagerConsultorDetailPage() {
                 </p>
               </div>
             </div>
-            <div className="d-flex flex-wrap align-items-center gap-3 pb-1 small text-muted">
+            <div className="d-flex flex-wrap align-items-center gap-3 pt-3 pb-1 small text-muted">
               {(talentView || serviceLineView) && (
                 <button type="button" className="btn btn-brand d-inline-flex align-items-center gap-2" onClick={downloadCompleteReport} disabled={reportBusy}>
                   {reportBusy ? <span className="spinner-border spinner-border-sm" aria-hidden="true" /> : <FileDown size={16} />}
