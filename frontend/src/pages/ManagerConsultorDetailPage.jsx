@@ -102,7 +102,7 @@ export default function ManagerConsultorDetailPage() {
               </div>
             </div>
             <div className="d-flex flex-wrap align-items-center gap-3 pb-1 small text-muted">
-              {talentView && (
+              {(talentView || serviceLineView) && (
                 <button type="button" className="btn btn-brand d-inline-flex align-items-center gap-2" onClick={downloadCompleteReport} disabled={reportBusy}>
                   {reportBusy ? <span className="spinner-border spinner-border-sm" aria-hidden="true" /> : <FileDown size={16} />}
                   {reportBusy ? t('managerConsultor.report.generating') : t('managerConsultor.report.download')}
