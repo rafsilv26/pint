@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { FileText } from 'lucide-react'
 import { PageHeader, Card, Spinner, ErrorState, EmptyState, StatusPill } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
@@ -59,7 +60,9 @@ export default function AdminPedidosPage() {
               <tbody>
                 {lista.map((c) => (
                   <tr key={c.id}>
-                    <td className="px-3 py-2 fw-medium text-ink">{c.trackingId}</td>
+                    <td className="px-3 py-2 fw-medium">
+                      <Link to={`/admin/pedidos/${c.id}`} className="text-brand text-decoration-none">{c.trackingId}</Link>
+                    </td>
                     <td className="px-3 py-2 text-ink">{c.consultor}</td>
                     <td className="px-3 py-2 text-ink">{c.badge}</td>
                     <td className="px-3 py-2 text-muted">{c.nivel}</td>

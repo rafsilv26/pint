@@ -486,6 +486,15 @@ export async function getCandidatura(id) {
       data: dataPT(h.createdAt),
       motivo: h.motivo || h.reason || '',
     })),
+    // Timeline do workflow (cronológica) — quem fez cada transição e quando.
+    timeline: (c.timeline || []).map((h) => ({
+      code: h.estadoNovoCode,
+      estado: statusName(h.estadoNovoCode, h.estadoNovo),
+      estadoAnterior: h.estadoAnteriorCode ? statusName(h.estadoAnteriorCode, h.estadoAnterior) : '',
+      autor: h.responsavel || '',
+      data: h.data ? new Date(h.data).toLocaleString('pt-PT') : '—',
+      motivo: h.motivo || '',
+    })),
   }
 }
 export async function validarTalentManager(id, { decisao, comentario } = {}) {

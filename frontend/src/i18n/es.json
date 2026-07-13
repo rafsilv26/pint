@@ -690,6 +690,20 @@
     "sucessoTitulo": "¡Candidatura enviada!",
     "sucessoDesc": "Redirigiendo a tus candidaturas…"
   },
+  "adminPedidoDetail": {
+    "voltar": "Volver a Solicitudes",
+    "naoEncontrado": "Solicitud no encontrada.",
+    "subtitulo": "Detalle e historial de la solicitud",
+    "pedido": "Solicitud",
+    "consultor": "Consultor",
+    "nivel": "Nivel",
+    "pontos": "Puntos",
+    "submissao": "Envío",
+    "evidencias": "Evidencias",
+    "semEvidencias": "Sin evidencias.",
+    "historico": "Historial del flujo",
+    "semHistorico": "Sin historial registrado."
+  },
   "adminUserDetail": {
     "voltar": "Volver a Usuarios",
     "naoEncontrado": "Usuario no encontrado.",

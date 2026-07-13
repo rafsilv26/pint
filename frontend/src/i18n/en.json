@@ -690,6 +690,20 @@
     "sucessoTitulo": "Application submitted!",
     "sucessoDesc": "Redirecting to your applications…"
   },
+  "adminPedidoDetail": {
+    "voltar": "Back to Requests",
+    "naoEncontrado": "Request not found.",
+    "subtitulo": "Request detail and history",
+    "pedido": "Request",
+    "consultor": "Consultant",
+    "nivel": "Level",
+    "pontos": "Points",
+    "submissao": "Submitted",
+    "evidencias": "Evidence",
+    "semEvidencias": "No evidence.",
+    "historico": "Workflow history",
+    "semHistorico": "No history recorded."
+  },
   "adminUserDetail": {
     "voltar": "Back to Users",
     "naoEncontrado": "User not found.",

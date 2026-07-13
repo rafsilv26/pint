@@ -680,6 +680,20 @@
     "sucessoTitulo": "Candidatura submetida!",
     "sucessoDesc": "A redirecionar para as tuas candidaturas…"
   },
+  "adminPedidoDetail": {
+    "voltar": "Voltar aos Pedidos",
+    "naoEncontrado": "Pedido não encontrado.",
+    "subtitulo": "Detalhe e histórico do pedido",
+    "pedido": "Pedido",
+    "consultor": "Consultor",
+    "nivel": "Nível",
+    "pontos": "Pontos",
+    "submissao": "Submissão",
+    "evidencias": "Evidências",
+    "semEvidencias": "Sem evidências.",
+    "historico": "Histórico do workflow",
+    "semHistorico": "Sem histórico registado."
+  },
   "adminUserDetail": {
     "voltar": "Voltar aos Utilizadores",
     "naoEncontrado": "Utilizador não encontrado.",

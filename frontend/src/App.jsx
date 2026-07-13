@@ -55,6 +55,7 @@ import AdminResourcePage from './pages/admin/AdminResourcePage'
 import AdminUsersPage from './pages/admin/AdminUsersPage'
 import AdminUserDetailPage from './pages/admin/AdminUserDetailPage'
 import AdminPedidosPage from './pages/admin/AdminPedidosPage'
+import AdminPedidoDetailPage from './pages/admin/AdminPedidoDetailPage'
 import AdminDefinicoesPage from './pages/admin/AdminDefinicoesPage'
 
 // Páginas partilhadas pelos perfis de gestão
@@ -178,6 +179,7 @@ export default function App() {
           <Route path="/admin/utilizadores/:id" element={<AdminUserDetailPage />} />
           <Route path="/admin/consultor/:id" element={<PublicProfilePage />} />
           <Route path="/admin/pedidos" element={<AdminPedidosPage />} />
+          <Route path="/admin/pedidos/:id" element={<AdminPedidoDetailPage />} />
           <Route path="/admin/relatorios" element={<TalentReportsPage soIndicadores />} />
           <Route path="/admin/definicoes" element={<AdminDefinicoesPage />} />
           <Route path="/admin/conta" element={<ManagerContaPage />} />

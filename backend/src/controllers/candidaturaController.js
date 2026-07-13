@@ -406,7 +406,30 @@ exports.detalhesCandidatura = async (req, res) => {
     }
     await assertBadgeInServiceLineScope(req.user, candidatura.badgeId);
 
-    res.json(candidatura);
+    // Histórico/timeline do workflow: cada transição, quem a fez e quando.
+    const historico = await HistoricoCandidatura.findAll({
+      where: { candidaturaId: candidatura.id },
+      include: [
+        { model: User, as: 'responsavel', attributes: ['id', 'nome'] },
+        { model: BadgeStatus, as: 'oldStatus', attributes: ['code', 'name'] },
+        { model: BadgeStatus, as: 'newStatus', attributes: ['code', 'name'] }
+      ],
+      order: [['createdAt', 'ASC']]
+    });
+
+    const timeline = historico.map((h) => ({
+      id: h.id,
+      data: h.createdAt,
+      motivo: h.motivo || '',
+      responsavel: h.responsavel?.nome || null,
+      responsavelId: h.responsavel?.id || null,
+      estadoAnteriorCode: h.oldStatus?.code || null,
+      estadoAnterior: h.oldStatus?.name || h.oldStatus?.code || null,
+      estadoNovoCode: h.newStatus?.code || null,
+      estadoNovo: h.newStatus?.name || h.newStatus?.code || null
+    }));
+
+    res.json({ ...candidatura.toJSON(), timeline });
   } catch (erro) {
     res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao buscar candidatura.', details: erro.message });
   }
