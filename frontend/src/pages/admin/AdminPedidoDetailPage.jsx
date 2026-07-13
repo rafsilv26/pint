@@ -1,13 +1,13 @@
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Award, User, FileText, Clock, CheckCircle2, XCircle, RotateCcw, Send, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Award, User, FileText, Clock, CheckCircle2, XCircle, RotateCcw, Send, Download } from 'lucide-react'
 import { PageHeader, Card, Spinner, ErrorState, StatusPill } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import { useTranslation } from 'react-i18next'
 
 // Cor + ícone por estado, para o marcador da timeline.
-// Cloudinary (plano free) bloqueia a entrega inline de PDFs — abrir o link
-// direto "não faz nada". `fl_attachment` força o download do ficheiro.
+// Devolve URL que força DOWNLOAD (fl_attachment do Cloudinary), ou null.
+// Nota: se der 401, ativa "Allow delivery of PDF and ZIP files" no Cloudinary.
 const linkFicheiro = (url) => {
   if (!url || url === '#') return null
   return url.includes('/upload/') ? url.replace('/upload/', '/upload/fl_attachment/') : url
@@ -89,7 +89,7 @@ export default function AdminPedidoDetailPage() {
                     <a
                       key={e.id}
                       href={href || undefined}
-                      target="_blank"
+                      download
                       rel="noopener noreferrer"
                       className={`d-flex align-items-center gap-2 rounded-3 border px-3 py-2 small text-decoration-none ${href ? '' : 'pe-none opacity-50'}`}
                     >
@@ -100,7 +100,7 @@ export default function AdminPedidoDetailPage() {
                       <span className="d-flex align-items-center gap-2 flex-shrink-0">
                         {e.validado === true && <CheckCircle2 size={14} className="text-success" />}
                         {e.validado === false && <XCircle size={14} className="text-danger" />}
-                        <ExternalLink size={13} className="text-muted" />
+                        <Download size={13} className="text-muted" />
                       </span>
                     </a>
                   )
