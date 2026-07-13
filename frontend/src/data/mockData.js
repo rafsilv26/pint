@@ -207,6 +207,7 @@ export const mockDashboard = {
   greeting: 'Bom dia',
   userName: 'Rafael',
   areaNome: 'OutSystems Development',
+  learningPath: { titulo: 'Learning Path: Jornada Técnica', progresso: 45 },
   stats: [
     { label: 'Pontos Totais', value: '1250', delta: '+12%', tint: 'violet', deltaTint: 'green' },
     { label: 'Badges Conquistados', value: '8', delta: '+2', tint: 'violet', deltaTint: 'green' },

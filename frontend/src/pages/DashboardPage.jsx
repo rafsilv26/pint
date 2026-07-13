@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import {
   TrendingUp, Award, Clock, Trophy, Bell, UserCircle, Compass,
-  ChevronRight,
+  ChevronRight, Route,
 } from 'lucide-react'
 import { Card, Spinner, StatusPill, ErrorState } from '../components/ui'
 import DashboardAlerts from '../components/DashboardAlerts'
@@ -77,6 +77,25 @@ export default function DashboardPage() {
       <div className="row g-4">
         {/* Coluna principal */}
         <div className="col-lg-8 d-flex flex-column gap-4">
+
+          {/* Progresso no Learning Path */}
+          {data.learningPath && (
+            <Card>
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <h2 className="fw-semibold text-ink mb-0 d-flex align-items-center gap-2">
+                  <Route size={18} className="text-brand" /> {data.learningPath.titulo}
+                </h2>
+                <span className="fw-bold text-brand">{data.learningPath.progresso}%</span>
+              </div>
+              <div className="rounded-pill bg-light overflow-hidden" style={{ height: '0.625rem' }}>
+                <div
+                  className="h-100 rounded-pill"
+                  style={{ width: `${data.learningPath.progresso}%`, background: 'linear-gradient(90deg,#8b5cf6,#d946ef)' }}
+                />
+              </div>
+              <p className="mt-2 mb-0 fs-xs text-muted">{t('dashboard.progressoLearningPath')}</p>
+            </Card>
+          )}
 
           {/* Badges Recentes */}
           <Card>

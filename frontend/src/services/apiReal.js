@@ -123,6 +123,10 @@ export async function getDashboard() {
       status: c.status,
     })),
     areaNome: d.areaNome || '',
+    learningPath: {
+      titulo: d.learningPathTitle || 'Learning Path',
+      progresso: Math.round((d.learningPathProgress ?? 0) * 100),
+    },
     recomendados: (d.recommendations || []).slice(0, 3).map((r, i) => ({
       id: r.id, nome: r.title, nivel: r.level || '', tint: TINTS[i % TINTS.length],
     })),
