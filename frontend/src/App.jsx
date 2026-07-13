@@ -102,8 +102,9 @@ export default function App() {
           <Route path="/perfil/assinatura" element={<EmailSignaturePage />} />
           <Route path="/perfil/alterar-password" element={<ChangePasswordPage />} />
           <Route path="/perfil/publico" element={<PublicProfilePage />} />
+          <Route path="/perfil/publico/:id" element={<PublicProfilePage />} />
           <Route path="/escolher-area" element={<EscolhaAreaPage />} />
-          <Route path="/consultores" element={<ConsultoresPage />} />
+          <Route path="/consultores" element={<ConsultoresPage linkBase="/perfil/publico" />} />
         </Route>
       </Route>
 

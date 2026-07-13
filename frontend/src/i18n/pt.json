@@ -584,6 +584,7 @@
   },
   "perfilPublico": {
     "voltar": "Voltar ao Perfil",
+    "voltarDiretorio": "Voltar ao Diretório",
     "defaultRole": "Consultor",
     "semBio": "Sem biografia definida.",
     "tabs": {

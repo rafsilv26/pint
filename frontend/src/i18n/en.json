@@ -594,6 +594,7 @@
   },
   "perfilPublico": {
     "voltar": "Back to Profile",
+    "voltarDiretorio": "Back to Directory",
     "defaultRole": "Consultant",
     "semBio": "No biography defined.",
     "tabs": {

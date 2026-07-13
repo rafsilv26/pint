@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import {
   Award, Star, Sparkles, Calendar, Mail, ArrowLeft,
   Trophy, CheckCircle2, XCircle, User as UserIcon,
@@ -38,13 +38,29 @@ const tintDoBadge = (id) => TINTS[Number(id) % TINTS.length]
 export default function PublicProfilePage() {
   const { t, i18n } = useTranslation() // <-- Inicializa a tradução
   const { user } = useAuth()
+  const { id } = useParams()
+  // Sem :id -> o meu próprio perfil. Com :id -> perfil de outro consultor
+  // (a partir do diretório).
+  const targetId = id ? Number(id) : user?.id
+  const isSelf = !id || Number(id) === user?.id
+
   const { data, loading } = useAsync(async () => {
-    const [consultor, badges] = await Promise.all([
-      api.getConsultant(user.id).catch(() => null),
-      api.getMeusBadges().catch(() => []),
-    ])
+    const consultor = await api.getConsultant(targetId).catch(() => null)
+    // Os meus badges vêm do endpoint próprio; os de outro consultor vêm já
+    // incluídos no perfil dele (badgesConquistados).
+    const badges = isSelf
+      ? await api.getMeusBadges().catch(() => [])
+      : (consultor?.badgesConquistados || []).map((b) => ({
+          badgeId: b.id,
+          nome: b.nome,
+          fornecedor: b.fornecedor || '',
+          pontos: b.pontos ?? 0,
+          obtainedDate: b.obtidoEm,
+          valid: b.valido !== false,
+          imagem: b.imagem || null,
+        }))
     return { consultor, badges }
-  }, [user?.id])
+  }, [targetId, isSelf])
 
   // Usar IDs para as tabs para a lógica não quebrar ao mudar o idioma
   const [tab, setTab] = useState('sobre')
@@ -62,7 +78,8 @@ export default function PublicProfilePage() {
   const consultor = data?.consultor
   const badges = data?.badges || []
 
-  const nome = consultor?.name || user?.nome || 'Consultor'
+  const nome = consultor?.name || (isSelf ? user?.nome : '') || 'Consultor'
+  const email = isSelf ? user?.email : consultor?.email
   const cargo = consultor?.role || user?.role || t('perfilPublico.defaultRole')
   const bio = consultor?.biography || t('perfilPublico.semBio')
   const iniciais = nome.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
@@ -85,8 +102,8 @@ export default function PublicProfilePage() {
 
   return (
     <div>
-      <Link to="/perfil" className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
-        <ArrowLeft size={16} /> {t('perfilPublico.voltar')}
+      <Link to={isSelf ? '/perfil' : '/consultores'} className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
+        <ArrowLeft size={16} /> {isSelf ? t('perfilPublico.voltar') : t('perfilPublico.voltarDiretorio')}
       </Link>
 
       {/* Cabeçalho */}
@@ -133,10 +150,10 @@ export default function PublicProfilePage() {
             </div>
             <div className="d-flex flex-wrap gap-2 pb-1">
               <a
-                href={`mailto:${user?.email}`}
+                href={`mailto:${email}`}
                 className="d-inline-flex align-items-center gap-1 rounded-pill border px-3 py-1 fs-xs fw-medium text-muted text-decoration-none"
               >
-                <Mail size={13} /> {user?.email}
+                <Mail size={13} /> {email}
               </a>
               {consultor?.linkedinUrl && (
                 <a
