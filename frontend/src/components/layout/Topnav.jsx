@@ -1,13 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { getNavItems } from '../../config/navigation' // <-- Import da função atualizada
+import { getNavItems } from '../../config/navigation'
 import Logo from '../Logo'
 import NotificationsBell from '../NotificationsBell'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Navbar horizontal de topo (gradiente azul Softinsa).
 export default function Topnav() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
-  const navItems = getNavItems(t) // <-- Gera a lista traduzida
+  const { t } = useTranslation()
+  const navItems = getNavItems(t)
 
   return (
     <header className="bg-gradient-brand text-white shadow-sm">

@@ -1,10 +1,9 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Bloqueia rotas privadas: se não houver sessão, redireciona para /login.
 export default function ProtectedRoute({ children }) {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { isAuthenticated, loading } = useAuth()
   const location = useLocation()
 

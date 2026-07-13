@@ -4,7 +4,7 @@ import { ArrowLeft, CalendarClock, ChevronDown, Coins, Layers3, Network, Tag } f
 import { Spinner, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 const HERO_TINTS = {
   salmon: 'tint-salmon',
@@ -13,9 +13,8 @@ const HERO_TINTS = {
   violet: 'tint-violet',
 }
 
-// Página de um badge vista por um perfil de gestão (só-leitura, sem candidatar).
 export default function ManagerBadgeDetailPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const { data: badge, loading, error, reload } = useAsync(() => api.getBadge(id), [id])

@@ -54,7 +54,6 @@ export default function ObjetivosPage() {
     <div>
       <PageHeader title={t('objetivos.titulo')} subtitle={t('objetivos.subtitulo')} />
 
-      {/* Formulário novo objetivo */}
       <Card className="mb-4">
         <form onSubmit={adicionar} className="row g-3 align-items-end">
           <div className="col-12 col-lg-5">

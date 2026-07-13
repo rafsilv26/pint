@@ -18,5 +18,3 @@ i18n
     interpolation: { escapeValue: false }
   })
 
-// Sem export — este módulo é importado por efeito colateral (inicializa o
-// i18next). Os componentes usam o hook `useTranslation` do react-i18next.

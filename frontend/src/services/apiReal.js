@@ -1,10 +1,7 @@
-// =============================================================
-//  IMPLEMENTAÇÃO REAL DA API (liga ao backend Express/Sequelize)
-//  Cada função chama o endpoint real e ADAPTA a resposta para o
-//  formato que as páginas esperam (que vem do design Figma).
-// =============================================================
+
+
 import { http, getUser, getToken, api } from './http.js'
-import i18next from 'i18next' // <-- Import da instância global para ficheiros JS puros
+import i18next from 'i18next'
 import {
   buildTalentConsultantReport,
   buildTalentDecisionHistory,
@@ -39,7 +36,6 @@ const localizeTalentRow = (row) => ({
   status: row.status ? { ...row.status, name: statusName(row.status.code, row.status.name) } : row.status,
 })
 
-// ---------- Autenticação ----------
 export async function login({ email, password }) {
   const data = await http('/auth/login', { method: 'POST', body: { email, password }, auth: false })
   const u = data.user || {}
@@ -55,7 +51,6 @@ export async function login({ email, password }) {
   }
 }
 
-// Lista de áreas para o formulário de escolha de área (1.º acesso).
 export async function getAreasPublicas() {
   return http('/auth/areas', { auth: false }).catch(() => [])
 }
@@ -72,7 +67,6 @@ export async function confirmarEmail({ token }) {
   return http('/auth/confirm-email', { method: 'POST', body: { token }, auth: false })
 }
 
-// ---------- Preferências de notificação ----------
 export async function getNotificationPrefs() {
   return http('/notifications/preferences')
 }
@@ -93,7 +87,6 @@ export async function acceptPolicy(policyId) {
   return http('/auth/accept-policy', { method: 'POST', body: { policyId } })
 }
 
-// ---------- Dashboard ----------
 export async function getDashboard() {
   const [res, cands] = await Promise.all([
     http('/dashboard'),
@@ -129,7 +122,6 @@ export async function getDashboard() {
   }
 }
 
-// ---------- Catálogo ----------
 function adaptBadge(b = {}) {
   return {
     id: b.id,
@@ -186,7 +178,6 @@ export async function getBadge(id) {
   return badge
 }
 
-// ---------- Candidaturas ----------
 export async function getMinhasCandidaturas() {
   const rows = await http('/candidaturas/minhas')
   return (rows || []).map((c) => {
@@ -205,10 +196,6 @@ export async function getMinhasCandidaturas() {
   })
 }
 
-// Submete (ou guarda como rascunho) a candidatura com as evidências (só
-// ficheiros). Cada evidência é enviada emparelhada com o requisito que
-// comprova, pela MESMA ordem — o backend associa evidencias[i] a requisitoIds[i].
-// rascunho=true -> "Guardar": fica no estado OPEN, sem exigir todos os requisitos.
 export async function submeterCandidatura({ badgeId, descricao, ficheiros = [], rascunho = false }) {
   const form = new FormData()
   form.append('badgeId', badgeId)
@@ -223,30 +210,26 @@ export async function submeterCandidatura({ badgeId, descricao, ficheiros = [], 
   return http('/candidaturas', { method: 'POST', body: form, isForm: true })
 }
 
-// Candidatura editável (OPEN ou SUBMITTED) do consultor para um badge, ou null.
 export async function getRascunho(badgeId) {
   if (!badgeId) return null
   return http(`/candidaturas/rascunho?badgeId=${badgeId}`).catch(() => null)
 }
 
-// Remove uma evidência (trocar/apagar) enquanto a candidatura é editável.
 export async function apagarEvidencia(id) {
   return http(`/candidaturas/evidencias/${id}`, { method: 'DELETE' })
 }
 
-// ---------- Definições globais de notificações (Admin) ----------
 export async function getDefinicoes() {
   return http('/notifications/config').catch(() => ({ emailEnabled: true, pushEnabled: false, daysBefore: 5 }))
 }
 export async function saveDefinicoes(body) {
   return http('/notifications/config', { method: 'PUT', body })
 }
-// Difunde um aviso a todos os consultores.
+
 export async function difundirAviso(body) {
   return http('/notifications/broadcast', { method: 'POST', body })
 }
 
-// ---------- Objetivos / Timeline (lembretes) ----------
 export async function getMeusObjetivos() {
   return http('/timeline/minha').catch(() => [])
 }
@@ -260,7 +243,6 @@ export async function apagarObjetivo(id) {
   return http(`/timeline/${id}`, { method: 'DELETE' })
 }
 
-// ---------- Badges conquistados ----------
 export async function getMeusBadges() {
   const id = getUser()?.id
   const [rows, badges] = await Promise.all([
@@ -284,7 +266,6 @@ export async function getMeusBadges() {
   })
 }
 
-// ---------- Notificações ----------
 export async function getNotificacoes() {
   const res = await http('/notifications').catch(() => ({ data: [] }))
   return (res?.data || []).map((n) => ({
@@ -303,7 +284,6 @@ export async function markAllNotificationsRead() {
   return http('/notifications/read-all', { method: 'PUT' })
 }
 
-// ---------- Gamificação ----------
 export async function getGamification() {
   const g = await http('/gamification')
   const ranking = g.ranking || []
@@ -320,12 +300,10 @@ export async function getGamification() {
   }
 }
 
-// ---------- Página pública de badge ----------
 export async function verificarBadge(publicToken) {
   return http(`/relatorios/verificar/${publicToken}`, { auth: false }).catch(() => null)
 }
 
-// ---------- Assinatura de email ----------
 export async function getEmailSignature() {
   const res = await http('/email-signature')
   const p = res?.profile || {}
@@ -339,7 +317,6 @@ export async function saveEmailSignature({ badgeIds = [], templateHtml } = {}) {
   return http('/email-signature', { method: 'PUT', body: { badgeIds, templateHtml } })
 }
 
-// ---------- Consultores (diretório) ----------
 export async function getConsultants(q = '') {
   const res = await http(`/consultants${q ? `?q=${encodeURIComponent(q)}` : ''}`)
   return res?.data || []
@@ -352,7 +329,6 @@ export async function updateConsultant(id, body) {
   return http(`/consultants/${id}`, { method: 'PUT', body })
 }
 
-// Histórico de candidaturas de um consultor (visto pelo TM/SLL/Admin, ou pelo próprio)
 export async function getConsultantCandidaturas(id) {
   const rows = await http(`/candidaturas/consultor/${id}`).catch(() => [])
   return (rows || []).map((c) => {
@@ -368,7 +344,6 @@ export async function getConsultantCandidaturas(id) {
   })
 }
 
-// ---------- Talent Manager ----------
 export async function getTalentDashboard() {
   const [workspace, fechadas] = await Promise.all([
     getTalentWorkspace(),
@@ -403,10 +378,7 @@ export async function getTalentDashboard() {
 export async function getTalentProfile() {
   return buildTalentProfile(await getTalentWorkspace())
 }
-// ---------- Admin: Dashboard (painel de controlo) ----------
-// Reutiliza as mesmas estatísticas/leaderboard do TM, mas troca a
-// "Atividade Recente" pelo feed real e transversal (utilizadores,
-// badges, candidaturas, avisos, políticas...) vindo de /dashboard/atividade.
+
 export async function getAdminDashboard() {
   const [base, atividade] = await Promise.all([
     getTalentDashboard(),
@@ -483,7 +455,7 @@ export async function getCandidatura(id) {
       data: dataPT(h.createdAt),
       motivo: h.motivo || h.reason || '',
     })),
-    // Timeline do workflow (cronológica) — quem fez cada transição e quando.
+
     timeline: (c.timeline || []).map((h) => ({
       code: h.estadoNovoCode,
       estado: statusName(h.estadoNovoCode, h.estadoNovo),
@@ -500,8 +472,6 @@ export async function validarTalentManager(id, { decisao, comentario } = {}) {
   return result
 }
 
-// Validar (ou invalidar) uma evidência individual — passo obrigatório antes
-// de o Talent Manager poder aprovar a candidatura completa.
 export async function validarEvidencia(id, validado) {
   const result = await http(`/candidaturas/evidencias/${id}/validar`, { method: 'PUT', body: { validado } })
   invalidateTalentWorkspace()
@@ -535,10 +505,6 @@ export async function getTalentCatalog() {
   return (await getTalentWorkspace()).catalog
 }
 
-// ---------- Service Line Leader ----------
-// Nota: /consultants, /candidaturas/serviceline/* e /relatorios/* já vêm
-// automaticamente restringidos pelo backend à Service Line do SLL
-// autenticado (Admin/TalentManager continuam a ver tudo).
 export async function getServiceLineDashboard() {
   const workspace = await getServiceLineWorkspace()
   const cons = workspace.consultants
@@ -566,9 +532,7 @@ export async function getServiceLineProfile() {
 export async function getServiceLineConsultants() {
   return buildServiceLineConsultants(await getServiceLineWorkspace())
 }
-// Histórico completo dos pedidos da Service Line do SLL (todos os estados,
-// não só os pendentes de aprovação final) — guião: "visualização do status
-// dos pedidos... em tempo real" + "histórico de badges... obtidos e em processo".
+
 export async function getServiceLinePedidos(filters = {}) {
   const rows = filterServiceLineApplications((await getServiceLineWorkspace()).applications, filters)
   return rows.map((row) => ({
@@ -620,7 +584,6 @@ export async function downloadManagerCertificate(consultantId, badgeId) {
   return { ok: true }
 }
 
-// ---------- Admin (CRUD genérico via catálogo) ----------
 export async function listResource(resource) {
   return http(`/catalog/${resource}`)
 }
@@ -634,7 +597,6 @@ export async function deleteResource(resource, id) {
   return http(`/catalog/${resource}/${id}`, { method: 'DELETE' })
 }
 
-// ---------- Admin: Utilizadores ----------
 export async function getUsers() {
   const rows = await http('/users')
   return (rows || []).map((u) => ({
@@ -651,7 +613,6 @@ export async function deleteUser(id) {
   return http(`/users/${id}`, { method: 'DELETE' })
 }
 
-// ---------- Admin: Pedidos ----------
 export async function getAdminPedidos() {
   const rows = await http('/candidaturas/admin/todas').catch(() => [])
   return (rows || []).map((c) => {
@@ -669,4 +630,3 @@ export async function getAdminPedidos() {
   })
 }
 
-// ---------- Exportações ----------

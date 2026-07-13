@@ -1,14 +1,11 @@
 import Logo from '../Logo'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Moldura das páginas de autenticação (login / registo / recuperar password).
-// Painel azul com a marca à esquerda, formulário centrado à direita.
 export default function AuthShell({ title, subtitle, children, footer }) {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
 
   return (
     <div className="d-flex min-vh-100">
-      {/* Painel da marca (escondido em ecrãs pequenos) */}
       <div className="position-relative d-none d-lg-flex align-items-center justify-content-center overflow-hidden bg-gradient-brand w-50">
         <div className="text-center text-white">
           <Logo height={48} className="mx-auto" textClassName="fs-1" />
@@ -16,7 +13,6 @@ export default function AuthShell({ title, subtitle, children, footer }) {
         </div>
       </div>
 
-      {/* Formulário */}
       <div className="d-flex flex-grow-1 align-items-center justify-content-center p-4">
         <div className="w-100" style={{ maxWidth: '24rem' }}>
           <div className="mb-4 text-center">

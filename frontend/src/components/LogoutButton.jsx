@@ -4,8 +4,6 @@ import { LogOut } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
 import { useTranslation } from 'react-i18next'
 
-// Botão de terminar sessão com confirmação (guião: "Pretende terminar a sua
-// sessão?" + possibilidade de cancelar).
 export default function LogoutButton({ className = '', children }) {
   const { t } = useTranslation()
   const { logout } = useAuth()

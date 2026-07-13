@@ -6,8 +6,6 @@ const STORAGE_KEY = 'softinsa.auth'
 const LAST_LOGIN_PREFIX = 'softinsa.lastLogin.'
 const FIFTEEN_DAYS = 15 * 24 * 60 * 60 * 1000
 
-// Store ativo: localStorage se o utilizador escolheu "Lembrar-me" (persiste);
-// sessionStorage caso contrário (cai ao fechar o browser).
 let authStore = localStorage.getItem(STORAGE_KEY) ? localStorage : sessionStorage
 function persistAuth(data) {
   authStore.setItem(STORAGE_KEY, JSON.stringify(data))
@@ -32,7 +30,6 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(initialAuth.token || null)
   const [loading, setLoading] = useState(Boolean(initialAuth.token))
 
-  // Confirma no servidor que a sessão persistida ainda é válida.
   useEffect(() => {
     if (!initialAuth.token) return undefined
     let alive = true
@@ -62,7 +59,7 @@ export function AuthProvider({ children }) {
     const greetingKind = !lastLogin ? 'welcome' : now - lastLogin >= FIFTEEN_DAYS ? 'welcomeBack' : 'time'
     const user = { ...authenticatedUser, greetingKind }
     localStorage.setItem(`${LAST_LOGIN_PREFIX}${authenticatedUser.id}`, String(now))
-    // "Lembrar-me" decide onde a sessão é guardada.
+
     authStore = lembrar ? localStorage : sessionStorage
     clearAuth()
     setUser(user)
@@ -77,7 +74,6 @@ export function AuthProvider({ children }) {
     clearAuth()
   }
 
-  // Limpa a flag de primeira-troca de password (após o utilizador a alterar)
   function markPasswordChanged() {
     setUser((prev) => {
       if (!prev) return prev
@@ -85,14 +81,11 @@ export function AuthProvider({ children }) {
       try {
         const saved = JSON.parse(authStore.getItem(STORAGE_KEY) || '{}')
         persistAuth({ ...saved, user: updated })
-      } catch {
-        // ignora
-      }
+      } catch { /* ignora */ }
       return updated
     })
   }
 
-  // Aceita uma política RGPD pendente (bloqueia a app até a lista ficar vazia).
   async function acceptPolicy(policyId) {
     const resultado = await api.acceptPolicy(policyId)
     setUser((prev) => {
@@ -103,9 +96,7 @@ export function AuthProvider({ children }) {
       try {
         const saved = JSON.parse(authStore.getItem(STORAGE_KEY) || '{}')
         persistAuth({ ...saved, user: updated })
-      } catch {
-        // ignora
-      }
+      } catch { /* ignora */ }
       return updated
     })
     return resultado

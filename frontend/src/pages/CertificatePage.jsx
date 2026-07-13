@@ -2,19 +2,17 @@ import { useParams, Link } from 'react-router-dom'
 import { Download, ArrowLeft, Award } from 'lucide-react'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Modificámos a função para aceitar o idioma e formatar a data de acordo com a região
 function formatar(d, locale = 'pt-PT') {
   return d ? new Date(d).toLocaleDateString(locale) : '—'
 }
 
 export default function CertificatePage() {
-  const { t, i18n } = useTranslation() // <-- Inicializamos a tradução e o i18n (para a data)
+  const { t, i18n } = useTranslation()
   const { token } = useParams()
   const { data, loading } = useAsync(() => api.verificarBadge(token), [token])
 
-  // Mapear o idioma atual do i18n para o formato de data correto
   const localeMap = {
     pt: 'pt-PT',
     en: 'en-US',
@@ -48,9 +46,7 @@ export default function CertificatePage() {
           </button>
         </div>
 
-        {/* Certificado */}
         <div className="position-relative overflow-hidden rounded-4 border bg-white p-5 shadow-lg">
-          {/* faixas douradas */}
           <div
             className="position-absolute"
             style={{

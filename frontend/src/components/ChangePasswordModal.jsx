@@ -5,13 +5,10 @@ import { Field } from './ui'
 import { useAuth } from '../context/useAuth'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Pop-up de primeira-troca de password (mostrado por cima da app quando
-// mustChangePassword está ativo). Bloqueia a app até estar trocada.
-// No primeiro acesso, o CONSULTOR escolhe aqui a sua área (guião req 2).
 export default function ChangePasswordModal() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user, markPasswordChanged, logout } = useAuth()
   const isConsultor = (user?.roles || []).includes('Consultor') || user?.role === 'Consultor'
@@ -28,7 +25,6 @@ export default function ChangePasswordModal() {
     e.preventDefault()
     setErro(null)
 
-    // Validações traduzidas
     if (nova.length < 8) return setErro(t('changePasswordModal.erros.comprimento'))
     if (nova !== confirmar) return setErro(t('changePasswordModal.erros.coincidem'))
     if (isConsultor && !areaId) return setErro(t('changePasswordModal.erros.area'))

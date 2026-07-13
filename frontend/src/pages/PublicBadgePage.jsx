@@ -2,20 +2,17 @@ import { useParams } from 'react-router-dom'
 import { Award, ShieldCheck, ShieldX } from 'lucide-react'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Função adaptada para receber o idioma atual (locale)
 function formatarData(d, locale = 'pt-PT') {
   return d ? new Date(d).toLocaleDateString(locale) : null
 }
 
-// Página PÚBLICA (sem login) — verificação de um badge por link único.
 export default function PublicBadgePage() {
-  const { t, i18n } = useTranslation() // <-- Inicializa a tradução e o i18n
+  const { t, i18n } = useTranslation()
   const { token } = useParams()
   const { data, loading } = useAsync(() => api.verificarBadge(token), [token])
 
-  // Mapear o idioma atual para o formato de data correto
   const localeMap = {
     pt: 'pt-PT',
     en: 'en-US',

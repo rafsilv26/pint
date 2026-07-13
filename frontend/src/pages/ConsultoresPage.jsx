@@ -5,12 +5,12 @@ import { PageHeader, Card, Spinner, EmptyState, ErrorState } from '../components
 import { useAsync } from '../hooks/useAsync'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 const iniciais = (n = '') => n.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
 
 export default function ConsultoresPage({ linkBase }) {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
   const { data, loading, error, reload } = useAsync(() => api.getConsultants())
   useAutoRefresh(reload)

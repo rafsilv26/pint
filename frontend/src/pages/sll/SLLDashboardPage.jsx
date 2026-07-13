@@ -4,7 +4,7 @@ import { Card, Spinner, ErrorState } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import * as api from '../../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 const STAT_ICONS = [Users, Award, ClipboardCheck, Flag]
 const TINTS = {
@@ -16,7 +16,7 @@ const TINTS = {
 const iniciais = (n = '') => n.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
 
 export default function SLLDashboardPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { data, loading, error, reload } = useAsync(() => api.getServiceLineDashboard())
   useAutoRefresh(reload)
 
@@ -27,10 +27,8 @@ export default function SLLDashboardPage() {
   const temDados = data.badgesAtribuidos.some((v) => v > 0)
   const totalSemana = data.badgesAtribuidos.reduce((soma, v) => soma + v, 0)
 
-  // Recupera o array de dias da semana a partir do ficheiro de idioma
   const diasSemana = t('sllDashboard.diasSemana', { returnObjects: true })
-  // O gráfico é rolante (últimos 7 dias): a barra i corresponde à data
-  // (hoje - (total-1-i)), tal como no dashboard do Talent Manager.
+
   const rotularDia = (i, total) => {
     const d = new Date()
     d.setDate(d.getDate() - (total - 1 - i))
@@ -57,7 +55,6 @@ export default function SLLDashboardPage() {
                     </span>
                   )}
                 </div>
-                {/* O s.label vem da API, se os labels forem dinâmicos, a tradução ideal deve ser tratada no backend ou mapeada aqui */}
                 <p className="mt-3 mb-0 fs-3 fw-bold text-ink">{s.value}</p>
                 <p className="mb-0 small text-muted">{s.label}</p>
               </Card>

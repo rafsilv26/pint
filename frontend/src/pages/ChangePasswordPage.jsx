@@ -3,10 +3,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { KeyRound, ArrowLeft, CheckCircle2, Info } from 'lucide-react'
 import { Card, Field, Button } from '../components/ui'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 export default function ChangePasswordPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const backTo = location.pathname.startsWith('/tm') ? '/tm/conta' : '/perfil'
@@ -16,7 +16,6 @@ export default function ChangePasswordPage() {
   const [erro, setErro] = useState(null)
   const [sucesso, setSucesso] = useState(false)
 
-  // As regras agora são traduzidas dinamicamente
   const REGRAS = [
     t('mudarPassword.regras.minimo'),
     t('mudarPassword.regras.maiuscula'),
@@ -28,7 +27,6 @@ export default function ChangePasswordPage() {
     e.preventDefault()
     setErro(null)
 
-    // Alertas também traduzidos
     if (nova.length < 8) return setErro(t('mudarPassword.erroComprimento'))
     if (nova !== confirmar) return setErro(t('mudarPassword.erroCoincidem'))
 

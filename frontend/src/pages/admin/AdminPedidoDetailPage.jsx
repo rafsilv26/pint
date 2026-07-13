@@ -5,9 +5,6 @@ import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import { useTranslation } from 'react-i18next'
 
-// Cor + ícone por estado, para o marcador da timeline.
-// Devolve URL que força DOWNLOAD (fl_attachment do Cloudinary), ou null.
-// Nota: se der 401, ativa "Allow delivery of PDF and ZIP files" no Cloudinary.
 const linkFicheiro = (url) => {
   if (!url || url === '#') return null
   return url.includes('/upload/') ? url.replace('/upload/', '/upload/fl_attachment/') : url
@@ -46,7 +43,6 @@ export default function AdminPedidoDetailPage() {
       <PageHeader title={`${c.badge?.nome || 'Badge'} · ${c.numero}`} subtitle={t('adminPedidoDetail.subtitulo')} />
 
       <div className="row g-4">
-        {/* Coluna esquerda: dados + evidências */}
         <div className="col-lg-5 d-flex flex-column gap-4">
           <Card>
             <div className="d-flex align-items-center justify-content-between mb-3">
@@ -110,7 +106,6 @@ export default function AdminPedidoDetailPage() {
           </Card>
         </div>
 
-        {/* Coluna direita: timeline do workflow */}
         <div className="col-lg-7">
           <Card>
             <h2 className="fw-semibold text-ink mb-4 d-flex align-items-center gap-2">
@@ -126,7 +121,6 @@ export default function AdminPedidoDetailPage() {
                   const ultimo = i === timeline.length - 1
                   return (
                     <div key={h.id ?? i} className="d-flex gap-3">
-                      {/* Coluna do marcador: ponto + linha a ligar ao próximo */}
                       <div className="d-flex flex-column align-items-center flex-shrink-0">
                         <span
                           className="d-flex align-items-center justify-content-center rounded-circle text-white"
@@ -136,7 +130,6 @@ export default function AdminPedidoDetailPage() {
                         </span>
                         {!ultimo && <span className="flex-grow-1 bg-light" style={{ width: '2px', minHeight: '1rem' }} />}
                       </div>
-                      {/* Conteúdo */}
                       <div className={ultimo ? '' : 'pb-4'}>
                         <div className="d-flex flex-wrap align-items-center gap-2">
                           <span className="fw-semibold text-ink">{h.estado}</span>

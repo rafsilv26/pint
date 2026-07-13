@@ -4,10 +4,10 @@ import { Mail } from 'lucide-react'
 import AuthShell from '../../components/layout/AuthShell'
 import { Field } from '../../components/ui'
 import * as api from '../../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 export default function ForgotPasswordPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [mensagem, setMensagem] = useState(null)
@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
     setLoading(true)
     try {
       const res = await api.recuperarPassword({ email })
-      setMensagem(res.message) // Nota: Se a API devolver a mensagem fixa, podes querer traduzi-la no backend ou usar uma chave aqui
+      setMensagem(res.message)
     } catch (err) {
       setErro(err.message)
     } finally {

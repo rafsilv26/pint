@@ -1,8 +1,4 @@
-// =============================================================
-//  DADOS MOCK — perfil Consultor
-//  Estrutura espelha (de forma simplificada) as respostas do backend,
-//  para que mais tarde seja fácil trocar pela API real sem mexer nas páginas.
-// =============================================================
+
 
 export const mockUser = {
   id: 1,
@@ -17,8 +13,6 @@ export const mockUser = {
   mustChangePassword: false,
 }
 
-// ---- Catálogo de badges ----
-// Gerado a partir de tecnologias × níveis (segue o estilo do Figma do catálogo).
 const TECHS = [
   { nome: 'OutSystems', tint: 'salmon', fornecedor: 'OutSystems' },
   { nome: 'Visual Code', tint: 'sky', fornecedor: 'Microsoft' },
@@ -49,7 +43,6 @@ export const mockBadges = TECHS.flatMap((t) =>
   }))
 )
 
-// ---- Badges já conquistadas (histórico) ----
 export const mockMyBadges = [
   {
     badgeId: 2,
@@ -75,7 +68,6 @@ export const mockMyBadges = [
   },
 ]
 
-// ---- Estados das candidaturas ----
 const ESTADOS = {
   OPEN: { code: 'OPEN', name: 'Aberta', cor: 'gray' },
   SUBMITTED: { code: 'SUBMITTED', name: 'Submetido', cor: 'blue' },
@@ -86,7 +78,6 @@ const ESTADOS = {
   REJECTED: { code: 'REJECTED', name: 'Rejeitada', cor: 'red' },
 }
 
-// ---- Candidaturas (ecrã "Meus Badges") ----
 export const mockCandidaturas = [
   {
     id: 101,
@@ -155,7 +146,6 @@ export const mockCandidaturas = [
   },
 ]
 
-// ---- Notificações / alertas ----
 export const mockNotifications = [
   {
     id: 1,
@@ -183,7 +173,6 @@ export const mockNotifications = [
   },
 ]
 
-// ---- Gamificação / Ranking ----
 export const mockGamification = {
   me: { posicao: 1, totalConsultores: 248, pontos: 1250, badges: 24, percentil: 45, evolucao: '+2' },
   lista: [
@@ -202,7 +191,6 @@ export const mockGamification = {
   ],
 }
 
-// ---- Dashboard pessoal (ecrã "Início") ----
 export const mockDashboard = {
   greeting: 'Bom dia',
   userName: 'Rafael',
@@ -238,7 +226,6 @@ export const mockDashboard = {
   ],
 }
 
-// ---- Página pública de badge (verificação por token) ----
 export const mockPublicBadges = {
   'pub-azure-001': {
     badge: { nome: 'Azure Fundamentals', descricao: 'Conceitos base de cloud Microsoft Azure.', fornecedor: 'Microsoft', tipo: 'Certificação' },
@@ -256,9 +243,6 @@ export const mockPublicBadges = {
   },
 }
 
-// =============================================================
-//  TALENT MANAGER
-// =============================================================
 export const mockTalentDashboard = {
   stats: [
     { label: 'Consultores', value: '40.689', delta: '+0.5%', tint: 'sky' },
@@ -293,9 +277,6 @@ export const mockTalentCandidaturas = [
   { id: 206, trackingId: '#20482', consultor: 'Joaquim Pernil', badge: 'OutSystems', nivel: 'A', data: '13/06/2022', status: ESTADOS.SUBMITTED },
 ]
 
-// =============================================================
-//  SERVICE LINE LEADER
-// =============================================================
 export const mockServiceLineDashboard = {
   stats: [
     { label: 'Consultores LowCode', value: '890', delta: '+0.5%', tint: 'sky' },

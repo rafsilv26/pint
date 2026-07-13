@@ -6,8 +6,6 @@ import { useAuth } from '../context/useAuth'
 import { useTranslation } from 'react-i18next'
 import * as api from '../services/api'
 
-// Marcos de gamificação (nº de badges conquistados) e janela de alerta de
-// expiração, em dias.
 const MARCOS = [1, 3, 5, 10, 15, 25, 50]
 const DIAS_ALERTA = 60
 
@@ -21,8 +19,6 @@ export default function DashboardAlerts() {
   if (!badges) return null
   const validos = badges.filter((b) => b.valid !== false)
 
-  // 16 — Celebração de marcos: mostra quando se atinge um novo marco (só uma
-  // vez por marco, memorizado em localStorage por utilizador).
   const chave = `marco-consultor-${user?.id || 'x'}`
   const vistoAntes = Number(localStorage.getItem(chave) || 0)
   const atingido = MARCOS.filter((m) => validos.length >= m).pop() || 0
@@ -32,7 +28,6 @@ export default function DashboardAlerts() {
     setMarcoDispensado(true)
   }
 
-  // 21 — Alertas de expiração: badges válidos que expiram nos próximos N dias.
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)
   const aExpirar = validos
@@ -41,7 +36,6 @@ export default function DashboardAlerts() {
     .filter((b) => b.dias >= 0 && b.dias <= DIAS_ALERTA)
     .sort((a, b) => a.dias - b.dias)
 
-  // 22 — Lembretes de objetivos: metas por concluir com prazo nos próximos N dias.
   const objetivosAlerta = (objetivos || [])
     .filter((o) => !o.concluido && o.expectedDate)
     .map((o) => ({ ...o, dias: Math.ceil((new Date(o.expectedDate) - hoje) / 86400000) }))

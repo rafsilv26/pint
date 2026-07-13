@@ -6,7 +6,7 @@ import LinkedinGlyph from '../components/LinkedinGlyph'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
 import { partilharLinkedin } from '../utils/share'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 const CARD_TINT = {
   blue: 'bg-primary-subtle bg-opacity-50',
@@ -26,7 +26,7 @@ const BAR = {
 }
 
 function Acoes({ c }) {
-  const { t } = useTranslation() // <-- Inicializa no componente auxiliar
+  const { t } = useTranslation()
 
   const detalhes = (
     <Link
@@ -80,7 +80,7 @@ function Acoes({ c }) {
 }
 
 export default function ApplicationsPage() {
-  const { t } = useTranslation() // <-- Inicializa no componente principal
+  const { t } = useTranslation()
   const { data: candidaturas, loading, error, reload } = useAsync(() => api.getMinhasCandidaturas())
   const [pesquisa, setPesquisa] = useState('')
 
@@ -148,7 +148,6 @@ export default function ApplicationsPage() {
                 </div>
               </div>
 
-              {/* Progresso de avaliação */}
               <div className="mt-3">
                 <div className="mb-1 d-flex align-items-center justify-content-between fs-xs text-muted">
                   <span>{t('candidaturas.progresso')}</span>
@@ -159,14 +158,12 @@ export default function ApplicationsPage() {
                 </div>
               </div>
 
-              {/* Meta */}
               <div className="mt-3 d-flex flex-wrap gap-3 fs-xs text-muted">
                 <span className="d-flex align-items-center gap-1"><Calendar size={13} /> {t('candidaturas.meta.submetido')} {c.submittedDate}</span>
                 <span className="d-flex align-items-center gap-1"><Clock size={13} /> {c.diasAnalise} {t('candidaturas.meta.diasAnalise')}</span>
                 <span className="d-flex align-items-center gap-1"><FileText size={13} /> {c.evidencias} {t('candidaturas.meta.evidencias')}</span>
               </div>
 
-              {/* Feedback (rejeitada) */}
               {c.feedback && (
                 <div className="mt-3 rounded-3 bg-danger-subtle p-3 border border-danger-subtle">
                   <p className="fs-xs fw-semibold text-danger mb-0">{t('candidaturas.feedback.de')} {c.feedback.papel}</p>
@@ -175,7 +172,6 @@ export default function ApplicationsPage() {
                 </div>
               )}
 
-              {/* Ações */}
               <div className="mt-3 d-flex flex-wrap justify-content-end gap-2">
                 <Acoes c={c} />
               </div>

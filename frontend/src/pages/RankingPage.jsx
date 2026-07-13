@@ -42,13 +42,11 @@ export default function RankingPage() {
 
   const { me, lista } = data
 
-  // Ordena pela categoria escolhida e renumera as posições.
   const ordenada = [...lista]
     .sort((a, b) => (categoria === 'badges' ? b.badges - a.badges : b.pontos - a.pontos))
     .map((c, i) => ({ ...c, rank: i + 1 }))
   const top3 = ordenada.slice(0, 3)
 
-  // Percentil real: quão à frente estou face ao total de consultores.
   const total = me.totalConsultores || 0
   const posNum = Number(me.posicao)
   const percentil = total > 0 && Number.isFinite(posNum)
@@ -71,7 +69,6 @@ export default function RankingPage() {
         <p className="mt-1 small text-muted">{t('ranking.subtitulo')}</p>
       </div>
 
-      {/* Filtro: ordenar por */}
       <div className="d-flex flex-wrap align-items-center gap-2">
         <span className="small text-muted">{t('ranking.ordenarPor')}</span>
         <Segmented
@@ -84,7 +81,6 @@ export default function RankingPage() {
         />
       </div>
 
-      {/* Banner de estatísticas */}
       <div className="row row-cols-2 row-cols-lg-4 g-0 overflow-hidden rounded-4 bg-gradient-brand text-white shadow-sm">
         {stats.map((s) => (
           <div key={s.label} className="col p-4">
@@ -97,7 +93,6 @@ export default function RankingPage() {
       </div>
 
       <div className="row g-4">
-        {/* Rankings completos */}
         <div className="col-lg-8">
           <Card>
             <h2 className="mb-3 d-flex align-items-center gap-2 fw-semibold text-ink">
@@ -126,7 +121,6 @@ export default function RankingPage() {
           </Card>
         </div>
 
-        {/* Top 3 pódio */}
         <div className="col-lg-4">
           <Card>
             <h2 className="mb-3 text-center fw-semibold text-ink">{t('ranking.top3')}</h2>

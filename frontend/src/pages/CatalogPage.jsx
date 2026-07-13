@@ -33,13 +33,11 @@ export default function CatalogPage() {
 
   return (
     <div>
-      {/* Cabeçalho */}
       <div className="mb-4">
         <h1 className="fs-3 fw-bold text-ink mb-1">{t('catalogo.titulo')}</h1>
         <p className="small text-muted mb-0">{t('catalogo.subtitulo')}</p>
       </div>
 
-      {/* Pesquisa + contador + paginação */}
       <div className="mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
         <div className="d-flex align-items-center gap-3 flex-grow-1">
           <div className="position-relative w-100" style={{ maxWidth: '24rem' }}>
@@ -68,7 +66,6 @@ export default function CatalogPage() {
                 to={`/catalogo/${b.id}`}
                 className="badge-tile d-flex flex-column h-100 overflow-hidden rounded-4 border bg-white text-decoration-none"
               >
-                {/* Faixa de cor com selo */}
                 <div className={`position-relative ${TECH_TINTS[b.tint] || TECH_TINTS.sky}`} style={{ height: '5.5rem' }}>
                   {b.fornecedor && (
                     <span className="position-absolute top-0 start-0 m-2 rounded-pill bg-white bg-opacity-75 px-2 py-1 fs-xs fw-semibold text-ink">
@@ -82,7 +79,6 @@ export default function CatalogPage() {
                   </div>
                 </div>
 
-                {/* Corpo */}
                 <div className="d-flex flex-column flex-grow-1 px-3 pb-3 text-center" style={{ paddingTop: '2rem' }}>
                   <p className="fw-semibold text-ink mb-1" style={{ lineHeight: 1.3 }}>{b.nome}</p>
                   {b.nivel && <p className="fs-xs text-muted mb-3">{t('catalogo.nivel')} {b.nivel}</p>}

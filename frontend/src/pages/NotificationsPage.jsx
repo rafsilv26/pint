@@ -4,15 +4,14 @@ import { Spinner, EmptyState, ErrorState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Função adaptada para receber o idioma atual (locale)
 function formatar(dt, locale = 'pt-PT') {
   return new Date(dt).toLocaleString(locale, { dateStyle: 'short', timeStyle: 'short' })
 }
 
 export default function NotificationsPage() {
-  const { t, i18n } = useTranslation() // <-- Inicializa a tradução e o i18n
+  const { t, i18n } = useTranslation()
   const { data, loading, error, reload } = useAsync(() => api.getNotificacoes())
   useAutoRefresh(reload)
   const [filtro, setFiltro] = useState('todas')
@@ -21,7 +20,6 @@ export default function NotificationsPage() {
   const [actionError, setActionError] = useState('')
   const [markingAll, setMarkingAll] = useState(false)
 
-  // Mapear o idioma atual para o formato de data/hora correto
   const localeMap = {
     pt: 'pt-PT',
     en: 'en-US',
@@ -29,7 +27,6 @@ export default function NotificationsPage() {
   }
   const currentLocale = localeMap[i18n.language?.substring(0, 2)] || 'pt-PT'
 
-  // As TAGS foram movidas para dentro para traduzir os labels
   const TAGS = {
     info: { label: t('notificacoes.tags.info'), cls: 'text-bg-primary' },
     warning: { label: t('notificacoes.tags.aviso'), cls: 'text-bg-warning' },
@@ -83,7 +80,6 @@ export default function NotificationsPage() {
     <div>
       <h1 className="mb-4 fs-2 fw-bold text-ink">{t('notificacoes.titulo')}</h1>
 
-      {/* Filtros */}
       <div className="mb-4 d-flex flex-wrap align-items-center gap-3">
         <div className="d-flex rounded-3 bg-white p-1 border">
           {FILTROS.map((f) => (

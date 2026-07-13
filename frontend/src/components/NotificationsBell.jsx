@@ -2,11 +2,10 @@ import { NavLink } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Sino de notificações na navbar, com contador de não lidas.
 export default function NotificationsBell() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { data } = useAsync(() => api.getNotificacoes().catch(() => []))
   const naoLidas = (data || []).filter((n) => !n.lida).length
 

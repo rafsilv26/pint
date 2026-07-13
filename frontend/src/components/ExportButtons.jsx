@@ -2,14 +2,10 @@ import { useState } from 'react'
 import { FileSpreadsheet, FileText } from 'lucide-react'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Por omissão exporta uma lista de utilizadores (nome/email/papel/estado),
-// comportamento original deste componente. Passando `columns` (array de
-// { key, label }) e `data` com objetos já formatados para essas keys,
-// o componente serve para exportar qualquer lista (pedidos, badges, etc.).
 export default function ExportButtons({ data, columns, filename }) {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const [busy, setBusy] = useState(null)
 
   const cols = columns || [
@@ -35,7 +31,6 @@ export default function ExportButtons({ data, columns, filename }) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
 
-  // 1. Exportação Excel em tabela HTML compatível com Excel.
   const exportarExcel = () => {
     if (!data || data.length === 0) return alert(t('exportButtons.semDados'))
 
@@ -53,7 +48,6 @@ export default function ExportButtons({ data, columns, filename }) {
     setBusy(null)
   }
 
-  // 2. Exportação PDF
   const exportarPDF = () => {
     if (!data || data.length === 0) return alert(t('exportButtons.semDados'))
 
@@ -62,7 +56,6 @@ export default function ExportButtons({ data, columns, filename }) {
     const doc = new jsPDF()
     doc.text(t('exportButtons.tituloRelatorio'), 14, 15)
 
-    // Usar a função autoTable importada
     autoTable(doc, {
       head: [cols.map((c) => c.label)],
       body: linhas,

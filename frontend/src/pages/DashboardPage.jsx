@@ -52,7 +52,6 @@ export default function DashboardPage() {
 
   return (
     <div className="d-flex flex-column gap-4">
-      {/* Cabeçalho */}
       <div>
         <h1 className="fs-2 fw-bold text-ink">
           {data.greeting}, {data.userName}! <span className="align-middle">👋</span>
@@ -62,10 +61,8 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Alertas: marcos alcançados + badges a expirar */}
       <DashboardAlerts />
 
-      {/* Estatísticas */}
       <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
         {data.stats.map((s, i) => (
           <div className="col" key={s.label}>
@@ -75,10 +72,8 @@ export default function DashboardPage() {
       </div>
 
       <div className="row g-4">
-        {/* Coluna principal */}
         <div className="col-lg-8 d-flex flex-column gap-4">
 
-          {/* Progresso no Learning Path */}
           {data.learningPath && (
             <Card>
               <div className="d-flex align-items-center justify-content-between mb-2">
@@ -97,7 +92,6 @@ export default function DashboardPage() {
             </Card>
           )}
 
-          {/* Badges Recentes */}
           <Card>
             <div className="mb-3 d-flex align-items-center justify-content-between">
               <h2 className="fw-semibold text-ink mb-0">{t('dashboard.badgesRecentes')}</h2>
@@ -135,7 +129,6 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          {/* Recomendados */}
           <Card>
             <div className="mb-1 d-flex align-items-center justify-content-between">
               <h2 className="fw-semibold text-ink mb-0">{t('dashboard.recomendados')}</h2>
@@ -172,10 +165,8 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Coluna lateral */}
         <div className="col-lg-4 d-flex flex-column gap-4">
 
-          {/* Ações Rápidas */}
           <div className="rounded-3 bg-gradient-brand p-4 text-white shadow-sm">
             <h2 className="mb-3 fw-semibold">{t('dashboard.acoesRapidas')}</h2>
             <div className="d-flex flex-column gap-2">
@@ -196,7 +187,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Mini perfil */}
           <Card>
             <div className="d-flex align-items-center gap-3">
               <div

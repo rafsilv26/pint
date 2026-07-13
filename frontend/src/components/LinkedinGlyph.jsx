@@ -1,5 +1,5 @@
-// lucide-react não inclui logótipos de marcas — ícone do LinkedIn inline,
-// herda cor (currentColor) e tamanho, como os restantes ícones.
+
+
 export default function LinkedinGlyph({ size = 16 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

@@ -18,7 +18,7 @@ export default function SubmitApplicationPage() {
   const { data: badges, loading, error, reload } = useAsync(() => api.getBadges())
 
   const [badgeId, setBadgeId] = useState(searchParams.get('badge') || '')
-  // Evidências NOVAS desta sessão, por requisito: { [requisitoId]: File[] }
+
   const [evidencias, setEvidencias] = useState({})
   const [enviando, setEnviando] = useState(false)
   const [guardando, setGuardando] = useState(false)
@@ -31,7 +31,7 @@ export default function SubmitApplicationPage() {
     () => (badgeId ? api.getBadge(badgeId) : Promise.resolve(null)),
     [badgeId]
   )
-  // Candidatura editável existente (OPEN ou SUBMITTED) + evidências já anexadas
+
   const { data: rascunho, reload: reloadRascunho } = useAsync(
     () => (badgeId ? api.getRascunho(badgeId) : Promise.resolve(null)),
     [badgeId]
@@ -41,7 +41,6 @@ export default function SubmitApplicationPage() {
   const obrigatorios = requisitos.filter((r) => r.obrigatorio !== false)
   const submetida = rascunho?.estado === 'SUBMITTED'
 
-  // Evidências já guardadas, agrupadas por requisito
   const existentesMap = {}
   ;(rascunho?.evidencias || []).forEach((e) => {
     ;(existentesMap[e.requisitoId] = existentesMap[e.requisitoId] || []).push(e)
@@ -159,7 +158,6 @@ export default function SubmitApplicationPage() {
         <ArrowLeft size={16} /> {t('submeterCandidatura.voltar')}
       </Link>
 
-      {/* Hero */}
       <div className="rounded-4 bg-gradient-brand p-4 text-white shadow-sm">
         <h1 className="d-flex align-items-center gap-2 fs-4 fw-bold mb-0">
           <ClipboardCheck size={22} /> {t('submeterCandidatura.tituloHero')}
@@ -191,7 +189,6 @@ export default function SubmitApplicationPage() {
         <div className="mt-4"><Spinner /></div>
       ) : (
         <div className="mt-4 row g-4">
-          {/* Requisitos */}
           <div className="col-lg-8">
             <div className="rounded-4 border bg-white p-4 shadow-sm">
               <h2 className="d-flex align-items-center gap-2 fw-semibold text-ink mb-1">
@@ -270,7 +267,6 @@ export default function SubmitApplicationPage() {
             </div>
           </div>
 
-          {/* Resumo / ações */}
           <div className="col-lg-4">
             <div className="rounded-4 border bg-white p-4 shadow-sm" style={{ position: 'sticky', top: '1rem' }}>
               <h2 className="fw-semibold text-ink mb-3">{t('submeterCandidatura.resumoTitulo')}</h2>

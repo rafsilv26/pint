@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 import ProtectedRoute from './components/ProtectedRoute'
-import RoleGuard from './components/RoleGuard' // <-- Import do RoleGuard
+import RoleGuard from './components/RoleGuard'
 import AppLayout from './components/layout/AppLayout'
 import ManagerLayout from './components/layout/ManagerLayout'
 
@@ -11,7 +11,6 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import AtualizarPasswordPage from './pages/auth/AtualizarPasswordPage'
 import ConfirmarEmailPage from './pages/auth/ConfirmarEmailPage'
 
-// Consultor
 import DashboardPage from './pages/DashboardPage'
 import CatalogPage from './pages/CatalogPage'
 import BadgeDetailPage from './pages/BadgeDetailPage'
@@ -31,7 +30,6 @@ import PublicProfilePage from './pages/PublicProfilePage'
 import CertificatePage from './pages/CertificatePage'
 import PublicBadgePage from './pages/PublicBadgePage'
 
-// Talent Manager
 import TalentDashboardPage from './pages/tm/TalentDashboardPage'
 import TalentCandidaturasPage from './pages/tm/TalentCandidaturasPage'
 import TalentCandidaturaDetailPage from './pages/tm/TalentCandidaturaDetailPage'
@@ -43,14 +41,12 @@ import TalentSearchPage from './pages/tm/TalentSearchPage'
 import TalentLearningPathsPage from './pages/tm/TalentLearningPathsPage'
 import BadgesGridView from './components/BadgesGridView'
 
-// Service Line Leader
 import SLLDashboardPage from './pages/sll/SLLDashboardPage'
 import SLLPedidosPage from './pages/sll/SLLPedidosPage'
 import SLLPedidoDetailPage from './pages/sll/SLLPedidoDetailPage'
 import SLLRelatoriosPage from './pages/sll/SLLRelatoriosPage'
 import SLLConsultoresPage from './pages/sll/SLLConsultoresPage'
 
-// Admin
 import AdminResourcePage from './pages/admin/AdminResourcePage'
 import AdminUsersPage from './pages/admin/AdminUsersPage'
 import AdminUserDetailPage from './pages/admin/AdminUserDetailPage'
@@ -58,7 +54,6 @@ import AdminPedidosPage from './pages/admin/AdminPedidosPage'
 import AdminPedidoDetailPage from './pages/admin/AdminPedidoDetailPage'
 import AdminDefinicoesPage from './pages/admin/AdminDefinicoesPage'
 
-// Páginas partilhadas pelos perfis de gestão
 import ManagerConsultorDetailPage from './pages/ManagerConsultorDetailPage'
 import ManagerBadgeDetailPage from './pages/ManagerBadgeDetailPage'
 import ManagerContaPage from './pages/ManagerContaPage'
@@ -68,7 +63,6 @@ export default function App() {
 
   return (
     <Routes>
-      {/* ---- Rotas públicas ---- */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/recuperar-password" element={<ForgotPasswordPage />} />
       <Route path="/atualizar-password" element={<AtualizarPasswordPage />} />
@@ -76,16 +70,9 @@ export default function App() {
       <Route path="/badge/:token" element={<PublicBadgePage />} />
       <Route path="/certificado/:token" element={<CertificatePage />} />
 
-      {/* ========================================================= */}
-      {/* ROTAS: CONSULTOR / BASE (Sem RoleGuard, apenas Protegido) */}
-      {/* ========================================================= */}
-{/* ========================================================= */}
-      {/* ROTAS: CONSULTOR                                          */}
-      {/* ========================================================= */}
       <Route
         element={
           <ProtectedRoute>
-            {/* Agora sim, apenas os consultores entram aqui! */}
             <RoleGuard allowedRoles={['consultor']} />
           </ProtectedRoute>
         }
@@ -111,12 +98,8 @@ export default function App() {
         </Route>
       </Route>
 
-      {/* ========================================================= */}
-      {/* ROTAS: GESTÃO & ADMIN (Trancadas com RoleGuard)           */}
-      {/* ========================================================= */}
       <Route element={<ProtectedRoute><ManagerLayout /></ProtectedRoute>}>
-        
-        {/* ---- Talent Manager ---- */}
+
         <Route element={<RoleGuard allowedRoles={['tm', 'admin']} />}>
           <Route path="/tm" element={<TalentDashboardPage />} />
           <Route path="/tm/candidaturas" element={<TalentCandidaturasPage />} />
@@ -136,7 +119,6 @@ export default function App() {
           <Route path="/tm/conta" element={<ManagerContaPage />} />
         </Route>
 
-        {/* ---- Service Line Leader ---- */}
         <Route element={<RoleGuard allowedRoles={['sll', 'admin']} />}>
           <Route path="/sll" element={<SLLDashboardPage />} />
           <Route path="/sll/pedidos" element={<SLLPedidosPage />} />
@@ -152,7 +134,6 @@ export default function App() {
           <Route path="/sll/conta" element={<ManagerContaPage />} />
         </Route>
 
-        {/* ---- Admin ---- */}
         <Route element={<RoleGuard allowedRoles={['admin']} />}>
           <Route path="/admin" element={<TalentDashboardPage usarDadosAdmin />} />
           <Route
@@ -187,7 +168,6 @@ export default function App() {
 
       </Route>
 
-      {/* Rota de segurança para apanhar URLs perdidos */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

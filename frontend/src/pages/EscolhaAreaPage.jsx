@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Diamond, Code, Hexagon, Rocket, Boxes, Check, Info } from 'lucide-react'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 const TINTS = {
   sky: { backgroundColor: '#e0f2fe', color: '#0284c7' },
@@ -12,11 +12,10 @@ const TINTS = {
 }
 
 export default function EscolhaAreaPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [selecionada, setSelecionada] = useState(null)
 
-  // As áreas foram movidas para dentro para podermos traduzir as descrições e as tags
   const AREAS = [
     { id: 1, nome: '.NET Development', desc: t('escolhaArea.areas.net'), tags: [t('escolhaArea.tags.pilares4'), t('escolhaArea.tags.intermedio')], badges: 14, tint: 'sky', icon: Diamond },
     { id: 2, nome: 'Python Development', desc: t('escolhaArea.areas.python'), tags: [t('escolhaArea.tags.pilares3'), t('escolhaArea.tags.iniciante')], badges: 12, tint: 'amber', icon: Code },

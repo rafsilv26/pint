@@ -5,7 +5,7 @@ import { Card, Spinner, ErrorState, StatusPill } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import * as api from '../../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 const TINT = {
   salmon: 'tint-salmon',
@@ -15,14 +15,14 @@ const TINT = {
 }
 
 export default function SLLPedidoDetailPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const { data: c, loading, error, reload } = useAsync(() => api.getCandidatura(id), [id])
 
   const [aprovando, setAprovando] = useState(false)
   const [tab, setTab] = useState(0)
-  const [acao, setAcao] = useState(null) // 'REJEITAR' | 'SEND_BACK'
+  const [acao, setAcao] = useState(null)
   const [comentario, setComentario] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [msg, setMsg] = useState(null)
@@ -50,11 +50,6 @@ export default function SLLPedidoDetailPage() {
     }
   }
 
-  // Só faz sentido decidir sobre candidaturas que o Talent Manager já validou
-  // (estado VALIDATED) e que ainda não têm decisão final do SLL — sem este
-  // filtro, a página mostrava sempre o botão "Iniciar Aprovação", mesmo em
-  // pedidos já aprovados/rejeitados ou ainda por validar pelo TM (o backend
-  // já recusa (400) essas decisões, mas a UI não devia sequer oferecê-las).
   const podeDecidir = c.estado?.code === 'VALIDATED'
 
   const evid = typeof tab === 'number' ? c.evidencias[tab] : null
@@ -190,9 +185,6 @@ export default function SLLPedidoDetailPage() {
               </span>
               <a href={evid.url} target="_blank" rel="noreferrer" className="text-muted"><Download size={18} /></a>
             </div>
-            {/* A validação de cada evidência é feita pelo Talent Manager antes de
-                chegar ao Service Line Leader — aqui mostra-se apenas o resultado
-                dessa validação, em modo leitura. */}
             {evid.validado === true && (
               <p className="mt-3 d-flex align-items-center justify-content-center gap-1 fs-xs fw-medium text-success">
                 <Check size={13} /> {t('sllPedidoDetail.evidenciaValidadaPeloTM')}

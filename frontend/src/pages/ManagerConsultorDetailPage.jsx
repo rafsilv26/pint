@@ -6,9 +6,8 @@ import { useAsync } from '../hooks/useAsync'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
 import { downloadTalentConsultantReport } from '../utils/talentConsultantReport'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Perfil de um consultor visto por um perfil de gestão (TM / SLL / Admin).
 export default function ManagerConsultorDetailPage() {
   const { t, i18n } = useTranslation()
   const { id } = useParams()
@@ -28,8 +27,6 @@ export default function ManagerConsultorDetailPage() {
   if (error) return <ErrorState onRetry={reload} />
   if (!c) return <p className="text-muted">{t('managerConsultor.naoEncontrado')}</p>
 
-  // A página é partilhada por /tm/consultores/:id e /sll/consultores/:id — a
-  // ligação para o detalhe de uma candidatura tem de respeitar essa base.
   const linkCandidatura = (candidaturaId) =>
     location.pathname.startsWith('/sll') ? `/sll/pedidos/${candidaturaId}` : `/tm/candidaturas/${candidaturaId}`
 
@@ -149,7 +146,6 @@ export default function ManagerConsultorDetailPage() {
         </Card>
       )}
 
-      {/* Badges Conquistados */}
       <Card className="mt-4">
         <h2 className="mb-3 fw-semibold text-ink">{t('managerConsultor.badgesConquistados.titulo')}</h2>
         {badgesConquistados.length === 0 ? (
@@ -193,7 +189,6 @@ export default function ManagerConsultorDetailPage() {
         {talentView && <div className="col-lg-6"><Card className="h-100"><h2 className="mb-3 h6 fw-bold"><Target size={17} className="me-2 text-primary" />{t('tmWorkspace.developmentTimeline')}</h2>{timeline.length === 0 ? <p className="small text-muted mb-0">{t('tmWorkspace.noGoals')}</p> : <div className="d-flex flex-column gap-3">{timeline.map((item) => <div key={item.timelineId} className="d-flex gap-3"><div className="d-flex align-items-center justify-content-center rounded-circle bg-brand-light text-brand flex-shrink-0" style={{ width: 32, height: 32 }}><Clock3 size={15} /></div><div><p className="small fw-bold mb-0">{item.title}</p><p className="fs-xs text-muted mb-1">{item.type} · {item.status}</p>{item.expectedDate && <p className="fs-xs text-muted mb-0">{t('tmWorkspace.expected')}: {new Date(item.expectedDate).toLocaleDateString()}</p>}</div></div>)}</div>}</Card></div>}
       </div>}
 
-      {/* Histórico de Candidaturas */}
       <Card className="mt-4 overflow-hidden p-0">
         <h2 className="px-4 pt-4 fw-semibold text-ink">{t('managerConsultor.historico.titulo')}</h2>
         {loadingHistorico ? (

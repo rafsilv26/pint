@@ -29,7 +29,6 @@ export default function AdminDefinicoesPage() {
   const [guardado, setGuardado] = useState(false)
   const [guardando, setGuardando] = useState(false)
 
-  // Difusão de aviso
   const [aviso, setAviso] = useState({ title: '', message: '', type: 'info' })
   const [difundindo, setDifundindo] = useState(false)
   const [difResultado, setDifResultado] = useState(null)
@@ -76,7 +75,6 @@ export default function AdminDefinicoesPage() {
     <div className="mx-auto" style={{ maxWidth: '46rem' }}>
       <PageHeader title={t('adminDefinicoes.titulo')} subtitle={t('adminDefinicoes.subtitulo')} />
 
-      {/* Visão geral rápida */}
       {kpis.length > 0 && (
         <div className="row row-cols-2 row-cols-lg-4 g-3 mb-4">
           {kpis.map((s, i) => {
@@ -94,7 +92,6 @@ export default function AdminDefinicoesPage() {
         </div>
       )}
 
-      {/* Difusão de aviso a todos os consultores */}
       <Card>
         <h2 className="mb-1 d-flex align-items-center gap-2 fw-semibold text-ink">
           <Megaphone size={18} className="text-brand" /> {t('adminDefinicoes.broadcast.titulo')}
@@ -130,7 +127,6 @@ export default function AdminDefinicoesPage() {
         </form>
       </Card>
 
-      {/* SLA */}
       <Card className="mt-4">
         <h2 className="mb-1 d-flex align-items-center gap-2 fw-semibold text-ink">
           <Clock size={18} className="text-brand" /> {t('adminDefinicoes.sla.titulo')}
@@ -148,7 +144,6 @@ export default function AdminDefinicoesPage() {
         />
       </Card>
 
-      {/* Notificações */}
       <Card className="mt-4">
         <h2 className="mb-1 d-flex align-items-center gap-2 fw-semibold text-ink">
           <Bell size={18} className="text-brand" /> {t('adminDefinicoes.notificacoes.titulo')}

@@ -5,10 +5,10 @@ import { PageHeader, Card, Spinner, ErrorState, EmptyState, Button } from '../..
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import ExportButtons from '../../components/ExportButtons'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 export default function AdminUsersPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { data, loading, error, reload } = useAsync(() => api.getUsers())
   const { data: serviceLines } = useAsync(() => api.listResource('service-lines'))
   const { data: areas } = useAsync(() => api.listResource('areas'))
@@ -21,7 +21,6 @@ export default function AdminUsersPage() {
   const serviceLineOptions = serviceLines || []
   const areaOptions = areas || []
 
-  // Lista de Roles movida para dentro para suportar traduções
   const ROLES = [
     { value: 'Consultor', label: t('adminUsers.roles.consultor') },
     { value: 'TalentManager', label: t('adminUsers.roles.talentManager') },

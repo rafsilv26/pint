@@ -5,7 +5,7 @@ import { Card, Spinner, ErrorState } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import * as api from '../../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/useAuth'
 
 const STAT_ICONS = [Users, Award, ClipboardCheck, Layers]
@@ -17,11 +17,8 @@ const TINTS = {
 }
 const iniciais = (n = '') => n.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
 
-// Quando usada em /admin (usarDadosAdmin), busca a mesma estrutura de dados mas
-// com a "Atividade Recente" a vir do feed real e transversal da app (utilizadores,
-// badges, candidaturas, avisos, políticas...) em vez de só candidaturas pendentes.
 export default function TalentDashboardPage({ usarDadosAdmin = false }) {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { user } = useAuth()
   const [progressArea, setProgressArea] = useState('')
   const [progressServiceLine, setProgressServiceLine] = useState('')
@@ -44,10 +41,8 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
     (!progressServiceLine || consultant.serviceLine === progressServiceLine)
   )
 
-  // Rótulos dos dias a partir do ficheiro de idioma (Segunda-first).
   const diasSemana = t('talentDashboard.diasSemana', { returnObjects: true })
-  // O gráfico é rolante (últimos 7 dias): a barra i corresponde à data
-  // (hoje - (total-1-i)). Converte para o índice Segunda-first do array acima.
+
   const rotularDia = (i, total) => {
     const d = new Date()
     d.setDate(d.getDate() - (total - 1 - i))
@@ -58,7 +53,6 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
     <div className="d-flex flex-column gap-4">
       <div><p className="small text-muted mb-1">{t(`tmWorkspace.dashboard.greeting.${greetingKey}`)}, {user?.nome?.split(' ')[0] || ''}</p><h1 className="fs-2 fw-bold text-ink mb-0">{t('talentDashboard.titulo')}</h1></div>
 
-      {/* Estatísticas */}
       <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
         {data.stats.map((s, i) => {
           const Icon = STAT_ICONS[i] || Award
@@ -84,7 +78,6 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
       </div>
 
       <div className="row g-4 align-items-stretch">
-        {/* Pontuação Global */}
         <div className="col-lg-6">
           <Card className="d-flex h-100 flex-column">
             <h2 className="mb-3 fw-semibold text-ink">{t('talentDashboard.pontuacaoGlobal')}</h2>
@@ -110,7 +103,6 @@ export default function TalentDashboardPage({ usarDadosAdmin = false }) {
           </Card>
         </div>
 
-        {/* Pedidos fechados + Atividade */}
         <div className="col-lg-6 d-flex flex-column gap-4">
           <Card>
             <div className="mb-3 d-flex align-items-baseline justify-content-between">

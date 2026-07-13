@@ -34,8 +34,6 @@ function BreakdownTable({ title, rows, labelKey, emptyLabel, extra }) {
   )
 }
 
-// soIndicadores: esconde as tabelas de dados (candidaturas/badges/consultores…)
-// — usado no Admin, que já tem abas próprias para essas listas.
 export default function TalentReportsPage({ soIndicadores = false }) {
   const { t, i18n } = useTranslation()
   const labels = t('tmWorkspace', { returnObjects: true })

@@ -2,12 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import AuthShell from '../../components/layout/AuthShell'
 import * as api from '../../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Confirmação do endereço de email (link do email de boas-vindas).
-// O link tem o formato /confirmar-email?token=<token>.
 export default function ConfirmarEmailPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')

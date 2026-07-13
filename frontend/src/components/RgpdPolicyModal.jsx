@@ -4,13 +4,6 @@ import { ShieldCheck } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
 import { useTranslation } from 'react-i18next'
 
-// Pop-up de aceitação de política RGPD (mostrado por cima da app quando o
-// consultor tem alguma política ativa/obrigatória por aceitar). Bloqueia a
-// app — igual ao ChangePasswordModal — até todas ficarem aceites.
-// Mostra uma política de cada vez; quando "pendingPolicies" fica vazio no
-// AuthContext, o AppLayout deixa de renderizar este modal automaticamente.
-// Exige confirmação explícita (checkbox) de que a política foi lida antes de
-// deixar aceitar — não basta clicar, tem de confirmar a leitura primeiro.
 export default function RgpdPolicyModal({ policies }) {
   const { t } = useTranslation()
   const navigate = useNavigate()

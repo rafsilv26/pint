@@ -8,11 +8,8 @@ import { Card, Spinner, EmptyState } from '../components/ui'
 import { useAsync } from '../hooks/useAsync'
 import { useAuth } from '../context/useAuth'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// lucide-react não inclui logótipos de marcas (removidos por questões de
-// trademark) — ícone do LinkedIn inline, mesma convenção de tamanho/cor
-// (currentColor) dos ícones lucide usados no resto da página.
 function LinkedinGlyph({ size = 13 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -21,34 +18,27 @@ function LinkedinGlyph({ size = 13 }) {
   )
 }
 
-// Cores das 3 primeiras posições do ranking (ouro/prata/bronze) — únicas
-// exceções à palete da marca, por representarem uma convenção universal de
-// pódio, tal como o azul do LinkedIn abaixo representa a marca do LinkedIn.
 const MEDALHAS = {
   1: { bg: '#fef3c7', fg: '#b45309' },
   2: { bg: '#f1f5f9', fg: '#475569' },
   3: { bg: '#fde2c8', fg: '#9a3412' },
 }
 
-// Tint determinístico (mesmo badge -> mesma cor sempre) reaproveitando as
-// classes tint-* já usadas na grelha de badges do catálogo.
 const TINTS = ['tint-sky-soft', 'tint-emerald-soft', 'tint-violet-soft', 'tint-salmon-soft']
 const tintDoBadge = (id) => TINTS[Number(id) % TINTS.length]
 
 export default function PublicProfilePage() {
-  const { t, i18n } = useTranslation() // <-- Inicializa a tradução
+  const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const { id } = useParams()
   const navigate = useNavigate()
-  // Sem :id -> o meu próprio perfil. Com :id -> perfil de outro consultor
-  // (a partir do diretório).
+
   const targetId = id ? Number(id) : user?.id
   const isSelf = !id || Number(id) === user?.id
 
   const { data, loading } = useAsync(async () => {
     const consultor = await api.getConsultant(targetId).catch(() => null)
-    // Os meus badges vêm do endpoint próprio; os de outro consultor vêm já
-    // incluídos no perfil dele (badgesConquistados).
+
     const badges = isSelf
       ? await api.getMeusBadges().catch(() => [])
       : (consultor?.badgesConquistados || []).map((b) => ({
@@ -63,7 +53,6 @@ export default function PublicProfilePage() {
     return { consultor, badges }
   }, [targetId, isSelf])
 
-  // Usar IDs para as tabs para a lógica não quebrar ao mudar o idioma
   const [tab, setTab] = useState('sobre')
 
   const TABS = [
@@ -106,11 +95,9 @@ export default function PublicProfilePage() {
         </button>
       )}
 
-      {/* Cabeçalho — cartão de credencial centrado */}
       <Card className="p-0 overflow-hidden">
         <div className="bg-gradient-brand" style={{ height: '7rem' }} />
         <div className="px-4 pb-4 text-center">
-          {/* Avatar centrado, sobreposto à faixa */}
           <div className="position-relative mx-auto" style={{ height: '6.5rem', width: '6.5rem', marginTop: '-3.5rem' }}>
             <div
               className="rounded-circle h-100 w-100 p-1 shadow-sm"
@@ -165,7 +152,6 @@ export default function PublicProfilePage() {
             )}
           </div>
 
-          {/* Faixa de estatísticas */}
           <div className="mt-4 pt-3 border-top row row-cols-3 g-0 text-center">
             {[
               { label: t('perfilPublico.stats.pontos'), value: consultor?.points ?? 0 },

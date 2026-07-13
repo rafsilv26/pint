@@ -25,9 +25,6 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
 
   const rows = data || []
 
-  // As rotas /admin/* renderizam TODAS este mesmo componente, por isso o React
-  // reutiliza a instância ao navegar (ex: Níveis -> Avisos) e o `activeKey`
-  // (useState) ficava preso no recurso anterior. Sincroniza quando a rota muda.
   useEffect(() => {
     setActiveKey(resourceKey)
     setEditing(null)
@@ -37,7 +34,6 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
     setErroDelete(null)
   }, [resourceKey])
 
-  // Função auxiliar para detetar a chave primária real
   const getPrimaryKey = (row) =>
     row?.policyId ?? row?.noticeId ?? row?.infoId ?? row?.areaId ?? row?.badgePremiumId ?? row?.id ?? null;
 
@@ -61,8 +57,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
             }));
           } catch (err) { console.error(`Erro ao carregar opções para ${f.key}:`, err); }
         }
-        // Carregar a lista de consultores (utilizadores com o perfil Consultor)
-        // para o seletor de destinatário dos avisos.
+
         if (f.type === 'select' && f.optionsLoader === 'consultores') {
           try {
             const users = await api.getUsers();
@@ -75,10 +70,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
       setDropdownOptions(newOptions);
     }
     loadOptions();
-    // Depende só de activeKey: allResources[activeKey].campos é um array novo
-    // a cada render (getAdminResources(t) recria tudo), por isso listá-lo como
-    // dependência disparava este efeito (e o pedido à API) em loop infinito.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [activeKey]);
 
   function trocarVariante(key) {
@@ -105,7 +97,7 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
     setSaving(true)
     setErroForm(null)
     try {
-      // Campos de data vazios seguem como null (string vazia rebenta na BD)
+
       const payload = { ...form }
       cfg.campos.forEach((f) => {
         if (f.type === 'date' && payload[f.key] === '') payload[f.key] = null
@@ -195,12 +187,11 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
                           </td>
                         )
                       }
-                      // Datas da BD (ISO) mostradas em formato local
+
                       if (c.type === 'date' && valor) {
                         valor = new Date(valor).toLocaleDateString()
                       }
-                      // Se a coluna corresponde a um campo select com opções carregadas
-                      // (ex: userId -> nome do consultor), mostra o label em vez do id.
+
                       const opcoes = dropdownOptions[c.key]
                       if (opcoes && valor != null) {
                         valor = opcoes.find((o) => String(o.value) === String(valor))?.label ?? valor
@@ -225,15 +216,12 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
         )}
       </Card>
 
-      {/* Modal Edição */}
       {editing && (
         <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3" style={{ zIndex: 1050, backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <form onSubmit={guardar} className="w-100 d-flex flex-column rounded-4 bg-white shadow-lg" style={{ maxWidth: '34rem', maxHeight: '90vh' }}>
-            {/* Cabeçalho fixo */}
             <div className="flex-shrink-0 border-bottom px-4 pt-4 pb-3">
               <h2 className="fs-5 fw-bold mb-0">{editing.id ? t('adminResource.editar', { singular: singularTraduzido }) : t('adminResource.adicionar', { singular: singularTraduzido })}</h2>
             </div>
-            {/* Campos com scroll */}
             <div className="flex-grow-1 overflow-auto px-4 py-3">
               {erroForm && <div className="mb-3 rounded-3 bg-danger-subtle px-3 py-2 small text-danger">{erroForm}</div>}
               <div className="row g-3">
@@ -263,7 +251,6 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
                 })}
               </div>
             </div>
-            {/* Rodapé fixo */}
             <div className="flex-shrink-0 d-flex justify-content-end gap-2 border-top px-4 py-3">
               <Button variant="secondary" onClick={fechar}>{t('adminResource.cancelar')}</Button>
               <Button type="submit">{saving ? t('adminResource.guardando') : t('adminResource.guardar')}</Button>
@@ -272,7 +259,6 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
         </div>
       )}
 
-      {/* Modal Confirmar Eliminar */}
       {confirmar && (
         <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3" style={{ zIndex: 1050, backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="bg-white p-4 rounded-4 w-100 text-center" style={{ maxWidth: '24rem' }}>

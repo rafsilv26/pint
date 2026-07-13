@@ -5,10 +5,10 @@ import AuthShell from '../../components/layout/AuthShell'
 import { Field } from '../../components/ui'
 import { useAuth } from '../../context/useAuth'
 import { homeForRole } from '../../config/navigation'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 export default function LoginPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { login } = useAuth()
   const navigate = useNavigate()
 

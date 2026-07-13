@@ -40,7 +40,6 @@ export default function BadgeDetailPage() {
     <div>
       {voltar}
 
-      {/* Hero */}
       <div className={`overflow-hidden rounded-4 p-4 p-sm-5 ${HERO_TINTS[badge.tint] || HERO_TINTS.sky}`}>
         {trilho.length > 0 && (
           <div className="d-flex flex-wrap align-items-center gap-1 fs-xs fw-medium text-ink text-opacity-75 mb-3">
@@ -85,7 +84,6 @@ export default function BadgeDetailPage() {
         </div>
       </div>
 
-      {/* Descrição + Requisitos */}
       <div className="mt-4 row g-4">
         <section className="col-lg-5">
           <h2 className="mb-3 fw-semibold text-ink">{t('badgeDetail.descricao')}</h2>

@@ -2,16 +2,14 @@ import { useState } from 'react'
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Search, LogOut, Menu, X, PenLine } from 'lucide-react'
 import { useAuth } from '../../context/useAuth'
-import { getPanelForPath } from '../../config/navigation' // <-- Import da função atualizada
+import { getPanelForPath } from '../../config/navigation'
 import Logo from '../Logo'
 import ChangePasswordModal from '../ChangePasswordModal'
 import RgpdPolicyModal from '../RgpdPolicyModal'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Layout dos painéis de gestão (Admin / Talent Manager / Service Line Leader):
-// sidebar azul à esquerda + barra de pesquisa no topo + conteúdo.
 export default function ManagerLayout() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { user, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
@@ -23,7 +21,6 @@ export default function ManagerLayout() {
   const [globalSearch, setGlobalSearch] = useState('')
   const [confirmLogout, setConfirmLogout] = useState(false)
 
-  // Obter o painel dinâmico já com os labels traduzidos
   const panel = getPanelForPath(location.pathname, t)
   const base = '/' + (location.pathname.split('/')[1] || '')
 
@@ -72,7 +69,6 @@ export default function ManagerLayout() {
 
   return (
     <div className="d-flex vh-100 overflow-hidden">
-      {/* Sidebar */}
       <aside
         className="d-none d-md-flex flex-shrink-0 flex-column bg-gradient-brand text-white"
         style={{ width: '16rem' }}
@@ -91,7 +87,6 @@ export default function ManagerLayout() {
         {navigation(true)}
       </aside>
 
-      {/* Main */}
       <div className="d-flex flex-grow-1 flex-column overflow-hidden">
         <header
           className="d-flex flex-shrink-0 align-items-center gap-3 border-bottom bg-white px-4"

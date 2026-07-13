@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Mail, ArrowLeft, Copy, Download, Award, Phone, MapPin, Info } from 'lucide-react'
 import { Card, Toggle } from '../components/ui'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 const escapeHtml = (value = '') => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
@@ -38,13 +38,13 @@ function Campo({ label, value, onChange }) {
 }
 
 export default function EmailSignaturePage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const location = useLocation()
   const backTo = location.pathname.startsWith('/tm') ? '/tm/conta' : location.pathname.startsWith('/sll') ? '/sll/conta' : '/perfil'
 
   const [d, setD] = useState({
     nome: '',
-    cargo: t('assinatura.campos.consultorDefault'), // Tradução aplicada ao valor por defeito
+    cargo: t('assinatura.campos.consultorDefault'),
     email: '',
     telefone: '',
     localizacao: '',
@@ -55,7 +55,6 @@ export default function EmailSignaturePage() {
   const [selected, setSelected] = useState([])
   const [message, setMessage] = useState('')
 
-  // Carrega a assinatura guardada (popula os campos)
   useEffect(() => {
     api.getEmailSignature()
       .then((s) => {
@@ -95,7 +94,7 @@ export default function EmailSignaturePage() {
       setMessage(error.message)
       return
     }
-    // Persiste a assinatura no backend (quando ligado à API real)
+
     if (chosen.length === 0) {
       setMessage(t('tmWorkspace.signature.persistenceRequiresBadge'))
       return
@@ -130,7 +129,6 @@ export default function EmailSignaturePage() {
       </div>
 
       <div className="row g-4">
-        {/* Esquerda — formulário */}
         <div className="col-lg-6 d-flex flex-column gap-4">
           <Card>
             <h2 className="mb-3 fw-semibold text-ink">{t('assinatura.infoPessoais')}</h2>
@@ -174,7 +172,6 @@ export default function EmailSignaturePage() {
           </Card>
         </div>
 
-        {/* Direita — pré-visualização + instruções */}
         <div className="col-lg-6 d-flex flex-column gap-4">
           <Card>
             <h2 className="mb-3 fw-semibold text-ink">{t('assinatura.preview')}</h2>

@@ -4,10 +4,10 @@ import { PageHeader, Card, Spinner, ErrorState, EmptyState, StatusPill } from '.
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import ExportButtons from '../../components/ExportButtons'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 export default function AdminPedidosPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { data, loading, error, reload } = useAsync(() => api.getAdminPedidos())
   const lista = data || []
 

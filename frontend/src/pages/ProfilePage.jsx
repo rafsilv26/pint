@@ -77,7 +77,6 @@ export default function ProfilePage() {
       </div>
 
       <div className="row g-4">
-        {/* Cartão lateral */}
         <div className="col-lg-4">
           <Card className="text-center">
             <div className="mx-auto d-flex align-items-center justify-content-center rounded-circle bg-brand-light fs-2 fw-bold text-brand" style={{ height: '5rem', width: '5rem' }}>
@@ -113,7 +112,6 @@ export default function ProfilePage() {
           </Card>
         </div>
 
-        {/* Formulário */}
         <div className="col-lg-8">
           <Card>
             <form onSubmit={guardarAlteracoes} className="d-flex flex-column gap-3">
@@ -176,7 +174,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Ações */}
       <div className="row row-cols-1 row-cols-sm-2 g-3">
         {ACOES.map((a) => (
           <div className="col" key={a.to}>

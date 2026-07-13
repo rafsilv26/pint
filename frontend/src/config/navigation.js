@@ -4,7 +4,6 @@ import {
   ShieldCheck, Info, Settings, Network, Boxes, BarChart3, ListChecks,
 } from 'lucide-react'
 
-// ===== Navbar de topo do Consultor =====
 export const getNavItems = (t) => [
   { to: '/', label: t('nav.consultor.inicio'), icon: Home, end: true },
   { to: '/catalogo', label: t('nav.consultor.catalogo'), icon: LayoutGrid },
@@ -14,7 +13,6 @@ export const getNavItems = (t) => [
   { to: '/perfil', label: t('nav.consultor.perfil'), icon: User },
 ]
 
-// ===== Sidebar do Talent Manager =====
 const getTalentNav = (t) => [
   { to: '/tm', label: t('nav.tm.dashboard'), icon: LayoutDashboard, end: true },
   { to: '/tm/candidaturas', label: t('nav.tm.candidaturas'), icon: ClipboardCheck },
@@ -27,7 +25,6 @@ const getTalentNav = (t) => [
   { to: '/tm/informacoes', label: t('nav.tm.informacoes', { defaultValue: 'Informações' }), icon: Info },
 ]
 
-// ===== Sidebar do Service Line Leader =====
 const getSllNav = (t) => [
   { to: '/sll', label: t('nav.sll.dashboard'), icon: LayoutDashboard, end: true },
   { to: '/sll/consultores', label: t('nav.sll.consultores'), icon: Users },
@@ -38,7 +35,6 @@ const getSllNav = (t) => [
   { to: '/sll/informacoes', label: t('nav.sll.informacoes', { defaultValue: 'Informações' }), icon: Info },
 ]
 
-// ===== Sidebar do Administrador =====
 const getAdminNav = (t) => [
   { to: '/admin', label: t('nav.admin.dashboard'), icon: LayoutDashboard, end: true },
   { to: '/admin/utilizadores', label: t('nav.admin.utilizadores'), icon: Users },
@@ -72,10 +68,6 @@ const ROLE_HOME = {
 const primaryRole = (user) => (user?.roles && user.roles[0]) || user?.role || 'Consultor'
 export const homeForRole = (user) => ROLE_HOME[primaryRole(user)] || '/'
 
-// O backend devolve sempre os perfis com o nome completo (ex: 'TalentManager',
-// 'ServiceLineLeader'), mas as rotas/RoleGuard usam códigos curtos ('tm', 'sll').
-// Este mapa é o único sítio que faz essa conversão — evita bugs de "Acesso
-// Negado" por o código curto nunca coincidir com o nome completo em minúsculas.
 const ROLE_SHORT_CODES = {
   Consultor: 'consultor',
   TalentManager: 'tm',
@@ -84,7 +76,6 @@ const ROLE_SHORT_CODES = {
 }
 export const roleShortCode = (role) => ROLE_SHORT_CODES[role] || String(role || '').toLowerCase()
 
-// O painel (sidebar) é escolhido pelo caminho — fácil de pré-visualizar.
 export const getPanelForPath = (pathname = '', t) => {
   const panels = getRolePanels(t)
   if (pathname.startsWith('/tm')) return panels.TalentManager

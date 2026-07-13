@@ -5,7 +5,7 @@ import { PageHeader, Spinner, ErrorState, EmptyState } from './ui'
 import { useAsync } from '../hooks/useAsync'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 const TECH_TINTS = {
   salmon: 'tint-salmon-soft',
@@ -14,9 +14,8 @@ const TECH_TINTS = {
   violet: 'tint-violet-soft',
 }
 
-// Grelha de badges só-leitura (para Talent Manager / Service Line Leader).
 export default function BadgesGridView({ titulo, linkBase }) {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { data, loading, error, reload } = useAsync(() => api.getBadges())
   useAutoRefresh(reload)
   const [q, setQ] = useState('')
@@ -26,7 +25,6 @@ export default function BadgesGridView({ titulo, linkBase }) {
 
   const lista = data.filter((b) => b.ativo !== false && `${b.nome} ${b.nivel} ${b.fornecedor}`.toLowerCase().includes(q.toLowerCase()))
 
-  // Definimos o título final aqui para usar a tradução caso não venha nas props
   const tituloFinal = titulo || t('badgesGrid.tituloDefault')
 
   return (

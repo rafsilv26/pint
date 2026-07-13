@@ -13,7 +13,7 @@ export const getAdminResources = (t) => ({
     ],
     campos: [
       { key: 'nome', label: t('admin.generic.nome') },
-      // Dropdown para o nível (mostra "Nome do Nível (Área)", tal como em Requisitos).
+
       {
         key: 'nivelId',
         label: t('admin.badges.campos.nivel'),
@@ -156,19 +156,18 @@ export const getAdminResources = (t) => ({
     singular: t('admin.serviceLines.singular'),
     colunas: [
       { key: 'nome', label: t('admin.generic.nome') },
-      { key: 'learningPathId', label: t('admin.learningPaths.singular') }, // Adicionado à tabela
+      { key: 'learningPathId', label: t('admin.learningPaths.singular') },
       { key: 'descricao', label: t('admin.generic.descricao') },
       { key: 'ativo', label: 'Ativo' },
     ],
     campos: [
       { key: 'nome', label: t('admin.generic.nome') },
 
-      // AQUI ESTÁ A MAGIA DO DROPDOWN:
       {
         key: 'learningPathId',
         label: t('admin.learningPaths.singular'),
         type: 'select',
-        optionsResource: 'learning-paths' // Liga diretamente à API dos learning-paths
+        optionsResource: 'learning-paths'
       },
 
       { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
@@ -187,7 +186,7 @@ export const getAdminResources = (t) => ({
       singular: t('admin.areas.singular'),
       colunas: [
         { key: 'nome', label: t('admin.generic.nome') },
-        // Opcional: Adicionar a coluna para veres o ID na tabela
+
         { key: 'serviceLineId', label: t('admin.serviceLines.singular') },
         { key: 'descricao', label: t('admin.generic.descricao') },
         { key: 'ativo', label: 'Ativo' },
@@ -195,12 +194,11 @@ export const getAdminResources = (t) => ({
       campos: [
         { key: 'nome', label: t('admin.generic.nome') },
 
-        // O NOVO DROPDOWN PARA A SERVICE LINE:
         {
           key: 'serviceLineId',
           label: t('admin.serviceLines.singular'),
           type: 'select',
-          optionsResource: 'service-lines' // Vai buscar a lista à API das service lines
+          optionsResource: 'service-lines'
         },
 
         { key: 'descricao', label: t('admin.generic.descricao'), type: 'textarea', optional: true },
@@ -218,13 +216,13 @@ export const getAdminResources = (t) => ({
       titulo: t('admin.levels.titulo'),
       singular: t('admin.levels.singular'),
       colunas: [
-        { key: 'areaId', label: t('admin.areas.singular') }, // Adicionado para veres a Área na tabela
+        { key: 'areaId', label: t('admin.areas.singular') },
         { key: 'nome', label: t('admin.generic.nome') },
         { key: 'ordem', label: t('admin.levels.campos.ordem') },
         { key: 'ativo', label: 'Ativo' },
       ],
       campos: [
-        // 1. O Dropdown mágico para a Área
+
         {
           key: 'areaId',
           label: t('admin.areas.singular'),
@@ -234,7 +232,6 @@ export const getAdminResources = (t) => ({
 
         { key: 'nome', label: t('admin.generic.nome'), optional: true },
 
-        // Como na BD é CHAR(1) (ex: 'A', 'B', 'C'), tirei o type: 'number' para permitir letras
         { key: 'ordem', label: t('admin.levels.campos.ordem') },
         {
           key: 'ativo',
@@ -262,7 +259,7 @@ requirements: {
         label: t('admin.levels.singular'),
         type: 'select',
         optionsResource: 'levels',
-        // Usa o mapa de áreas injetado pelo componente para mostrar "Nome da Área"
+
         optionLabel: (item, areasMap) => {
           const nomeArea = areasMap[item.areaId] || 'Área Desconhecida';
           return `${item.nome || 'Nível'} (${nomeArea})`;
@@ -291,7 +288,7 @@ requirements: {
       titulo: t('admin.policies.titulo'),
       singular: t('admin.policies.singular'),
       colunas: [
-        { key: 'policyId', label: 'ID' }, // Adicionado para veres o ID
+        { key: 'policyId', label: 'ID' },
         { key: 'title', label: t('admin.generic.titulo') },
         { key: 'version', label: 'Versão' },
         { key: 'effectiveDate', label: 'Data de Eficácia' },

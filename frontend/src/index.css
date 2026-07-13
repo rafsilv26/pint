@@ -1,6 +1,4 @@
-/* ===== Extras que o tema Bootstrap (src/scss/custom.scss) não cobre =====
-   Tudo o resto (cores, tipografia, botões, focus, etc.) já vem do Bootstrap
-   temizado com a cor de marca da Softinsa — ver src/scss/custom.scss. */
+
 
 html,
 body,
@@ -8,8 +6,6 @@ body,
   height: 100%;
 }
 
-/* Aliases de conveniência para a cor de marca (equivalentes ao $primary já
-   configurado no tema, úteis onde o nome "brand" é mais claro que "primary") */
 .bg-brand { background-color: var(--bs-primary) !important; }
 .text-brand { color: var(--bs-primary) !important; }
 .bg-brand-dark { background-color: var(--bs-primary-text-emphasis, #15406d) !important; }
@@ -17,17 +13,13 @@ body,
 .border-brand { border-color: var(--bs-primary) !important; }
 .btn-brand { --bs-btn-bg: var(--bs-primary); --bs-btn-border-color: var(--bs-primary); --bs-btn-color: #fff; --bs-btn-hover-bg: #15406d; --bs-btn-hover-border-color: #15406d; --bs-btn-hover-color: #fff; }
 
-/* Alias para a cor de texto "tinta" (equivalente ao body-color, útil onde o
-   nome "ink" é mais claro do que confiar no herdado) */
 .text-ink { color: var(--bs-body-color) !important; }
 
-/* Gradiente de marca usado em sidebars/navbars/painéis de destaque */
 .bg-gradient-brand {
   background: linear-gradient(135deg, var(--bs-primary-text-emphasis, #15406d) 0%, var(--bs-primary) 55%, #3f93cf 100%) !important;
   color: #fff;
 }
 
-/* ---- Gradientes de "tint" usados em avatares/ícones de badges ---- */
 .tint-salmon { background: linear-gradient(135deg, #fecaca, #fed7aa); }
 .tint-sky { background: linear-gradient(135deg, #bae6fd, #bfdbfe); }
 .tint-emerald { background: linear-gradient(135deg, #a7f3d0, #bbf7d0); }
@@ -38,10 +30,9 @@ body,
 .tint-emerald-soft { background: linear-gradient(135deg, #d8f6e6, #ddf7de); }
 .tint-violet-soft { background: linear-gradient(135deg, #ece7fd, #f1e3fd); }
 
-/* ---- Pequenos utilitários ---- */
 .border-dashed { border-style: dashed !important; }
 .cursor-pointer { cursor: pointer; }
-/* Permite que um filho flex encolha abaixo do conteúdo (para text-truncate) */
+
 .min-w-0 { min-width: 0 !important; }
 .min-vh-100 { min-height: 100vh; }
 .fs-xs { font-size: 0.75rem; }
@@ -55,7 +46,6 @@ body,
 }
 .hover-shadow:hover { box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08); }
 
-/* ---- Cartão de badge (catálogo): elevação suave ao passar o rato ---- */
 .badge-tile {
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
@@ -64,7 +54,7 @@ body,
   box-shadow: 0 0.75rem 1.5rem rgba(15, 64, 109, 0.12);
   border-color: var(--bs-primary) !important;
 }
-/* Selo circular do badge sobreposto à faixa de cor do cartão */
+
 .badge-seal {
   display: grid;
   place-items: center;

@@ -4,12 +4,10 @@ import { Lock } from 'lucide-react'
 import AuthShell from '../../components/layout/AuthShell'
 import { Field } from '../../components/ui'
 import * as api from '../../services/api'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Definir nova password (após link de recuperação recebido por email).
-// O link tem o formato /atualizar-password?token=<token>.
 export default function AtualizarPasswordPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
@@ -46,7 +44,6 @@ export default function AtualizarPasswordPage() {
     }
   }
 
-  // Sem token no URL não há nada para repor — pedir nova recuperação.
   if (!token) {
     return (
       <AuthShell

@@ -6,7 +6,7 @@ import { useAsync } from '../../hooks/useAsync'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import * as api from '../../services/api'
 import ExportButtons from '../../components/ExportButtons'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 export default function SLLPedidosPage() {
   const { t, i18n } = useTranslation()
@@ -42,7 +42,6 @@ export default function SLLPedidosPage() {
     navigate(location.pathname, { replace: true, state: null })
   }, [location.pathname, location.state?.feedback, navigate])
 
-  // Agora que o resumo está dentro do componente, podemos usar o t() para traduzir as labels
   const resumo = [
     { label: t('sllPedidos.resumo.pendentes'), value: cont('VALIDATED'), icon: Clock, tint: { backgroundColor: '#fef3c7', color: '#d97706' } },
     { label: t('sllPedidos.resumo.aprovados'), value: cont('APPROVED'), icon: CheckCircle2, tint: { backgroundColor: '#dcfce7', color: '#16a34a' } },

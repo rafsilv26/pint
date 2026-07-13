@@ -1,9 +1,6 @@
-// =============================================================
-//  IMPLEMENTAÇÃO MOCK DA API
-//  Devolve dados estáticos (de ../data/mockData) com latência simulada.
-//  Usada quando VITE_USE_REAL_API !== 'true' (ver api.js).
-// =============================================================
-import i18next from 'i18next' // <-- Import da instância global para ficheiros JS puros
+
+
+import i18next from 'i18next'
 import {
   mockUser,
   mockBadges,
@@ -22,7 +19,6 @@ import {
 const delay = (ms = 400) => new Promise((resolve) => setTimeout(resolve, ms))
 const clone = (data) => JSON.parse(JSON.stringify(data))
 
-// ---------- Autenticação ----------
 export async function login({ email, password }) {
   await delay()
   if (!email || !password) throw new Error(i18next.t('api.validacao.emailPassword'))
@@ -57,7 +53,6 @@ export async function confirmarEmail({ token }) {
   return { message: i18next.t('api.mensagens.emailConfirmado') }
 }
 
-// ---------- Preferências de notificação ----------
 let mockNotificationPrefs = {
   email: true, aprovado: true, rejeitado: true,
   novos: true, ranking: false, semanal: true, mensal: false,
@@ -74,13 +69,11 @@ export async function saveNotificationPrefs(prefs) {
   return { message: i18next.t('api.mensagens.preferenciasGuardadas'), prefs: { ...mockNotificationPrefs } }
 }
 
-// ---------- Dashboard ----------
 export async function getDashboard() {
   await delay()
   return clone(mockDashboard)
 }
 
-// ---------- Catálogo ----------
 export async function getBadges() {
   await delay()
   return clone(mockBadges)
@@ -90,7 +83,6 @@ export async function getBadge(id) {
   return clone(mockBadges.find((b) => b.id === Number(id)) || null)
 }
 
-// ---------- Candidaturas ----------
 export async function getMinhasCandidaturas() {
   await delay()
   return clone(mockCandidaturas)
@@ -146,31 +138,26 @@ export async function apagarObjetivo(id) {
   return {}
 }
 
-// ---------- Badges conquistados ----------
 export async function getMeusBadges() {
   await delay()
   return clone(mockMyBadges)
 }
 
-// ---------- Notificações ----------
 export async function getNotificacoes() {
   await delay()
   return clone(mockNotifications)
 }
 
-// ---------- Gamificação ----------
 export async function getGamification() {
   await delay()
   return clone(mockGamification)
 }
 
-// ---------- Página pública de badge ----------
 export async function verificarBadge(publicToken) {
   await delay()
   return clone(mockPublicBadges[publicToken] || null)
 }
 
-// ---------- Notificações (ações) ----------
 export async function markNotificationRead() {
   await delay(150)
   return { ok: true }
@@ -180,7 +167,6 @@ export async function markAllNotificationsRead() {
   return { ok: true }
 }
 
-// ---------- Assinatura de email ----------
 export async function getEmailSignature() {
   await delay()
   return {
@@ -199,14 +185,12 @@ export async function saveEmailSignature() {
   return { mensagem: i18next.t('api.mensagens.assinaturaGuardada') }
 }
 
-// ---------- Password ----------
 export async function changePassword({ currentPassword, newPassword }) {
   await delay()
   if (!currentPassword || !newPassword) throw new Error(i18next.t('api.validacao.preencheCampos'))
   return { message: i18next.t('api.mensagens.passwordAlterada') }
 }
 
-// ---------- Consultores (diretório) ----------
 export async function getConsultants() {
   await delay()
   return [
@@ -232,20 +216,16 @@ export async function getConsultantCandidaturas(id) {
   return Number(id) === 7 ? mockTalentCandidaturas.map((c) => ({ ...c })) : []
 }
 
-// ---------- Sessão ----------
 export async function me() {
   await delay()
   return { user: clone(mockUser) }
 }
 
-// ---------- RGPD ----------
-// Em modo mock não há políticas pendentes a bloquear a entrada.
 export async function acceptPolicy() {
   await delay(200)
   return { message: 'Política aceite com sucesso.', pendingPolicies: [] }
 }
 
-// ---------- Talent Manager ----------
 export async function getTalentDashboard() {
   await delay()
   return clone(mockTalentDashboard)
@@ -423,8 +403,6 @@ export async function getTalentProfile() {
   }
 }
 
-
-// ---------- Service Line Leader ----------
 export async function getServiceLineDashboard() {
   await delay()
   const dashboard = clone(mockServiceLineDashboard)
@@ -505,7 +483,6 @@ export async function downloadManagerCertificate() {
   return { ok: true }
 }
 
-// ---------- Admin (CRUD genérico, com store em memória) ----------
 let _adminId = 1000
 const adminStore = {
   badges: [
@@ -573,7 +550,6 @@ export async function deleteResource(resource, id) {
   return { ok: true }
 }
 
-// ---------- Admin: Utilizadores ----------
 let _userId = 50
 const usersStore = [
   { id: 1, nome: 'Rafael Silva', email: 'rafael@softinsa.pt', roles: ['Consultor'], ativo: true },
@@ -604,13 +580,11 @@ export async function deleteUser(id) {
   return { ok: true }
 }
 
-// ---------- Admin: Pedidos ----------
 export async function getAdminPedidos() {
   await delay()
   return clone(mockServiceLinePedidos)
 }
 
-// ---------- Exportações (gera um CSV de demonstração) ----------
 export async function updateConsultant() {
   return { mensagem: i18next.t('api.mensagens.perfilAtualizado') }
 }

@@ -9,7 +9,6 @@ import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
 import { useTranslation } from 'react-i18next'
 
-// Definições de conta dos perfis de gestão (Admin / TM / SLL).
 export default function ManagerContaPage() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
@@ -65,7 +64,6 @@ export default function ManagerContaPage() {
     setErro(null)
     setMsg(null)
 
-    // Validações traduzidas
     if (pw.nova.length < 8) return setErro(t('managerConta.erroComprimento'))
     if (pw.nova !== pw.confirmar) return setErro(t('managerConta.erroCoincidem'))
     if (pw.atual === pw.nova) return setErro(t('managerConta.erroDiferente'))

@@ -6,7 +6,7 @@ import { useAsync } from '../../hooks/useAsync'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import * as api from '../../services/api'
 import { getEvidenceCoverage } from '../../services/talentWorkspace'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
 const TINT = {
   salmon: 'tint-salmon',
@@ -16,7 +16,7 @@ const TINT = {
 }
 
 export default function TalentCandidaturaDetailPage() {
-  const { t } = useTranslation() // <-- Inicializa a tradução
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const { data: c, loading, error, reload } = useAsync(() => api.getCandidatura(id), [id])
@@ -34,8 +34,6 @@ export default function TalentCandidaturaDetailPage() {
   if (error) return <ErrorState onRetry={reload} />
   if (!c) return <p className="text-muted">{t('talentCandidaturaDetail.naoEncontrada')}</p>
 
-  // Só é possível validar/rejeitar uma candidatura enquanto esta aguarda
-  // decisão do Talent Manager. Já validada, rejeitada ou aprovada -> sem ações.
   const podeValidar = c.estado?.code === 'SUBMITTED'
   const evidenceCoverage = getEvidenceCoverage(c.badge.requisitos, c.evidencias)
   const requisitosObrigatorios = evidenceCoverage.required
@@ -147,7 +145,6 @@ export default function TalentCandidaturaDetailPage() {
           {msg && <p className="mt-2 small text-danger">{msg}</p>}
         </div>
 
-        {/* Badge */}
         <div className={`rounded-4 p-4 text-center ${TINT[c.badge.tint] || TINT.salmon}`} style={{ width: '11rem' }}>
           <div className="mx-auto d-flex align-items-center justify-content-center rounded-circle bg-white fs-3 fw-bold text-ink shadow" style={{ height: '3.5rem', width: '3.5rem' }}>
             {c.badge.nome[0]}
@@ -198,7 +195,6 @@ export default function TalentCandidaturaDetailPage() {
         </Card>
       )}
 
-      {/* Tabs */}
       <div className="mt-4 d-flex flex-wrap gap-1 border-bottom">
         {c.evidencias.map((e, i) => (
           <button

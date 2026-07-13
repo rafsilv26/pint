@@ -5,18 +5,16 @@ import LinkedinGlyph from '../components/LinkedinGlyph'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
 import { partilharLinkedin } from '../utils/share'
-import { useTranslation } from 'react-i18next' // <-- Import do hook
+import { useTranslation } from 'react-i18next'
 
-// Função adaptada para receber o idioma atual (locale)
 function formatarData(d, locale = 'pt-PT') {
   return d ? new Date(d).toLocaleDateString(locale) : '—'
 }
 
 export default function HistoryPage() {
-  const { t, i18n } = useTranslation() // <-- Inicializa a tradução e o i18n
+  const { t, i18n } = useTranslation()
   const { data: badges, loading, error, reload } = useAsync(() => api.getMeusBadges())
 
-  // Mapear o idioma atual para o formato de data correto
   const localeMap = {
     pt: 'pt-PT',
     en: 'en-US',

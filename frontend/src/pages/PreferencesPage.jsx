@@ -53,12 +53,10 @@ export default function PreferencesPage() {
   const [erro, setErro] = useState(null)
   const [aGuardar, setAGuardar] = useState(false)
 
-  // As preferências de notificação são persistidas no backend; as restantes
-  // secções (visualização/privacidade) continuam locais.
   useEffect(() => {
     api.getNotificationPrefs()
       .then((prefs) => setNotif((cur) => ({ ...cur, ...prefs })))
-      .catch(() => {}) // sem prefs guardadas, ficam os defaults
+      .catch(() => {})
   }, [])
 
   async function guardarPreferencias() {
@@ -77,7 +75,6 @@ export default function PreferencesPage() {
 
   const upd = (obj, setter, key) => (v) => setter({ ...obj, [key]: v })
 
-  // Muda o idioma e guarda no localStorage
   const mudarIdioma = (novoIdioma) => {
     i18n.changeLanguage(novoIdioma)
   }
@@ -98,7 +95,6 @@ export default function PreferencesPage() {
       <div className="row g-4">
         <div className="col-lg-8 d-flex flex-column gap-4">
 
-          {/* Notificações */}
           <Card>
             <h2 className="mb-2 d-flex align-items-center gap-2 fw-semibold text-ink">
               <Bell size={18} className="text-brand" /> {t('preferencias.notificacoes.titulo')}
@@ -112,13 +108,11 @@ export default function PreferencesPage() {
             <ToggleRow label={t('preferencias.notificacoes.mensal')} desc={t('preferencias.notificacoes.mensalDesc')} checked={notif.mensal} onChange={upd(notif, setNotif, 'mensal')} />
           </Card>
 
-          {/* Visualização */}
           <Card>
             <h2 className="mb-3 d-flex align-items-center gap-2 fw-semibold text-ink">
               <Eye size={18} className="text-brand" /> {t('preferencias.visualizacao.titulo')}
             </h2>
 
-            {/* Seletor de Idioma */}
             <p className="mb-2 small fw-medium text-ink">{t('preferencias.visualizacao.idioma')}</p>
             <Segmented
               options={[
@@ -130,7 +124,6 @@ export default function PreferencesPage() {
               onChange={mudarIdioma}
             />
 
-            {/* Tema */}
             <p className="mb-2 mt-4 small fw-medium text-ink">{t('preferencias.visualizacao.tema')}</p>
             <Segmented
               options={[
@@ -164,7 +157,6 @@ export default function PreferencesPage() {
             </div>
           </Card>
 
-          {/* Privacidade */}
           <Card>
             <h2 className="mb-2 d-flex align-items-center gap-2 fw-semibold text-ink">
               <Shield size={18} className="text-brand" /> {t('preferencias.privacidade.titulo')}
@@ -176,7 +168,6 @@ export default function PreferencesPage() {
           </Card>
         </div>
 
-        {/* Coluna lateral */}
         <div className="col-lg-4 d-flex flex-column gap-4">
           <Card className="bg-brand-light">
             <h3 className="fw-semibold text-ink">{t('preferencias.resumo.titulo')}</h3>
@@ -196,7 +187,6 @@ export default function PreferencesPage() {
               <div className="d-flex justify-content-between">
                 <dt className="text-muted fw-normal">{t('preferencias.resumo.tema')}</dt>
                 <dd className="fw-medium text-ink text-capitalize mb-0">
-                  {/* Busca a tradução do tema atual dinamicamente */}
                   {t(`preferencias.visualizacao.${tema}`)}
                 </dd>
               </div>

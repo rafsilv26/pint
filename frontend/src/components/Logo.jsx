@@ -1,7 +1,5 @@
 import { useState } from 'react'
 
-// Logótipo Softinsa. Usa a imagem em /softinsa-logo.png (fundo transparente,
-// wordmark branco) e cai para o texto estilizado caso a imagem não exista.
 export default function Logo({ height = 28, className = '', textClassName = 'fs-4' }) {
   const [erro, setErro] = useState(false)
 
