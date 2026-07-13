@@ -93,89 +93,89 @@ export default function PublicProfilePage() {
     { label: t('perfilPublico.rankingLabel'), value: rank ? `#${rank}` : null },
   ].filter((f) => f.value)
 
-  const heroStat = { icon: Star, label: t('perfilPublico.stats.pontos'), value: consultor?.points ?? 0 }
-  const outrasStats = [
-    { icon: Award, label: t('perfilPublico.stats.badges'), value: consultor?.badges ?? badges.length },
-    { icon: Sparkles, label: t('perfilPublico.stats.conquistas'), value: consultor?.specials ?? 0 },
-    { icon: Calendar, label: t('perfilPublico.stats.desde'), value: consultor?.startDate || '—' },
-  ]
-
   return (
     <div>
       <Link to={isSelf ? '/perfil' : '/consultores'} className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
         <ArrowLeft size={16} /> {isSelf ? t('perfilPublico.voltar') : t('perfilPublico.voltarDiretorio')}
       </Link>
 
-      {/* Cabeçalho */}
+      {/* Cabeçalho — cartão de credencial centrado */}
       <Card className="p-0 overflow-hidden">
-        <div className="bg-gradient-brand" style={{ height: '6.5rem' }} />
-        <div className="px-4 pb-4">
-          <div className="d-flex flex-wrap align-items-end justify-content-between gap-3">
-            <div className="d-flex align-items-end gap-3">
-              {/* Avatar em anel, com selo de pódio para o Top 3 do ranking.
-                  Só o avatar sobe para cima da faixa; nome/contactos ficam
-                  em baixo, sobre o fundo branco (senão texto escuro fica ilegível). */}
-              <div className="position-relative flex-shrink-0" style={{ height: '6rem', width: '6rem', marginTop: '-3rem' }}>
-                <div
-                  className="rounded-circle h-100 w-100 p-1"
-                  style={{ background: 'linear-gradient(135deg, var(--bs-primary), #3f93cf)' }}
-                >
-                  <div className="rounded-circle h-100 w-100 d-flex align-items-center justify-content-center bg-white overflow-hidden">
-                    {consultor?.imagePath ? (
-                      <img src={consultor.imagePath} alt="" className="w-100 h-100 object-fit-cover" />
-                    ) : (
-                      <span className="fs-2 fw-bold text-brand">{iniciais}</span>
-                    )}
-                  </div>
-                </div>
-                {medalha && (
-                  <span
-                    className="position-absolute d-flex align-items-center justify-content-center rounded-circle border border-2 border-white shadow-sm"
-                    style={{ height: '1.85rem', width: '1.85rem', bottom: '-0.3rem', right: '-0.3rem', backgroundColor: medalha.bg }}
-                    title={`${t('perfilPublico.rankingLabel')}: #${rank}`}
-                  >
-                    <Trophy size={13} style={{ color: medalha.fg }} />
-                  </span>
-                )}
-              </div>
-              <div className="pb-1">
-                <h1 className="fs-4 fw-bold text-ink mb-0">{nome}</h1>
-                <p className="small text-muted mb-0">{cargo}</p>
-                {(consultor?.area || consultor?.serviceLine) && (
-                  <div className="mt-2 d-flex flex-wrap gap-1">
-                    {[consultor?.area, consultor?.serviceLine].filter(Boolean).map((tag) => (
-                      <span key={tag} className="rounded-pill bg-brand-light text-brand px-2 py-1 fs-xs fw-medium">{tag}</span>
-                    ))}
-                  </div>
+        <div className="bg-gradient-brand" style={{ height: '7rem' }} />
+        <div className="px-4 pb-4 text-center">
+          {/* Avatar centrado, sobreposto à faixa */}
+          <div className="position-relative mx-auto" style={{ height: '6.5rem', width: '6.5rem', marginTop: '-3.5rem' }}>
+            <div
+              className="rounded-circle h-100 w-100 p-1 shadow-sm"
+              style={{ background: 'linear-gradient(135deg, var(--bs-primary), #3f93cf)' }}
+            >
+              <div className="rounded-circle h-100 w-100 d-flex align-items-center justify-content-center bg-white overflow-hidden">
+                {consultor?.imagePath ? (
+                  <img src={consultor.imagePath} alt="" className="w-100 h-100 object-fit-cover" />
+                ) : (
+                  <span className="fs-2 fw-bold text-brand">{iniciais}</span>
                 )}
               </div>
             </div>
-            <div className="d-flex flex-wrap gap-2 pb-1">
-              <a
-                href={`mailto:${email}`}
-                className="d-inline-flex align-items-center gap-1 rounded-pill border px-3 py-1 fs-xs fw-medium text-muted text-decoration-none"
+            {medalha && (
+              <span
+                className="position-absolute d-flex align-items-center justify-content-center rounded-circle border border-2 border-white shadow-sm"
+                style={{ height: '2rem', width: '2rem', bottom: '-0.2rem', right: '-0.2rem', backgroundColor: medalha.bg }}
+                title={`${t('perfilPublico.rankingLabel')}: #${rank}`}
               >
+                <Trophy size={14} style={{ color: medalha.fg }} />
+              </span>
+            )}
+          </div>
+
+          <h1 className="mt-3 fs-4 fw-bold text-ink mb-0">{nome}</h1>
+          <p className="small text-muted mb-0">{cargo}</p>
+
+          {(consultor?.area || consultor?.serviceLine) && (
+            <div className="mt-2 d-flex flex-wrap justify-content-center gap-1">
+              {[consultor?.area, consultor?.serviceLine].filter(Boolean).map((tag) => (
+                <span key={tag} className="rounded-pill bg-brand-light text-brand px-2 py-1 fs-xs fw-medium">{tag}</span>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-3 d-flex flex-wrap justify-content-center gap-2">
+            {email && (
+              <a href={`mailto:${email}`} className="d-inline-flex align-items-center gap-1 rounded-pill border px-3 py-1 fs-xs fw-medium text-muted text-decoration-none">
                 <Mail size={13} /> {email}
               </a>
-              {consultor?.linkedinUrl && (
-                <a
-                  href={consultor.linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="d-inline-flex align-items-center gap-1 rounded-pill border px-3 py-1 fs-xs fw-medium text-decoration-none"
-                  style={{ borderColor: '#0a66c2', color: '#0a66c2' }}
-                >
-                  <LinkedinGlyph size={13} /> LinkedIn
-                </a>
-              )}
-            </div>
+            )}
+            {consultor?.linkedinUrl && (
+              <a
+                href={consultor.linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="d-inline-flex align-items-center gap-1 rounded-pill border px-3 py-1 fs-xs fw-medium text-decoration-none"
+                style={{ borderColor: '#0a66c2', color: '#0a66c2' }}
+              >
+                <LinkedinGlyph size={13} /> LinkedIn
+              </a>
+            )}
+          </div>
+
+          {/* Faixa de estatísticas */}
+          <div className="mt-4 pt-3 border-top row row-cols-3 g-0 text-center">
+            {[
+              { label: t('perfilPublico.stats.pontos'), value: consultor?.points ?? 0 },
+              { label: t('perfilPublico.stats.badges'), value: consultor?.badges ?? badges.length },
+              { label: t('perfilPublico.stats.conquistas'), value: consultor?.specials ?? 0 },
+            ].map((s) => (
+              <div className="col" key={s.label}>
+                <p className="fs-4 fw-bold text-ink mb-0">{loading ? '—' : s.value}</p>
+                <p className="fs-xs text-muted mb-0">{s.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </Card>
 
-      <div className="mt-4 row g-4">
-        {/* Conteúdo */}
-        <div className="col-lg-8">
+      <div className="mt-4">
+        <div>
           <div className="mb-3 d-flex gap-1 border-bottom">
             {TABS.map((tItem) => (
               <button
@@ -256,30 +256,6 @@ export default function PublicProfilePage() {
               </Card>
             )
           )}
-        </div>
-
-        {/* Estatísticas */}
-        <div className="col-lg-4 d-flex flex-column gap-3">
-          <div className="rounded-3 bg-gradient-brand p-4">
-            <div className="d-flex align-items-center gap-2 text-white-50 fs-xs fw-semibold text-uppercase mb-1" style={{ letterSpacing: '0.04em' }}>
-              <heroStat.icon size={14} /> {heroStat.label}
-            </div>
-            <p className="fs-1 fw-bold text-white mb-0">{loading ? '—' : heroStat.value}</p>
-          </div>
-
-          <Card className="p-0">
-            {outrasStats.map((s, i) => (
-              <div key={s.label} className={`d-flex align-items-center gap-3 px-3 py-3 ${i > 0 ? 'border-top' : ''}`}>
-                <div className="rounded-2 bg-brand-light text-brand d-flex align-items-center justify-content-center flex-shrink-0" style={{ height: '2.25rem', width: '2.25rem' }}>
-                  <s.icon size={16} />
-                </div>
-                <div className="flex-grow-1 min-w-0">
-                  <p className="fw-semibold text-ink mb-0">{loading ? '—' : s.value}</p>
-                  <p className="fs-xs text-muted mb-0">{s.label}</p>
-                </div>
-              </div>
-            ))}
-          </Card>
         </div>
       </div>
     </div>
