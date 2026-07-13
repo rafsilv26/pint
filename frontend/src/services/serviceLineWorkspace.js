@@ -1,6 +1,7 @@
 import { http } from './http.js'
 
 const CACHE_MS = 30_000
+const DAY_MS = 86_400_000
 const array = (value) => (Array.isArray(value) ? value : [])
 const toDate = (value) => {
   if (!value) return null
@@ -146,6 +147,30 @@ export function filterServiceLineApplications(rows, filters = {}) {
     if (filters.to && date && date > new Date(`${filters.to}T23:59:59`)) return false
     if (query && !`${row.trackingId} ${row.consultor} ${row.badge} ${row.area}`.toLowerCase().includes(query)) return false
     return true
+  })
+}
+
+export function buildServiceLineConsultants(workspace, now = new Date()) {
+  return array(workspace?.consultants).map((consultant) => {
+    const awards = array(consultant.awards)
+    const applications = array(workspace?.applications).filter(
+      (row) => Number(row.consultorId) === Number(consultant.id),
+    )
+    const expirationState = (award) => {
+      const expiration = toDate(award.expirationDate)
+      if (award.valido === false || award.valid === false || (expiration && expiration < now)) return 'expired'
+      if (expiration && (expiration.getTime() - now.getTime()) / DAY_MS <= 90) return 'soon'
+      return 'valid'
+    }
+
+    return {
+      ...consultant,
+      activeApplications: applications.filter(
+        (row) => !['APPROVED', 'REJECTED'].includes(row.status?.code),
+      ).length,
+      expiringCount: awards.filter((award) => expirationState(award) === 'soon').length,
+      expiredCount: awards.filter((award) => expirationState(award) === 'expired').length,
+    }
   })
 }
 

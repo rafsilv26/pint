@@ -236,6 +236,10 @@
     "tu": "(tu)",
     "consultorDefault": "Consultor"
   },
+  "sllConsultores": {
+    "subtitulo": "Acompanha o progresso, as badges e as candidaturas dos consultores da tua Service Line.",
+    "nome": "Nome"
+  },
   "assinatura": {
     "voltar": "Voltar ao Perfil",
     "titulo": "Assinatura de Email",

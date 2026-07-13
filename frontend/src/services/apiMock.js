@@ -468,6 +468,9 @@ export async function getServiceLineProfile() {
     },
   }
 }
+export async function getServiceLineConsultants() {
+  return getTalentConsultants()
+}
 export async function getServiceLinePedidos() {
   await delay()
   return clone(mockServiceLinePedidos)

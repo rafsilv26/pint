@@ -48,6 +48,7 @@ import SLLDashboardPage from './pages/sll/SLLDashboardPage'
 import SLLPedidosPage from './pages/sll/SLLPedidosPage'
 import SLLPedidoDetailPage from './pages/sll/SLLPedidoDetailPage'
 import SLLRelatoriosPage from './pages/sll/SLLRelatoriosPage'
+import SLLConsultoresPage from './pages/sll/SLLConsultoresPage'
 
 // Admin
 import AdminResourcePage from './pages/admin/AdminResourcePage'
@@ -138,7 +139,7 @@ export default function App() {
           <Route path="/sll" element={<SLLDashboardPage />} />
           <Route path="/sll/pedidos" element={<SLLPedidosPage />} />
           <Route path="/sll/pedidos/:id" element={<SLLPedidoDetailPage />} />
-          <Route path="/sll/consultores" element={<ConsultoresPage linkBase="/sll/consultores" />} />
+          <Route path="/sll/consultores" element={<SLLConsultoresPage />} />
           <Route path="/sll/consultores/:id" element={<ManagerConsultorDetailPage />} />
           <Route path="/sll/badges" element={<BadgesGridView titulo={t('app.rotas.badges')} linkBase="/sll/badges" />} />
           <Route path="/sll/badges/:id" element={<ManagerBadgeDetailPage />} />

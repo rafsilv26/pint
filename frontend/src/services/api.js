@@ -85,6 +85,7 @@ export const refreshTalentWorkspace = impl.refreshTalentWorkspace
 // Service Line Leader
 export const getServiceLineDashboard = impl.getServiceLineDashboard
 export const getServiceLineProfile = impl.getServiceLineProfile
+export const getServiceLineConsultants = impl.getServiceLineConsultants
 export const getServiceLinePedidos = impl.getServiceLinePedidos
 export const getServiceLineDecisionHistory = impl.getServiceLineDecisionHistory
 export const getServiceLineReports = impl.getServiceLineReports

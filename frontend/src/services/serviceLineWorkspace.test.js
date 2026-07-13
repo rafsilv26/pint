@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildServiceLineDecisionHistory, buildServiceLineProfile, buildServiceLineReport, filterServiceLineApplications, normalizeServiceLineWorkspace } from './serviceLineWorkspace'
+import { buildServiceLineConsultants, buildServiceLineDecisionHistory, buildServiceLineProfile, buildServiceLineReport, filterServiceLineApplications, normalizeServiceLineWorkspace } from './serviceLineWorkspace'
 
 const raw = {
   consultants: { data: [
@@ -46,6 +46,25 @@ describe('service line workspace', () => {
       learningPath: { id: 2, nome: 'Engineering' },
       areas: [{ id: 3, nome: 'Mobile' }],
       stats: { consultants: 2, availableBadges: 2, pendingApprovals: 1, awardedBadges: 1 },
+    })
+  })
+
+  it('calcula candidaturas ativas e validades dos consultores', () => {
+    const workspace = normalizeServiceLineWorkspace({
+      ...raw,
+      consultants: { data: [{
+        ...raw.consultants.data[0],
+        badgesConquistados: [
+          { id: 10, pontos: 100, expirationDate: '2026-08-01' },
+          { id: 11, pontos: 80, expirationDate: '2026-01-01' },
+        ],
+      }] },
+    }, new Date('2026-07-11'))
+
+    expect(buildServiceLineConsultants(workspace, new Date('2026-07-11'))[0]).toMatchObject({
+      activeApplications: 0,
+      expiringCount: 1,
+      expiredCount: 1,
     })
   })
 
