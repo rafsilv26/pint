@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import {
   Award, Star, Sparkles, Calendar, Mail, ArrowLeft,
   Trophy, CheckCircle2, XCircle, User as UserIcon,
@@ -39,6 +39,7 @@ export default function PublicProfilePage() {
   const { t, i18n } = useTranslation() // <-- Inicializa a tradução
   const { user } = useAuth()
   const { id } = useParams()
+  const navigate = useNavigate()
   // Sem :id -> o meu próprio perfil. Com :id -> perfil de outro consultor
   // (a partir do diretório).
   const targetId = id ? Number(id) : user?.id
@@ -95,9 +96,15 @@ export default function PublicProfilePage() {
 
   return (
     <div>
-      <Link to={isSelf ? '/perfil' : '/consultores'} className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
-        <ArrowLeft size={16} /> {isSelf ? t('perfilPublico.voltar') : t('perfilPublico.voltarDiretorio')}
-      </Link>
+      {isSelf ? (
+        <Link to="/perfil" className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
+          <ArrowLeft size={16} /> {t('perfilPublico.voltar')}
+        </Link>
+      ) : (
+        <button onClick={() => navigate(-1)} className="btn btn-link p-0 mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
+          <ArrowLeft size={16} /> {t('perfilPublico.voltarDiretorio')}
+        </button>
+      )}
 
       {/* Cabeçalho — cartão de credencial centrado */}
       <Card className="p-0 overflow-hidden">

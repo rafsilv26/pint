@@ -173,6 +173,7 @@ export default function App() {
           <Route path="/admin/avisos" element={<AdminResourcePage resourceKey="notices" />} />
           <Route path="/admin/informacoes" element={<AdminResourcePage resourceKey="information" />} />
           <Route path="/admin/utilizadores" element={<AdminUsersPage />} />
+          <Route path="/admin/utilizadores/:id" element={<PublicProfilePage />} />
           <Route path="/admin/pedidos" element={<AdminPedidosPage />} />
           <Route path="/admin/relatorios" element={<TalentReportsPage soIndicadores />} />
           <Route path="/admin/definicoes" element={<AdminDefinicoesPage />} />
