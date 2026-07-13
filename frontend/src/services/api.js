@@ -40,6 +40,7 @@ export const getRascunho = impl.getRascunho
 export const apagarEvidencia = impl.apagarEvidencia
 export const getDefinicoes = impl.getDefinicoes
 export const saveDefinicoes = impl.saveDefinicoes
+export const getEmailStatus = impl.getEmailStatus
 export const getMeusObjetivos = impl.getMeusObjetivos
 export const criarObjetivo = impl.criarObjetivo
 export const concluirObjetivo = impl.concluirObjetivo

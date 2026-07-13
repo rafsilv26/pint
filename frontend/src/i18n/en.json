@@ -722,14 +722,29 @@
     "subtitulo": "General platform configurations.",
     "sla": {
       "titulo": "SLA",
+      "subtitulo": "Request response deadline and alerts.",
       "dias": "Response days",
       "alertasLabel": "SLA Alerts",
       "alertasDesc": "Send warnings when a request approaches the deadline"
     },
     "notificacoes": {
       "titulo": "Platform notifications",
+      "subtitulo": "Channels used to notify users.",
       "email": "Email Notifications",
-      "push": "Push Notifications"
+      "emailDesc": "Send application, approval and rejection emails",
+      "push": "Push Notifications",
+      "pushDesc": "In-app push alerts (when available)"
+    },
+    "email": {
+      "titulo": "Email Diagnostics",
+      "subtitulo": "Check whether email sending is working.",
+      "verificar": "Check connection",
+      "enviarTeste": "Send test email",
+      "aVerificar": "Checking…",
+      "ligacaoOk": "Email service connection OK ({{modo}}).",
+      "ligacaoErro": "Connection failed: {{erro}}",
+      "envioOk": "Test email sent to {{para}}.",
+      "envioErro": "Sending failed: {{erro}}"
     },
     "botoes": {
       "guardado": "Settings saved ✓",

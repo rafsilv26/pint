@@ -722,14 +722,29 @@
     "subtitulo": "Configuraciones generales de la plataforma.",
     "sla": {
       "titulo": "SLA",
+      "subtitulo": "Plazo de respuesta a solicitudes y alertas.",
       "dias": "Días de respuesta",
       "alertasLabel": "Alertas de SLA",
       "alertasDesc": "Enviar avisos cuando una solicitud se acerca a la fecha límite"
     },
     "notificacoes": {
       "titulo": "Notificaciones de la plataforma",
+      "subtitulo": "Canales usados para notificar a los usuarios.",
       "email": "Notificaciones por Email",
-      "push": "Notificaciones Push"
+      "emailDesc": "Enviar emails de candidatura, aprobación y rechazo",
+      "push": "Notificaciones Push",
+      "pushDesc": "Alertas push en la aplicación (cuando esté disponible)"
+    },
+    "email": {
+      "titulo": "Diagnóstico de Email",
+      "subtitulo": "Comprueba si el envío de emails funciona.",
+      "verificar": "Verificar conexión",
+      "enviarTeste": "Enviar email de prueba",
+      "aVerificar": "Verificando…",
+      "ligacaoOk": "Conexión al servicio de email OK ({{modo}}).",
+      "ligacaoErro": "Fallo en la conexión: {{erro}}",
+      "envioOk": "Email de prueba enviado a {{para}}.",
+      "envioErro": "Fallo en el envío: {{erro}}"
     },
     "botoes": {
       "guardado": "Configuraciones guardadas ✓",
