@@ -15,7 +15,7 @@ export const getNavItems = (t) => [
 ]
 
 // ===== Sidebar do Talent Manager =====
-export const getTalentNav = (t) => [
+const getTalentNav = (t) => [
   { to: '/tm', label: t('nav.tm.dashboard'), icon: LayoutDashboard, end: true },
   { to: '/tm/candidaturas', label: t('nav.tm.candidaturas'), icon: ClipboardCheck },
   { to: '/tm/catalogo', label: t('nav.tm.catalogo'), icon: LayoutGrid },
@@ -28,7 +28,7 @@ export const getTalentNav = (t) => [
 ]
 
 // ===== Sidebar do Service Line Leader =====
-export const getSllNav = (t) => [
+const getSllNav = (t) => [
   { to: '/sll', label: t('nav.sll.dashboard'), icon: LayoutDashboard, end: true },
   { to: '/sll/consultores', label: t('nav.sll.consultores'), icon: Users },
   { to: '/sll/badges', label: t('nav.sll.badges'), icon: Award },
@@ -39,7 +39,7 @@ export const getSllNav = (t) => [
 ]
 
 // ===== Sidebar do Administrador =====
-export const getAdminNav = (t) => [
+const getAdminNav = (t) => [
   { to: '/admin', label: t('nav.admin.dashboard'), icon: LayoutDashboard, end: true },
   { to: '/admin/utilizadores', label: t('nav.admin.utilizadores'), icon: Users },
   { to: '/admin/badges', label: t('nav.admin.badges'), icon: Award },
@@ -56,20 +56,20 @@ export const getAdminNav = (t) => [
   { to: '/admin/definicoes', label: t('nav.admin.definicoes'), icon: Settings },
 ]
 
-export const getRolePanels = (t) => ({
+const getRolePanels = (t) => ({
   TalentManager: { label: 'Talent Manager', home: '/tm', nav: getTalentNav(t) },
   ServiceLineLeader: { label: 'Service Line Leader', home: '/sll', nav: getSllNav(t) },
   Admin: { label: t('nav.roles.admin'), home: '/admin', nav: getAdminNav(t) },
 })
 
-export const ROLE_HOME = {
+const ROLE_HOME = {
   Consultor: '/',
   TalentManager: '/tm',
   ServiceLineLeader: '/sll',
   Admin: '/admin',
 }
 
-export const primaryRole = (user) => (user?.roles && user.roles[0]) || user?.role || 'Consultor'
+const primaryRole = (user) => (user?.roles && user.roles[0]) || user?.role || 'Consultor'
 export const homeForRole = (user) => ROLE_HOME[primaryRole(user)] || '/'
 
 // O backend devolve sempre os perfis com o nome completo (ex: 'TalentManager',

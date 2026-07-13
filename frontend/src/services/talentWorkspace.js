@@ -529,4 +529,3 @@ export function buildTalentReport(workspace, filters = {}) {
   }
 }
 
-export { STATUS_META }

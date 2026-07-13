@@ -29,17 +29,6 @@ export async function login({ email, password }) {
   return { token: 'mock-token-' + Date.now(), user: { ...clone(mockUser), email } }
 }
 
-export async function register(dados) {
-  await delay()
-  if (!dados?.nome || !dados?.email || !dados?.password) throw new Error(i18next.t('api.validacao.registoCampos'))
-  return { message: i18next.t('api.mensagens.contaCriada') }
-}
-
-export async function signup(dados) {
-  await delay(600)
-  if (!dados?.nome || !dados?.email || !dados?.password) throw new Error(i18next.t('api.validacao.registoCampos'))
-  return { message: 'Conta criada. Confirma o teu email.' }
-}
 export async function getAreasPublicas() {
   await delay()
   return [
@@ -434,9 +423,6 @@ export async function getTalentProfile() {
   }
 }
 
-export async function refreshTalentWorkspace() {
-  return { ok: true }
-}
 
 // ---------- Service Line Leader ----------
 export async function getServiceLineDashboard() {
@@ -510,9 +496,6 @@ export async function getServiceLineReports() {
     filterOptions: { areas: [...new Set(consultants.map((row) => row.area).filter(Boolean))], experienceBands: ['12-35'] },
     totals: { applications: applications.length, consultants: consultants.length, catalog: mockBadges.length, awards: 0, approvals: approvals.length, rejections: rejections.length, specialAchievements: 0, points: 0 },
   }
-}
-export async function refreshServiceLineWorkspace() {
-  return { ok: true }
 }
 export async function validarServiceLine() {
   await delay(500)
@@ -628,21 +611,6 @@ export async function getAdminPedidos() {
 }
 
 // ---------- Exportações (gera um CSV de demonstração) ----------
-export async function exportarRelatorio() {
-  await delay(300)
-  const csv = 'Tracking,Consultor,Badge,Nivel,Estado\n#20482,Matt Dickerson,Java,A,Em Validacao\n#20482,Joaquim Pernil,OutSystems,A,Submetido\n'
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'relatorio-mock.csv'
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(url)
-  return { ok: true }
-}
-
 export async function updateConsultant() {
   return { mensagem: i18next.t('api.mensagens.perfilAtualizado') }
 }

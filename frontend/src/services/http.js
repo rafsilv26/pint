@@ -5,7 +5,7 @@ import i18next from 'i18next' // <-- Import da instância global para ficheiros 
 // - prefixa o API_URL
 // - junta o token JWT (guardado pelo AuthContext em localStorage)
 // - trata JSON e erros de forma uniforme
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 const STORAGE_KEY = 'softinsa.auth'
 

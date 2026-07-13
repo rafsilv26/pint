@@ -136,8 +136,7 @@
     "nivel": "Level",
     "pontosConquistados": "Points Earned",
     "posicao": "Position",
-    "verPerfilCompleto": "View Full Profile",
-    "proximosEventos": "Upcoming Events"
+    "verPerfilCompleto": "View Full Profile"
   },
   "catalogo": {
     "titulo": "Badge Catalog",
@@ -628,26 +627,17 @@
   "ranking": {
     "titulo": "Ranking",
     "subtitulo": "Compete with the best Softinsa consultants",
-    "periodos": {
-      "semana": "Week",
-      "mes": "Month",
-      "ano": "Year",
-      "total": "Total"
-    },
     "categorias": {
       "pontos": "Points",
-      "badges": "Badges",
-      "dias": "Days"
+      "badges": "Badges"
     },
     "stats": {
       "posicao": "Position",
       "pontos": "Points",
       "badges": "Badges",
       "percentil": "Percentile",
-      "evolucao": "Evolution",
       "em": "out of",
-      "consultores": "consultants",
-      "posicoesMes": "positions this month"
+      "consultores": "consultants"
     },
     "completos": "Full Rankings",
     "ordenarPor": "Sort by:",
@@ -1030,35 +1020,10 @@
     },
     "lembrarMe": "Remember me",
     "esqueceuPassword": "Forgot your password?",
-    "semConta": "Don't have an account?",
-    "criarConta": "Create account",
     "botoes": {
       "entrando": "Logging in…",
       "entrar": "Login"
     }
-  },
-  "registo": {
-    "titulo": "Create account",
-    "subtitulo": "Sign up as a Softinsa consultant",
-    "nome": "Full name",
-    "nomePlaceholder": "Your name",
-    "email": "Email",
-    "emailPlaceholder": "Enter your email",
-    "password": "Password",
-    "passwordPlaceholder": "Minimum 8 characters",
-    "confirmar": "Confirm password",
-    "confirmarPlaceholder": "Repeat the password",
-    "mostrarPassword": "Show password",
-    "area": "Area",
-    "areaPlaceholder": "Choose your area",
-    "criar": "Create account",
-    "aCriar": "Creating…",
-    "erroComprimento": "Password must be at least 8 characters.",
-    "erroCoincidem": "Passwords do not match.",
-    "sucesso": "Account created. Confirm your email to sign in.",
-    "irLogin": "Go to login",
-    "jaTens": "Already have an account?",
-    "entrar": "Login"
   },
   "sllDashboard": {
     "titulo": "Dashboard",

@@ -76,7 +76,7 @@ export const mockMyBadges = [
 ]
 
 // ---- Estados das candidaturas ----
-export const ESTADOS = {
+const ESTADOS = {
   OPEN: { code: 'OPEN', name: 'Aberta', cor: 'gray' },
   SUBMITTED: { code: 'SUBMITTED', name: 'Submetido', cor: 'blue' },
   IN_VALIDATION: { code: 'IN_VALIDATION', name: 'Em Validação', cor: 'amber' },

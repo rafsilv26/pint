@@ -55,14 +55,7 @@ export async function login({ email, password }) {
   }
 }
 
-export async function register(dados) {
-  return http('/auth/register', { method: 'POST', body: dados })
-}
-
-// Auto-registo público de consultor + lista de áreas para o formulário.
-export async function signup(dados) {
-  return http('/auth/signup', { method: 'POST', body: dados, auth: false })
-}
+// Lista de áreas para o formulário de escolha de área (1.º acesso).
 export async function getAreasPublicas() {
   return http('/auth/areas', { auth: false }).catch(() => [])
 }
@@ -542,10 +535,6 @@ export async function getTalentCatalog() {
   return (await getTalentWorkspace()).catalog
 }
 
-export async function refreshTalentWorkspace() {
-  return getTalentWorkspace(true)
-}
-
 // ---------- Service Line Leader ----------
 // Nota: /consultants, /candidaturas/serviceline/* e /relatorios/* já vêm
 // automaticamente restringidos pelo backend à Service Line do SLL
@@ -606,9 +595,6 @@ export async function getServiceLineReports(filters = {}) {
     rejections: report.rejections.map((row) => ({ ...row, status: { ...row.status, name: statusName(row.status.code, row.status.name), cor: CODE_COR[row.status.code] || 'gray' } })),
     statusBreakdown: report.statusBreakdown.map((row) => ({ ...row, label: statusName(row.code, row.label) })),
   }
-}
-export async function refreshServiceLineWorkspace() {
-  return getServiceLineWorkspace(true)
 }
 export async function validarServiceLine(id, { decisao, comentario } = {}) {
   const result = await http(`/candidaturas/serviceline/${id}/validar`, { method: 'PUT', body: { decisao, comentario } })
@@ -684,24 +670,3 @@ export async function getAdminPedidos() {
 }
 
 // ---------- Exportações ----------
-export async function exportarRelatorio(formato = 'excel') {
-  const token = getToken()
-  let res
-  try {
-    res = await api.get(`/relatorios/${formato}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      responseType: 'blob',
-    })
-  } catch {
-    throw new Error(i18next.t('api.erros.exportacao'))
-  }
-  const url = URL.createObjectURL(res.data)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `relatorio-candidaturas.${formato === 'excel' ? 'xlsx' : 'pdf'}`
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(url)
-  return { ok: true }
-}

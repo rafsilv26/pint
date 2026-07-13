@@ -12,14 +12,12 @@
 import * as mock from './apiMock'
 import * as real from './apiReal'
 
-export const USE_REAL_API = import.meta.env.VITE_USE_REAL_API === 'true'
+const USE_REAL_API = import.meta.env.VITE_USE_REAL_API === 'true'
 
 const impl = USE_REAL_API ? real : mock
 
 // Autenticação
 export const login = impl.login
-export const register = impl.register
-export const signup = impl.signup
 export const getAreasPublicas = impl.getAreasPublicas
 export const recuperarPassword = impl.recuperarPassword
 export const resetPassword = impl.resetPassword
@@ -81,7 +79,6 @@ export const getTalentConsultants = impl.getTalentConsultants
 export const getTalentConsultant = impl.getTalentConsultant
 export const getTalentConsultantReport = impl.getTalentConsultantReport
 export const getTalentCatalog = impl.getTalentCatalog
-export const refreshTalentWorkspace = impl.refreshTalentWorkspace
 
 // Service Line Leader
 export const getServiceLineDashboard = impl.getServiceLineDashboard
@@ -90,7 +87,6 @@ export const getServiceLineConsultants = impl.getServiceLineConsultants
 export const getServiceLinePedidos = impl.getServiceLinePedidos
 export const getServiceLineDecisionHistory = impl.getServiceLineDecisionHistory
 export const getServiceLineReports = impl.getServiceLineReports
-export const refreshServiceLineWorkspace = impl.refreshServiceLineWorkspace
 export const validarServiceLine = impl.validarServiceLine
 export const downloadManagerCertificate = impl.downloadManagerCertificate
 
@@ -107,4 +103,3 @@ export const updateUser = impl.updateUser
 export const deleteUser = impl.deleteUser
 export const getAdminPedidos = impl.getAdminPedidos
 export const getAdminDashboard = impl.getAdminDashboard
-export const exportarRelatorio = impl.exportarRelatorio

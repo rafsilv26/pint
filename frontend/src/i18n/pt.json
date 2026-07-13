@@ -136,8 +136,7 @@
     "nivel": "Nível",
     "pontosConquistados": "Pontos Conquistados",
     "posicao": "Posição",
-    "verPerfilCompleto": "Ver Perfil Completo",
-    "proximosEventos": "Próximos Eventos"
+    "verPerfilCompleto": "Ver Perfil Completo"
   },
   "catalogo": {
     "titulo": "Catálogo de Badges",
@@ -618,26 +617,17 @@
   "ranking": {
     "titulo": "Ranking",
     "subtitulo": "Compete com os melhores consultores da Softinsa",
-    "periodos": {
-      "semana": "Semana",
-      "mes": "Mês",
-      "ano": "Ano",
-      "total": "Total"
-    },
     "categorias": {
       "pontos": "Pontos",
-      "badges": "Badges",
-      "dias": "Dias"
+      "badges": "Badges"
     },
     "stats": {
       "posicao": "Posição",
       "pontos": "Pontos",
       "badges": "Badges",
       "percentil": "Percentil",
-      "evolucao": "Evolução",
       "em": "em",
-      "consultores": "consultores",
-      "posicoesMes": "posições este mês"
+      "consultores": "consultores"
     },
     "completos": "Rankings Completos",
     "ordenarPor": "Ordenar por:",
@@ -1020,35 +1010,10 @@
     },
     "lembrarMe": "Lembrar-me",
     "esqueceuPassword": "Esqueceu-se da password?",
-    "semConta": "Ainda não tens conta?",
-    "criarConta": "Criar conta",
     "botoes": {
       "entrando": "A entrar…",
       "entrar": "Entrar"
     }
-  },
-  "registo": {
-    "titulo": "Criar conta",
-    "subtitulo": "Regista-te como consultor da Softinsa",
-    "nome": "Nome completo",
-    "nomePlaceholder": "O teu nome",
-    "email": "Email",
-    "emailPlaceholder": "Introduzir o email",
-    "password": "Password",
-    "passwordPlaceholder": "Mínimo 8 caracteres",
-    "confirmar": "Confirmar password",
-    "confirmarPlaceholder": "Repete a password",
-    "mostrarPassword": "Mostrar password",
-    "area": "Área",
-    "areaPlaceholder": "Escolhe a tua área",
-    "criar": "Criar conta",
-    "aCriar": "A criar…",
-    "erroComprimento": "A password deve ter pelo menos 8 caracteres.",
-    "erroCoincidem": "As passwords não coincidem.",
-    "sucesso": "Conta criada. Confirma o teu email para poderes entrar.",
-    "irLogin": "Ir para o login",
-    "jaTens": "Já tens conta?",
-    "entrar": "Entrar"
   },
   "sllDashboard": {
     "titulo": "Painel de Controlo",
