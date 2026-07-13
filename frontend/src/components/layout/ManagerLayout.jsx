@@ -60,7 +60,7 @@ export default function ManagerLayout() {
         ))}
       </nav>
       <div className="border-top border-white border-opacity-10 px-2 py-3">
-        {['/tm', '/sll'].includes(base) && <NavLink to={`${base}/assinatura`} onClick={() => mobile && setMobileOpen(false)} className="d-flex align-items-center gap-2 rounded-3 px-3 py-2 mb-1 text-decoration-none text-white-50"><PenLine size={18} /> <span className="small fw-medium">{t('tmWorkspace.signature.emailSignature')}</span></NavLink>}
+        {base === '/sll' && <NavLink to={`${base}/assinatura`} onClick={() => mobile && setMobileOpen(false)} className="d-flex align-items-center gap-2 rounded-3 px-3 py-2 mb-1 text-decoration-none text-white-50"><PenLine size={18} /> <span className="small fw-medium">{t('tmWorkspace.signature.emailSignature')}</span></NavLink>}
         <NavLink to={`${base}/conta`} onClick={() => mobile && setMobileOpen(false)} className="d-flex align-items-center gap-2 rounded-3 px-2 py-2 text-decoration-none text-white overflow-hidden">
           <div className="d-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25 small fw-semibold flex-shrink-0" style={{ height: '2.25rem', width: '2.25rem' }}>{iniciais}</div>
           <div className="flex-grow-1 overflow-hidden" style={{ minWidth: 0 }}><p className="text-truncate small fw-semibold mb-0" title={user?.nome}>{user?.nome}</p><p className="text-truncate small text-white-50 mb-0">{panel.label}</p></div>

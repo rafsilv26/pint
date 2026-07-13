@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Award, BadgeCheck, BookOpen, Building2, Clock3, Globe2, KeyRound, Layers3, LogOut, Network, PenLine, TriangleAlert, Users } from 'lucide-react'
+import { Award, BadgeCheck, BookOpen, Building2, Clock3, Globe2, KeyRound, Layers3, LogOut, Mail, Network, PenLine, TriangleAlert, Users } from 'lucide-react'
 import { PageHeader, Card, Field, Button, Spinner } from '../components/ui'
 import { useAuth } from '../context/useAuth'
 import { useAsync } from '../hooks/useAsync'
@@ -85,8 +85,8 @@ export default function ManagerContaPage() {
   return (
     <div className="mx-auto" style={{ maxWidth: '56rem' }}>
       <PageHeader
-        title={t('managerConta.titulo')}
-        subtitle={t('managerConta.subtitulo')}
+        title={isTalentManager ? t('perfil.titulo') : t('managerConta.titulo')}
+        subtitle={isTalentManager ? t('perfil.subtitulo') : t('managerConta.subtitulo')}
       />
 
       <Card className="d-flex align-items-center gap-3">
@@ -230,15 +230,38 @@ export default function ManagerContaPage() {
         </Card>
       )}
 
+      {isTalentManager && (
+        <div className="mt-4 row row-cols-1 row-cols-sm-2 g-3">
+          {[
+            { to: '/tm/alterar-password', icon: KeyRound, title: t('perfil.acoes.alterarPassword'), description: t('perfil.acoes.alterarPasswordDesc') },
+            { to: '/tm/assinatura', icon: Mail, title: t('perfil.acoes.assinatura'), description: t('perfil.acoes.assinaturaDesc') },
+          ].map((action) => (
+            <div className="col" key={action.to}>
+              <Link to={action.to} className="text-decoration-none">
+                <Card className="d-flex h-100 align-items-center gap-3 hover-shadow">
+                  <div className="d-flex flex-shrink-0 align-items-center justify-content-center rounded-3 bg-brand-light text-brand" style={{ height: '2.75rem', width: '2.75rem' }}>
+                    <action.icon size={20} aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="fw-semibold text-ink mb-0">{action.title}</p>
+                    <p className="small text-muted mb-0">{action.description}</p>
+                  </div>
+                </Card>
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
+
       <Card className="mt-4">
         <h2 className="mb-3 d-flex align-items-center gap-2 fw-semibold text-ink"><Globe2 size={18} className="text-brand" />{t('managerConta.idioma')}</h2>
         <div className="btn-group w-100" role="group" aria-label={t('managerConta.idioma')}>
           {[['pt', 'Português'], ['en', 'English'], ['es', 'Español']].map(([code, label]) => <button key={code} type="button" onClick={() => i18n.changeLanguage(code)} className={`btn ${i18n.language.startsWith(code) ? 'btn-brand' : 'btn-outline-secondary'}`}>{label}</button>)}
         </div>
-        {(isTalentManager || isServiceLineLeader) && <Link to={isTalentManager ? '/tm/assinatura' : '/sll/assinatura'} className="mt-3 btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2"><PenLine size={16} />{t('tmWorkspace.signature.emailSignature')}</Link>}
+        {isServiceLineLeader && <Link to="/sll/assinatura" className="mt-3 btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2"><PenLine size={16} />{t('tmWorkspace.signature.emailSignature')}</Link>}
       </Card>
 
-      <Card className="mt-4">
+      {!isTalentManager && <Card className="mt-4">
         <h2 className="mb-3 d-flex align-items-center gap-2 fw-semibold text-ink">
           <KeyRound size={18} className="text-brand" /> {t('managerConta.alterarPassword')}
         </h2>
@@ -273,7 +296,7 @@ export default function ManagerContaPage() {
             {saving ? t('managerConta.botoes.guardando') : t('managerConta.botoes.alterar')}
           </Button>
         </form>
-      </Card>
+      </Card>}
 
       <button
         onClick={() => { if (window.confirm(t('managerConta.confirmarLogout'))) { logout(); navigate('/login') } }}

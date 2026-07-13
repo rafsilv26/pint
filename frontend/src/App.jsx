@@ -127,6 +127,7 @@ export default function App() {
           <Route path="/tm/notificacoes" element={<NotificationsPage />} />
           <Route path="/tm/informacoes" element={<AdminResourcePage resourceKey="information" readOnly />} />
           <Route path="/tm/assinatura" element={<EmailSignaturePage />} />
+          <Route path="/tm/alterar-password" element={<ChangePasswordPage />} />
           <Route path="/tm/pesquisa" element={<TalentSearchPage />} />
           <Route path="/tm/conta" element={<ManagerContaPage />} />
         </Route>

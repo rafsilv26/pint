@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { KeyRound, ArrowLeft, CheckCircle2, Info } from 'lucide-react'
 import { Card, Field, Button } from '../components/ui'
 import * as api from '../services/api'
@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next' // <-- Import do hook
 export default function ChangePasswordPage() {
   const { t } = useTranslation() // <-- Inicializa a tradução
   const navigate = useNavigate()
+  const location = useLocation()
+  const backTo = location.pathname.startsWith('/tm') ? '/tm/conta' : '/perfil'
   const [atual, setAtual] = useState('')
   const [nova, setNova] = useState('')
   const [confirmar, setConfirmar] = useState('')
@@ -33,7 +35,7 @@ export default function ChangePasswordPage() {
     try {
       await api.changePassword({ currentPassword: atual, newPassword: nova })
       setSucesso(true)
-      setTimeout(() => navigate('/perfil'), 1500)
+      setTimeout(() => navigate(backTo), 1500)
     } catch (err) {
       setErro(err.message)
     }
@@ -41,7 +43,7 @@ export default function ChangePasswordPage() {
 
   return (
     <div className="mx-auto" style={{ maxWidth: '36rem' }}>
-      <Link to="/perfil" className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
+      <Link to={backTo} className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
         <ArrowLeft size={16} /> {t('mudarPassword.voltar')}
       </Link>
 
