@@ -185,7 +185,7 @@ export default function ProfilePage() {
         {ACOES.map((a) => (
           <div className="col" key={a.to}>
             <Link to={a.to} className="text-decoration-none">
-              <Card className="d-flex h-100 align-items-center gap-3 hover-shadow">
+              <Card className="d-flex flex-column h-100 align-items-center text-center gap-3 hover-shadow">
                 <div className="d-flex flex-shrink-0 align-items-center justify-content-center rounded-3 bg-brand-light text-brand" style={{ height: '2.75rem', width: '2.75rem' }}>
                   <a.icon size={20} />
                 </div>
