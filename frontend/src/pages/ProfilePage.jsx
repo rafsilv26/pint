@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { LogOut, KeyRound, Mail, Users, Settings, ExternalLink } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { KeyRound, Mail, Users, Settings, ExternalLink } from 'lucide-react'
 import { Card } from '../components/ui'
+import LogoutButton from '../components/LogoutButton'
 import { useAuth } from '../context/useAuth'
 import { useAsync } from '../hooks/useAsync'
 import { useTranslation } from 'react-i18next'
@@ -9,8 +10,7 @@ import * as api from '../services/api'
 
 export default function ProfilePage() {
   const { t } = useTranslation()
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
+  const { user } = useAuth()
 
   const ACOES = [
     { to: '/perfil/alterar-password', icon: KeyRound, title: t('perfil.acoes.alterarPassword'), desc: t('perfil.acoes.alterarPasswordDesc') },
@@ -107,13 +107,9 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => { logout(); navigate('/login') }}
-              className="mt-4 btn btn-outline-danger bg-white w-100 d-flex align-items-center justify-content-center gap-2"
-            >
-              <LogOut size={16} /> {t('perfil.terminarSessao')}
-            </button>
+            <LogoutButton className="mt-4 btn btn-outline-danger bg-white w-100 d-flex align-items-center justify-content-center gap-2">
+              {t('perfil.terminarSessao')}
+            </LogoutButton>
           </Card>
         </div>
 

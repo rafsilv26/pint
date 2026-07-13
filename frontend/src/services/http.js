@@ -9,21 +9,23 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 const STORAGE_KEY = 'softinsa.auth'
 
-export function getToken() {
+// A sessão pode estar em localStorage (com "Lembrar-me") ou sessionStorage
+// (sem "Lembrar-me" — cai ao fechar o browser). Lê de qualquer um.
+function rawAuth() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}').token || null
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY) || '{}')
   } catch {
-    return null
+    return {}
   }
+}
+
+export function getToken() {
+  return rawAuth().token || null
 }
 
 // Utilizador autenticado guardado (para obter o id nas chamadas filtradas)
 export function getUser() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}').user || null
-  } catch {
-    return null
-  }
+  return rawAuth().user || null
 }
 
 // Instância de Axios partilhada por toda a app (também usada diretamente

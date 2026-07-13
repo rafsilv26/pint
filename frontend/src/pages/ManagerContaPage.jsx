@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Award, BadgeCheck, BookOpen, Building2, Clock3, Globe2, KeyRound, Layers3, LogOut, Mail, Network, PenLine, TriangleAlert, Users } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+import { Award, BadgeCheck, BookOpen, Building2, Clock3, Globe2, KeyRound, Layers3, Mail, Network, PenLine, TriangleAlert, Users } from 'lucide-react'
 import { PageHeader, Card, Field, Button, Spinner } from '../components/ui'
+import LogoutButton from '../components/LogoutButton'
 import { useAuth } from '../context/useAuth'
 import { useAsync } from '../hooks/useAsync'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
@@ -11,8 +12,7 @@ import { useTranslation } from 'react-i18next'
 // Definições de conta dos perfis de gestão (Admin / TM / SLL).
 export default function ManagerContaPage() {
   const { t, i18n } = useTranslation()
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
+  const { user } = useAuth()
   const location = useLocation()
   const isTalentManager = location.pathname.startsWith('/tm')
   const isServiceLineLeader = location.pathname.startsWith('/sll')
@@ -89,14 +89,14 @@ export default function ManagerContaPage() {
         subtitle={isTalentManager ? t('perfil.subtitulo') : t('managerConta.subtitulo')}
       />
 
-      <Card className="d-flex align-items-center gap-3">
+      <Card className="d-flex flex-column align-items-center text-center gap-3">
         <div className="d-flex align-items-center justify-content-center rounded-circle bg-brand-light fs-5 fw-bold text-brand flex-shrink-0" style={{ height: '4rem', width: '4rem' }}>{iniciais}</div>
         <div className="min-w-0">
           <p className="fs-5 fw-semibold text-ink mb-0">{user?.nome}</p>
           <p className="small text-muted mb-0 text-break">{user?.email}</p>
           <p className="mt-1 fs-xs fw-medium text-brand mb-0">{roleLabel}</p>
           {isServiceLineLeader && serviceLineProfile?.serviceLine?.nome && (
-            <p className="small text-muted mt-1 mb-0 d-flex align-items-center gap-1">
+            <p className="small text-muted mt-1 mb-0 d-flex align-items-center justify-content-center gap-1">
               <Network size={14} aria-hidden="true" />
               {serviceLineProfile.serviceLine.nome}
             </p>
@@ -298,12 +298,9 @@ export default function ManagerContaPage() {
         </form>
       </Card>}
 
-      <button
-        onClick={() => { if (window.confirm(t('managerConta.confirmarLogout'))) { logout(); navigate('/login') } }}
-        className="mt-4 btn btn-outline-danger bg-white w-100 d-flex align-items-center justify-content-center gap-2"
-      >
-        <LogOut size={16} /> {t('managerConta.botoes.terminarSessao')}
-      </button>
+      <LogoutButton className="mt-4 btn btn-outline-danger bg-white w-100 d-flex align-items-center justify-content-center gap-2">
+        {t('managerConta.botoes.terminarSessao')}
+      </LogoutButton>
     </div>
   )
 }

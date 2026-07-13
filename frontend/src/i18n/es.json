@@ -832,6 +832,11 @@
     "nivel": "Nivel",
     "pontos": "puntos"
   },
+  "logout": {
+    "pergunta": "¿Quieres cerrar sesión?",
+    "terminar": "Cerrar Sesión",
+    "cancelar": "Cancelar"
+  },
   "changePasswordModal": {
     "titulo": "Establecer nueva contraseña",
     "descricao": "Es tu primer acceso — establece una contraseña personal para continuar.",
