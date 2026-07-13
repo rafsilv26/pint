@@ -1385,7 +1385,13 @@
     "confirmar": "Cerrar sesión"
   },
   "authShell": {
-    "plataforma": "Plataforma de Insignias"
+    "plataforma": "Plataforma de Insignias de Softinsa",
+    "headline": "Reconoce y muestra tus competencias.",
+    "features": {
+      "credenciais": "Credenciales digitales verificadas",
+      "gamificacao": "Puntos y ranking que motivan la evolución",
+      "verificavel": "Insignias con página pública verificable"
+    }
   },
   "roleGuard": {
     "acessoNegado": "Acceso Denegado",

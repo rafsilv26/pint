@@ -1375,7 +1375,13 @@
     "confirmar": "Terminar sessão"
   },
   "authShell": {
-    "plataforma": "Plataforma de Badges"
+    "plataforma": "Plataforma de Badges da Softinsa",
+    "headline": "Reconhece e evidencia as tuas competências.",
+    "features": {
+      "credenciais": "Credenciais digitais verificadas",
+      "gamificacao": "Pontos e ranking que motivam a evolução",
+      "verificavel": "Badges com página pública verificável"
+    }
   },
   "roleGuard": {
     "acessoNegado": "Acesso Negado",

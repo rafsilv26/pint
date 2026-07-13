@@ -1385,7 +1385,13 @@
     "confirmar": "Log out"
   },
   "authShell": {
-    "plataforma": "Badges Platform"
+    "plataforma": "Softinsa Badge Platform",
+    "headline": "Recognize and showcase your skills.",
+    "features": {
+      "credenciais": "Verified digital credentials",
+      "gamificacao": "Points and ranking that drive growth",
+      "verificavel": "Badges with a verifiable public page"
+    }
   },
   "roleGuard": {
     "acessoNegado": "Access Denied",
