@@ -6,11 +6,22 @@ const STORAGE_KEY = 'softinsa.auth'
 const LAST_LOGIN_PREFIX = 'softinsa.lastLogin.'
 const FIFTEEN_DAYS = 15 * 24 * 60 * 60 * 1000
 
+// Store ativo: localStorage se o utilizador escolheu "Lembrar-me" (persiste);
+// sessionStorage caso contrário (cai ao fechar o browser).
+let authStore = localStorage.getItem(STORAGE_KEY) ? localStorage : sessionStorage
+function persistAuth(data) {
+  authStore.setItem(STORAGE_KEY, JSON.stringify(data))
+}
+function clearAuth() {
+  localStorage.removeItem(STORAGE_KEY)
+  sessionStorage.removeItem(STORAGE_KEY)
+}
+
 function readStoredAuth() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
+    return JSON.parse(authStore.getItem(STORAGE_KEY) || '{}')
   } catch {
-    localStorage.removeItem(STORAGE_KEY)
+    clearAuth()
     return {}
   }
 }
@@ -31,36 +42,39 @@ export function AuthProvider({ children }) {
         const fresh = response?.user || response?.data || response
         if (fresh?.id) {
           setUser((current) => ({ ...current, ...fresh }))
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ token: initialAuth.token, user: { ...initialAuth.user, ...fresh } }))
+          persistAuth({ token: initialAuth.token, user: { ...initialAuth.user, ...fresh } })
         }
       })
       .catch(() => {
         if (!alive) return
         setUser(null)
         setToken(null)
-        localStorage.removeItem(STORAGE_KEY)
+        clearAuth()
       })
       .finally(() => alive && setLoading(false))
     return () => { alive = false }
   }, [initialAuth])
 
-  async function login(credentials) {
+  async function login(credentials, lembrar = true) {
     const { token, user: authenticatedUser } = await api.login(credentials)
     const now = Date.now()
     const lastLogin = Number(localStorage.getItem(`${LAST_LOGIN_PREFIX}${authenticatedUser.id}`) || 0)
     const greetingKind = !lastLogin ? 'welcome' : now - lastLogin >= FIFTEEN_DAYS ? 'welcomeBack' : 'time'
     const user = { ...authenticatedUser, greetingKind }
     localStorage.setItem(`${LAST_LOGIN_PREFIX}${authenticatedUser.id}`, String(now))
+    // "Lembrar-me" decide onde a sessão é guardada.
+    authStore = lembrar ? localStorage : sessionStorage
+    clearAuth()
     setUser(user)
     setToken(token)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }))
+    persistAuth({ token, user })
     return user
   }
 
   function logout() {
     setUser(null)
     setToken(null)
-    localStorage.removeItem(STORAGE_KEY)
+    clearAuth()
   }
 
   // Limpa a flag de primeira-troca de password (após o utilizador a alterar)
@@ -69,8 +83,8 @@ export function AuthProvider({ children }) {
       if (!prev) return prev
       const updated = { ...prev, mustChangePassword: false }
       try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...saved, user: updated }))
+        const saved = JSON.parse(authStore.getItem(STORAGE_KEY) || '{}')
+        persistAuth({ ...saved, user: updated })
       } catch {
         // ignora
       }
@@ -87,8 +101,8 @@ export function AuthProvider({ children }) {
         ?? (prev.pendingPolicies || []).filter((p) => p.policyId !== policyId)
       const updated = { ...prev, pendingPolicies }
       try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...saved, user: updated }))
+        const saved = JSON.parse(authStore.getItem(STORAGE_KEY) || '{}')
+        persistAuth({ ...saved, user: updated })
       } catch {
         // ignora
       }

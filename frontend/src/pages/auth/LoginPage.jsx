@@ -15,15 +15,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [lembrar, setLembrar] = useState(true)
+  const [tentou, setTentou] = useState(false)
   const [erro, setErro] = useState(null)
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
+    setTentou(true)
     setErro(null)
+    if (!email || !password) return
     setLoading(true)
     try {
-      const u = await login({ email, password })
+      const u = await login({ email, password }, lembrar)
       navigate(homeForRole(u), { replace: true })
     } catch (err) {
       setErro(err.message)
@@ -49,6 +53,7 @@ export default function LoginPage() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('login.campos.emailPlaceholder')}
           required
+          invalid={tentou && !email}
         />
         <Field
           label={t('login.campos.passwordLabel')}
@@ -58,6 +63,7 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           placeholder={t('login.campos.passwordPlaceholder')}
           required
+          invalid={tentou && !password}
           trailing={
             <button
               type="button"
@@ -76,7 +82,7 @@ export default function LoginPage() {
 
         <div className="d-flex align-items-center justify-content-between small">
           <label className="form-check d-flex align-items-center gap-2 text-muted mb-0">
-            <input type="checkbox" className="form-check-input" />
+            <input type="checkbox" className="form-check-input" checked={lembrar} onChange={(e) => setLembrar(e.target.checked)} />
             {t('login.lembrarMe')}
           </label>
           <Link to="/recuperar-password" className="text-brand text-decoration-none">

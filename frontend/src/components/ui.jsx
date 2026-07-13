@@ -75,23 +75,24 @@ export function StatusPill({ status }) {
   )
 }
 
-export function Field({ label, hint, icon: Icon, trailing, ...props }) {
+export function Field({ label, hint, icon: Icon, trailing, invalid, ...props }) {
   const agrupado = Icon || trailing
+  const inputClass = `form-control${invalid ? ' is-invalid' : ''}`
   return (
     <label className="d-block">
       {label && <span className="mb-1 d-block small fw-medium text-ink">{label}</span>}
       {agrupado ? (
         <div className="input-group">
           {Icon && (
-            <span className="input-group-text bg-white">
+            <span className={`input-group-text bg-white${invalid ? ' border-danger' : ''}`}>
               <Icon size={16} className="text-secondary" />
             </span>
           )}
-          <input className="form-control" {...props} />
+          <input className={inputClass} {...props} />
           {trailing}
         </div>
       ) : (
-        <input className="form-control" {...props} />
+        <input className={inputClass} {...props} />
       )}
       {hint && <span className="mt-1 d-block fs-xs text-muted">{hint}</span>}
     </label>

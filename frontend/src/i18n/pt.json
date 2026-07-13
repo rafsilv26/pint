@@ -822,6 +822,11 @@
     "nivel": "Nível",
     "pontos": "pontos"
   },
+  "logout": {
+    "pergunta": "Pretende terminar a sua sessão?",
+    "terminar": "Terminar Sessão",
+    "cancelar": "Cancelar"
+  },
   "changePasswordModal": {
     "titulo": "Definir nova palavra-passe",
     "descricao": "É o teu primeiro acesso — define uma palavra-passe pessoal para continuar.",

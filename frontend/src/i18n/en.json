@@ -832,6 +832,11 @@
     "nivel": "Level",
     "pontos": "points"
   },
+  "logout": {
+    "pergunta": "Do you want to sign out?",
+    "terminar": "Sign Out",
+    "cancelar": "Cancel"
+  },
   "changePasswordModal": {
     "titulo": "Set new password",
     "descricao": "This is your first login — set a personal password to continue.",
