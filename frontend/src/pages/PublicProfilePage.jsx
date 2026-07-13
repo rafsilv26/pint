@@ -110,10 +110,12 @@ export default function PublicProfilePage() {
       <Card className="p-0 overflow-hidden">
         <div className="bg-gradient-brand" style={{ height: '6.5rem' }} />
         <div className="px-4 pb-4">
-          <div className="d-flex flex-wrap align-items-end justify-content-between gap-3" style={{ marginTop: '-3rem' }}>
+          <div className="d-flex flex-wrap align-items-end justify-content-between gap-3">
             <div className="d-flex align-items-end gap-3">
-              {/* Avatar em anel, com selo de pódio para o Top 3 do ranking */}
-              <div className="position-relative flex-shrink-0" style={{ height: '6rem', width: '6rem' }}>
+              {/* Avatar em anel, com selo de pódio para o Top 3 do ranking.
+                  Só o avatar sobe para cima da faixa; nome/contactos ficam
+                  em baixo, sobre o fundo branco (senão texto escuro fica ilegível). */}
+              <div className="position-relative flex-shrink-0" style={{ height: '6rem', width: '6rem', marginTop: '-3rem' }}>
                 <div
                   className="rounded-circle h-100 w-100 p-1"
                   style={{ background: 'linear-gradient(135deg, var(--bs-primary), #3f93cf)' }}
