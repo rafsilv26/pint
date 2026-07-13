@@ -40,7 +40,13 @@ function Campo({ label, value, onChange }) {
 export default function EmailSignaturePage() {
   const { t } = useTranslation()
   const location = useLocation()
-  const backTo = location.pathname.startsWith('/tm') ? '/tm/conta' : location.pathname.startsWith('/sll') ? '/sll/conta' : '/perfil'
+  const backTo = location.pathname.startsWith('/tm')
+    ? '/tm/conta'
+    : location.pathname.startsWith('/sll')
+      ? '/sll/conta'
+      : location.pathname.startsWith('/admin')
+        ? '/admin/conta'
+        : '/perfil'
 
   const [d, setD] = useState({
     nome: '',

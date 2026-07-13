@@ -163,6 +163,8 @@ export default function App() {
           <Route path="/admin/pedidos/:id" element={<AdminPedidoDetailPage />} />
           <Route path="/admin/relatorios" element={<TalentReportsPage soIndicadores />} />
           <Route path="/admin/definicoes" element={<AdminDefinicoesPage />} />
+          <Route path="/admin/assinatura" element={<EmailSignaturePage />} />
+          <Route path="/admin/alterar-password" element={<ChangePasswordPage />} />
           <Route path="/admin/conta" element={<ManagerContaPage />} />
         </Route>
 

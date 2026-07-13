@@ -9,7 +9,11 @@ export default function ChangePasswordPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
-  const backTo = location.pathname.startsWith('/tm') ? '/tm/conta' : '/perfil'
+  const backTo = location.pathname.startsWith('/tm')
+    ? '/tm/conta'
+    : location.pathname.startsWith('/admin')
+      ? '/admin/conta'
+      : '/perfil'
   const [atual, setAtual] = useState('')
   const [nova, setNova] = useState('')
   const [confirmar, setConfirmar] = useState('')
