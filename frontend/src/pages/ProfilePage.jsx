@@ -92,7 +92,7 @@ export default function ProfilePage() {
                 ))}
               </div>
             )}
-            <Link to="/perfil/publico" className="mt-2 d-inline-flex align-items-center gap-1 small fw-medium text-brand text-decoration-none">
+            <Link to="/perfil/publico" className="mt-2 d-flex justify-content-center align-items-center gap-1 small fw-medium text-brand text-decoration-none">
               {t('perfil.verPerfilPublico')} <ExternalLink size={14} />
             </Link>
 
