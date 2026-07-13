@@ -95,7 +95,7 @@ export default function AdminPedidoDetailPage() {
                     >
                       <span className="d-flex align-items-center gap-2 flex-grow-1 min-w-0 text-ink">
                         <FileText size={14} className="text-brand flex-shrink-0" />
-                        <span className="text-truncate">{e.nome}</span>
+                        <span className="text-truncate min-w-0">{e.nome}</span>
                       </span>
                       <span className="d-flex align-items-center gap-2 flex-shrink-0">
                         {e.validado === true && <CheckCircle2 size={14} className="text-success" />}
@@ -119,33 +119,37 @@ export default function AdminPedidoDetailPage() {
             {timeline.length === 0 ? (
               <p className="small text-muted mb-0">{t('adminPedidoDetail.semHistorico')}</p>
             ) : (
-              <div className="position-relative ps-4">
-                {/* Linha vertical */}
-                <span className="position-absolute top-0 bottom-0 bg-light" style={{ left: '0.4rem', width: '2px' }} />
+              <div className="d-flex flex-column">
                 {timeline.map((h, i) => {
                   const fase = FASE[h.code] || FASE.OPEN
                   const Icon = fase.icon
+                  const ultimo = i === timeline.length - 1
                   return (
-                    <div key={h.id ?? i} className="position-relative pb-4">
-                      <span
-                        className="position-absolute d-flex align-items-center justify-content-center rounded-circle text-white"
-                        style={{ left: '-1.5rem', top: 0, height: '1.6rem', width: '1.6rem', backgroundColor: fase.cor }}
-                      >
-                        <Icon size={12} />
-                      </span>
-                      <div className="d-flex flex-wrap align-items-center gap-2">
-                        <span className="fw-semibold text-ink">{h.estado}</span>
-                        {h.estadoAnterior && (
-                          <span className="fs-xs text-muted">← {h.estadoAnterior}</span>
+                    <div key={h.id ?? i} className="d-flex gap-3">
+                      {/* Coluna do marcador: ponto + linha a ligar ao próximo */}
+                      <div className="d-flex flex-column align-items-center flex-shrink-0">
+                        <span
+                          className="d-flex align-items-center justify-content-center rounded-circle text-white"
+                          style={{ height: '1.75rem', width: '1.75rem', backgroundColor: fase.cor }}
+                        >
+                          <Icon size={13} />
+                        </span>
+                        {!ultimo && <span className="flex-grow-1 bg-light" style={{ width: '2px', minHeight: '1rem' }} />}
+                      </div>
+                      {/* Conteúdo */}
+                      <div className={ultimo ? '' : 'pb-4'}>
+                        <div className="d-flex flex-wrap align-items-center gap-2">
+                          <span className="fw-semibold text-ink">{h.estado}</span>
+                          {h.estadoAnterior && <span className="fs-xs text-muted">← {h.estadoAnterior}</span>}
+                        </div>
+                        <p className="fs-xs text-muted mb-1">
+                          {h.autor && <span className="fw-medium">{h.autor}</span>}
+                          {h.autor && ' · '}{h.data}
+                        </p>
+                        {h.motivo && (
+                          <p className="small text-ink mb-0 rounded-3 bg-light px-3 py-2">{h.motivo}</p>
                         )}
                       </div>
-                      <p className="fs-xs text-muted mb-1">
-                        {h.autor && <span className="fw-medium">{h.autor}</span>}
-                        {h.autor && ' · '}{h.data}
-                      </p>
-                      {h.motivo && (
-                        <p className="small text-ink mb-0 rounded-3 bg-light px-3 py-2">{h.motivo}</p>
-                      )}
                     </div>
                   )
                 })}

@@ -41,6 +41,8 @@ body,
 /* ---- Pequenos utilitários ---- */
 .border-dashed { border-style: dashed !important; }
 .cursor-pointer { cursor: pointer; }
+/* Permite que um filho flex encolha abaixo do conteúdo (para text-truncate) */
+.min-w-0 { min-width: 0 !important; }
 .min-vh-100 { min-height: 100vh; }
 .fs-xs { font-size: 0.75rem; }
 .avatar-circle {
