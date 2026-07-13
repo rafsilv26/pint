@@ -16,6 +16,7 @@ export default function ManagerContaPage() {
   const location = useLocation()
   const isTalentManager = location.pathname.startsWith('/tm')
   const isServiceLineLeader = location.pathname.startsWith('/sll')
+  const isAdmin = location.pathname.startsWith('/admin')
   const [pw, setPw] = useState({ atual: '', nova: '', confirmar: '' })
   const [msg, setMsg] = useState(null)
   const [erro, setErro] = useState(null)
@@ -230,11 +231,11 @@ export default function ManagerContaPage() {
         </Card>
       )}
 
-      {isTalentManager && (
+      {(isTalentManager || isAdmin) && (
         <div className="mt-4 row row-cols-1 row-cols-sm-2 g-3">
           {[
-            { to: '/tm/alterar-password', icon: KeyRound, title: t('perfil.acoes.alterarPassword'), description: t('perfil.acoes.alterarPasswordDesc') },
-            { to: '/tm/assinatura', icon: Mail, title: t('perfil.acoes.assinatura'), description: t('perfil.acoes.assinaturaDesc') },
+            { to: `${isAdmin ? '/admin' : '/tm'}/alterar-password`, icon: KeyRound, title: t('perfil.acoes.alterarPassword'), description: t('perfil.acoes.alterarPasswordDesc') },
+            { to: `${isAdmin ? '/admin' : '/tm'}/assinatura`, icon: Mail, title: t('perfil.acoes.assinatura'), description: t('perfil.acoes.assinaturaDesc') },
           ].map((action) => (
             <div className="col" key={action.to}>
               <Link to={action.to} className="text-decoration-none">
@@ -261,7 +262,7 @@ export default function ManagerContaPage() {
         {isServiceLineLeader && <Link to="/sll/assinatura" className="mt-3 btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2"><PenLine size={16} />{t('tmWorkspace.signature.emailSignature')}</Link>}
       </Card>
 
-      {!isTalentManager && <Card className="mt-4">
+      {isServiceLineLeader && <Card className="mt-4">
         <h2 className="mb-3 d-flex align-items-center gap-2 fw-semibold text-ink">
           <KeyRound size={18} className="text-brand" /> {t('managerConta.alterarPassword')}
         </h2>
