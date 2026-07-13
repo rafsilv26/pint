@@ -236,6 +236,10 @@
     "tu": "(you)",
     "consultorDefault": "Consultant"
   },
+  "sllConsultores": {
+    "subtitulo": "Track the progress, badges and applications of consultants in your Service Line.",
+    "nome": "Name"
+  },
   "assinatura": {
     "voltar": "Back to Profile",
     "titulo": "Email Signature",

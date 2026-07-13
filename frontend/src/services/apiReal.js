@@ -14,6 +14,7 @@ import {
   invalidateTalentWorkspace,
 } from './talentWorkspace.js'
 import {
+  buildServiceLineConsultants,
   buildServiceLineDecisionHistory,
   buildServiceLineProfile,
   buildServiceLineReport,
@@ -559,6 +560,9 @@ export async function getServiceLineDashboard() {
 }
 export async function getServiceLineProfile() {
   return buildServiceLineProfile(await getServiceLineWorkspace())
+}
+export async function getServiceLineConsultants() {
+  return buildServiceLineConsultants(await getServiceLineWorkspace())
 }
 // Histórico completo dos pedidos da Service Line do SLL (todos os estados,
 // não só os pendentes de aprovação final) — guião: "visualização do status

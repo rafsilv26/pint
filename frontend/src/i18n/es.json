@@ -236,6 +236,10 @@
     "tu": "(tú)",
     "consultorDefault": "Consultor"
   },
+  "sllConsultores": {
+    "subtitulo": "Consulta el progreso, las insignias y las solicitudes de los consultores de tu Service Line.",
+    "nome": "Nombre"
+  },
   "assinatura": {
     "voltar": "Volver al Perfil",
     "titulo": "Firma de Email",
