@@ -680,6 +680,19 @@
     "sucessoTitulo": "Candidatura submetida!",
     "sucessoDesc": "A redirecionar para as tuas candidaturas…"
   },
+  "adminUserDetail": {
+    "voltar": "Voltar aos Utilizadores",
+    "naoEncontrado": "Utilizador não encontrado.",
+    "subtitulo": "Informações da conta",
+    "papel": "Perfil",
+    "area": "Área",
+    "serviceLine": "Service Line",
+    "registado": "Registado em",
+    "primeiroAcesso": "Primeiro acesso",
+    "pendente": "Password por definir",
+    "feito": "Concluído",
+    "verPerfilPublico": "Ver Perfil Público"
+  },
   "adminDefinicoes": {
     "titulo": "Definições",
     "subtitulo": "Configurações gerais da plataforma.",

@@ -690,6 +690,19 @@
     "sucessoTitulo": "Application submitted!",
     "sucessoDesc": "Redirecting to your applications…"
   },
+  "adminUserDetail": {
+    "voltar": "Back to Users",
+    "naoEncontrado": "User not found.",
+    "subtitulo": "Account information",
+    "papel": "Role",
+    "area": "Area",
+    "serviceLine": "Service Line",
+    "registado": "Registered on",
+    "primeiroAcesso": "First login",
+    "pendente": "Password not set",
+    "feito": "Done",
+    "verPerfilPublico": "View Public Profile"
+  },
   "adminDefinicoes": {
     "titulo": "Settings",
     "subtitulo": "General platform configurations.",

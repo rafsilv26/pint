@@ -690,6 +690,19 @@
     "sucessoTitulo": "¡Candidatura enviada!",
     "sucessoDesc": "Redirigiendo a tus candidaturas…"
   },
+  "adminUserDetail": {
+    "voltar": "Volver a Usuarios",
+    "naoEncontrado": "Usuario no encontrado.",
+    "subtitulo": "Información de la cuenta",
+    "papel": "Perfil",
+    "area": "Área",
+    "serviceLine": "Service Line",
+    "registado": "Registrado el",
+    "primeiroAcesso": "Primer acceso",
+    "pendente": "Contraseña sin definir",
+    "feito": "Completado",
+    "verPerfilPublico": "Ver Perfil Público"
+  },
   "adminDefinicoes": {
     "titulo": "Configuraciones",
     "subtitulo": "Configuraciones generales de la plataforma.",

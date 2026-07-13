@@ -102,10 +102,8 @@ export default function AdminUsersPage() {
               <tbody>
                 {rows.map((u) => (
                   <tr key={u.id}>
-                    <td className="px-3 py-2 fw-medium text-ink">
-                      {(u.roles || []).includes('Consultor')
-                        ? <Link to={`/admin/utilizadores/${u.id}`} className="text-brand text-decoration-none">{u.nome}</Link>
-                        : u.nome}
+                    <td className="px-3 py-2 fw-medium">
+                      <Link to={`/admin/utilizadores/${u.id}`} className="text-brand text-decoration-none">{u.nome}</Link>
                     </td>
                     <td className="px-3 py-2 text-muted">{u.email}</td>
                     <td className="px-3 py-2 text-ink">{(u.roles || []).map(roleLabel).join(', ') || '—'}</td>

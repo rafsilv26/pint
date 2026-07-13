@@ -53,6 +53,7 @@ import SLLConsultoresPage from './pages/sll/SLLConsultoresPage'
 // Admin
 import AdminResourcePage from './pages/admin/AdminResourcePage'
 import AdminUsersPage from './pages/admin/AdminUsersPage'
+import AdminUserDetailPage from './pages/admin/AdminUserDetailPage'
 import AdminPedidosPage from './pages/admin/AdminPedidosPage'
 import AdminDefinicoesPage from './pages/admin/AdminDefinicoesPage'
 
@@ -174,7 +175,8 @@ export default function App() {
           <Route path="/admin/avisos" element={<AdminResourcePage resourceKey="notices" />} />
           <Route path="/admin/informacoes" element={<AdminResourcePage resourceKey="information" />} />
           <Route path="/admin/utilizadores" element={<AdminUsersPage />} />
-          <Route path="/admin/utilizadores/:id" element={<PublicProfilePage />} />
+          <Route path="/admin/utilizadores/:id" element={<AdminUserDetailPage />} />
+          <Route path="/admin/consultor/:id" element={<PublicProfilePage />} />
           <Route path="/admin/pedidos" element={<AdminPedidosPage />} />
           <Route path="/admin/relatorios" element={<TalentReportsPage soIndicadores />} />
           <Route path="/admin/definicoes" element={<AdminDefinicoesPage />} />
