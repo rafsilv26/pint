@@ -77,7 +77,7 @@ export function StatusPill({ status }) {
 
 export function Field({ label, hint, icon: Icon, trailing, invalid, ...props }) {
   const agrupado = Icon || trailing
-  const inputClass = `form-control${invalid ? ' is-invalid' : ''}`
+  const inputClass = `form-control bg-white${invalid ? ' is-invalid' : ''}`
   return (
     <label className="d-block">
       {label && <span className="mb-1 d-block small fw-medium text-ink">{label}</span>}
