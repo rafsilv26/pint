@@ -150,8 +150,8 @@ PolicyRGPD.belongsTo(Administrator, { foreignKey: 'createdBy', as: 'creator' });
 PolicyRGPD.hasMany(PolicyRGPDAcceptance, { foreignKey: 'policyId', as: 'acceptances' });
 PolicyRGPDAcceptance.belongsTo(PolicyRGPD, { foreignKey: 'policyId' });
 
-Consultant.hasMany(PolicyRGPDAcceptance, { foreignKey: 'consultorId' });
-PolicyRGPDAcceptance.belongsTo(Consultant, { foreignKey: 'consultorId' });
+User.hasMany(PolicyRGPDAcceptance, { foreignKey: 'consultorId' });
+PolicyRGPDAcceptance.belongsTo(User, { foreignKey: 'consultorId' });
 
 // Notifications
 User.hasMany(Notice, { foreignKey: 'userId', as: 'notices' });
