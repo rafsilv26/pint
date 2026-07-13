@@ -6,6 +6,13 @@ import * as api from '../../services/api'
 import { useTranslation } from 'react-i18next'
 
 // Cor + ícone por estado, para o marcador da timeline.
+// Cloudinary (plano free) bloqueia a entrega inline de PDFs — abrir o link
+// direto "não faz nada". `fl_attachment` força o download do ficheiro.
+const linkFicheiro = (url) => {
+  if (!url || url === '#') return null
+  return url.includes('/upload/') ? url.replace('/upload/', '/upload/fl_attachment/') : url
+}
+
 const FASE = {
   OPEN: { cor: '#9ca3af', icon: RotateCcw },
   SUBMITTED: { cor: '#3b82f6', icon: Send },
@@ -76,19 +83,28 @@ export default function AdminPedidoDetailPage() {
               <p className="small text-muted mb-0">{t('adminPedidoDetail.semEvidencias')}</p>
             ) : (
               <div className="d-flex flex-column gap-2">
-                {c.evidencias.map((e) => (
-                  <a key={e.id} href={e.url} target="_blank" rel="noopener noreferrer" className="d-flex align-items-center gap-2 rounded-3 border px-3 py-2 small text-decoration-none">
-                    <span className="d-flex align-items-center gap-2 flex-grow-1 min-w-0 text-ink">
-                      <FileText size={14} className="text-brand flex-shrink-0" />
-                      <span className="text-truncate">{e.nome}</span>
-                    </span>
-                    <span className="d-flex align-items-center gap-2 flex-shrink-0">
-                      {e.validado === true && <CheckCircle2 size={14} className="text-success" />}
-                      {e.validado === false && <XCircle size={14} className="text-danger" />}
-                      <ExternalLink size={13} className="text-muted" />
-                    </span>
-                  </a>
-                ))}
+                {c.evidencias.map((e) => {
+                  const href = linkFicheiro(e.url)
+                  return (
+                    <a
+                      key={e.id}
+                      href={href || undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`d-flex align-items-center gap-2 rounded-3 border px-3 py-2 small text-decoration-none ${href ? '' : 'pe-none opacity-50'}`}
+                    >
+                      <span className="d-flex align-items-center gap-2 flex-grow-1 min-w-0 text-ink">
+                        <FileText size={14} className="text-brand flex-shrink-0" />
+                        <span className="text-truncate">{e.nome}</span>
+                      </span>
+                      <span className="d-flex align-items-center gap-2 flex-shrink-0">
+                        {e.validado === true && <CheckCircle2 size={14} className="text-success" />}
+                        {e.validado === false && <XCircle size={14} className="text-danger" />}
+                        <ExternalLink size={13} className="text-muted" />
+                      </span>
+                    </a>
+                  )
+                })}
               </div>
             )}
           </Card>
