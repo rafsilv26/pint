@@ -735,16 +735,18 @@
       "push": "Push Notifications",
       "pushDesc": "In-app push alerts (when available)"
     },
-    "email": {
-      "titulo": "Email Diagnostics",
-      "subtitulo": "Check whether email sending is working.",
-      "verificar": "Check connection",
-      "enviarTeste": "Send test email",
-      "aVerificar": "Checking…",
-      "ligacaoOk": "Email service connection OK ({{modo}}).",
-      "ligacaoErro": "Connection failed: {{erro}}",
-      "envioOk": "Test email sent to {{para}}.",
-      "envioErro": "Sending failed: {{erro}}"
+    "broadcast": {
+      "titulo": "Broadcast notice",
+      "subtitulo": "Send a notification to all consultants at once.",
+      "titulo_campo": "Title",
+      "tituloPlaceholder": "Ex: New Learning Path available",
+      "tipo": "Type",
+      "tipos": { "info": "Info", "warning": "Warning", "success": "Success" },
+      "mensagem": "Message",
+      "mensagemPlaceholder": "Notice details…",
+      "enviar": "Broadcast to all",
+      "aEnviar": "Sending…",
+      "enviado": "Notice sent to {{total}} consultants ✓"
     },
     "botoes": {
       "guardado": "Settings saved ✓",

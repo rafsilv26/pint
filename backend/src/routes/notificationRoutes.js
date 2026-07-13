@@ -9,6 +9,8 @@ router.get('/email-status', authorize('Admin'), notificationController.emailStat
 // Definições globais de notificações (Admin)
 router.get('/config', authorize('Admin'), notificationController.getConfigGlobal);
 router.put('/config', authorize('Admin'), notificationController.saveConfigGlobal);
+// Difusão de aviso a todos os consultores (Admin)
+router.post('/broadcast', authorize('Admin'), notificationController.broadcastAviso);
 // Verificação de SLA a pedido — só Admin
 router.post('/sla-check', authorize('Admin'), notificationController.runSlaCheck);
 

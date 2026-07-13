@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Clock, Bell, Mail, CheckCircle2, XCircle, Send, PlugZap } from 'lucide-react'
+import { Clock, Bell, Megaphone, Users, Award, ClipboardCheck, Layers, Send } from 'lucide-react'
 import { PageHeader, Card, Toggle, Spinner } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import { useTranslation } from 'react-i18next'
+
+const KPI_ICONS = [Users, Award, ClipboardCheck, Layers]
 
 function ToggleRow({ label, desc, checked, onChange }) {
   return (
@@ -20,13 +22,17 @@ function ToggleRow({ label, desc, checked, onChange }) {
 export default function AdminDefinicoesPage() {
   const { t } = useTranslation()
   const { data, loading } = useAsync(() => api.getDefinicoes())
+  const { data: painel } = useAsync(() => api.getAdminDashboard().catch(() => null))
+
   const [sla, setSla] = useState({ dias: 5, alertas: true })
   const [notif, setNotif] = useState({ email: true, push: false })
   const [guardado, setGuardado] = useState(false)
   const [guardando, setGuardando] = useState(false)
 
-  // Diagnóstico de email
-  const [emailState, setEmailState] = useState({ loading: false, ligacao: null, envio: null, erro: null })
+  // Difusão de aviso
+  const [aviso, setAviso] = useState({ title: '', message: '', type: 'info' })
+  const [difundindo, setDifundindo] = useState(false)
+  const [difResultado, setDifResultado] = useState(null)
 
   useEffect(() => {
     if (data) {
@@ -46,38 +52,93 @@ export default function AdminDefinicoesPage() {
     }
   }
 
-  async function testarEmail(enviar) {
-    setEmailState({ loading: true, ligacao: null, envio: null, erro: null })
+  async function difundir(e) {
+    e.preventDefault()
+    if (!aviso.title.trim()) return
+    setDifundindo(true)
+    setDifResultado(null)
     try {
-      const r = await api.getEmailStatus(enviar)
-      setEmailState({ loading: false, ligacao: r.ligacao, envio: r.envioTeste, erro: null })
+      const r = await api.difundirAviso({ title: aviso.title.trim(), message: aviso.message.trim(), type: aviso.type })
+      setDifResultado({ ok: true, total: r.total ?? 0 })
+      setAviso({ title: '', message: '', type: 'info' })
     } catch (err) {
-      const detalhe = err.response?.data
-      setEmailState({ loading: false, ligacao: detalhe?.ligacao || { ok: false }, envio: detalhe?.envioTeste || null, erro: detalhe?.ligacao?.erro || err.message })
+      setDifResultado({ ok: false, erro: err.message })
+    } finally {
+      setDifundindo(false)
     }
   }
 
   if (loading) return <Spinner />
 
+  const kpis = painel?.stats || []
+
   return (
-    <div className="mx-auto" style={{ maxWidth: '44rem' }}>
+    <div className="mx-auto" style={{ maxWidth: '46rem' }}>
       <PageHeader title={t('adminDefinicoes.titulo')} subtitle={t('adminDefinicoes.subtitulo')} />
 
-      {/* SLA */}
+      {/* Visão geral rápida */}
+      {kpis.length > 0 && (
+        <div className="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+          {kpis.map((s, i) => {
+            const Icon = KPI_ICONS[i] || Award
+            return (
+              <div className="col" key={s.label}>
+                <Card className="h-100">
+                  <Icon size={18} className="text-brand" />
+                  <p className="fs-3 fw-bold text-ink mb-0 mt-2">{s.value}</p>
+                  <p className="fs-xs text-muted mb-0">{s.label}</p>
+                </Card>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Difusão de aviso a todos os consultores */}
       <Card>
+        <h2 className="mb-1 d-flex align-items-center gap-2 fw-semibold text-ink">
+          <Megaphone size={18} className="text-brand" /> {t('adminDefinicoes.broadcast.titulo')}
+        </h2>
+        <p className="fs-xs text-muted mb-3">{t('adminDefinicoes.broadcast.subtitulo')}</p>
+        <form onSubmit={difundir} className="d-flex flex-column gap-3">
+          <div className="row g-3">
+            <label className="col-12 col-sm-8">
+              <span className="mb-1 d-block small fw-medium text-ink">{t('adminDefinicoes.broadcast.titulo_campo')}</span>
+              <input value={aviso.title} onChange={(e) => setAviso({ ...aviso, title: e.target.value })} className="form-control" placeholder={t('adminDefinicoes.broadcast.tituloPlaceholder')} />
+            </label>
+            <label className="col-12 col-sm-4">
+              <span className="mb-1 d-block small fw-medium text-ink">{t('adminDefinicoes.broadcast.tipo')}</span>
+              <select value={aviso.type} onChange={(e) => setAviso({ ...aviso, type: e.target.value })} className="form-select">
+                <option value="info">{t('adminDefinicoes.broadcast.tipos.info')}</option>
+                <option value="warning">{t('adminDefinicoes.broadcast.tipos.warning')}</option>
+                <option value="success">{t('adminDefinicoes.broadcast.tipos.success')}</option>
+              </select>
+            </label>
+          </div>
+          <label className="d-block">
+            <span className="mb-1 d-block small fw-medium text-ink">{t('adminDefinicoes.broadcast.mensagem')}</span>
+            <textarea rows={2} value={aviso.message} onChange={(e) => setAviso({ ...aviso, message: e.target.value })} className="form-control" placeholder={t('adminDefinicoes.broadcast.mensagemPlaceholder')} />
+          </label>
+          {difResultado && (
+            <p className={`rounded-3 px-3 py-2 small mb-0 ${difResultado.ok ? 'bg-success-subtle text-success-emphasis' : 'bg-danger-subtle text-danger'}`}>
+              {difResultado.ok ? t('adminDefinicoes.broadcast.enviado', { total: difResultado.total }) : difResultado.erro}
+            </p>
+          )}
+          <button type="submit" disabled={difundindo || !aviso.title.trim()} className="btn btn-brand align-self-start d-inline-flex align-items-center gap-2">
+            <Send size={16} /> {difundindo ? t('adminDefinicoes.broadcast.aEnviar') : t('adminDefinicoes.broadcast.enviar')}
+          </button>
+        </form>
+      </Card>
+
+      {/* SLA */}
+      <Card className="mt-4">
         <h2 className="mb-1 d-flex align-items-center gap-2 fw-semibold text-ink">
           <Clock size={18} className="text-brand" /> {t('adminDefinicoes.sla.titulo')}
         </h2>
         <p className="fs-xs text-muted mb-2">{t('adminDefinicoes.sla.subtitulo')}</p>
         <label className="d-block py-3">
           <span className="mb-2 d-block small fw-medium text-ink">{t('adminDefinicoes.sla.dias')}</span>
-          <input
-            type="number" min={1}
-            value={sla.dias}
-            onChange={(e) => setSla({ ...sla, dias: Number(e.target.value) })}
-            className="form-control"
-            style={{ width: '8rem' }}
-          />
+          <input type="number" min={1} value={sla.dias} onChange={(e) => setSla({ ...sla, dias: Number(e.target.value) })} className="form-control" style={{ width: '8rem' }} />
         </label>
         <ToggleRow
           label={t('adminDefinicoes.sla.alertasLabel')}
@@ -110,43 +171,6 @@ export default function AdminDefinicoesPage() {
       <button onClick={guardar} disabled={guardando} className="mt-4 btn btn-brand w-100 py-2 fw-semibold">
         {guardado ? t('adminDefinicoes.botoes.guardado') : t('adminDefinicoes.botoes.guardar')}
       </button>
-
-      {/* Diagnóstico de email */}
-      <Card className="mt-4">
-        <h2 className="mb-1 d-flex align-items-center gap-2 fw-semibold text-ink">
-          <Mail size={18} className="text-brand" /> {t('adminDefinicoes.email.titulo')}
-        </h2>
-        <p className="fs-xs text-muted mb-3">{t('adminDefinicoes.email.subtitulo')}</p>
-
-        <div className="d-flex flex-wrap gap-2">
-          <button onClick={() => testarEmail(false)} disabled={emailState.loading} className="btn btn-outline-secondary bg-white btn-sm d-inline-flex align-items-center gap-2">
-            <PlugZap size={15} /> {t('adminDefinicoes.email.verificar')}
-          </button>
-          <button onClick={() => testarEmail(true)} disabled={emailState.loading} className="btn btn-outline-secondary bg-white btn-sm d-inline-flex align-items-center gap-2">
-            <Send size={15} /> {t('adminDefinicoes.email.enviarTeste')}
-          </button>
-        </div>
-
-        {emailState.loading && <p className="mt-3 mb-0 small text-muted">{t('adminDefinicoes.email.aVerificar')}</p>}
-
-        {emailState.ligacao && (
-          <div className={`mt-3 rounded-3 px-3 py-2 small d-flex align-items-center gap-2 ${emailState.ligacao.ok ? 'bg-success-subtle text-success-emphasis' : 'bg-danger-subtle text-danger'}`}>
-            {emailState.ligacao.ok ? <CheckCircle2 size={15} /> : <XCircle size={15} />}
-            {emailState.ligacao.ok
-              ? t('adminDefinicoes.email.ligacaoOk', { modo: emailState.ligacao.modo || '—' })
-              : t('adminDefinicoes.email.ligacaoErro', { erro: emailState.erro || '—' })}
-          </div>
-        )}
-
-        {emailState.envio && (
-          <div className={`mt-2 rounded-3 px-3 py-2 small d-flex align-items-center gap-2 ${emailState.envio.ok ? 'bg-success-subtle text-success-emphasis' : 'bg-danger-subtle text-danger'}`}>
-            {emailState.envio.ok ? <CheckCircle2 size={15} /> : <XCircle size={15} />}
-            {emailState.envio.ok
-              ? t('adminDefinicoes.email.envioOk', { para: emailState.envio.para || '—' })
-              : t('adminDefinicoes.email.envioErro', { erro: emailState.envio.erro || '—' })}
-          </div>
-        )}
-      </Card>
     </div>
   )
 }

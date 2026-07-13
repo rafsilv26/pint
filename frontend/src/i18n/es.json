@@ -735,16 +735,18 @@
       "push": "Notificaciones Push",
       "pushDesc": "Alertas push en la aplicación (cuando esté disponible)"
     },
-    "email": {
-      "titulo": "Diagnóstico de Email",
-      "subtitulo": "Comprueba si el envío de emails funciona.",
-      "verificar": "Verificar conexión",
-      "enviarTeste": "Enviar email de prueba",
-      "aVerificar": "Verificando…",
-      "ligacaoOk": "Conexión al servicio de email OK ({{modo}}).",
-      "ligacaoErro": "Fallo en la conexión: {{erro}}",
-      "envioOk": "Email de prueba enviado a {{para}}.",
-      "envioErro": "Fallo en el envío: {{erro}}"
+    "broadcast": {
+      "titulo": "Difundir aviso",
+      "subtitulo": "Envía una notificación a todos los consultores a la vez.",
+      "titulo_campo": "Título",
+      "tituloPlaceholder": "Ej: Nuevo Learning Path disponible",
+      "tipo": "Tipo",
+      "tipos": { "info": "Información", "warning": "Aviso", "success": "Éxito" },
+      "mensagem": "Mensaje",
+      "mensagemPlaceholder": "Detalle del aviso…",
+      "enviar": "Difundir a todos",
+      "aEnviar": "Enviando…",
+      "enviado": "Aviso enviado a {{total}} consultores ✓"
     },
     "botoes": {
       "guardado": "Configuraciones guardadas ✓",

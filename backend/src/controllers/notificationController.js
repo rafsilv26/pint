@@ -1,6 +1,19 @@
 const { Notice, NotificationConfig } = require('../models');
 const { verificarLigacao, enviarEmail } = require('../services/email.service');
 const { getPrefs, savePrefs } = require('../services/notificationPrefs.service');
+const { notificarTodosConsultores } = require('../services/notification.service');
+
+// Difunde um aviso a TODOS os consultores (uma notificação por consultor).
+exports.broadcastAviso = async (req, res) => {
+  try {
+    const { title, message, type } = req.body;
+    if (!title) return res.status(400).json({ erro: 'O aviso precisa de um título.' });
+    const criados = await notificarTodosConsultores({ title, message, type: type || 'info' });
+    res.status(201).json({ mensagem: 'Aviso difundido.', total: criados.length });
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao difundir aviso.', details: error.message });
+  }
+};
 
 // Configuração global de notificações da plataforma (singleton type='global').
 // Usada pelas Definições do Admin (req 7 do guião).

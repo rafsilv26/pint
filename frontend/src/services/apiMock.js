@@ -132,13 +132,9 @@ export async function saveDefinicoes(body) {
   _mockDefinicoes = { ..._mockDefinicoes, ...body }
   return { mensagem: 'ok' }
 }
-export async function getEmailStatus(enviarTeste = false) {
+export async function difundirAviso() {
   await delay(500)
-  return {
-    brevoApiKeyDefinida: true,
-    ligacao: { ok: true, modo: 'Brevo API (mock)' },
-    envioTeste: enviarTeste ? { ok: true, para: 'admin@softinsa.pt' } : null,
-  }
+  return { mensagem: 'ok', total: 12 }
 }
 export async function getMeusObjetivos() {
   await delay()

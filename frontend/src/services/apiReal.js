@@ -248,9 +248,9 @@ export async function getDefinicoes() {
 export async function saveDefinicoes(body) {
   return http('/notifications/config', { method: 'PUT', body })
 }
-// Diagnóstico de email (Brevo). enviarTeste=true manda email de teste ao admin.
-export async function getEmailStatus(enviarTeste = false) {
-  return http(`/notifications/email-status${enviarTeste ? '?send=1' : ''}`)
+// Difunde um aviso a todos os consultores.
+export async function difundirAviso(body) {
+  return http('/notifications/broadcast', { method: 'POST', body })
 }
 
 // ---------- Objetivos / Timeline (lembretes) ----------
