@@ -67,7 +67,7 @@ const serialize = (consultant, rank, currentUserId) => ({
       obtidoEm: award.obtainedDate,
       expiraEm: award.expirationDate,
       valido: award.valid !== false,
-      publicToken: award.Badge?.publicToken || '',
+      publicToken: award.publicToken || '',
       expirationDate: award.expirationDate
     })),
   specialAchievements: (consultant.premiumBadges || []).map((award) => ({

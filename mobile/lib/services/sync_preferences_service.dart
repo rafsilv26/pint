@@ -4,6 +4,7 @@ class SyncPreferencesService {
   static const String _lastDashboardUpdateKey =
       'softinsa_dashboard_ultimaatualizacao';
   static const String _mobileDataVersionKey = 'softinsa_mobile_data_version';
+  static const String _publicWebUrlKey = 'softinsa_public_web_url';
 
   Future<DateTime?> getLastDashboardUpdate() async {
     final preferences = await SharedPreferences.getInstance();
@@ -33,5 +34,19 @@ class SyncPreferencesService {
   Future<void> saveMobileDataVersion(String version) async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(_mobileDataVersionKey, version);
+  }
+
+  Future<void> savePublicWebUrl(String url) async {
+    if (url.trim().isEmpty) return;
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setString(
+      _publicWebUrlKey,
+      url.replaceAll(RegExp(r'/$'), ''),
+    );
+  }
+
+  Future<String?> getPublicWebUrl() async {
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getString(_publicWebUrlKey);
   }
 }

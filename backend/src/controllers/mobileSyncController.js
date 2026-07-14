@@ -8,7 +8,8 @@ exports.getStatus = async (req, res) => {
     return res.json({
       status: 'success',
       changed: clientVersion.length === 0 || clientVersion !== version,
-      version
+      version,
+      publicWebUrl: (process.env.FRONTEND_URL || '').replace(/\/$/, '')
     });
   } catch (error) {
     console.error('Erro ao calcular versao dos dados mobile:', error);

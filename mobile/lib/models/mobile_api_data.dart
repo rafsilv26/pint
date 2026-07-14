@@ -306,6 +306,9 @@ class TimelineEventData {
     required this.description,
     required this.icon,
     this.date,
+    this.completionDate,
+    this.status = '',
+    this.priority = 3,
   });
 
   final String id;
@@ -313,13 +316,26 @@ class TimelineEventData {
   final String description;
   final String icon;
   final DateTime? date;
+  final DateTime? completionDate;
+  final String status;
+  final int priority;
+
+  bool get completed =>
+      completionDate != null || status.toLowerCase().contains('conclu');
+  bool get overdue =>
+      !completed && date != null && date!.isBefore(DateTime.now());
 
   factory TimelineEventData.fromJson(Map<String, dynamic> json) {
     final title =
         _textValue(json, const ['title', 'titulo', 'name', 'nome']) ??
         _textValue(json, const ['event', 'acao']) ??
         '';
-    final date = _dateValue(json, const ['startDate', 'createdAt', 'date']);
+    final date = _dateValue(json, const [
+      'expectedDate',
+      'startDate',
+      'createdAt',
+      'date',
+    ]);
     return TimelineEventData(
       id:
           _textValue(json, const ['id', 'timelineId']) ??
@@ -329,6 +345,9 @@ class TimelineEventData {
           _textValue(json, const ['description', 'descricao', 'details']) ?? '',
       icon: _textValue(json, const ['icon', 'type', 'tipo']) ?? 'timeline',
       date: date,
+      completionDate: _dateValue(json, const ['completionDate']),
+      status: _textValue(json, const ['status', 'estado']) ?? '',
+      priority: _intValue(json, const ['priority', 'prioridade']) ?? 3,
     );
   }
 }
@@ -535,6 +554,11 @@ class MyBadgeApplication {
     this.evidences = const [],
     this.createdAt,
     this.updatedAt,
+    this.obtainedAt,
+    this.expirationDate,
+    this.valid = true,
+    this.publicToken = '',
+    this.history = const [],
   });
 
   final int id;
@@ -548,6 +572,11 @@ class MyBadgeApplication {
   final List<ApplicationEvidence> evidences;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final DateTime? obtainedAt;
+  final DateTime? expirationDate;
+  final bool valid;
+  final String publicToken;
+  final List<ApplicationHistoryItem> history;
 
   bool get isApproved {
     final normalized = status.toUpperCase();
@@ -558,6 +587,34 @@ class MyBadgeApplication {
     final normalized = status.toUpperCase();
     return normalized == 'REJECTED' || normalized == 'FECHADO_REJEITADO';
   }
+
+  bool get isAwarded => obtainedAt != null || isApproved;
+
+  int? get daysUntilExpiration {
+    if (expirationDate == null) return null;
+    return expirationDate!.difference(DateTime.now()).inDays;
+  }
+
+  bool get isExpired =>
+      !valid || (daysUntilExpiration != null && daysUntilExpiration! < 0);
+  bool get isExpiringSoon =>
+      !isExpired && daysUntilExpiration != null && daysUntilExpiration! <= 90;
+}
+
+class ApplicationHistoryItem {
+  const ApplicationHistoryItem({
+    required this.id,
+    required this.label,
+    required this.comment,
+    this.responsible = '',
+    this.date,
+  });
+
+  final int id;
+  final String label;
+  final String comment;
+  final String responsible;
+  final DateTime? date;
 }
 
 Object? _field(Map<String, dynamic> json, List<String> keys) {

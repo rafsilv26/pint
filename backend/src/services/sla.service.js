@@ -11,6 +11,7 @@ const {
   Notice
 } = require('../models');
 const { emailAlertaSLA } = require('./email.service');
+const { sendPushToUser } = require('./pushNotification.service');
 
 // =============================================================
 // Verificação de SLA (guião: emails automáticos quando o SLA é ultrapassado).
@@ -59,13 +60,21 @@ const alertarUser = async (user, atrasadas, responseDays) => {
 
   // O aviso in-app é criado mesmo que o email falhe: serve de registo e
   // impede reenvios em ciclo no mesmo dia.
+  const pushTitle = `SLA ultrapassado: ${atrasadas.length} candidatura(s) em atraso`;
+  const pushMessage = atrasadas.map((c) => `${c.badgeNome} — ${c.consultorNome} (${c.diasEmEspera} dias)`).join('\n');
   await Notice.create({
     userId: user.id,
-    title: `SLA ultrapassado: ${atrasadas.length} candidatura(s) em atraso`,
-    message: atrasadas.map((c) => `${c.badgeNome} — ${c.consultorNome} (${c.diasEmEspera} dias)`).join('\n'),
+    title: pushTitle,
+    message: pushMessage,
     type: 'warning',
     emailSent
   });
+  await sendPushToUser(user.id, {
+    title: pushTitle,
+    body: pushMessage,
+    type: 'sla',
+    action: 'fetch_api'
+  }).catch((erro) => console.error('Erro ao enviar push SLA:', erro.message));
   return emailSent;
 };
 

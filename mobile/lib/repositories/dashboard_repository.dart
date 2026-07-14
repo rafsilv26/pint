@@ -54,11 +54,15 @@ class DashboardRepository {
   }
 
   Future<DashboardData> _withSessionUser(DashboardData data) async {
+    final savedGreeting = await authService.getSavedGreeting();
     final localUser = await database.getCurrentUserProfile();
     if (localUser != null) {
       return data.copyWith(
         userName: localUser.name.isNotEmpty ? localUser.name : data.userName,
         userRole: localUser.role.isNotEmpty ? localUser.role : data.userRole,
+        greeting: savedGreeting != null && savedGreeting.isNotEmpty
+            ? savedGreeting
+            : data.greeting,
       );
     }
 
@@ -72,6 +76,9 @@ class DashboardRepository {
       userRole: savedRole != null && savedRole.isNotEmpty
           ? savedRole
           : data.userRole,
+      greeting: savedGreeting != null && savedGreeting.isNotEmpty
+          ? savedGreeting
+          : data.greeting,
     );
   }
 }

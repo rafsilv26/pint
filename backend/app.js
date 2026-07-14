@@ -9,6 +9,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const sequelize = require('./src/config/database');
+const { ensurePublicBadgeTokens } = require('./src/services/publicBadgeToken.service');
 require('./src/models'); // Importa os modelos para garantir que estão registrados no Sequelize
 
 const app = express();
@@ -24,7 +25,10 @@ sequelize.authenticate()
         // Sincroniza os modelos com as tabelas reais da BD
         return sequelize.sync({ alter: true });
     })
-    .then(() => console.log('🔄 Tabelas sincronizadas no Neon.'))
+    .then(async () => {
+        await ensurePublicBadgeTokens();
+        console.log('🔄 Tabelas sincronizadas no Neon.');
+    })
     .catch(err => console.error('❌ Erro crucial de ligação:', err));
 
 //Importar as rotas
@@ -38,6 +42,7 @@ app.get('/api/teste', (req, res) => {
 // útil porque o Render free adormece e o job interno pode não correr.
 // Protegida por chave: GET /api/sla-check?key=<CRON_SECRET>
 const { verificarSLA, iniciarJobSLA } = require('./src/services/sla.service');
+const { iniciarJobExpiracoes } = require('./src/services/expirationAlert.service');
 app.get('/api/sla-check', async (req, res) => {
     if (!process.env.CRON_SECRET || req.query.key !== process.env.CRON_SECRET) {
         return res.status(401).json({ message: 'Chave inválida.' });
@@ -51,6 +56,7 @@ app.get('/api/sla-check', async (req, res) => {
 
 // Job interno: verifica os SLAs pouco depois do arranque e a cada 12 horas.
 iniciarJobSLA();
+iniciarJobExpiracoes();
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

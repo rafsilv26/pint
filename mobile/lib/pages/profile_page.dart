@@ -4,6 +4,7 @@ import '../l10n/app_language.dart';
 import '../models/dashboard_data.dart';
 import '../repositories/mobile_api_repository.dart';
 import '../services/auth_service.dart';
+import '../services/push_notification_service.dart';
 import 'change_password_page.dart';
 import 'consultants_directory_page.dart';
 import 'email_signature_page.dart';
@@ -43,6 +44,25 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const AppText('Terminar sessão'),
+        content: const AppText('Pretende terminar a sua sessão?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const AppText('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const AppText('Terminar sessão'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await PushNotificationService.instance.unregister();
     await authService.logout();
 
     if (mounted) {

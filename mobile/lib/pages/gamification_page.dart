@@ -22,6 +22,56 @@ class _GamificationPageState extends State<GamificationPage> {
     gamificationFuture = repository.getGamification();
   }
 
+  Future<void> reload() async {
+    final future = repository.getGamification();
+    setState(() => gamificationFuture = future);
+    await future;
+  }
+
+  Future<void> createObjective() async {
+    final draft = await showDialog<_ObjectiveDraft>(
+      context: context,
+      builder: (context) => const _ObjectiveDialog(),
+    );
+    if (draft == null) return;
+    try {
+      await repository.createTimelineObjective(
+        title: draft.title,
+        description: draft.description,
+        expectedDate: draft.expectedDate,
+        priority: draft.priority,
+      );
+      await reload();
+    } catch (_) {
+      if (mounted) _showError('Não foi possível criar o objetivo.');
+    }
+  }
+
+  Future<void> toggleObjective(TimelineEventData event) async {
+    try {
+      await repository.setTimelineObjectiveCompleted(
+        event.id,
+        !event.completed,
+      );
+      await reload();
+    } catch (_) {
+      if (mounted) _showError('Não foi possível atualizar o objetivo.');
+    }
+  }
+
+  Future<void> deleteObjective(TimelineEventData event) async {
+    try {
+      await repository.deleteTimelineObjective(event.id);
+      await reload();
+    } catch (_) {
+      if (mounted) _showError('Não foi possível remover o objetivo.');
+    }
+  }
+
+  void _showError(String message) => ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: AppText(message)));
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<GamificationData>(
@@ -72,7 +122,12 @@ class _GamificationPageState extends State<GamificationPage> {
                                 const SizedBox(height: 22),
                                 _LeaderboardSection(users: data.ranking),
                                 const SizedBox(height: 22),
-                                _ProfessionalEvolution(events: data.timeline),
+                                _ProfessionalEvolution(
+                                  events: data.timeline,
+                                  onCreate: createObjective,
+                                  onToggle: toggleObjective,
+                                  onDelete: deleteObjective,
+                                ),
                               ],
                             ),
                           ),
@@ -440,19 +495,38 @@ class _LeaderboardRow extends StatelessWidget {
 }
 
 class _ProfessionalEvolution extends StatelessWidget {
-  const _ProfessionalEvolution({required this.events});
+  const _ProfessionalEvolution({
+    required this.events,
+    required this.onCreate,
+    required this.onToggle,
+    required this.onDelete,
+  });
 
   final List<TimelineEventData> events;
+  final VoidCallback onCreate;
+  final ValueChanged<TimelineEventData> onToggle;
+  final ValueChanged<TimelineEventData> onDelete;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SectionLabel(
-          icon: Icons.trending_up,
-          text: 'Evolução Profissional',
-          iconColor: Color(0xFF005DFF),
+        Row(
+          children: [
+            const Expanded(
+              child: _SectionLabel(
+                icon: Icons.trending_up,
+                text: 'Evolução Profissional',
+                iconColor: Color(0xFF005DFF),
+              ),
+            ),
+            IconButton.filledTonal(
+              tooltip: context.tr('Criar objetivo'),
+              onPressed: onCreate,
+              icon: const Icon(Icons.add),
+            ),
+          ],
         ),
         const SizedBox(height: 14),
         if (events.isEmpty)
@@ -471,6 +545,8 @@ class _ProfessionalEvolution extends StatelessWidget {
                   _TimelineRow(
                     event: events[index],
                     isLast: index == events.length - 1,
+                    onToggle: () => onToggle(events[index]),
+                    onDelete: () => onDelete(events[index]),
                   ),
               ],
             ),
@@ -481,10 +557,17 @@ class _ProfessionalEvolution extends StatelessWidget {
 }
 
 class _TimelineRow extends StatelessWidget {
-  const _TimelineRow({required this.event, required this.isLast});
+  const _TimelineRow({
+    required this.event,
+    required this.isLast,
+    required this.onToggle,
+    required this.onDelete,
+  });
 
   final TimelineEventData event;
   final bool isLast;
+  final VoidCallback onToggle;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -501,7 +584,12 @@ class _TimelineRow extends StatelessWidget {
                 color: Color(0xFFEAF3FF),
                 shape: BoxShape.circle,
               ),
-              child: Icon(_iconFor(event.icon), color: const Color(0xFF005DFF)),
+              child: Icon(
+                event.completed ? Icons.check : _iconFor(event.icon),
+                color: event.overdue
+                    ? const Color(0xFFB42318)
+                    : const Color(0xFF005DFF),
+              ),
             ),
             if (!isLast)
               Container(width: 2, height: 38, color: const Color(0xFFE0E5EE)),
@@ -522,6 +610,24 @@ class _TimelineRow extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                if (event.overdue)
+                  const AppText(
+                    'Prazo ultrapassado',
+                    style: TextStyle(
+                      color: Color(0xFFB42318),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  )
+                else if (event.completed)
+                  const AppText(
+                    'Concluído',
+                    style: TextStyle(
+                      color: Color(0xFF027A48),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 if (event.description.isNotEmpty) ...[
                   const SizedBox(height: 5),
                   AppText(
@@ -543,6 +649,128 @@ class _TimelineRow extends StatelessWidget {
               ],
             ),
           ),
+        ),
+        Column(
+          children: [
+            Checkbox(value: event.completed, onChanged: (_) => onToggle()),
+            IconButton(
+              tooltip: context.tr('Remover objetivo'),
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline, size: 20),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ObjectiveDraft {
+  const _ObjectiveDraft({
+    required this.title,
+    required this.description,
+    required this.expectedDate,
+    required this.priority,
+  });
+  final String title;
+  final String description;
+  final DateTime expectedDate;
+  final int priority;
+}
+
+class _ObjectiveDialog extends StatefulWidget {
+  const _ObjectiveDialog();
+
+  @override
+  State<_ObjectiveDialog> createState() => _ObjectiveDialogState();
+}
+
+class _ObjectiveDialogState extends State<_ObjectiveDialog> {
+  final titleController = TextEditingController();
+  final descriptionController = TextEditingController();
+  DateTime expectedDate = DateTime.now().add(const Duration(days: 30));
+  int priority = 3;
+  bool showError = false;
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const AppText('Novo objetivo'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(
+                labelText: context.tr('Título'),
+                errorText: showError && titleController.text.trim().isEmpty
+                    ? context.tr('Campo obrigatório')
+                    : null,
+              ),
+            ),
+            TextField(
+              controller: descriptionController,
+              maxLines: 3,
+              decoration: InputDecoration(labelText: context.tr('Descrição')),
+            ),
+            const SizedBox(height: 14),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.event_outlined),
+              title: const AppText('Data limite'),
+              subtitle: AppText(_formatDate(expectedDate)),
+              onTap: () async {
+                final selected = await showDatePicker(
+                  context: context,
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 3650)),
+                  initialDate: expectedDate,
+                );
+                if (selected != null) setState(() => expectedDate = selected);
+              },
+            ),
+            DropdownButtonFormField<int>(
+              initialValue: priority,
+              decoration: InputDecoration(labelText: context.tr('Prioridade')),
+              items: const [
+                DropdownMenuItem(value: 1, child: AppText('Alta')),
+                DropdownMenuItem(value: 3, child: AppText('Normal')),
+                DropdownMenuItem(value: 5, child: AppText('Baixa')),
+              ],
+              onChanged: (value) => setState(() => priority = value ?? 3),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const AppText('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: () {
+            if (titleController.text.trim().isEmpty) {
+              setState(() => showError = true);
+              return;
+            }
+            Navigator.of(context).pop(
+              _ObjectiveDraft(
+                title: titleController.text.trim(),
+                description: descriptionController.text.trim(),
+                expectedDate: expectedDate,
+                priority: priority,
+              ),
+            );
+          },
+          child: const AppText('Criar'),
         ),
       ],
     );

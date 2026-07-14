@@ -27,6 +27,7 @@ class AppSyncService {
       final status = await apiService.fetchMobileSyncStatus(
         version: force ? null : localVersion,
       );
+      await preferencesService.savePublicWebUrl(status.publicWebUrl);
       if (!force && !status.changed) {
         return true;
       }

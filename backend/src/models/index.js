@@ -29,6 +29,7 @@ const Feedback = require('./Feedback');
 const ExternalIntegration = require('./ExternalIntegration');
 const EmailSignature = require('./EmailSignature');
 const LogsWorkflow = require('./LogsWorkflow');
+const DevicePushToken = require('./DevicePushToken');
 
 // User roles associations
 User.hasOne(Administrator, { foreignKey: 'adminId' });
@@ -175,6 +176,9 @@ LogsWorkflow.belongsTo(User, { foreignKey: 'userId', as: 'actor' });
 Candidatura.hasMany(LogsWorkflow, { foreignKey: 'candidaturaId', as: 'logs' });
 LogsWorkflow.belongsTo(Candidatura, { foreignKey: 'candidaturaId' });
 
+User.hasMany(DevicePushToken, { foreignKey: 'userId', as: 'pushTokens' });
+DevicePushToken.belongsTo(User, { foreignKey: 'userId' });
+
 module.exports = {
   User,
   Badge,
@@ -206,5 +210,6 @@ module.exports = {
   Feedback,
   ExternalIntegration,
   EmailSignature,
-  LogsWorkflow
+  LogsWorkflow,
+  DevicePushToken
 };

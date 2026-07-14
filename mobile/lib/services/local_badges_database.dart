@@ -893,6 +893,7 @@ class LocalBadgesDatabase {
         maps: _collectMaps(payload, const {
           'historico',
           'historicos',
+          'history',
           'HistoricoCandidatura',
           'HistoricoCandidaturas',
         }),
@@ -903,12 +904,23 @@ class LocalBadgesDatabase {
             'CANDIDATURAID',
           ]),
           'user_id': _intValue(row, const ['userId', 'USERID']),
-          'estado_anterior': _textValue(row, const [
-            'estadoAnterior',
-            'ANTIGO_ESTADOID',
+          'estado_anterior':
+              _textValue(_mapValue(row, const ['oldStatus']), const [
+                'name',
+                'code',
+              ]) ??
+              _textValue(row, const ['estadoAnterior', 'ANTIGO_ESTADOID']),
+          'estado_novo':
+              _textValue(_mapValue(row, const ['newStatus']), const [
+                'name',
+                'code',
+              ]) ??
+              _textValue(row, const ['estadoNovo', 'NOVO_ESTADOID']),
+          'comentario': _textValue(row, const [
+            'comentario',
+            'motivo',
+            'MOTIVO',
           ]),
-          'estado_novo': _textValue(row, const ['estadoNovo', 'NOVO_ESTADOID']),
-          'comentario': _textValue(row, const ['comentario', 'MOTIVO']),
           'acao': _textValue(row, const ['acao']),
           'created_at': _textValue(row, const ['createdAt', 'CREATED_AT']),
           'updated_at': _textValue(row, const ['updatedAt', 'UPDATED_AT']),
@@ -1644,6 +1656,18 @@ class LocalBadgesDatabase {
     }
 
     final db = await database;
+    final awardRows = await db.rawQuery('''
+      SELECT cb.*, b.nome AS badge_nome, b.descricao AS badge_descricao,
+             b.imagem AS badge_imagem, b.pontos AS badge_pontos,
+             b.uuid AS badge_public_token
+      FROM consultant_badges cb
+      LEFT JOIN badges b ON b.id = cb.badge_id
+      ORDER BY cb.obtained_date DESC
+    ''');
+    final awardsByBadge = {
+      for (final award in awardRows)
+        if (award['badge_id'] is int) award['badge_id'] as int: award,
+    };
     final rows = await db.rawQuery('''
       SELECT
         c.id AS candidatura_id,
@@ -1665,13 +1689,47 @@ class LocalBadgesDatabase {
     final applications = <MyBadgeApplication>[];
     for (final row in rows) {
       final candidaturaId = row['candidatura_id'] as int? ?? 0;
+      final badgeId = row['badge_id'] as int? ?? 0;
       applications.add(
         _myBadgeApplicationFromRow(
           row,
           await _applicationEvidences(db, candidaturaId),
+          await _applicationHistory(db, candidaturaId),
+          award: awardsByBadge[badgeId],
         ),
       );
     }
+
+    final existingBadgeIds = applications.map((item) => item.badgeId).toSet();
+    for (final award in awardRows) {
+      final badgeId = award['badge_id'] as int? ?? 0;
+      if (badgeId <= 0 || existingBadgeIds.contains(badgeId)) continue;
+      applications.add(
+        MyBadgeApplication(
+          id: -badgeId,
+          badgeId: badgeId,
+          title: award['badge_nome'] as String? ?? '',
+          description: award['badge_descricao'] as String? ?? '',
+          status: 'APPROVED',
+          statusLabel: 'Conquistado',
+          points:
+              award['points_obtained'] as int? ??
+              award['badge_pontos'] as int? ??
+              0,
+          imagePath: award['badge_imagem'] as String? ?? '',
+          obtainedAt: _dateFromText(award['obtained_date'] as String?),
+          expirationDate: _dateFromText(award['expiration_date'] as String?),
+          valid: (award['valid'] as int? ?? 1) == 1,
+          publicToken: _awardPublicToken(award) ?? '',
+        ),
+      );
+    }
+
+    applications.sort((a, b) {
+      final ad = a.updatedAt ?? a.obtainedAt ?? a.createdAt ?? DateTime(1970);
+      final bd = b.updatedAt ?? b.obtainedAt ?? b.createdAt ?? DateTime(1970);
+      return bd.compareTo(ad);
+    });
 
     return applications;
   }
@@ -2273,6 +2331,8 @@ class LocalBadgesDatabase {
   }
 
   TimelineEventData _timelineEventFromRow(Map<String, Object?> row) {
+    final raw = _jsonMap(row['raw_json'] as String?);
+    if (raw.isNotEmpty) return TimelineEventData.fromJson(raw);
     return TimelineEventData(
       id: row['id'] as String? ?? '',
       title: row['title'] as String? ?? '',
@@ -2336,7 +2396,9 @@ class LocalBadgesDatabase {
   MyBadgeApplication _myBadgeApplicationFromRow(
     Map<String, Object?> row,
     List<ApplicationEvidence> evidences,
-  ) {
+    List<ApplicationHistoryItem> history, {
+    Map<String, Object?>? award,
+  }) {
     final candidaturaRaw = _jsonMap(row['candidatura_raw_json'] as String?);
     final badgeRaw = _jsonMap(row['badge_raw_json'] as String?);
     final nestedBadge = _mapValue(candidaturaRaw, const ['Badge', 'badge']);
@@ -2375,7 +2437,53 @@ class LocalBadgesDatabase {
       evidences: evidences,
       createdAt: _dateFromText(row['candidatura_created_at'] as String?),
       updatedAt: _dateFromText(row['candidatura_updated_at'] as String?),
+      obtainedAt: _dateFromText(award?['obtained_date'] as String?),
+      expirationDate: _dateFromText(award?['expiration_date'] as String?),
+      valid: (award?['valid'] as int? ?? 1) == 1,
+      publicToken:
+          _awardPublicToken(award) ??
+          row['badge_public_token'] as String? ??
+          _textValue(badgeRaw, const ['publicToken', 'uuid']) ??
+          '',
+      history: history,
     );
+  }
+
+  Future<List<ApplicationHistoryItem>> _applicationHistory(
+    Database db,
+    int candidaturaId,
+  ) async {
+    if (candidaturaId <= 0) return const [];
+    final rows = await db.query(
+      'historico_candidaturas',
+      where: 'candidatura_id = ?',
+      whereArgs: [candidaturaId],
+      orderBy: 'created_at ASC, id ASC',
+    );
+    return rows.map((row) {
+      final raw = _jsonMap(row['raw_json'] as String?);
+      final responsible = _mapValue(raw, const ['responsavel']);
+      final newStatus = _mapValue(raw, const ['newStatus']);
+      final label =
+          _textValue(newStatus, const ['name', 'code']) ??
+          row['estado_novo'] as String? ??
+          row['acao'] as String? ??
+          'Atualização';
+      return ApplicationHistoryItem(
+        id: row['id'] as int? ?? 0,
+        label: label,
+        comment: row['comentario'] as String? ?? '',
+        responsible: _textValue(responsible, const ['nome', 'name']) ?? '',
+        date: _dateFromText(row['created_at'] as String?),
+      );
+    }).toList();
+  }
+
+  String? _awardPublicToken(Map<String, Object?>? award) {
+    if (award == null) return null;
+    final raw = _jsonMap(award['raw_json'] as String?);
+    return _textValue(raw, const ['publicToken']) ??
+        award['badge_public_token'] as String?;
   }
 
   Future<List<ApplicationEvidence>> _applicationEvidences(

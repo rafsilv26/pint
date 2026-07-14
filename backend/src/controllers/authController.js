@@ -122,8 +122,8 @@ exports.register = async (req, res) => {
 exports.signup = async (req, res) => {
     try {
         const { nome, email, password, areaId } = req.body;
-        if (!nome || !email || !password) {
-            return res.status(400).json({ message: 'Nome, email e password são obrigatórios.' });
+        if (!nome || !email || !password || !areaId) {
+            return res.status(400).json({ message: 'Nome, email, password e área são obrigatórios.' });
         }
         if (String(password).length < 8) {
             return res.status(400).json({ message: 'A password deve ter pelo menos 8 caracteres.' });
@@ -132,6 +132,11 @@ exports.signup = async (req, res) => {
         const userExists = await User.findOne({ where: { email } });
         if (userExists) {
             return res.status(400).json({ message: 'Este email já está registado.' });
+        }
+
+        const area = await Area.findOne({ where: { id: areaId, ativo: true, deletedAt: null } });
+        if (!area) {
+            return res.status(400).json({ message: 'A área selecionada não existe ou está inativa.' });
         }
 
         const confirmToken = crypto.randomBytes(32).toString('hex');
@@ -144,7 +149,7 @@ exports.signup = async (req, res) => {
                 password,
                 emailConfirmationToken: hashToken(confirmToken)
             }, { transaction: t });
-            // Perfil Consultor + área escolhida (areaId é opcional na tabela).
+            // Perfil Consultor + área escolhida.
             await applyUserRoles(newUser.id, ['Consultor'], { areaId }, t);
             await t.commit();
         } catch (error) {
@@ -161,10 +166,34 @@ exports.signup = async (req, res) => {
     }
 };
 
+// Reenvio de confirmação com resposta neutra para não permitir enumeração.
+exports.resendConfirmation = async (req, res) => {
+    const resposta = { message: 'Se a conta estiver pendente, será enviado um novo email de confirmação.' };
+    try {
+        const email = String(req.body.email || '').trim().toLowerCase();
+        if (!email) return res.status(400).json({ message: 'O email é obrigatório.' });
+        const user = await User.findOne({ where: { email } });
+        if (!user || user.emailConfirmed === true || user.ativo === false) return res.json(resposta);
+
+        const confirmToken = crypto.randomBytes(32).toString('hex');
+        user.emailConfirmationToken = hashToken(confirmToken);
+        user.updatedAt = new Date();
+        await user.save();
+        await emailBoasVindas(user, `${frontendUrl()}/login`, `${frontendUrl()}/confirmar-email?token=${confirmToken}`);
+        return res.json(resposta);
+    } catch (error) {
+        return res.status(500).json({ message: 'Não foi possível reenviar o email de confirmação.', details: error.message });
+    }
+};
+
 // Lista pública das áreas — para o formulário de auto-registo escolher a área.
 exports.listarAreasPublicas = async (_req, res) => {
     try {
-        const areas = await Area.findAll({ attributes: ['id', 'nome'], order: [['nome', 'ASC']] });
+        const areas = await Area.findAll({
+            where: { ativo: true, deletedAt: null },
+            attributes: ['id', 'nome'],
+            order: [['nome', 'ASC']]
+        });
         res.json(areas);
     } catch (error) {
         res.status(500).json({ error: 'Erro ao listar áreas.', details: error.message });
@@ -201,6 +230,17 @@ exports.login = async (req, res) => {
             { expiresIn: '12h' }
         );
 
+        const agora = new Date();
+        const primeiroLogin = !user.firstLoginDate;
+        const ausenteHa15Dias = user.lastLogin &&
+            (agora.getTime() - new Date(user.lastLogin).getTime()) >= 15 * 24 * 60 * 60 * 1000;
+        const hora = agora.getHours();
+        const greeting = primeiroLogin
+            ? 'Bem-vindo!'
+            : ausenteHa15Dias
+                ? 'Seja bem-vindo novamente'
+                : hora < 12 ? 'Bom dia,' : hora < 20 ? 'Boa tarde,' : 'Boa noite,';
+
         // atualizar a data do último login e, se for o primeiro login, definir a data do primeiro login
         user.lastLogin = new Date();
         if (!user.firstLoginDate) {
@@ -218,6 +258,7 @@ exports.login = async (req, res) => {
                 role: roles[0] || null,
                 roles,
                 mustChangePassword: user.mustChangePassword,
+                greeting,
                 pendingPolicies: await pendingPoliciesFor(user.id)
             }
         });

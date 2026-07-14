@@ -35,6 +35,13 @@ const ConsultorBadge = sequelize.define('ConsultorBadge', {
         allowNull: true,
         comment: 'Pontos concedidos'
     },
+    publicToken: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        defaultValue: DataTypes.UUIDV4,
+        unique: true,
+        comment: 'Link público único desta conquista concreta'
+    },
     createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW

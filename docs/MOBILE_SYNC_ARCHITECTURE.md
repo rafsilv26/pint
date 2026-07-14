@@ -31,7 +31,37 @@ na base local.
 
 ## Notificacoes push
 
-O ponto de entrada para uma futura notificacao Firebase com comando
-`atualizar` e `AppSyncService.synchronizeIfNeeded()`. A notificacao deve chamar
-este metodo silenciosamente; o metodo verifica primeiro a versao e so depois
-descarrega dados, correspondendo ao fluxo apresentado na aula 9.
+O backend regista os tokens dos dispositivos autenticados em
+`DEVICE_PUSH_TOKEN` e envia notificacoes FCM quando cria avisos, quando uma
+candidatura muda de estado e quando o SLA e ultrapassado. Todas levam o comando
+`atualizar`.
+
+Ao receber esse comando em foreground, background ou ao abrir a notificacao, o
+mobile chama silenciosamente `AppSyncService.synchronizeIfNeeded()`. Mesmo
+nesse caso, a aplicacao consulta primeiro `/api/mobile-sync/status`: os dados da
+API so sao descarregados quando a assinatura tiver mudado.
+
+O mobile tambem volta a fazer esta verificacao quando regressa ao primeiro
+plano. Nao existe polling periodico.
+
+## Configuracao Firebase
+
+No backend deve ser definida `FIREBASE_SERVICE_ACCOUNT_JSON` com o JSON da
+conta de servico Firebase numa unica linha. Se ja existir a configuracao global
+de notificacoes, a opcao PUSH tem tambem de estar ativa no painel Admin.
+
+No arranque/build Flutter devem ser passados os valores publicos do projeto:
+
+```bash
+flutter run \
+  --dart-define=FIREBASE_API_KEY=... \
+  --dart-define=FIREBASE_APP_ID=... \
+  --dart-define=FIREBASE_IOS_APP_ID=... \
+  --dart-define=FIREBASE_MESSAGING_SENDER_ID=... \
+  --dart-define=FIREBASE_PROJECT_ID=... \
+  --dart-define=FIREBASE_STORAGE_BUCKET=...
+```
+
+`FIREBASE_IOS_APP_ID` e opcional quando Android e iOS partilham o mesmo App ID.
+Sem estas variaveis, o suporte push fica inativo de forma segura e a restante
+aplicacao continua funcional.

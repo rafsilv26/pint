@@ -196,6 +196,31 @@ class MobileApiRepository {
     );
   }
 
+  Future<void> createTimelineObjective({
+    required String title,
+    required String description,
+    required DateTime expectedDate,
+    int priority = 3,
+  }) async {
+    await apiService.createTimelineObjective(
+      title: title,
+      description: description,
+      expectedDate: expectedDate,
+      priority: priority,
+    );
+    await syncGamification();
+  }
+
+  Future<void> setTimelineObjectiveCompleted(String id, bool completed) async {
+    await apiService.setTimelineObjectiveCompleted(id, completed);
+    await syncGamification();
+  }
+
+  Future<void> deleteTimelineObjective(String id) async {
+    await apiService.deleteTimelineObjective(id);
+    await syncGamification();
+  }
+
   Future<bool> syncEmailSignature() async {
     try {
       final payload = await apiService.fetchEmailSignature();

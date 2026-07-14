@@ -7,9 +7,10 @@ const {
 } = require('../src/services/email.service');
 
 const originalEnvironment = {
-  RESEND_API_KEY: process.env.RESEND_API_KEY,
-  RESEND_FROM: process.env.RESEND_FROM,
+  BREVO_API_KEY: process.env.BREVO_API_KEY,
+  EMAIL_USER: process.env.EMAIL_USER,
   APP_URL: process.env.APP_URL,
+  FRONTEND_URL: process.env.FRONTEND_URL,
   EMAIL_TIMEOUT_MS: process.env.EMAIL_TIMEOUT_MS
 };
 const originalFetch = globalThis.fetch;
@@ -17,13 +18,15 @@ const originalFetch = globalThis.fetch;
 const response = (status, body) => ({
   ok: status >= 200 && status < 300,
   status,
+  json: async () => body,
   text: async () => JSON.stringify(body)
 });
 
 beforeEach(() => {
-  process.env.RESEND_API_KEY = 're_test_key';
-  process.env.RESEND_FROM = 'Softinsa Badges <badges@example.com>';
+  process.env.BREVO_API_KEY = 'xkeysib-test';
+  process.env.EMAIL_USER = 'badges@example.com';
   process.env.APP_URL = 'https://api.example.com/';
+  process.env.FRONTEND_URL = 'https://app.example.com/';
   process.env.EMAIL_TIMEOUT_MS = '1000';
 });
 
@@ -35,7 +38,7 @@ afterEach(() => {
   globalThis.fetch = originalFetch;
 });
 
-test('envia pelo Resend e devolve o ID aceite pelo fornecedor', async () => {
+test('envia pelo Brevo e devolve o ID aceite pelo fornecedor', async () => {
   let request;
   const result = await enviarEmail(
     'consultor@example.com',
@@ -44,47 +47,46 @@ test('envia pelo Resend e devolve o ID aceite pelo fornecedor', async () => {
     {
       fetchImplementation: async (url, options) => {
         request = { url, options };
-        return response(200, { id: 'email-123' });
+        return response(201, { messageId: 'email-123' });
       }
     }
   );
 
   assert.deepEqual(result, { id: 'email-123', to: 'consultor@example.com' });
-  assert.equal(request.url, 'https://api.resend.com/emails');
-  assert.equal(request.options.headers.Authorization, 'Bearer re_test_key');
+  assert.equal(request.url, 'https://api.brevo.com/v3/smtp/email');
+  assert.equal(request.options.headers['api-key'], 'xkeysib-test');
   assert.deepEqual(JSON.parse(request.options.body), {
-    from: 'Softinsa Badges <badges@example.com>',
-    to: ['consultor@example.com'],
+    sender: { name: 'Softinsa Badges', email: 'badges@example.com' },
+    to: [{ email: 'consultor@example.com' }],
     subject: 'Assunto',
-    html: '<p>Mensagem</p>'
+    htmlContent: '<p>Mensagem</p>'
   });
 });
 
 test('recusa iniciar sem chave ou remetente configurados', async () => {
-  delete process.env.RESEND_API_KEY;
+  delete process.env.BREVO_API_KEY;
   await assert.rejects(
     enviarEmail('consultor@example.com', 'Assunto', '<p>Mensagem</p>'),
-    (error) => error.code === 'EMAIL_CONFIG_API_KEY_MISSING'
+    (error) => error.message.includes('BREVO_API_KEY')
   );
 
-  process.env.RESEND_API_KEY = 're_test_key';
-  delete process.env.RESEND_FROM;
+  process.env.BREVO_API_KEY = 'xkeysib-test';
+  delete process.env.EMAIL_USER;
   await assert.rejects(
     enviarEmail('consultor@example.com', 'Assunto', '<p>Mensagem</p>'),
-    (error) => error.code === 'EMAIL_CONFIG_FROM_MISSING'
+    (error) => error.message.includes('EMAIL_USER')
   );
 });
 
-test('propaga de forma estruturada uma rejeição do Resend', async () => {
+test('propaga uma rejeição do Brevo com o estado e resposta', async () => {
   await assert.rejects(
     enviarEmail('consultor@example.com', 'Assunto', '<p>Mensagem</p>', {
       fetchImplementation: async () =>
-        response(403, { message: 'The resend.dev domain is for testing only' })
+        response(403, { message: 'sender not allowed' })
     }),
     (error) =>
-      error.code === 'EMAIL_PROVIDER_REJECTED' &&
-      error.status === 403 &&
-      error.message.includes('testing only')
+      error.message.includes('Brevo respondeu 403') &&
+      error.message.includes('sender not allowed')
   );
 });
 
@@ -92,7 +94,7 @@ test('template aprovado usa os campos reais de nível e pontos', async () => {
   let payload;
   globalThis.fetch = async (_url, options) => {
     payload = JSON.parse(options.body);
-    return response(200, { id: 'email-template-1' });
+    return response(201, { messageId: 'email-template-1' });
   };
 
   const result = await emailBadgeAprovado(
@@ -106,10 +108,7 @@ test('template aprovado usa os campos reais de nível e pontos', async () => {
   );
 
   assert.equal(result.id, 'email-template-1');
-  assert.match(payload.html, /Nível:<\/strong> Júnior/);
-  assert.match(payload.html, /Pontos:<\/strong> 100/);
-  assert.match(
-    payload.html,
-    /https:\/\/api\.example\.com\/api\/relatorios\/verificar\/public-token/
-  );
+  assert.match(payload.htmlContent, /Nível:<\/strong> Júnior/);
+  assert.match(payload.htmlContent, /Pontos:<\/strong> 100/);
+  assert.match(payload.htmlContent, /https:\/\/app\.example\.com\/badge\/public-token/);
 });
