@@ -1,4 +1,4 @@
-package com.example.softinsa_badges_mobile
+package pt.softinsa.badges
 
 import io.flutter.embedding.android.FlutterActivity
 
