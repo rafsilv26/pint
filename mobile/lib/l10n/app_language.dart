@@ -476,6 +476,8 @@ class AppStrings {
       'Notificações': 'Notifications',
       'Marcar todas': 'Mark all',
       'Marcar como\nlida': 'Mark as\nread',
+      'Marcar como lida': 'Mark as read',
+      '1 nova': '1 new',
       'Sem notificações sincronizadas.': 'No synced notifications.',
       'Dica': 'Tip',
       'Ative as notificações para receber alertas em tempo real sobre aprovações e badges a expirar.':
@@ -880,6 +882,8 @@ class AppStrings {
       'Notificações': 'Notificaciones',
       'Marcar todas': 'Marcar todas',
       'Marcar como\nlida': 'Marcar como\nleída',
+      'Marcar como lida': 'Marcar como leída',
+      '1 nova': '1 nueva',
       'Sem notificações sincronizadas.': 'No hay notificaciones sincronizadas.',
       'Dica': 'Consejo',
       'Ative as notificações para receber alertas em tempo real sobre aprovações e badges a expirar.':

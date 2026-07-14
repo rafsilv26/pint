@@ -173,56 +173,77 @@ class _NotificationsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+      padding: const EdgeInsets.fromLTRB(16, 18, 20, 24),
       color: const Color(0xFF006DAA),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          IconButton(
-            onPressed: onBack,
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const AppText(
-                  'Notificações',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.w500,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    tooltip: context.tr('Voltar'),
+                    onPressed: onBack,
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                AppText(
-                  '$unreadCount novas',
-                  style: const TextStyle(
-                    color: Color(0xFFE6F5FF),
-                    fontSize: 22,
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: AppText(
+                      'Notificações',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          FilledButton.icon(
-            onPressed: onMarkAll,
-            icon: const Icon(Icons.check, size: 22),
-            label: const AppText('Marcar todas'),
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF3D8DBA),
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: const Color(0xFF6EA7C8),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+                ],
               ),
-              textStyle: const TextStyle(fontSize: 16),
-            ),
+              Padding(
+                padding: const EdgeInsets.only(left: 56, top: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: AppText(
+                        unreadCount == 1 ? '1 nova' : '$unreadCount novas',
+                        style: const TextStyle(
+                          color: Color(0xFFE6F5FF),
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton.icon(
+                      onPressed: onMarkAll,
+                      icon: const Icon(Icons.done_all, size: 20),
+                      label: const AppText('Marcar todas'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF3D8DBA),
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: const Color(0xFF6EA7C8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 13,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        textStyle: const TextStyle(fontSize: 15),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -240,14 +261,21 @@ class _NotificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = _colorsFor(notification);
-    final text = notification.message.isNotEmpty
-        ? notification.message
-        : notification.title;
+    final hasTitle = notification.title.trim().isNotEmpty;
+    final hasMessage = notification.message.trim().isNotEmpty;
+    final showSeparateMessage =
+        hasTitle &&
+        hasMessage &&
+        notification.title.trim() != notification.message.trim();
+    final primaryText = hasTitle
+        ? notification.title.trim()
+        : notification.message.trim();
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: notification.unread ? const Color(0xFFFCFDFF) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: notification.unread
@@ -263,56 +291,86 @@ class _NotificationCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 58,
-            height: 58,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: colors.background,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(colors.icon, color: colors.foreground, size: 28),
-          ),
-          const SizedBox(width: 18),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(
-                  text,
-                  style: const TextStyle(
-                    color: Color(0xFF111827),
-                    fontSize: 19,
-                    height: 1.45,
-                  ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.background,
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(height: 16),
-                AppText(
+                child: Icon(colors.icon, color: colors.foreground, size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppText(
+                      primaryText,
+                      style: TextStyle(
+                        color: const Color(0xFF111827),
+                        fontSize: 17,
+                        height: 1.35,
+                        fontWeight: showSeparateMessage
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
+                    if (showSeparateMessage) ...[
+                      const SizedBox(height: 6),
+                      AppText(
+                        notification.message.trim(),
+                        style: const TextStyle(
+                          color: Color(0xFF344054),
+                          fontSize: 15,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: AppText(
                   _formatDate(notification.createdAt),
                   style: const TextStyle(
                     color: Color(0xFF667085),
-                    fontSize: 16,
-                    height: 1.35,
+                    fontSize: 14,
                   ),
                 ),
-              ],
-            ),
-          ),
-          if (notification.unread) ...[
-            const SizedBox(width: 10),
-            TextButton.icon(
-              onPressed: onMarkAsRead,
-              icon: const Icon(Icons.check, size: 20),
-              label: const AppText('Marcar como\nlida'),
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF005DFF),
-                textStyle: const TextStyle(fontSize: 16),
               ),
-            ),
-          ],
+              if (notification.unread)
+                TextButton.icon(
+                  onPressed: onMarkAsRead,
+                  icon: const Icon(Icons.check, size: 18),
+                  label: const AppText('Marcar como lida'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF005DFF),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    textStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );
