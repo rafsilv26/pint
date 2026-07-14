@@ -6,6 +6,7 @@ import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
 import '../services/badges_api_service.dart';
+import '../services/app_sync_service.dart';
 
 class CatalogPage extends StatefulWidget {
   const CatalogPage({super.key});
@@ -34,6 +35,7 @@ class _CatalogPageState extends State<CatalogPage> {
   }
 
   Future<void> reload() async {
+    await AppSyncService().synchronizeIfNeeded();
     final future = repository.getCatalogBadges();
     setState(() {
       badgesFuture = future;

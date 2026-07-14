@@ -3,11 +3,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'l10n/app_language.dart';
 import 'pages/auth_gate.dart';
-import 'repositories/dashboard_repository.dart';
+import 'services/app_sync_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DashboardRepository().prepareLocalData();
+  await AppSyncService().synchronizeIfNeeded();
   final languageController = AppLanguageController.instance;
   await languageController.load();
   runApp(SoftinsaBadgesApp(languageController: languageController));

@@ -10,6 +10,13 @@ import '../models/mobile_api_data.dart';
 import 'api_config.dart';
 import 'auth_service.dart';
 
+class MobileSyncStatus {
+  const MobileSyncStatus({required this.changed, required this.version});
+
+  final bool changed;
+  final String version;
+}
+
 class BadgesApiService {
   BadgesApiService({
     http.Client? client,
@@ -22,6 +29,28 @@ class BadgesApiService {
   final http.Client client;
   final String baseUrl;
   final Future<String?> Function() tokenProvider;
+
+  Future<MobileSyncStatus> fetchMobileSyncStatus({String? version}) async {
+    final uri = Uri.parse('$_normalizedBaseUrl/mobile-sync/status').replace(
+      queryParameters: version == null || version.isEmpty
+          ? null
+          : {'version': version},
+    );
+    final response = await client
+        .get(uri, headers: await _headers())
+        .timeout(const Duration(seconds: 8));
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiRequestException(response.statusCode);
+    }
+    final decoded = _decodeResponse(response);
+    if (decoded is! Map || decoded['version'] is! String) {
+      throw const ApiInvalidResponseException();
+    }
+    return MobileSyncStatus(
+      changed: decoded['changed'] == true,
+      version: decoded['version'] as String,
+    );
+  }
 
   Future<Map<String, dynamic>?> fetchCurrentUser() async {
     if (baseUrl.trim().isEmpty) {

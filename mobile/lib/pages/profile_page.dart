@@ -30,7 +30,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<_ProfileViewData> loadProfileData() async {
-    await mobileRepository.syncConsultantsDirectory();
     final localUser = await mobileRepository.database.getCurrentUserProfile();
     final consultant = await mobileRepository.database
         .getCurrentConsultantProfile();

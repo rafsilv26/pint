@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../repositories/dashboard_repository.dart';
-import '../repositories/mobile_api_repository.dart';
+import '../services/app_sync_service.dart';
 import '../services/auth_service.dart';
 import 'change_password_page.dart';
 import 'home_page.dart';
@@ -39,8 +38,7 @@ class _AuthGateState extends State<AuthGate> {
   Future<_AuthState> _checkSessionAndSync() async {
     final isLoggedIn = await authService.isLoggedIn();
     if (isLoggedIn) {
-      await DashboardRepository().prepareLocalData();
-      await MobileApiRepository().syncAvailableMobileData();
+      await AppSyncService().synchronizeIfNeeded();
       final mustChangePassword = await authService.mustChangePassword();
       return _AuthState(loggedIn: true, mustChangePassword: mustChangePassword);
     }

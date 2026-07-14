@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../services/app_sync_service.dart';
 import '../widgets/app_bottom_navigation.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Future<void> reload() async {
+    await AppSyncService().synchronizeIfNeeded();
     final future = repository.getNotifications();
     setState(() {
       notificationsFuture = future;

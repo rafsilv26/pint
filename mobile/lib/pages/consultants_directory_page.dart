@@ -4,6 +4,7 @@ import '../l10n/app_language.dart';
 import '../models/consultant_profile.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../services/app_sync_service.dart';
 import '../widgets/app_bottom_navigation.dart';
 import 'consultant_detail_page.dart';
 
@@ -67,6 +68,7 @@ class _ConsultantsDirectoryPageState extends State<ConsultantsDirectoryPage> {
                       ? const Center(child: CircularProgressIndicator())
                       : RefreshIndicator(
                           onRefresh: () async {
+                            await AppSyncService().synchronizeIfNeeded();
                             final future = repository.getConsultantsDirectory();
                             setState(() {
                               directoryFuture = future;

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../services/app_sync_service.dart';
 
 class GamificationPage extends StatefulWidget {
   const GamificationPage({super.key});
@@ -36,6 +37,7 @@ class _GamificationPageState extends State<GamificationPage> {
           bottom: false,
           child: RefreshIndicator(
             onRefresh: () async {
+              await AppSyncService().synchronizeIfNeeded();
               final future = repository.getGamification();
               setState(() {
                 gamificationFuture = future;

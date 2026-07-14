@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../services/app_sync_service.dart';
 
 class MyBadgesPage extends StatefulWidget {
   const MyBadgesPage({super.key});
@@ -24,6 +25,7 @@ class _MyBadgesPageState extends State<MyBadgesPage> {
   }
 
   Future<void> reload() async {
+    await AppSyncService().synchronizeIfNeeded();
     final future = repository.getMyBadgeApplications();
     setState(() {
       applicationsFuture = future;

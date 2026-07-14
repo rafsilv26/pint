@@ -13,14 +13,15 @@ class MobileApiRepository {
   final BadgesApiService apiService;
   final LocalBadgesDatabase database;
 
-  Future<void> syncAvailableMobileData() async {
-    await Future.wait([
+  Future<bool> syncAvailableMobileData() async {
+    final results = await Future.wait([
       syncConsultantsDirectory(),
       syncNotifications(),
       syncGamification(),
       syncEmailSignature(),
       syncCatalogData(),
     ]);
+    return results.every((result) => result);
   }
 
   Future<bool> syncCatalogData() async {
@@ -79,12 +80,10 @@ class MobileApiRepository {
   }
 
   Future<List<CatalogBadge>> getCatalogBadges() async {
-    await syncCatalogData();
     return database.getCatalogBadges();
   }
 
   Future<List<MyBadgeApplication>> getMyBadgeApplications() async {
-    await syncCatalogData();
     return database.getMyBadgeApplications();
   }
 
@@ -127,29 +126,24 @@ class MobileApiRepository {
   }
 
   Future<ConsultantsDirectoryData> getConsultantsDirectory() async {
-    final synced = await syncConsultantsDirectory();
     final local = await database.getConsultantsDirectory();
     return ConsultantsDirectoryData(
       consultants: local.consultants,
       stats: local.stats,
-      loadedFromCache: !synced,
+      loadedFromCache: true,
     );
   }
 
   Future<ConsultantDetailData> getConsultantDetail(
     ConsultantProfile consultant,
   ) async {
-    final results = await Future.wait([
-      syncConsultantsDirectory(),
-      syncCatalogData(),
-    ]);
     final local = await database.getConsultantDetail(consultant);
     return ConsultantDetailData(
       consultant: local.consultant,
       badges: local.badges,
       achievements: local.achievements,
       stats: local.stats,
-      loadedFromCache: !results.every((item) => item),
+      loadedFromCache: true,
     );
   }
 
@@ -166,7 +160,6 @@ class MobileApiRepository {
   }
 
   Future<List<AppNotification>> getNotifications() async {
-    await syncNotifications();
     return database.getNotifications();
   }
 
@@ -193,14 +186,13 @@ class MobileApiRepository {
   }
 
   Future<GamificationData> getGamification() async {
-    final synced = await syncGamification();
     final local = await database.getGamification();
     return GamificationData(
       summary: local.summary,
       achievements: local.achievements,
       ranking: local.ranking,
       timeline: local.timeline,
-      loadedFromCache: !synced,
+      loadedFromCache: true,
     );
   }
 
@@ -217,13 +209,12 @@ class MobileApiRepository {
   }
 
   Future<EmailSignatureData> getEmailSignature() async {
-    final synced = await syncEmailSignature();
     final local = await database.getEmailSignature();
     return EmailSignatureData(
       profile: local.profile,
       badges: local.badges,
       templateHtml: local.templateHtml,
-      loadedFromCache: !synced,
+      loadedFromCache: true,
     );
   }
 
