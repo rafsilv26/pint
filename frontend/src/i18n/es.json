@@ -341,6 +341,23 @@
     "reabrir": "Reabrir",
     "remover": "Quitar"
   },
+  "timelineManager": {
+    "titulo": "Timeline de desarrollo",
+    "subtitulo": "Crea objetivos para este consultor — aparecerán en su página de objetivos.",
+    "tituloLabel": "Objetivo",
+    "tituloPlaceholder": "Ej: Completar Azure Fundamentals",
+    "tipoLabel": "Tipo",
+    "tipos": { "meta": "Meta", "milestone": "Hito", "evento": "Evento" },
+    "prazoLabel": "Fecha objetivo",
+    "prioridadeLabel": "Prioridad",
+    "adicionar": "Añadir",
+    "vazioTitulo": "Sin objetivos",
+    "vazioDesc": "Crea el primer objetivo para este consultor.",
+    "prazo": "Plazo:",
+    "semPrazo": "Sin plazo",
+    "concluidoEm": "Completado el",
+    "remover": "Quitar"
+  },
   "managerBadge": {
     "naoEncontrado": "Insignia no encontrada.",
     "voltar": "Volver",

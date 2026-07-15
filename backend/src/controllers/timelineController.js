@@ -1,4 +1,4 @@
-const { ConsultorTimeline } = require('../models');
+const { ConsultorTimeline, User } = require('../models');
 
 // Objetivos/metas pessoais do consultor (timeline) — base dos "Lembretes":
 // o consultor define uma meta com data esperada e é lembrado quando o prazo
@@ -10,6 +10,7 @@ const serialize = (o) => ({
   description: o.description || '',
   expectedDate: o.expectedDate,
   completionDate: o.completionDate,
+  type: o.type,
   status: o.status,
   priority: o.priority,
   concluido: Boolean(o.completionDate)
@@ -67,6 +68,65 @@ exports.concluirObjetivo = async (req, res) => {
     res.json(serialize(objetivo));
   } catch (erro) {
     res.status(500).json({ erro: 'Erro ao atualizar objetivo.', details: erro.message });
+  }
+};
+
+// Gestão da timeline de um consultor específico por Talent Managers / Admins:
+// os objetivos criados aqui aparecem na zona de timeline (Objetivos) do consultor.
+
+// GET /timeline/consultor/:consultorId — objetivos de um consultor específico.
+exports.listarObjetivosConsultor = async (req, res) => {
+  try {
+    const consultor = await User.findByPk(req.params.consultorId);
+    if (!consultor) return res.status(404).json({ erro: 'Consultor não encontrado.' });
+
+    const objetivos = await ConsultorTimeline.findAll({
+      where: { consultorId: consultor.id, deletedAt: null },
+      order: [['expectedDate', 'ASC'], ['createdAt', 'DESC']]
+    });
+    res.json(objetivos.map(serialize));
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao listar objetivos do consultor.', details: erro.message });
+  }
+};
+
+// POST /timeline/consultor/:consultorId — cria um objetivo para o consultor.
+exports.criarObjetivoConsultor = async (req, res) => {
+  try {
+    const consultor = await User.findByPk(req.params.consultorId);
+    if (!consultor) return res.status(404).json({ erro: 'Consultor não encontrado.' });
+
+    const { title, description, expectedDate, priority, type } = req.body;
+    if (!title) return res.status(400).json({ erro: 'O objetivo precisa de um título.' });
+
+    const objetivo = await ConsultorTimeline.create({
+      consultorId: consultor.id,
+      title,
+      description: description || null,
+      startDate: new Date(),
+      expectedDate: expectedDate || null,
+      type: ['Meta', 'Milestone', 'Evento'].includes(type) ? type : 'Meta',
+      status: 'Pendente',
+      priority: priority || 3
+    });
+    res.status(201).json(serialize(objetivo));
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao criar objetivo para o consultor.', details: erro.message });
+  }
+};
+
+// DELETE /timeline/consultor/:consultorId/:id — remove um objetivo do consultor (soft delete).
+exports.apagarObjetivoConsultor = async (req, res) => {
+  try {
+    const objetivo = await ConsultorTimeline.findOne({
+      where: { timelineId: req.params.id, consultorId: req.params.consultorId, deletedAt: null }
+    });
+    if (!objetivo) return res.status(404).json({ erro: 'Objetivo não encontrado.' });
+
+    await objetivo.update({ deletedAt: new Date() });
+    res.json({ mensagem: 'Objetivo removido.' });
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao remover objetivo do consultor.', details: erro.message });
   }
 };
 

@@ -31,6 +31,9 @@ export const getMeusObjetivos = impl.getMeusObjetivos
 export const criarObjetivo = impl.criarObjetivo
 export const concluirObjetivo = impl.concluirObjetivo
 export const apagarObjetivo = impl.apagarObjetivo
+export const getObjetivosConsultor = impl.getObjetivosConsultor
+export const criarObjetivoConsultor = impl.criarObjetivoConsultor
+export const apagarObjetivoConsultor = impl.apagarObjetivoConsultor
 export const getMeusBadges = impl.getMeusBadges
 
 export const getNotificacoes = impl.getNotificacoes

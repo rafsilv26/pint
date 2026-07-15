@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Mail, Shield, MapPin, Network, Calendar, KeyRound, CheckCircle2, XCircle } from 'lucide-react'
 import { PageHeader, Card, Spinner, ErrorState } from '../../components/ui'
+import ConsultorTimelineManager from '../../components/ConsultorTimelineManager'
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import { useTranslation } from 'react-i18next'
@@ -108,6 +109,8 @@ export default function AdminUserDetailPage() {
           </div>
         )}
       </Card>
+
+      {isConsultor && <ConsultorTimelineManager consultorId={u.id} className="mt-4" />}
     </div>
   )
 }

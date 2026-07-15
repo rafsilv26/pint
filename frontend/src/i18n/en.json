@@ -341,6 +341,23 @@
     "reabrir": "Reopen",
     "remover": "Remove"
   },
+  "timelineManager": {
+    "titulo": "Development timeline",
+    "subtitulo": "Create goals for this consultant — they will show up on their goals page.",
+    "tituloLabel": "Goal",
+    "tituloPlaceholder": "Ex: Complete Azure Fundamentals",
+    "tipoLabel": "Type",
+    "tipos": { "meta": "Goal", "milestone": "Milestone", "evento": "Event" },
+    "prazoLabel": "Target date",
+    "prioridadeLabel": "Priority",
+    "adicionar": "Add",
+    "vazioTitulo": "No goals",
+    "vazioDesc": "Create the first goal for this consultant.",
+    "prazo": "Due:",
+    "semPrazo": "No deadline",
+    "concluidoEm": "Completed on",
+    "remover": "Remove"
+  },
   "managerBadge": {
     "naoEncontrado": "Badge not found.",
     "voltar": "Go back",

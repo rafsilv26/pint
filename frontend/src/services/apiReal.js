@@ -243,6 +243,16 @@ export async function apagarObjetivo(id) {
   return http(`/timeline/${id}`, { method: 'DELETE' })
 }
 
+export async function getObjetivosConsultor(consultorId) {
+  return http(`/timeline/consultor/${consultorId}`).catch(() => [])
+}
+export async function criarObjetivoConsultor(consultorId, body) {
+  return http(`/timeline/consultor/${consultorId}`, { method: 'POST', body })
+}
+export async function apagarObjetivoConsultor(consultorId, id) {
+  return http(`/timeline/consultor/${consultorId}/${id}`, { method: 'DELETE' })
+}
+
 export async function getMeusBadges() {
   const id = getUser()?.id
   const [rows, badges] = await Promise.all([
