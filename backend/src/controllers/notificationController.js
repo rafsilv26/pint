@@ -5,7 +5,8 @@ const { notificarTodosConsultores } = require('../services/notification.service'
 const {
   registerDeviceToken,
   unregisterDeviceToken,
-  getPushStatus
+  getPushStatus,
+  sendPushToUser
 } = require('../services/pushNotification.service');
 
 exports.registerPushToken = async (req, res) => {
@@ -38,6 +39,20 @@ exports.getMyPushStatus = async (req, res) => {
     res.json(await getPushStatus(req.user.id));
   } catch (error) {
     res.status(500).json({ erro: 'Erro ao obter estado das notificações push.', details: error.message });
+  }
+};
+
+exports.testMyPush = async (req, res) => {
+  try {
+    const result = await sendPushToUser(req.user.id, {
+      title: 'Softinsa Badges',
+      body: 'Notificações push configuradas com sucesso.',
+      type: 'success',
+      action: 'fetch_api'
+    });
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao testar notificações push.', details: error.message });
   }
 };
 

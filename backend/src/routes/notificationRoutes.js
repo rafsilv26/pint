@@ -18,6 +18,7 @@ router.post('/sla-check', authorize('Admin'), notificationController.runSlaCheck
 router.get('/preferences', notificationController.getMyNotificationPrefs);
 router.put('/preferences', notificationController.saveMyNotificationPrefs);
 router.get('/push-status', notificationController.getMyPushStatus);
+router.post('/push-test', notificationController.testMyPush);
 router.post('/push-token', notificationController.registerPushToken);
 router.delete('/push-token', notificationController.unregisterPushToken);
 
