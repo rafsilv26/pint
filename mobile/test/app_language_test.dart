@@ -20,6 +20,20 @@ void main() {
       spanish.translate('Desbloqueado em 07/07/2026'),
       'Desbloqueado el 07/07/2026',
     );
+    expect(english.translate('Criar objetivo'), 'Create goal');
+    expect(spanish.translate('Página pública'), 'Página pública');
+    expect(
+      english.translate(
+        'Enviámos um link de confirmação para user@example.com. Abra o link antes de iniciar sessão.',
+      ),
+      'We sent a confirmation link to user@example.com. Open it before signing in.',
+    );
+    expect(
+      spanish.translate(
+        'Parabéns por conquistar 3 badges. Continue a evoluir!',
+      ),
+      '¡Enhorabuena por conseguir 3 badges. Sigue avanzando!',
+    );
   });
 
   testWidgets('AppText reage imediatamente à mudança de idioma', (

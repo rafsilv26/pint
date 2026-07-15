@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../repositories/dashboard_repository.dart';
-import '../repositories/mobile_api_repository.dart';
+import '../services/app_sync_service.dart';
 import '../services/auth_service.dart';
+import '../services/push_notification_service.dart';
 import 'change_password_page.dart';
 import 'home_page.dart';
 import 'login_page.dart';
+import 'rgpd_policy_page.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -39,10 +40,15 @@ class _AuthGateState extends State<AuthGate> {
   Future<_AuthState> _checkSessionAndSync() async {
     final isLoggedIn = await authService.isLoggedIn();
     if (isLoggedIn) {
-      await DashboardRepository().prepareLocalData();
-      await MobileApiRepository().syncAvailableMobileData();
+      await AppSyncService().synchronizeIfNeeded();
+      await PushNotificationService.instance.initialize();
       final mustChangePassword = await authService.mustChangePassword();
-      return _AuthState(loggedIn: true, mustChangePassword: mustChangePassword);
+      final pendingPolicies = await authService.getPendingPolicies();
+      return _AuthState(
+        loggedIn: true,
+        mustChangePassword: mustChangePassword,
+        pendingPolicies: pendingPolicies,
+      );
     }
 
     return const _AuthState.loggedOut();
@@ -67,6 +73,17 @@ class _AuthGateState extends State<AuthGate> {
           );
         }
 
+        if (authState.loggedIn && authState.pendingPolicies.isNotEmpty) {
+          return RgpdPolicyPage(
+            policies: authState.pendingPolicies,
+            onAccepted: showHome,
+            onLogout: () async {
+              await authService.logout();
+              showLogin();
+            },
+          );
+        }
+
         if (authState.loggedIn) {
           return HomePage(onLoggedOut: showLogin);
         }
@@ -78,10 +95,18 @@ class _AuthGateState extends State<AuthGate> {
 }
 
 class _AuthState {
-  const _AuthState({required this.loggedIn, required this.mustChangePassword});
+  const _AuthState({
+    required this.loggedIn,
+    required this.mustChangePassword,
+    this.pendingPolicies = const [],
+  });
 
-  const _AuthState.loggedOut() : loggedIn = false, mustChangePassword = false;
+  const _AuthState.loggedOut()
+    : loggedIn = false,
+      mustChangePassword = false,
+      pendingPolicies = const [];
 
   final bool loggedIn;
   final bool mustChangePassword;
+  final List<PendingPolicy> pendingPolicies;
 }

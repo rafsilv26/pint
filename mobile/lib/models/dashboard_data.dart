@@ -36,12 +36,13 @@ class DashboardData {
   DashboardData copyWith({
     String? userName,
     String? userRole,
+    String? greeting,
     bool? loadedFromCache,
   }) {
     return DashboardData(
       userName: userName ?? this.userName,
       userRole: userRole ?? this.userRole,
-      greeting: greeting,
+      greeting: greeting ?? this.greeting,
       totalPoints: totalPoints,
       learningPathTitle: learningPathTitle,
       learningPathProgress: learningPathProgress,

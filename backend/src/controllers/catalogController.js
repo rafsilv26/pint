@@ -111,6 +111,20 @@ exports.listResources = async (req, res) => {
       whereClause = await restringirCatalogoPorServiceLine(req, req.params.resource, whereClause);
     }
 
+    // Recursos pessoais nunca podem expor dados de outros consultores.
+    const personalResources = {
+      'consultor-badges': 'consultorId',
+      'consultor-badge-premium': 'consultorId',
+      timeline: 'consultorId',
+      'email-signatures': 'consultorId'
+    };
+    const personalField = personalResources[req.params.resource];
+    const isConsultantOnly = req.user?.roles?.includes('Consultor') &&
+      !req.user.roles.some((role) => ['Admin', 'TalentManager', 'ServiceLineLeader'].includes(role));
+    if (personalField && isConsultantOnly) {
+      whereClause[personalField] = req.user.id;
+    }
+
     // As aceitações de RGPD são dados pessoais: um consultor só pode ver as
     // suas próprias, nunca as de outros. Admin continua a ver tudo.
     if (req.params.resource === 'policy-acceptances' && req.user && !req.user.roles.includes('Admin')) {

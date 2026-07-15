@@ -20,6 +20,8 @@ class AuthService {
   static const String _roleKey = 'softinsa_user_role';
   static const String _mustChangePasswordKey =
       'softinsa_user_must_change_password';
+  static const String _pendingPoliciesKey = 'softinsa_pending_rgpd_policies';
+  static const String _greetingKey = 'softinsa_login_greeting';
 
   final http.Client client;
   final LocalBadgesDatabase database;
@@ -72,7 +74,11 @@ class AuthService {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setBool(_loggedInKey, true);
     await preferences.setString(tokenKey, token);
-    await preferences.setString(_emailKey, email);
+    if (rememberLogin) {
+      await preferences.setString(_emailKey, email);
+    } else {
+      await preferences.remove(_emailKey);
+    }
     await preferences.setInt(_userIdKey, (user['id'] as num?)?.toInt() ?? 0);
 
     final name = user['nome'] as String?;
@@ -90,6 +96,12 @@ class AuthService {
       await preferences.setBool(_mustChangePasswordKey, mustChangePassword);
     }
 
+    await _savePendingPolicies(preferences, user['pendingPolicies']);
+    final greeting = user['greeting']?.toString();
+    if (greeting != null && greeting.isNotEmpty) {
+      await preferences.setString(_greetingKey, greeting);
+    }
+
     await preferences.setBool('softinsa_remember_login', rememberLogin);
   }
 
@@ -97,8 +109,9 @@ class AuthService {
     required String name,
     required String email,
     required String password,
+    required int areaId,
   }) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/auth/register');
+    final uri = Uri.parse('${ApiConfig.baseUrl}/auth/signup');
     final response = await client
         .post(
           uri,
@@ -107,7 +120,7 @@ class AuthService {
             'nome': name,
             'email': email,
             'password': password,
-            'roles': ['Consultor'],
+            'areaId': areaId,
           }),
         )
         .timeout(const Duration(seconds: 12));
@@ -125,8 +138,86 @@ class AuthService {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(_nameKey, name);
     await preferences.setString(_emailKey, email);
+  }
 
-    await login(email: email, password: password, rememberLogin: true);
+  Future<List<SignupArea>> getSignupAreas() async {
+    final response = await client
+        .get(Uri.parse('${ApiConfig.baseUrl}/auth/areas'))
+        .timeout(const Duration(seconds: 12));
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw const AuthException('Não foi possível carregar as áreas.');
+    }
+    final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+    if (decoded is! List) return const [];
+    return decoded
+        .whereType<Map>()
+        .map((row) {
+          final map = Map<String, dynamic>.from(row);
+          return SignupArea(
+            id: (map['id'] as num?)?.toInt() ?? 0,
+            name: map['nome']?.toString() ?? '',
+          );
+        })
+        .where((area) => area.id > 0 && area.name.isNotEmpty)
+        .toList();
+  }
+
+  Future<void> resendConfirmation(String email) async {
+    await _postPublic('/auth/resend-confirmation', {'email': email});
+  }
+
+  Future<String> forgotPassword(String email) async {
+    final body = await _postPublic('/auth/forgot-password', {'email': email});
+    return _apiMessage(body) ?? 'Consulta o teu email para continuar.';
+  }
+
+  Future<String> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    final body = await _postPublic('/auth/reset-password', {
+      'token': token,
+      'novaPassword': newPassword,
+    });
+    return _apiMessage(body) ?? 'A sua password foi redefinida com sucesso.';
+  }
+
+  Future<List<PendingPolicy>> getPendingPolicies() async {
+    final preferences = await SharedPreferences.getInstance();
+    final raw = preferences.getString(_pendingPoliciesKey);
+    if (raw == null || raw.isEmpty) return const [];
+    final decoded = jsonDecode(raw);
+    if (decoded is! List) return const [];
+    return decoded
+        .whereType<Map>()
+        .map((row) => PendingPolicy.fromJson(Map<String, dynamic>.from(row)))
+        .where((policy) => policy.id > 0)
+        .toList();
+  }
+
+  Future<void> acceptPolicy(int policyId) async {
+    final preferences = await SharedPreferences.getInstance();
+    final token = preferences.getString(tokenKey);
+    if (token == null || token.isEmpty) {
+      throw const AuthException('Sessão expirada.');
+    }
+    final response = await client
+        .post(
+          Uri.parse('${ApiConfig.baseUrl}/auth/accept-policy'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({'policyId': policyId}),
+        )
+        .timeout(const Duration(seconds: 12));
+    final body = _decodeBody(response);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw AuthException(
+        _apiMessage(body) ?? 'Não foi possível aceitar a política.',
+      );
+    }
+    await _savePendingPolicies(preferences, body['pendingPolicies']);
   }
 
   Future<void> confirmAccount() async {
@@ -187,6 +278,11 @@ class AuthService {
   Future<String?> getSavedRole() async {
     final preferences = await SharedPreferences.getInstance();
     return preferences.getString(_roleKey);
+  }
+
+  Future<String?> getSavedGreeting() async {
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getString(_greetingKey);
   }
 
   Future<bool> mustChangePassword() async {
@@ -264,6 +360,36 @@ class AuthService {
     await preferences.remove(_userIdKey);
     await preferences.remove(_roleKey);
     await preferences.remove(_mustChangePasswordKey);
+    await preferences.remove(_pendingPoliciesKey);
+    await preferences.remove(_greetingKey);
+  }
+
+  Future<Map<String, dynamic>> _postPublic(
+    String path,
+    Map<String, dynamic> payload,
+  ) async {
+    final response = await client
+        .post(
+          Uri.parse('${ApiConfig.baseUrl}$path'),
+          headers: const {'Content-Type': 'application/json'},
+          body: jsonEncode(payload),
+        )
+        .timeout(const Duration(seconds: 12));
+    final body = _decodeBody(response);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw AuthException(
+        _apiMessage(body) ?? 'Não foi possível concluir o pedido.',
+      );
+    }
+    return body;
+  }
+
+  Future<void> _savePendingPolicies(
+    SharedPreferences preferences,
+    Object? value,
+  ) async {
+    final list = value is List ? value : const [];
+    await preferences.setString(_pendingPoliciesKey, jsonEncode(list));
   }
 
   bool _isExpiredJwt(String token) {
@@ -307,4 +433,30 @@ class AuthException implements Exception {
   const AuthException(this.message);
 
   final String message;
+}
+
+class SignupArea {
+  const SignupArea({required this.id, required this.name});
+  final int id;
+  final String name;
+}
+
+class PendingPolicy {
+  const PendingPolicy({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.version,
+  });
+  final int id;
+  final String title;
+  final String description;
+  final String version;
+
+  factory PendingPolicy.fromJson(Map<String, dynamic> json) => PendingPolicy(
+    id: (json['policyId'] as num?)?.toInt() ?? 0,
+    title: json['title']?.toString() ?? 'Política RGPD',
+    description: json['description']?.toString() ?? '',
+    version: json['version']?.toString() ?? '',
+  );
 }

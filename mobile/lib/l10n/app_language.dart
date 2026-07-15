@@ -168,6 +168,44 @@ class AppStrings {
           : 'Desbloqueada el';
       return '$prefix ${source.substring(16)}';
     }
+    if (source.startsWith('Versão ')) {
+      final prefix = language == AppLanguage.english ? 'Version' : 'Versión';
+      return '$prefix ${source.substring(7)}';
+    }
+    final confirmationEmail = RegExp(
+      r'^Enviámos um link de confirmação para (.+)\. Abra o link antes de iniciar sessão\.$',
+    ).firstMatch(source);
+    if (confirmationEmail != null) {
+      final email = confirmationEmail.group(1)!;
+      return language == AppLanguage.english
+          ? 'We sent a confirmation link to $email. Open it before signing in.'
+          : 'Hemos enviado un enlace de confirmación a $email. Ábrelo antes de iniciar sesión.';
+    }
+    final milestone = RegExp(
+      r'^Parabéns por conquistar (\d+) badges?\. Continue a evoluir!$',
+    ).firstMatch(source);
+    if (milestone != null) {
+      final count = milestone.group(1)!;
+      return language == AppLanguage.english
+          ? 'Congratulations on earning $count badge${count == '1' ? '' : 's'}. Keep growing!'
+          : '¡Enhorabuena por conseguir $count badge${count == '1' ? '' : 's'}. Sigue avanzando!';
+    }
+    final expiredBadges = RegExp(
+      r'^(\d+) badge\(s\) expirada\(s\) e (\d+) próxima\(s\) da renovação\.$',
+    ).firstMatch(source);
+    if (expiredBadges != null) {
+      return language == AppLanguage.english
+          ? '${expiredBadges.group(1)} expired badge(s) and ${expiredBadges.group(2)} nearing renewal.'
+          : '${expiredBadges.group(1)} badge(s) caducado(s) y ${expiredBadges.group(2)} próximo(s) a renovarse.';
+    }
+    final expiringBadges = RegExp(
+      r'^(\d+) badge\(s\) próxima\(s\) da data de expiração\.$',
+    ).firstMatch(source);
+    if (expiringBadges != null) {
+      return language == AppLanguage.english
+          ? '${expiringBadges.group(1)} badge(s) nearing expiration.'
+          : '${expiringBadges.group(1)} badge(s) próximo(s) a caducar.';
+    }
     if (source.startsWith('Um código de 4 dígitos foi enviado para:')) {
       final email = source.split('\n').skip(1).join('\n');
       final prefix = language == AppLanguage.english
@@ -237,6 +275,8 @@ class AppStrings {
       'Bom dia,': 'Good morning,',
       'Boa tarde,': 'Good afternoon,',
       'Boa noite,': 'Good evening,',
+      'Bem-vindo!': 'Welcome!',
+      'Seja bem-vindo novamente': 'Welcome back',
       'Consultor': 'Consultant',
       'Consultora': 'Consultant',
       'Consultor Júnior': 'Junior Consultant',
@@ -436,6 +476,8 @@ class AppStrings {
       'Notificações': 'Notifications',
       'Marcar todas': 'Mark all',
       'Marcar como\nlida': 'Mark as\nread',
+      'Marcar como lida': 'Mark as read',
+      '1 nova': '1 new',
       'Sem notificações sincronizadas.': 'No synced notifications.',
       'Dica': 'Tip',
       'Ative as notificações para receber alertas em tempo real sobre aprovações e badges a expirar.':
@@ -636,11 +678,68 @@ class AppStrings {
       'Em validação': 'Under validation',
       'Em aprovação': 'Awaiting approval',
       'Sem estado': 'No status',
+      'Área': 'Area',
+      'Campo obrigatório': 'Required field',
+      'Email inválido': 'Invalid email',
+      'As palavras-passe não coincidem': 'The passwords do not match',
+      'A palavra-passe deve ter pelo menos 8 caracteres.':
+          'The password must be at least 8 characters long.',
+      'Recuperar palavra-passe': 'Recover password',
+      'Receba um link seguro no email. Também pode colar abaixo o token incluído no link.':
+          'Receive a secure link by email. You can also paste the token from the link below.',
+      'A enviar...': 'Sending...',
+      'Enviar email de recuperação': 'Send recovery email',
+      'Token de recuperação': 'Recovery token',
+      'Cole o token recebido': 'Paste the token you received',
+      'A redefinir...': 'Resetting...',
+      'Redefinir palavra-passe': 'Reset password',
+      'A sua password foi redefinida com sucesso.':
+          'Your password has been reset successfully.',
+      'Cancelar': 'Cancel',
+      'Confirmo que li e aceito esta política RGPD.':
+          'I confirm that I have read and accept this GDPR policy.',
+      'A aceitar...': 'Accepting...',
+      'Aceitar e continuar': 'Accept and continue',
+      'Terminar sessão': 'Sign out',
+      'Pretende terminar a sua sessão?': 'Do you want to sign out?',
+      'Email de confirmação reenviado.': 'Confirmation email sent again.',
+      'Confirme o seu email': 'Confirm your email',
+      'Voltar ao login': 'Back to sign in',
+      'A reenviar...': 'Resending...',
+      'Reenviar email': 'Resend email',
+      'Não foi possível criar o objetivo.': 'Could not create the goal.',
+      'Não foi possível atualizar o objetivo.': 'Could not update the goal.',
+      'Não foi possível remover o objetivo.': 'Could not delete the goal.',
+      'Criar objetivo': 'Create goal',
+      'Prazo ultrapassado': 'Overdue',
+      'Concluído': 'Completed',
+      'Remover objetivo': 'Delete goal',
+      'Novo objetivo': 'New goal',
+      'Título': 'Title',
+      'Descrição': 'Description',
+      'Data limite': 'Due date',
+      'Prioridade': 'Priority',
+      'Alta': 'High',
+      'Normal': 'Normal',
+      'Baixa': 'Low',
+      'Criar': 'Create',
+      'Marco alcançado!': 'Milestone reached!',
+      'Conquistado em': 'Earned on',
+      'Expirou em': 'Expired on',
+      'Expira em': 'Expires on',
+      'Histórico do pedido': 'Application history',
+      'Página pública': 'Public page',
+      'Verificar': 'Verify',
+      'Certificado PDF': 'PDF certificate',
+      'Não foi possível abrir o link.': 'Could not open the link.',
+      'Link público indisponível.': 'Public link unavailable.',
     },
     'es': {
       'Bom dia,': 'Buenos días,',
       'Boa tarde,': 'Buenas tardes,',
       'Boa noite,': 'Buenas noches,',
+      'Bem-vindo!': '¡Bienvenido!',
+      'Seja bem-vindo novamente': 'Bienvenido de nuevo',
       'Consultor': 'Consultor',
       'Consultora': 'Consultora',
       'Consultor Júnior': 'Consultor Júnior',
@@ -783,6 +882,8 @@ class AppStrings {
       'Notificações': 'Notificaciones',
       'Marcar todas': 'Marcar todas',
       'Marcar como\nlida': 'Marcar como\nleída',
+      'Marcar como lida': 'Marcar como leída',
+      '1 nova': '1 nueva',
       'Sem notificações sincronizadas.': 'No hay notificaciones sincronizadas.',
       'Dica': 'Consejo',
       'Ative as notificações para receber alertas em tempo real sobre aprovações e badges a expirar.':
@@ -981,6 +1082,64 @@ class AppStrings {
       'Em validação': 'En validación',
       'Em aprovação': 'En aprobación',
       'Sem estado': 'Sin estado',
+      'Área': 'Área',
+      'Campo obrigatório': 'Campo obligatorio',
+      'Email inválido': 'Email no válido',
+      'As palavras-passe não coincidem': 'Las contraseñas no coinciden',
+      'A palavra-passe deve ter pelo menos 8 caracteres.':
+          'La contraseña debe tener al menos 8 caracteres.',
+      'Recuperar palavra-passe': 'Recuperar contraseña',
+      'Receba um link seguro no email. Também pode colar abaixo o token incluído no link.':
+          'Recibe un enlace seguro por email. También puedes pegar abajo el token incluido en el enlace.',
+      'A enviar...': 'Enviando...',
+      'Enviar email de recuperação': 'Enviar email de recuperación',
+      'Token de recuperação': 'Token de recuperación',
+      'Cole o token recebido': 'Pega el token recibido',
+      'A redefinir...': 'Restableciendo...',
+      'Redefinir palavra-passe': 'Restablecer contraseña',
+      'A sua password foi redefinida com sucesso.':
+          'Tu contraseña se ha restablecido correctamente.',
+      'Cancelar': 'Cancelar',
+      'Confirmo que li e aceito esta política RGPD.':
+          'Confirmo que he leído y acepto esta política RGPD.',
+      'A aceitar...': 'Aceptando...',
+      'Aceitar e continuar': 'Aceptar y continuar',
+      'Terminar sessão': 'Cerrar sesión',
+      'Pretende terminar a sua sessão?': '¿Quieres cerrar la sesión?',
+      'Email de confirmação reenviado.':
+          'Email de confirmación enviado de nuevo.',
+      'Confirme o seu email': 'Confirma tu email',
+      'Voltar ao login': 'Volver al inicio de sesión',
+      'A reenviar...': 'Reenviando...',
+      'Reenviar email': 'Reenviar email',
+      'Não foi possível criar o objetivo.': 'No se pudo crear el objetivo.',
+      'Não foi possível atualizar o objetivo.':
+          'No se pudo actualizar el objetivo.',
+      'Não foi possível remover o objetivo.':
+          'No se pudo eliminar el objetivo.',
+      'Criar objetivo': 'Crear objetivo',
+      'Prazo ultrapassado': 'Plazo vencido',
+      'Concluído': 'Completado',
+      'Remover objetivo': 'Eliminar objetivo',
+      'Novo objetivo': 'Nuevo objetivo',
+      'Título': 'Título',
+      'Descrição': 'Descripción',
+      'Data limite': 'Fecha límite',
+      'Prioridade': 'Prioridad',
+      'Alta': 'Alta',
+      'Normal': 'Normal',
+      'Baixa': 'Baja',
+      'Criar': 'Crear',
+      'Marco alcançado!': '¡Hito alcanzado!',
+      'Conquistado em': 'Conseguido el',
+      'Expirou em': 'Caducó el',
+      'Expira em': 'Caduca el',
+      'Histórico do pedido': 'Historial de la candidatura',
+      'Página pública': 'Página pública',
+      'Verificar': 'Verificar',
+      'Certificado PDF': 'Certificado PDF',
+      'Não foi possível abrir o link.': 'No se pudo abrir el enlace.',
+      'Link público indisponível.': 'Enlace público no disponible.',
     },
   };
 }

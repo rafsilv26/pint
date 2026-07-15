@@ -10,6 +10,18 @@ import '../models/mobile_api_data.dart';
 import 'api_config.dart';
 import 'auth_service.dart';
 
+class MobileSyncStatus {
+  const MobileSyncStatus({
+    required this.changed,
+    required this.version,
+    this.publicWebUrl = '',
+  });
+
+  final bool changed;
+  final String version;
+  final String publicWebUrl;
+}
+
 class BadgesApiService {
   BadgesApiService({
     http.Client? client,
@@ -22,6 +34,29 @@ class BadgesApiService {
   final http.Client client;
   final String baseUrl;
   final Future<String?> Function() tokenProvider;
+
+  Future<MobileSyncStatus> fetchMobileSyncStatus({String? version}) async {
+    final uri = Uri.parse('$_normalizedBaseUrl/mobile-sync/status').replace(
+      queryParameters: version == null || version.isEmpty
+          ? null
+          : {'version': version},
+    );
+    final response = await client
+        .get(uri, headers: await _headers())
+        .timeout(const Duration(seconds: 8));
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiRequestException(response.statusCode);
+    }
+    final decoded = _decodeResponse(response);
+    if (decoded is! Map || decoded['version'] is! String) {
+      throw const ApiInvalidResponseException();
+    }
+    return MobileSyncStatus(
+      changed: decoded['changed'] == true,
+      version: decoded['version'] as String,
+      publicWebUrl: decoded['publicWebUrl']?.toString() ?? '',
+    );
+  }
 
   Future<Map<String, dynamic>?> fetchCurrentUser() async {
     if (baseUrl.trim().isEmpty) {
@@ -129,6 +164,60 @@ class BadgesApiService {
       '/email-signature',
       body: {'badgeIds': badgeIds, 'templateHtml': templateHtml},
     );
+  }
+
+  Future<void> createTimelineObjective({
+    required String title,
+    required String description,
+    required DateTime expectedDate,
+    int priority = 3,
+  }) async {
+    await _postMap(
+      '/timeline',
+      body: {
+        'title': title,
+        'description': description,
+        'expectedDate': expectedDate.toUtc().toIso8601String(),
+        'priority': priority,
+      },
+    );
+  }
+
+  Future<void> setTimelineObjectiveCompleted(String id, bool completed) async {
+    await _putMap('/timeline/$id/concluir', body: {'concluido': completed});
+  }
+
+  Future<void> deleteTimelineObjective(String id) async {
+    if (baseUrl.trim().isEmpty) throw const ApiNotConfiguredException();
+    final response = await client
+        .delete(
+          Uri.parse('$_normalizedBaseUrl/timeline/$id'),
+          headers: await _headers(),
+        )
+        .timeout(const Duration(seconds: 8));
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiRequestException(response.statusCode);
+    }
+  }
+
+  Future<void> registerPushToken(String token, String platform) async {
+    await _postMap(
+      '/notifications/push-token',
+      body: {'token': token, 'platform': platform},
+    );
+  }
+
+  Future<void> unregisterPushToken(String token) async {
+    final response = await client
+        .delete(
+          Uri.parse('$_normalizedBaseUrl/notifications/push-token'),
+          headers: await _headers(),
+          body: jsonEncode({'token': token}),
+        )
+        .timeout(const Duration(seconds: 8));
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiRequestException(response.statusCode);
+    }
   }
 
   Future<List<Map<String, dynamic>>> fetchCatalogResource(
@@ -325,6 +414,28 @@ class BadgesApiService {
       return Map<String, dynamic>.from(decoded);
     }
 
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> _postMap(
+    String path, {
+    Map<String, dynamic>? body,
+  }) async {
+    if (baseUrl.trim().isEmpty) throw const ApiNotConfiguredException();
+    final response = await client
+        .post(
+          Uri.parse('$_normalizedBaseUrl$path'),
+          headers: await _headers(),
+          body: body == null ? null : jsonEncode(body),
+        )
+        .timeout(const Duration(seconds: 8));
+    final decoded = response.body.trim().isEmpty
+        ? null
+        : _decodeResponse(response);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiRequestException(response.statusCode, _apiMessage(decoded));
+    }
+    if (decoded is Map) return Map<String, dynamic>.from(decoded);
     return null;
   }
 

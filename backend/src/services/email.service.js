@@ -34,10 +34,10 @@ const verificarLigacao = async () => {
 };
 
 // Função base
-const enviarEmail = async (para, assunto, html) => {
+const enviarEmail = async (para, assunto, html, { fetchImplementation = fetch } = {}) => {
   try {
     verificarConfig();
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    const res = await fetchImplementation('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
         'api-key': process.env.BREVO_API_KEY,
@@ -55,7 +55,9 @@ const enviarEmail = async (para, assunto, html) => {
       const corpo = await res.text().catch(() => '');
       throw new Error(`Brevo respondeu ${res.status}: ${corpo}`);
     }
+    const result = await res.json().catch(() => ({}));
     console.log(`✅ Email enviado para ${para}`);
+    return { id: result.messageId || null, to: para };
   } catch (erro) {
     console.error(`❌ Erro ao enviar email para ${para}:`, erro.message);
     throw erro;
@@ -153,7 +155,7 @@ const emailNovaValidacaoSLL = async (serviceLineLeader, consultor, badge) => {
         <div style="background-color: #e8f0fe; padding: 15px; border-radius: 5px; margin: 20px 0;">
           <p style="margin: 0;"><strong>Consultor:</strong> ${consultor.nome}</p>
           <p style="margin: 5px 0;"><strong>Badge:</strong> ${badge.nome}</p>
-          <p style="margin: 5px 0;"><strong>Nível:</strong> ${badge.nivel || ''}</p>
+          <p style="margin: 5px 0;"><strong>Nível:</strong> ${badge.nivel || badge.Level?.nome || ''}</p>
         </div>
         <p>Acede à plataforma para tomar a decisão final.</p>
       </div>
@@ -164,7 +166,7 @@ const emailNovaValidacaoSLL = async (serviceLineLeader, consultor, badge) => {
 
 // Email ao consultor quando badge aprovado
 const emailBadgeAprovado = async (consultor, badge, uuid) => {
-  await enviarEmail(
+  return enviarEmail(
     consultor.email,
     '🎉 Badge aprovado!',
     `
@@ -177,10 +179,10 @@ const emailBadgeAprovado = async (consultor, badge, uuid) => {
         <p>O teu badge <strong>${badge.nome}</strong> foi aprovado!</p>
         <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0;">
           <p style="margin: 0;"><strong>Badge:</strong> ${badge.nome}</p>
-          <p style="margin: 5px 0;"><strong>Nível:</strong> ${badge.nivel}</p>
-          <p style="margin: 5px 0;"><strong>Pontos:</strong> ${badge.pontos}</p>
+          <p style="margin: 5px 0;"><strong>Nível:</strong> ${badge.nivel || badge.Level?.nome || ''}</p>
+          <p style="margin: 5px 0;"><strong>Pontos:</strong> ${badge.ponto ?? badge.pontos ?? 0}</p>
         </div>
-        <a href="${process.env.APP_URL}/api/relatorios/verificar/${uuid}" 
+        <a href="${(process.env.FRONTEND_URL || process.env.APP_URL || '').replace(/\/$/, '')}/badge/${uuid}"
            style="background-color: #003087; color: white; padding: 10px 20px; 
                   text-decoration: none; border-radius: 5px;">
           Ver Badge

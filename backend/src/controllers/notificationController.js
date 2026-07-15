@@ -2,6 +2,32 @@ const { Notice, NotificationConfig } = require('../models');
 const { verificarLigacao, enviarEmail } = require('../services/email.service');
 const { getPrefs, savePrefs } = require('../services/notificationPrefs.service');
 const { notificarTodosConsultores } = require('../services/notification.service');
+const { registerDeviceToken, unregisterDeviceToken } = require('../services/pushNotification.service');
+
+exports.registerPushToken = async (req, res) => {
+  try {
+    const token = String(req.body.token || '').trim();
+    if (!token) return res.status(400).json({ erro: 'O token do dispositivo é obrigatório.' });
+    await registerDeviceToken({
+      userId: req.user.id,
+      token,
+      platform: String(req.body.platform || '')
+    });
+    res.json({ mensagem: 'Dispositivo registado para notificações push.' });
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao registar dispositivo.', details: error.message });
+  }
+};
+
+exports.unregisterPushToken = async (req, res) => {
+  try {
+    const token = String(req.body.token || '').trim();
+    if (token) await unregisterDeviceToken({ userId: req.user.id, token });
+    res.json({ mensagem: 'Dispositivo removido das notificações push.' });
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao remover dispositivo.', details: error.message });
+  }
+};
 
 // Difunde um aviso a TODOS os consultores (uma notificação por consultor).
 exports.broadcastAviso = async (req, res) => {

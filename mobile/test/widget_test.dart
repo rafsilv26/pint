@@ -249,6 +249,10 @@ void main() {
   testWidgets('abre notificacoes pelo sino da home', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     SharedPreferences.setMockInitialValues(loggedSession());
 
     await tester.pumpWidget(SoftinsaBadgesApp());
@@ -260,6 +264,8 @@ void main() {
     expect(find.text('Notificações'), findsOneWidget);
     expect(find.text('2 novas'), findsOneWidget);
     expect(find.text('Marcar todas'), findsOneWidget);
+    expect(find.text('Marcar como lida'), findsWidgets);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('abre alterar password atraves do perfil', (

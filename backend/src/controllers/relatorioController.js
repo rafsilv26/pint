@@ -34,11 +34,8 @@ const buildCandidaturaWhereParaUtilizador = async (user) => {
 };
 
 const findAwardByPublicToken = async (publicToken) => {
-  const badge = await Badge.findOne({ where: { publicToken } });
-  if (!badge) return null;
-
   const award = await ConsultorBadge.findOne({
-    where: { badgeId: badge.id, valid: true },
+    where: { publicToken },
     include: [
       { model: Badge },
       { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] }
@@ -46,12 +43,16 @@ const findAwardByPublicToken = async (publicToken) => {
     order: [['obtainedDate', 'DESC']]
   });
 
-  return award ? { badge, award } : { badge, award: null };
+  return award ? { badge: award.Badge, award } : null;
 };
 
 const sendCertificate = async (req, res, award) => {
   const consultor = award.Consultant?.User;
-  const pdfBuffer = await gerarCertificado(consultor, award.Badge, award.obtainedDate);
+  const pdfBuffer = await gerarCertificado(
+    consultor,
+    { ...award.Badge.toJSON(), publicToken: award.publicToken },
+    award.obtainedDate
+  );
 
   await CertificateDownload.create({
     consultorId: award.consultorId,
@@ -141,7 +142,7 @@ exports.verificarBadge = async (req, res) => {
         imagem: result.badge.imagem,
         fornecedor: result.badge.fornecedor,
         tipo: result.badge.tipo,
-        publicToken: result.badge.publicToken
+        publicToken: result.award.publicToken
       },
       consultor: consultor ? {
         id: consultor.id,
@@ -149,7 +150,8 @@ exports.verificarBadge = async (req, res) => {
       } : null,
       dataAtribuicao: result.award.obtainedDate,
       dataExpiracao: expirationDate,
-      valido: expirationDate ? new Date() < new Date(expirationDate) : true
+      valido: result.award.valid !== false &&
+        (expirationDate ? new Date() < new Date(expirationDate) : true)
     });
   } catch (erro) {
     console.error(erro);

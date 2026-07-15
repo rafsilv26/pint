@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const { randomUUID } = require('crypto');
 const {
   Candidatura,
   Evidencia,
@@ -28,6 +29,7 @@ const {
   getServiceLineScopeForUser,
   getBadgeIdsDaServiceLine
 } = require('../services/serviceLineScope.service');
+const { sendPushToUser } = require('../services/pushNotification.service');
 
 const STATUS = {
   OPEN: 'OPEN',
@@ -94,7 +96,11 @@ const sendEmail = async (fn, ...args) => {
 const createNotice = async (userId, title, message, type = 'info') => {
   if (!userId) return null;
   try {
-    return await Notice.create({ userId, title, message, type, read: false });
+    const notice = await Notice.create({ userId, title, message, type, read: false });
+    sendPushToUser(userId, { title, body: message, type }).catch((error) =>
+      console.error('Erro ao enviar push:', error.message)
+    );
+    return notice;
   } catch (error) {
     console.error('Erro ao criar notificação:', error.message);
     return null;
@@ -802,6 +808,10 @@ exports.validarServiceLine = async (req, res) => {
     if (decisao === 'APROVAR') {
       // Atribuir badge ao consultor e calcular data de expiração
       const expirationDate = calcularExpiracao(candidatura.Badge);
+      const existingAward = await ConsultorBadge.findOne({
+        where: { consultorId: candidatura.consultorId, badgeId: candidatura.badgeId }
+      });
+      const publicToken = existingAward?.publicToken || randomUUID();
       await ConsultorBadge.upsert({
         consultorId: candidatura.consultorId,
         badgeId: candidatura.badgeId,
@@ -809,7 +819,8 @@ exports.validarServiceLine = async (req, res) => {
         expirationDate,
         durationMonths: candidatura.Badge.duracaoMeses,
         valid: true,
-        pointsObtained: candidatura.Badge.ponto
+        pointsObtained: candidatura.Badge.ponto,
+        publicToken
       });
       // Responder já — o email (SMTP) é lento e vai em background
       res.json({ mensagem: 'Badge aprovada e atribuída ao consultor.' });
@@ -819,7 +830,7 @@ exports.validarServiceLine = async (req, res) => {
         `A badge ${candidatura.Badge?.nome || ''} foi aprovada e atribuída ao teu perfil.`,
         'success'
       );
-      sendEmail(emailBadgeAprovado, consultor, candidatura.Badge, candidatura.Badge.publicToken);
+      sendEmail(emailBadgeAprovado, consultor, candidatura.Badge, publicToken);
       return;
     }
 

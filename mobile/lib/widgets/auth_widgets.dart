@@ -11,6 +11,7 @@ class AuthTextField extends StatelessWidget {
     this.keyboardType,
     this.obscureText = false,
     this.suffixIcon,
+    this.errorText,
   });
 
   final TextEditingController controller;
@@ -19,6 +20,7 @@ class AuthTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool obscureText;
   final Widget? suffixIcon;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +36,8 @@ class AuthTextField extends StatelessWidget {
           fontWeight: FontWeight.w400,
         ),
         suffixIcon: suffixIcon,
+        errorText: errorText == null ? null : context.tr(errorText!),
+        errorStyle: const TextStyle(color: Color(0xFFB42318)),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,
           vertical: 18,
@@ -45,6 +49,14 @@ class AuthTextField extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: Color(0xFF0076FF), width: 1.8),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFB42318), width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFB42318), width: 1.8),
         ),
       ),
     );

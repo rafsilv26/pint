@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_widgets.dart';
 import 'register_page.dart';
+import 'forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.onAuthenticated});
@@ -23,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   bool hidePassword = true;
   bool rememberLogin = false;
   bool isSubmitting = false;
+  bool showValidationErrors = false;
 
   @override
   void initState() {
@@ -48,7 +50,8 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    if (emailController.text.trim().isEmpty ||
+    setState(() => showValidationErrors = true);
+    if (!_validEmail(emailController.text.trim()) ||
         passwordController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: AppText('Preencha o email e a palavra-passe.')),
@@ -149,12 +152,22 @@ class _LoginPageState extends State<LoginPage> {
                             controller: emailController,
                             hintText: 'Email',
                             keyboardType: TextInputType.emailAddress,
+                            errorText:
+                                showValidationErrors &&
+                                    !_validEmail(emailController.text.trim())
+                                ? 'Email inválido'
+                                : null,
                           ),
                           const SizedBox(height: 16),
                           AuthTextField(
                             controller: passwordController,
                             hintText: 'Palavra-passe',
                             obscureText: hidePassword,
+                            errorText:
+                                showValidationErrors &&
+                                    passwordController.text.trim().isEmpty
+                                ? 'Campo obrigatório'
+                                : null,
                             suffixIcon: IconButton(
                               onPressed: () {
                                 setState(() {
@@ -171,7 +184,12 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 18),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ForgotPasswordPage(),
+                              ),
+                            ),
                             style: TextButton.styleFrom(
                               foregroundColor: const Color(0xFF0076FF),
                               padding: EdgeInsets.zero,
@@ -237,3 +255,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+bool _validEmail(String value) =>
+    RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value);

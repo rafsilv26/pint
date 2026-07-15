@@ -1,10 +1,15 @@
 const { Notice, Consultant } = require('../models');
+const { sendPushToUser } = require('./pushNotification.service');
 
 // Cria uma notificação/aviso (linha na tabela AVISOS) para um utilizador.
 // type: 'info' | 'warning' | 'success' | 'error'
 const criarNotificacao = async ({ userId, title, message, type = 'info' }) => {
   if (!userId || !title) return null;
-  return Notice.create({ userId, title, message: message || null, type });
+  const notice = await Notice.create({ userId, title, message: message || null, type });
+  sendPushToUser(userId, { title, body: message, type }).catch((error) =>
+    console.error('Erro ao enviar push:', error.message)
+  );
+  return notice;
 };
 
 // Difunde um aviso a todos os consultores (uma linha por consultor).
@@ -19,7 +24,11 @@ const notificarTodosConsultores = async ({ title, message, type = 'info' }) => {
     message: message || null,
     type
   }));
-  return Notice.bulkCreate(linhas);
+  const notices = await Notice.bulkCreate(linhas);
+  await Promise.allSettled(consultores.map((consultor) =>
+    sendPushToUser(consultor.consultorId, { title, body: message, type })
+  ));
+  return notices;
 };
 
 module.exports = { criarNotificacao, notificarTodosConsultores };

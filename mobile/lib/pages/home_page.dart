@@ -144,6 +144,12 @@ class _HomeContent extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
+                          if (_reachedMilestone(data.badgesWon) != null) ...[
+                            _MilestoneBanner(
+                              milestone: _reachedMilestone(data.badgesWon)!,
+                            ),
+                            const SizedBox(height: 18),
+                          ],
                           _StatsRow(data: data),
                           const SizedBox(height: 18),
                           _LearningPathCard(data: data),
@@ -174,6 +180,62 @@ class _HomeContent extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+int? _reachedMilestone(int badges) {
+  const milestones = [1, 3, 5, 10, 15, 25, 50];
+  for (final milestone in milestones.reversed) {
+    if (badges >= milestone) return milestone;
+  }
+  return null;
+}
+
+class _MilestoneBanner extends StatelessWidget {
+  const _MilestoneBanner({required this.milestone});
+  final int milestone;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6B4EFF), Color(0xFF006DAA)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.celebration_outlined, color: Colors.white, size: 32),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const AppText(
+                  'Marco alcançado!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                AppText(
+                  'Parabéns por conquistar $milestone badge${milestone == 1 ? '' : 's'}. Continue a evoluir!',
+                  style: const TextStyle(
+                    color: Color(0xE6FFFFFF),
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

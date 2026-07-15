@@ -26,7 +26,7 @@ exports.getMyEmailSignature = async (req, res) => {
         id: award.badgeId,
         title: award.Badge?.nome || '',
         imagePath: award.Badge?.imagem || '',
-        publicToken: award.Badge?.publicToken || '',
+        publicToken: award.publicToken || '',
         selected: selectedBadgeIds.includes(award.badgeId)
       })),
       templateHtml: signatures[0]?.templateHtml || ''

@@ -4,6 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../services/app_sync_service.dart';
+import '../services/public_links_service.dart';
 
 class MyBadgesPage extends StatefulWidget {
   const MyBadgesPage({super.key});
@@ -24,6 +26,7 @@ class _MyBadgesPageState extends State<MyBadgesPage> {
   }
 
   Future<void> reload() async {
+    await AppSyncService().synchronizeIfNeeded();
     final future = repository.getMyBadgeApplications();
     setState(() {
       applicationsFuture = future;
@@ -40,6 +43,9 @@ class _MyBadgesPageState extends State<MyBadgesPage> {
         final approved = applications.where((item) => item.isApproved).length;
         final rejected = applications.where((item) => item.isRejected).length;
         final inProgress = applications.length - approved - rejected;
+        final expiring = applications
+            .where((item) => item.isExpiringSoon || item.isExpired)
+            .toList();
         final filtered = applications.where(_matchesFilter).toList();
 
         return SafeArea(
@@ -63,6 +69,7 @@ class _MyBadgesPageState extends State<MyBadgesPage> {
                   });
                 },
               ),
+              if (expiring.isNotEmpty) _ExpirationAlert(items: expiring),
               Expanded(
                 child: snapshot.connectionState == ConnectionState.waiting
                     ? const Center(child: CircularProgressIndicator())
@@ -497,6 +504,18 @@ class _ApplicationDetailSheet extends StatelessWidget {
                   label: 'Última atualização',
                   value: _formatDate(application.updatedAt!),
                 ),
+              if (application.obtainedAt != null)
+                _DetailRow(
+                  icon: Icons.workspace_premium_outlined,
+                  label: 'Conquistado em',
+                  value: _formatDate(application.obtainedAt!),
+                ),
+              if (application.expirationDate != null)
+                _DetailRow(
+                  icon: Icons.event_busy_outlined,
+                  label: application.isExpired ? 'Expirou em' : 'Expira em',
+                  value: _formatDate(application.expirationDate!),
+                ),
               const SizedBox(height: 18),
               const AppText(
                 'Evidências enviadas',
@@ -528,6 +547,64 @@ class _ApplicationDetailSheet extends StatelessWidget {
                       evidence: application.evidences[index],
                     ),
                   ),
+              if (application.history.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                const AppText(
+                  'Histórico do pedido',
+                  style: TextStyle(
+                    color: Color(0xFF111827),
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                for (final item in application.history)
+                  _HistoryTile(item: item),
+              ],
+              if (application.isAwarded &&
+                  application.publicToken.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () => _openPublicAction(
+                        context,
+                        (links) => links.badgePage(application.publicToken),
+                      ),
+                      icon: const Icon(Icons.public),
+                      label: const AppText('Página pública'),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () => _openPublicAction(
+                        context,
+                        (links) async =>
+                            links.verification(application.publicToken),
+                      ),
+                      icon: const Icon(Icons.verified_outlined),
+                      label: const AppText('Verificar'),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () => _openPublicAction(
+                        context,
+                        (links) async =>
+                            links.certificate(application.publicToken),
+                      ),
+                      icon: const Icon(Icons.picture_as_pdf_outlined),
+                      label: const AppText('Certificado PDF'),
+                    ),
+                    FilledButton.icon(
+                      onPressed: () => _openPublicAction(
+                        context,
+                        (links) => links.linkedinShare(application.publicToken),
+                      ),
+                      icon: const Icon(Icons.share_outlined),
+                      label: const AppText('LinkedIn'),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 20),
               SizedBox(
                 height: 48,
@@ -549,6 +626,104 @@ class _ApplicationDetailSheet extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class _ExpirationAlert extends StatelessWidget {
+  const _ExpirationAlert({required this.items});
+  final List<MyBadgeApplication> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final expired = items.where((item) => item.isExpired).length;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF4E5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFFFD596)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.warning_amber_rounded, color: Color(0xFFB54708)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: AppText(
+              expired > 0
+                  ? '$expired badge(s) expirada(s) e ${items.length - expired} próxima(s) da renovação.'
+                  : '${items.length} badge(s) próxima(s) da data de expiração.',
+              style: const TextStyle(color: Color(0xFF7A2E0E), fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryTile extends StatelessWidget {
+  const _HistoryTile({required this.item});
+  final ApplicationHistoryItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 3),
+            child: Icon(Icons.circle, size: 10, color: Color(0xFF006DAA)),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  item.label,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                if (item.comment.isNotEmpty) AppText(item.comment),
+                AppText(
+                  [
+                    if (item.date != null) _formatDate(item.date!),
+                    if (item.responsible.isNotEmpty) item.responsible,
+                  ].join(' · '),
+                  style: const TextStyle(
+                    color: Color(0xFF667085),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Future<void> _openPublicAction(
+  BuildContext context,
+  Future<Uri> Function(PublicLinksService links) uriBuilder,
+) async {
+  try {
+    final links = PublicLinksService();
+    final opened = await links.open(await uriBuilder(links));
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: AppText('Não foi possível abrir o link.')),
+      );
+    }
+  } catch (_) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: AppText('Link público indisponível.')),
+      );
+    }
   }
 }
 
