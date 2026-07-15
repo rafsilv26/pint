@@ -21,14 +21,16 @@ app.use(express.json()); // Permite ler JSON no corpo do pedido (req.body)
 
 // Teste de Ligação à BD
 sequelize.authenticate()
-    .then(() => {
-        console.log('✅ Conetado ao Neon com sucesso!');
-        // Sincroniza os modelos com as tabelas reais da BD
-        return sequelize.sync({ alter: true });
-    })
     .then(async () => {
-        await ensurePublicBadgeTokens();
-        console.log('🔄 Tabelas sincronizadas no Neon.');
+        console.log('✅ Conetado ao Neon com sucesso!');
+        if (process.env.SKIP_DATABASE_SYNC !== 'true') {
+            // Sincroniza os modelos apenas no serviço principal.
+            await sequelize.sync({ alter: true });
+            await ensurePublicBadgeTokens();
+            console.log('🔄 Tabelas sincronizadas no Neon.');
+        } else {
+            console.log('⏭️ Sincronização de esquema ignorada neste serviço secundário.');
+        }
         if (process.env.PUSH_OUTBOX_ENABLED === 'true') {
             startPushOutbox();
         }
