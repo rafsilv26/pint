@@ -2,7 +2,7 @@ const { Op } = require('sequelize');
 const { Notice, User } = require('../models');
 const { sendPushToUser } = require('./pushNotification.service');
 
-const DEFAULT_INTERVAL_MS = 30_000;
+const DEFAULT_INTERVAL_MS = 10_000;
 const DEFAULT_MAX_AGE_DAYS = 7;
 let timer;
 let processing = false;
@@ -64,7 +64,7 @@ async function processPendingPushNotices() {
 function startPushOutbox() {
   if (timer) return timer;
   const interval = Math.max(
-    10_000,
+    5_000,
     Number(process.env.PUSH_OUTBOX_INTERVAL_MS) || DEFAULT_INTERVAL_MS
   );
   processPendingPushNotices();
