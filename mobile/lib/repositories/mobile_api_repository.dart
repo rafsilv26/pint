@@ -97,9 +97,6 @@ class MobileApiRepository {
       evidenceFiles: evidenceFiles,
       descricao: descricao,
     );
-    await syncCatalogData();
-    await syncNotifications();
-    await syncGamification();
     return _apiMessage(response) ?? 'Candidatura submetida com sucesso.';
   }
 
