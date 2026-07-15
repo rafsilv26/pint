@@ -54,9 +54,12 @@ app.get('/api/sla-check', async (req, res) => {
     }
 });
 
-// Job interno: verifica os SLAs pouco depois do arranque e a cada 12 horas.
-iniciarJobSLA();
-iniciarJobExpiracoes();
+// Um serviço secundário pode reutilizar a API/BD sem duplicar emails e alertas.
+// Os jobs continuam ativos por omissão no serviço principal.
+if (process.env.DISABLE_SCHEDULED_JOBS !== 'true') {
+    iniciarJobSLA();
+    iniciarJobExpiracoes();
+}
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

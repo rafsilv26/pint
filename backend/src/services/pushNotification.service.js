@@ -1,6 +1,6 @@
 const { cert, getApp, getApps, initializeApp } = require('firebase-admin/app');
 const { getMessaging } = require('firebase-admin/messaging');
-const { DevicePushToken, NotificationConfig } = require('../models');
+const { DevicePushToken, NotificationConfig, User } = require('../models');
 
 let firebaseApp;
 
@@ -36,6 +36,21 @@ async function unregisterDeviceToken({ userId, token }) {
   );
 }
 
+const getAllowedEmails = () => new Set(
+  String(process.env.PUSH_ALLOWED_EMAILS || '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean)
+);
+
+async function isPushEnabledForUser(userId, config) {
+  if (!config || config.pushEnabled !== false) return true;
+  const allowedEmails = getAllowedEmails();
+  if (allowedEmails.size === 0) return false;
+  const user = await User.findByPk(userId, { attributes: ['email'] });
+  return allowedEmails.has(String(user?.email || '').trim().toLowerCase());
+}
+
 async function getPushStatus(userId) {
   const [config, deviceCount] = await Promise.all([
     NotificationConfig.findOne({ where: { type: 'global' } }),
@@ -43,14 +58,14 @@ async function getPushStatus(userId) {
   ]);
   return {
     configured: Boolean(getFirebaseApp()),
-    enabled: !config || config.pushEnabled !== false,
+    enabled: await isPushEnabledForUser(userId, config),
     devices: deviceCount
   };
 }
 
 async function sendPushToUser(userId, { title, body, type = 'info', action = 'fetch_api' }) {
   const config = await NotificationConfig.findOne({ where: { type: 'global' } });
-  if (config && config.pushEnabled === false) {
+  if (!(await isPushEnabledForUser(userId, config))) {
     return { sent: 0, configured: Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_JSON), enabled: false };
   }
   const app = getFirebaseApp();
