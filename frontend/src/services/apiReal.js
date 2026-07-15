@@ -447,15 +447,6 @@ export async function getCandidatura(id) {
       requisito: e.Requirement?.titulo || e.Requirement?.descricao || e.descricao || '—',
       validado: e.validado === true ? true : e.validado === false ? false : null,
     })),
-    historico: (c.history || []).slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((h) => ({
-      estado: statusName(h.newStatus?.code, h.newStatus?.name || i18next.t('api.generic.atualizacaoEstado', { defaultValue: 'Atualização de estado' })),
-      estadoAnterior: statusName(h.oldStatus?.code, h.oldStatus?.name || ''),
-      code: h.newStatus?.code,
-      autor: h.responsavel?.nome || '',
-      data: dataPT(h.createdAt),
-      motivo: h.motivo || h.reason || '',
-    })),
-
     timeline: (c.timeline || []).map((h) => ({
       code: h.estadoNovoCode,
       estado: statusName(h.estadoNovoCode, h.estadoNovo),
@@ -464,6 +455,20 @@ export async function getCandidatura(id) {
       data: h.data ? new Date(h.data).toLocaleString('pt-PT') : '—',
       motivo: h.motivo || '',
     })),
+
+    get historico() {
+      if (this.timeline && this.timeline.length) {
+        return this.timeline.slice().reverse()
+      }
+      return (c.history || []).slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((h) => ({
+        estado: statusName(h.newStatus?.code, h.newStatus?.name || i18next.t('api.generic.atualizacaoEstado', { defaultValue: 'Atualização de estado' })),
+        estadoAnterior: statusName(h.oldStatus?.code, h.oldStatus?.name || ''),
+        code: h.newStatus?.code,
+        autor: h.responsavel?.nome || '',
+        data: dataPT(h.createdAt),
+        motivo: h.motivo || h.reason || '',
+      }))
+    },
   }
 }
 export async function validarTalentManager(id, { decisao, comentario } = {}) {
