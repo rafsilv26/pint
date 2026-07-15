@@ -339,7 +339,9 @@
     "concluidoEm": "Completado el",
     "marcarConcluido": "Marcar como hecho",
     "reabrir": "Reabrir",
-    "remover": "Quitar"
+    "remover": "Quitar",
+    "atribuido": "Asignado",
+    "atribuidoTooltip": "Objetivo asignado por la gestión — puedes completarlo pero no eliminarlo."
   },
   "timelineManager": {
     "titulo": "Timeline de desarrollo",

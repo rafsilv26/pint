@@ -339,7 +339,9 @@
     "concluidoEm": "Completed on",
     "marcarConcluido": "Mark as done",
     "reabrir": "Reopen",
-    "remover": "Remove"
+    "remover": "Remove",
+    "atribuido": "Assigned",
+    "atribuidoTooltip": "Goal assigned by management — you can complete it but not remove it."
   },
   "timelineManager": {
     "titulo": "Development timeline",

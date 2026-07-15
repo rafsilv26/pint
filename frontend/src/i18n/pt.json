@@ -339,7 +339,9 @@
     "concluidoEm": "Concluído em",
     "marcarConcluido": "Marcar como concluído",
     "reabrir": "Reabrir",
-    "remover": "Remover"
+    "remover": "Remover",
+    "atribuido": "Atribuído",
+    "atribuidoTooltip": "Objetivo atribuído pela gestão — podes concluí-lo mas não removê-lo."
   },
   "timelineManager": {
     "titulo": "Timeline de desenvolvimento",

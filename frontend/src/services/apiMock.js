@@ -123,7 +123,7 @@ export async function getMeusObjetivos() {
 }
 export async function criarObjetivo(body) {
   await delay()
-  const novo = { id: Date.now(), title: body.title, description: body.description || '', expectedDate: body.expectedDate || null, completionDate: null, status: 'Pendente', priority: body.priority || 3, concluido: false }
+  const novo = { id: Date.now(), title: body.title, description: body.description || '', expectedDate: body.expectedDate || null, completionDate: null, status: 'Pendente', priority: body.priority || 3, concluido: false, atribuido: false }
   _mockObjetivos = [..._mockObjetivos, novo]
   return clone(novo)
 }
@@ -145,7 +145,7 @@ export async function getObjetivosConsultor(consultorId) {
 }
 export async function criarObjetivoConsultor(consultorId, body) {
   await delay()
-  const novo = { id: Date.now(), title: body.title, description: body.description || '', expectedDate: body.expectedDate || null, completionDate: null, type: body.type || 'Meta', status: 'Pendente', priority: body.priority || 3, concluido: false }
+  const novo = { id: Date.now(), title: body.title, description: body.description || '', expectedDate: body.expectedDate || null, completionDate: null, type: body.type || 'Meta', status: 'Pendente', priority: body.priority || 3, concluido: false, atribuido: true }
   _mockObjetivosConsultores = { ..._mockObjetivosConsultores, [consultorId]: [...(_mockObjetivosConsultores[consultorId] || []), novo] }
   return clone(novo)
 }

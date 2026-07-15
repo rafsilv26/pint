@@ -13,7 +13,9 @@ const serialize = (o) => ({
   type: o.type,
   status: o.status,
   priority: o.priority,
-  concluido: Boolean(o.completionDate)
+  concluido: Boolean(o.completionDate),
+  // Atribuído por um TM/Admin: o consultor pode concluir mas não remover.
+  atribuido: Boolean(o.createdBy && o.createdBy !== o.consultorId)
 });
 
 // GET /timeline/minha — objetivos do próprio consultor, mais urgentes primeiro.
@@ -43,7 +45,8 @@ exports.criarObjetivo = async (req, res) => {
       expectedDate: expectedDate || null,
       type: 'Meta',
       status: 'Pendente',
-      priority: priority || 3
+      priority: priority || 3,
+      createdBy: req.user.id
     });
     res.status(201).json(serialize(objetivo));
   } catch (erro) {
@@ -107,7 +110,8 @@ exports.criarObjetivoConsultor = async (req, res) => {
       expectedDate: expectedDate || null,
       type: ['Meta', 'Milestone', 'Evento'].includes(type) ? type : 'Meta',
       status: 'Pendente',
-      priority: priority || 3
+      priority: priority || 3,
+      createdBy: req.user.id
     });
     res.status(201).json(serialize(objetivo));
   } catch (erro) {
@@ -137,6 +141,11 @@ exports.apagarObjetivo = async (req, res) => {
       where: { timelineId: req.params.id, consultorId: req.user.id, deletedAt: null }
     });
     if (!objetivo) return res.status(404).json({ erro: 'Objetivo não encontrado.' });
+
+    // Objetivos atribuídos por um TM/Admin só podem ser removidos por quem gere a timeline.
+    if (objetivo.createdBy && Number(objetivo.createdBy) !== Number(req.user.id)) {
+      return res.status(403).json({ erro: 'Este objetivo foi atribuído pela gestão e não pode ser removido.' });
+    }
 
     await objetivo.update({ deletedAt: new Date() });
     res.json({ mensagem: 'Objetivo removido.' });
