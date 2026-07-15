@@ -720,11 +720,29 @@
     "titulo": "Definições",
     "subtitulo": "Configurações gerais da plataforma.",
     "sla": {
-      "titulo": "SLA",
-      "subtitulo": "Prazo de resposta a pedidos e alertas.",
-      "dias": "Dias de resposta",
-      "alertasLabel": "Alertas de SLA",
-      "alertasDesc": "Enviar avisos quando um pedido se aproxima do prazo"
+      "titulo": "Gestão de SLAs",
+      "subtitulo": "Prazos de resposta das equipas de Talent e Service Line. O SLA ativo de cada equipa define quando os alertas de atraso (email e push) são enviados.",
+      "equipaTalent": "Talent",
+      "equipaServiceLine": "Service Line",
+      "equipaGlobal": "Global",
+      "dias_one": "{{count}} dia de resposta",
+      "dias_many": "{{count}} dias de resposta",
+      "dias_other": "{{count}} dias de resposta",
+      "alertaResumo_one": "alerta {{count}} dia antes",
+      "alertaResumo_many": "alerta {{count}} dias antes",
+      "alertaResumo_other": "alerta {{count}} dias antes",
+      "nomeLabel": "Nome",
+      "nomePlaceholder": "Ex: SLA Standard",
+      "equipaLabel": "Equipa",
+      "diasLabel": "Dias",
+      "alertaLabel": "Alerta (dias antes)",
+      "adicionar": "Adicionar SLA",
+      "vazio": "Sem SLAs configurados — é usado o valor por omissão de 5 dias.",
+      "ativa": "Ativo",
+      "remover": "Remover",
+      "verificar": "Correr verificação de SLA agora",
+      "aVerificar": "A verificar…",
+      "resumo": "Em atraso: {{tm}} candidatura(s) na equipa de Talent e {{sll}} na Service Line · {{emails}} email(s) de alerta enviados"
     },
     "notificacoes": {
       "titulo": "Notificações da plataforma",
@@ -732,7 +750,9 @@
       "email": "Notificações por Email",
       "emailDesc": "Enviar emails de candidatura, aprovação e rejeição",
       "push": "Notificações Push",
-      "pushDesc": "Alertas push na aplicação (quando disponível)"
+      "pushDesc": "Alertas push na aplicação (quando disponível)",
+      "diasExpiracao": "Antecedência dos alertas de expiração",
+      "diasExpiracaoDesc": "Quantos dias antes de um badge expirar os consultores são avisados."
     },
     "broadcast": {
       "titulo": "Difundir aviso",
@@ -764,8 +784,10 @@
       "nivel": "Nível",
       "pontos": "Pontos",
       "data": "Data",
+      "sla": "SLA",
       "estado": "Estado"
-    }
+    },
+    "slaExcedido": "SLA excedido"
   },
   "adminResource": {
     "adicionar": "Adicionar {{singular}}",

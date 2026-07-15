@@ -730,11 +730,27 @@
     "titulo": "Settings",
     "subtitulo": "General platform configurations.",
     "sla": {
-      "titulo": "SLA",
-      "subtitulo": "Request response deadline and alerts.",
-      "dias": "Response days",
-      "alertasLabel": "SLA Alerts",
-      "alertasDesc": "Send warnings when a request approaches the deadline"
+      "titulo": "SLA management",
+      "subtitulo": "Response deadlines for the Talent and Service Line teams. Each team's active SLA defines when overdue alerts (email and push) are sent.",
+      "equipaTalent": "Talent",
+      "equipaServiceLine": "Service Line",
+      "equipaGlobal": "Global",
+      "dias_one": "{{count}} response day",
+      "dias_other": "{{count}} response days",
+      "alertaResumo_one": "alert {{count}} day before",
+      "alertaResumo_other": "alert {{count}} days before",
+      "nomeLabel": "Name",
+      "nomePlaceholder": "Ex: Standard SLA",
+      "equipaLabel": "Team",
+      "diasLabel": "Days",
+      "alertaLabel": "Alert (days before)",
+      "adicionar": "Add SLA",
+      "vazio": "No SLAs configured — the default of 5 days is used.",
+      "ativa": "Active",
+      "remover": "Remove",
+      "verificar": "Run SLA check now",
+      "aVerificar": "Checking…",
+      "resumo": "Overdue: {{tm}} application(s) for the Talent team and {{sll}} for Service Line · {{emails}} alert email(s) sent"
     },
     "notificacoes": {
       "titulo": "Platform notifications",
@@ -742,7 +758,9 @@
       "email": "Email Notifications",
       "emailDesc": "Send application, approval and rejection emails",
       "push": "Push Notifications",
-      "pushDesc": "In-app push alerts (when available)"
+      "pushDesc": "In-app push alerts (when available)",
+      "diasExpiracao": "Expiration alert lead time",
+      "diasExpiracaoDesc": "How many days before a badge expires consultants are warned."
     },
     "broadcast": {
       "titulo": "Broadcast notice",
@@ -774,8 +792,10 @@
       "nivel": "Level",
       "pontos": "Points",
       "data": "Date",
+      "sla": "SLA",
       "estado": "Status"
-    }
+    },
+    "slaExcedido": "SLA exceeded"
   },
   "adminResource": {
     "adicionar": "Add {{singular}}",

@@ -30,6 +30,7 @@ const {
   getBadgeIdsDaServiceLine
 } = require('../services/serviceLineScope.service');
 const { sendPushToUser } = require('../services/pushNotification.service');
+const { getSLAConfigForTeam } = require('../services/sla.service');
 
 const STATUS = {
   OPEN: 'OPEN',
@@ -289,8 +290,16 @@ exports.submeterCandidatura = async (req, res) => {
       return res.status(200).json({ mensagem: 'Rascunho guardado.', candidaturaId: candidatura.id, estado: STATUS.OPEN });
     }
 
-    // "Submeter": passa OPEN -> SUBMITTED.
-    await candidatura.update({ estadoId: submittedId, dataSubmicao: new Date() });
+    // "Submeter": passa OPEN -> SUBMITTED, aplicando o SLA ativo da equipa
+    // de talent (guião: DATA_SLA_LIMITE calculada segundo a configuração).
+    const slaTalent = await getSLAConfigForTeam('talent').catch(() => null);
+    await candidatura.update({
+      estadoId: submittedId,
+      dataSubmicao: new Date(),
+      slaId: slaTalent?.slaId ?? null,
+      dataSlaLimite: slaTalent ? new Date(Date.now() + slaTalent.responseDays * 24 * 60 * 60 * 1000) : null,
+      slaExcedido: false
+    });
     await HistoricoCandidatura.create({
       candidaturaId: candidatura.id,
       userId: consultorId,

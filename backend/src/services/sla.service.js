@@ -26,12 +26,30 @@ const { sendPushToUser } = require('./pushNotification.service');
 
 const RESPONSE_DAYS_DEFAULT = 5;
 
-const getSLAConfig = async () => {
-  const config = await SLAConfig.findOne({
+// SLA por equipa (guião — bónus Gestor 10: "Definir e gerir os SLA da equipa
+// de talent e service line"). Resolução: config ativa da equipa -> config
+// ativa global (team null) -> default.
+const getSLAConfigForTeam = async (team) => {
+  const configs = await SLAConfig.findAll({
     where: { active: true },
     order: [['createdAt', 'DESC']]
   });
-  return { responseDays: config?.responseDays ?? RESPONSE_DAYS_DEFAULT };
+  const daEquipa = configs.find((c) => c.team === team);
+  const global = configs.find((c) => !c.team);
+  const escolhida = daEquipa || global;
+  return {
+    slaId: escolhida?.slaId ?? null,
+    responseDays: escolhida?.responseDays ?? RESPONSE_DAYS_DEFAULT,
+    alertDaysBeforeExpiration: escolhida?.alertDaysBeforeExpiration ?? null
+  };
+};
+
+const getSLAConfig = async () => {
+  const [talent, serviceline] = await Promise.all([
+    getSLAConfigForTeam('talent'),
+    getSLAConfigForTeam('serviceline')
+  ]);
+  return { talent, serviceline };
 };
 
 const diasDesde = (data) => Math.floor((Date.now() - new Date(data).getTime()) / (24 * 60 * 60 * 1000));
@@ -90,19 +108,28 @@ const candidaturaIncludeSLA = [
   { model: Consultant, include: [{ model: User, attributes: ['id', 'nome'] }] }
 ];
 
+// Marca a flag slaExcedido nas candidaturas em atraso (registo histórico).
+const marcarSlaExcedido = async (candidaturas) => {
+  const ids = candidaturas.filter((c) => !c.slaExcedido).map((c) => c.id);
+  if (ids.length === 0) return;
+  await Candidatura.update({ slaExcedido: true, updatedAt: new Date() }, { where: { id: ids } });
+};
+
 // Corre a verificação completa. Devolve um resumo (usado pelo endpoint).
 const verificarSLA = async () => {
-  const { responseDays } = await getSLAConfig();
-  const limite = new Date(Date.now() - responseDays * 24 * 60 * 60 * 1000);
+  const { talent, serviceline } = await getSLAConfig();
+  const limiteTalent = new Date(Date.now() - talent.responseDays * 24 * 60 * 60 * 1000);
+  const limiteServiceLine = new Date(Date.now() - serviceline.responseDays * 24 * 60 * 60 * 1000);
 
   const statuses = await BadgeStatus.findAll({ where: { code: ['SUBMITTED', 'VALIDATED'] } });
   const porCodigo = Object.fromEntries(statuses.map((s) => [s.code, s.statusId]));
 
   // --- Talent Managers: SUBMITTED em atraso (globais, o TM vê tudo) ---
   const submetidasAtrasadas = await Candidatura.findAll({
-    where: { estadoId: porCodigo.SUBMITTED, createdAt: { [Op.lt]: limite } },
+    where: { estadoId: porCodigo.SUBMITTED, createdAt: { [Op.lt]: limiteTalent } },
     include: candidaturaIncludeSLA
   });
+  await marcarSlaExcedido(submetidasAtrasadas);
   const atrasadasTM = submetidasAtrasadas.map((c) => resumoCandidatura(c, c.createdAt));
 
   let emailsEnviados = 0;
@@ -111,15 +138,16 @@ const verificarSLA = async () => {
       include: [{ association: User.associations.TalentManager, required: true }]
     });
     for (const tm of talentManagers) {
-      if (await alertarUser(tm, atrasadasTM, responseDays)) emailsEnviados++;
+      if (await alertarUser(tm, atrasadasTM, talent.responseDays)) emailsEnviados++;
     }
   }
 
   // --- Service Line Leaders: VALIDATED em atraso, filtradas pela sua SL ---
   const validadasAtrasadas = await Candidatura.findAll({
-    where: { estadoId: porCodigo.VALIDATED, dataValidacao: { [Op.lt]: limite } },
+    where: { estadoId: porCodigo.VALIDATED, dataValidacao: { [Op.lt]: limiteServiceLine } },
     include: candidaturaIncludeSLA
   });
+  await marcarSlaExcedido(validadasAtrasadas);
   const atrasadasSLL = validadasAtrasadas.map((c) => resumoCandidatura(c, c.dataValidacao));
 
   if (atrasadasSLL.length > 0) {
@@ -135,12 +163,14 @@ const verificarSLA = async () => {
       const daSuaLinha = atrasadasSLL.filter(
         (c) => c.serviceLineId === sll.ServiceLineLeader?.serviceLineId
       );
-      if (daSuaLinha.length > 0 && (await alertarUser(sll, daSuaLinha, responseDays))) emailsEnviados++;
+      if (daSuaLinha.length > 0 && (await alertarUser(sll, daSuaLinha, serviceline.responseDays))) emailsEnviados++;
     }
   }
 
   const resumo = {
-    responseDays,
+    responseDays: talent.responseDays,
+    responseDaysTalent: talent.responseDays,
+    responseDaysServiceLine: serviceline.responseDays,
     pendentesTalentManager: atrasadasTM.length,
     pendentesServiceLine: atrasadasSLL.length,
     emailsEnviados
@@ -159,4 +189,4 @@ const iniciarJobSLA = () => {
   setInterval(executar, 12 * 60 * 60 * 1000);
 };
 
-module.exports = { verificarSLA, iniciarJobSLA };
+module.exports = { verificarSLA, iniciarJobSLA, getSLAConfigForTeam };

@@ -730,11 +730,29 @@
     "titulo": "Configuraciones",
     "subtitulo": "Configuraciones generales de la plataforma.",
     "sla": {
-      "titulo": "SLA",
-      "subtitulo": "Plazo de respuesta a solicitudes y alertas.",
-      "dias": "Días de respuesta",
-      "alertasLabel": "Alertas de SLA",
-      "alertasDesc": "Enviar avisos cuando una solicitud se acerca a la fecha límite"
+      "titulo": "Gestión de SLAs",
+      "subtitulo": "Plazos de respuesta de los equipos de Talent y Service Line. El SLA activo de cada equipo define cuándo se envían las alertas de retraso (email y push).",
+      "equipaTalent": "Talent",
+      "equipaServiceLine": "Service Line",
+      "equipaGlobal": "Global",
+      "dias_one": "{{count}} día de respuesta",
+      "dias_other": "{{count}} días de respuesta",
+      "dias_many": "{{count}} días de respuesta",
+      "alertaResumo_one": "alerta {{count}} día antes",
+      "alertaResumo_other": "alerta {{count}} días antes",
+      "alertaResumo_many": "alerta {{count}} días antes",
+      "nomeLabel": "Nombre",
+      "nomePlaceholder": "Ej: SLA Estándar",
+      "equipaLabel": "Equipo",
+      "diasLabel": "Días",
+      "alertaLabel": "Alerta (días antes)",
+      "adicionar": "Añadir SLA",
+      "vazio": "Sin SLAs configurados — se usa el valor por defecto de 5 días.",
+      "ativa": "Activo",
+      "remover": "Quitar",
+      "verificar": "Ejecutar verificación de SLA ahora",
+      "aVerificar": "Verificando…",
+      "resumo": "Con retraso: {{tm}} candidatura(s) del equipo de Talent y {{sll}} de Service Line · {{emails}} email(s) de alerta enviados"
     },
     "notificacoes": {
       "titulo": "Notificaciones de la plataforma",
@@ -742,7 +760,9 @@
       "email": "Notificaciones por Email",
       "emailDesc": "Enviar emails de candidatura, aprobación y rechazo",
       "push": "Notificaciones Push",
-      "pushDesc": "Alertas push en la aplicación (cuando esté disponible)"
+      "pushDesc": "Alertas push en la aplicación (cuando esté disponible)",
+      "diasExpiracao": "Antelación de las alertas de expiración",
+      "diasExpiracaoDesc": "Cuántos días antes de que expire una insignia se avisa a los consultores."
     },
     "broadcast": {
       "titulo": "Difundir aviso",
@@ -774,8 +794,10 @@
       "nivel": "Nivel",
       "pontos": "Puntos",
       "data": "Fecha",
+      "sla": "SLA",
       "estado": "Estado"
-    }
+    },
+    "slaExcedido": "SLA excedido"
   },
   "adminResource": {
     "adicionar": "Añadir {{singular}}",

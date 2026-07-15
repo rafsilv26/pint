@@ -117,6 +117,50 @@ export async function difundirAviso() {
   await delay(500)
   return { mensagem: 'ok', total: 12 }
 }
+
+let _mockSlaConfigs = [
+  { id: 1, name: 'SLA Standard — Talent', team: 'talent', responseDays: 5, alertDaysBeforeExpiration: 2, active: true, createdAt: new Date().toISOString() },
+  { id: 2, name: 'SLA Standard — Service Line', team: 'serviceline', responseDays: 7, alertDaysBeforeExpiration: 2, active: true, createdAt: new Date().toISOString() },
+]
+const _slaEfetivo = () => {
+  const porEquipa = (team) => {
+    const cfg = _mockSlaConfigs.find((c) => c.active && c.team === team) || _mockSlaConfigs.find((c) => c.active && !c.team)
+    return { slaId: cfg?.id ?? null, responseDays: cfg?.responseDays ?? 5, alertDaysBeforeExpiration: cfg?.alertDaysBeforeExpiration ?? null }
+  }
+  return { talent: porEquipa('talent'), serviceline: porEquipa('serviceline') }
+}
+export async function getSlaConfigs() {
+  await delay()
+  return { configs: clone(_mockSlaConfigs), efetivo: _slaEfetivo() }
+}
+export async function criarSlaConfig(body) {
+  await delay()
+  const ativa = body.active !== false
+  if (ativa) _mockSlaConfigs = _mockSlaConfigs.map((c) => (c.team === (body.team || null) ? { ...c, active: false } : c))
+  const novo = { id: Date.now(), name: body.name, team: body.team || null, responseDays: Number(body.responseDays), alertDaysBeforeExpiration: body.alertDaysBeforeExpiration != null && body.alertDaysBeforeExpiration !== '' ? Number(body.alertDaysBeforeExpiration) : null, active: ativa, createdAt: new Date().toISOString() }
+  _mockSlaConfigs = [novo, ..._mockSlaConfigs]
+  return clone(novo)
+}
+export async function atualizarSlaConfig(id, body) {
+  await delay()
+  if (body.active) {
+    const alvo = _mockSlaConfigs.find((c) => c.id === id)
+    const team = body.team !== undefined ? (body.team || null) : (alvo?.team || null)
+    _mockSlaConfigs = _mockSlaConfigs.map((c) => (c.id !== id && c.team === team ? { ...c, active: false } : c))
+  }
+  _mockSlaConfigs = _mockSlaConfigs.map((c) => (c.id === id ? { ...c, ...body } : c))
+  return clone(_mockSlaConfigs.find((c) => c.id === id))
+}
+export async function apagarSlaConfig(id) {
+  await delay()
+  _mockSlaConfigs = _mockSlaConfigs.filter((c) => c.id !== id)
+  return {}
+}
+export async function runSlaCheck() {
+  await delay(600)
+  const efetivo = _slaEfetivo()
+  return { responseDaysTalent: efetivo.talent.responseDays, responseDaysServiceLine: efetivo.serviceline.responseDays, pendentesTalentManager: 1, pendentesServiceLine: 0, emailsEnviados: 1 }
+}
 export async function getMeusObjetivos() {
   await delay()
   return clone(_mockObjetivos)
@@ -599,7 +643,11 @@ export async function deleteUser(id) {
 
 export async function getAdminPedidos() {
   await delay()
-  return clone(mockServiceLinePedidos)
+  return clone(mockServiceLinePedidos).map((c, i) => ({
+    ...c,
+    slaLimite: new Date(Date.now() + 3 * 86400000).toLocaleDateString('pt-PT'),
+    slaExcedido: i === 0,
+  }))
 }
 
 export async function updateConsultant() {
