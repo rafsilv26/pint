@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -34,8 +36,11 @@ class _CatalogPageState extends State<CatalogPage> {
     super.dispose();
   }
 
-  Future<void> reload() async {
-    await AppSyncService().synchronizeIfNeeded();
+  Future<void> reload({bool force = false}) async {
+    await AppSyncService().synchronizeIfNeeded(force: force);
+    if (!mounted) {
+      return;
+    }
     final future = repository.getCatalogBadges();
     setState(() {
       badgesFuture = future;
@@ -52,13 +57,13 @@ class _CatalogPageState extends State<CatalogPage> {
         badgeId: badge.id,
         evidenceFiles: evidenceFiles,
       );
-      await reload();
       if (!mounted) {
         return true;
       }
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: AppText(message)));
+      unawaited(reload(force: true));
       return true;
     } on ApiRequestException catch (error) {
       if (!mounted) {
@@ -568,8 +573,8 @@ class BadgeDetailPage extends StatelessWidget {
               SizedBox(
                 height: 52,
                 child: FilledButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
+                  onPressed: () async {
+                    final submitted = await Navigator.of(context).push<bool>(
                       MaterialPageRoute(
                         builder: (context) => BadgeEvidenceSubmissionPage(
                           badge: badge,
@@ -577,6 +582,9 @@ class BadgeDetailPage extends StatelessWidget {
                         ),
                       ),
                     );
+                    if (submitted == true && context.mounted) {
+                      Navigator.of(context).pop(true);
+                    }
                   },
                   icon: const Icon(Icons.arrow_forward),
                   label: const AppText('Candidatar a Badge'),
@@ -696,15 +704,14 @@ class _BadgeEvidenceSubmissionPageState
       return;
     }
 
+    if (success) {
+      Navigator.of(context).pop(true);
+      return;
+    }
+
     setState(() {
       isSubmitting = false;
     });
-
-    if (success) {
-      final navigator = Navigator.of(context);
-      navigator.pop();
-      navigator.pop();
-    }
   }
 
   @override
