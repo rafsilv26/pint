@@ -10,6 +10,7 @@ const cors = require('cors');
 require('dotenv').config();
 const sequelize = require('./src/config/database');
 const { ensurePublicBadgeTokens } = require('./src/services/publicBadgeToken.service');
+const { startPushOutbox } = require('./src/services/pushOutbox.service');
 require('./src/models'); // Importa os modelos para garantir que estão registrados no Sequelize
 
 const app = express();
@@ -28,6 +29,9 @@ sequelize.authenticate()
     .then(async () => {
         await ensurePublicBadgeTokens();
         console.log('🔄 Tabelas sincronizadas no Neon.');
+        if (process.env.PUSH_OUTBOX_ENABLED === 'true') {
+            startPushOutbox();
+        }
     })
     .catch(err => console.error('❌ Erro crucial de ligação:', err));
 
