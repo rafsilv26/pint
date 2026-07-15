@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'app_sync_service.dart';
 import 'badges_api_service.dart';
@@ -14,6 +15,12 @@ const _firebaseSenderId = String.fromEnvironment(
 const _firebaseProjectId = String.fromEnvironment('FIREBASE_PROJECT_ID');
 const _firebaseStorageBucket = String.fromEnvironment(
   'FIREBASE_STORAGE_BUCKET',
+);
+const _androidNotificationChannel = AndroidNotificationChannel(
+  'badge_updates',
+  'Atualizações de badges',
+  description: 'Aprovações, rejeições e alterações das candidaturas.',
+  importance: Importance.max,
 );
 
 FirebaseOptions? get _firebaseOptions {
@@ -73,7 +80,10 @@ class PushNotificationService {
   static final PushNotificationService instance = PushNotificationService._();
 
   final BadgesApiService apiService = BadgesApiService();
+  final FlutterLocalNotificationsPlugin localNotifications =
+      FlutterLocalNotificationsPlugin();
   bool initialized = false;
+  bool localNotificationsInitialized = false;
   String? currentToken;
 
   Future<bool> initialize() async {
@@ -81,6 +91,7 @@ class PushNotificationService {
     try {
       await _ensureFirebaseInitialized();
       if (!initialized) {
+        await _initializeLocalNotifications();
         FirebaseMessaging.onBackgroundMessage(
           firebaseMessagingBackgroundHandler,
         );
@@ -89,7 +100,13 @@ class PushNotificationService {
           badge: true,
           sound: true,
         );
-        FirebaseMessaging.onMessage.listen(_handleMessage);
+        await FirebaseMessaging.instance
+            .setForegroundNotificationPresentationOptions(
+              alert: true,
+              badge: true,
+              sound: true,
+            );
+        FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
         FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
         FirebaseMessaging.instance.onTokenRefresh.listen(_registerToken);
         final initialMessage = await FirebaseMessaging.instance
@@ -104,6 +121,70 @@ class PushNotificationService {
       debugPrint('Firebase PUSH indisponível: $error');
       return false;
     }
+  }
+
+  Future<void> _initializeLocalNotifications() async {
+    if (localNotificationsInitialized ||
+        defaultTargetPlatform != TargetPlatform.android) {
+      return;
+    }
+
+    await localNotifications.initialize(
+      settings: const InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      ),
+    );
+    await localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(_androidNotificationChannel);
+    localNotificationsInitialized = true;
+  }
+
+  Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    await _showForegroundNotification(message);
+    await _handleMessage(message);
+  }
+
+  Future<void> _showForegroundNotification(RemoteMessage message) async {
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+
+    final title = message.notification?.title?.trim().isNotEmpty == true
+        ? message.notification!.title!.trim()
+        : (message.data['title']?.toString().trim().isNotEmpty == true
+              ? message.data['title'].toString().trim()
+              : 'Softinsa Badges');
+    final body = message.notification?.body?.trim().isNotEmpty == true
+        ? message.notification!.body!.trim()
+        : message.data['body']?.toString().trim();
+
+    await localNotifications.show(
+      id: _notificationId(message),
+      title: title,
+      body: body,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'badge_updates',
+          'Atualizações de badges',
+          channelDescription:
+              'Aprovações, rejeições e alterações das candidaturas.',
+          importance: Importance.max,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+        ),
+      ),
+      payload: message.data['action']?.toString(),
+    );
+  }
+
+  int _notificationId(RemoteMessage message) {
+    final source =
+        message.messageId ??
+        '${message.sentTime?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch}'
+            '-${message.notification?.title ?? ''}'
+            '-${message.notification?.body ?? ''}';
+    return source.hashCode & 0x7fffffff;
   }
 
   Future<void> _handleMessage(RemoteMessage message) async {
