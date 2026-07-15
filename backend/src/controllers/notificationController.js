@@ -2,7 +2,11 @@ const { Notice, NotificationConfig } = require('../models');
 const { verificarLigacao, enviarEmail } = require('../services/email.service');
 const { getPrefs, savePrefs } = require('../services/notificationPrefs.service');
 const { notificarTodosConsultores } = require('../services/notification.service');
-const { registerDeviceToken, unregisterDeviceToken } = require('../services/pushNotification.service');
+const {
+  registerDeviceToken,
+  unregisterDeviceToken,
+  getPushStatus
+} = require('../services/pushNotification.service');
 
 exports.registerPushToken = async (req, res) => {
   try {
@@ -26,6 +30,14 @@ exports.unregisterPushToken = async (req, res) => {
     res.json({ mensagem: 'Dispositivo removido das notificações push.' });
   } catch (error) {
     res.status(500).json({ erro: 'Erro ao remover dispositivo.', details: error.message });
+  }
+};
+
+exports.getMyPushStatus = async (req, res) => {
+  try {
+    res.json(await getPushStatus(req.user.id));
+  } catch (error) {
+    res.status(500).json({ erro: 'Erro ao obter estado das notificações push.', details: error.message });
   }
 };
 

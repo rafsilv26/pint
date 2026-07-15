@@ -17,6 +17,7 @@ router.post('/sla-check', authorize('Admin'), notificationController.runSlaCheck
 // Preferências de notificação por email do próprio utilizador
 router.get('/preferences', notificationController.getMyNotificationPrefs);
 router.put('/preferences', notificationController.saveMyNotificationPrefs);
+router.get('/push-status', notificationController.getMyPushStatus);
 router.post('/push-token', notificationController.registerPushToken);
 router.delete('/push-token', notificationController.unregisterPushToken);
 

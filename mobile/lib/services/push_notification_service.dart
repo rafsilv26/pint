@@ -42,11 +42,19 @@ FirebaseOptions? get _firebaseOptions {
   );
 }
 
+Future<void> _ensureFirebaseInitialized() async {
+  if (Firebase.apps.isNotEmpty) return;
+  final options = _firebaseOptions;
+  if (options == null) {
+    await Firebase.initializeApp();
+  } else {
+    await Firebase.initializeApp(options: options);
+  }
+}
+
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  final options = _firebaseOptions;
-  if (options == null) return;
-  if (Firebase.apps.isEmpty) await Firebase.initializeApp(options: options);
+  await _ensureFirebaseInitialized();
   if (_requestsDataRefresh(message)) {
     await AppSyncService().synchronizeIfNeeded();
   }
@@ -70,10 +78,8 @@ class PushNotificationService {
 
   Future<bool> initialize() async {
     if (kIsWeb) return false;
-    final options = _firebaseOptions;
-    if (options == null) return false;
     try {
-      if (Firebase.apps.isEmpty) await Firebase.initializeApp(options: options);
+      await _ensureFirebaseInitialized();
       if (!initialized) {
         FirebaseMessaging.onBackgroundMessage(
           firebaseMessagingBackgroundHandler,
@@ -110,8 +116,9 @@ class PushNotificationService {
     currentToken = token;
     try {
       await apiService.registerPushToken(token, defaultTargetPlatform.name);
-    } catch (_) {
+    } catch (error) {
       // Sem sessão no arranque: AuthGate volta a chamar initialize após login.
+      debugPrint('Não foi possível registar o token PUSH: $error');
     }
   }
 
