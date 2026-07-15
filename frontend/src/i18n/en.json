@@ -780,6 +780,27 @@
       "guardar": "Save Settings"
     }
   },
+  "adminEmailTemplates": {
+    "titulo": "Email templates",
+    "subtitulo": "Customize the subject and content of the emails sent by the platform.",
+    "escolhe": "Pick a template on the left to edit it.",
+    "personalizado": "Customized",
+    "padrao": "Default",
+    "assunto": "Subject",
+    "corpo": "Body (HTML)",
+    "variaveis": "Available variables",
+    "guardar": "Save",
+    "aGuardar": "Saving…",
+    "guardado": "Template saved ✓",
+    "repor": "Reset to default",
+    "reposto": "Template reset to default ✓",
+    "preVisualizar": "Preview",
+    "previewAssunto": "Subject",
+    "previewTitulo": "Email preview",
+    "enviarTeste": "Send test",
+    "aEnviar": "Sending…",
+    "testeEnviado": "Test email sent to {{para}} ✓"
+  },
   "adminPedidos": {
     "titulo": "Badge Requests",
     "subtitulo": "All badge applications.",
@@ -1002,6 +1023,7 @@
       "politicas": "GDPR Policies",
       "avisos": "Notices",
       "informacoes": "Information",
+      "templatesEmail": "Email templates",
       "definicoes": "Settings"
     },
     "roles": {

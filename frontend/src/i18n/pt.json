@@ -772,6 +772,27 @@
       "guardar": "Guardar Definições"
     }
   },
+  "adminEmailTemplates": {
+    "titulo": "Templates de email",
+    "subtitulo": "Personaliza o assunto e o conteúdo dos emails enviados pela plataforma.",
+    "escolhe": "Escolhe um template à esquerda para o editar.",
+    "personalizado": "Personalizado",
+    "padrao": "Padrão",
+    "assunto": "Assunto",
+    "corpo": "Corpo (HTML)",
+    "variaveis": "Variáveis disponíveis",
+    "guardar": "Guardar",
+    "aGuardar": "A guardar…",
+    "guardado": "Template guardado ✓",
+    "repor": "Repor padrão",
+    "reposto": "Template reposto para o padrão ✓",
+    "preVisualizar": "Pré-visualizar",
+    "previewAssunto": "Assunto",
+    "previewTitulo": "Pré-visualização do email",
+    "enviarTeste": "Enviar teste",
+    "aEnviar": "A enviar…",
+    "testeEnviado": "Email de teste enviado para {{para}} ✓"
+  },
   "adminPedidos": {
     "titulo": "Pedido de Badges",
     "subtitulo": "Todas as candidaturas a badges.",
@@ -994,6 +1015,7 @@
       "politicas": "Políticas RGPD",
       "avisos": "Avisos",
       "informacoes": "Informações",
+      "templatesEmail": "Templates de email",
       "definicoes": "Definições"
     },
     "roles": {

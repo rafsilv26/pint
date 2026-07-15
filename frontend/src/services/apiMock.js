@@ -118,6 +118,46 @@ export async function difundirAviso() {
   return { mensagem: 'ok', total: 12 }
 }
 
+const _mockTemplateDefs = [
+  { code: 'candidatura-submetida', nome: 'Candidatura submetida', descricao: 'Enviado ao consultor quando submete uma candidatura a badge.', variaveis: { consultor: 'Nome do consultor', badge: 'Nome do badge', nivel: 'Nível do badge' }, assuntoDefault: '✅ Candidatura submetida com sucesso', corpoDefault: '<h2>Olá {{consultor}}!</h2><p>A tua candidatura ao badge <strong>{{badge}}</strong> foi submetida com sucesso.</p>' },
+  { code: 'badge-aprovado', nome: 'Badge aprovado', descricao: 'Enviado ao consultor quando o badge é aprovado.', variaveis: { consultor: 'Nome do consultor', badge: 'Nome do badge', nivel: 'Nível', pontos: 'Pontos', link: 'Link público' }, assuntoDefault: '🎉 Badge aprovado!', corpoDefault: '<h2>Parabéns {{consultor}}! 🎉</h2><p>O teu badge <strong>{{badge}}</strong> foi aprovado!</p>' },
+  { code: 'badge-rejeitado', nome: 'Candidatura rejeitada', descricao: 'Enviado ao consultor quando a candidatura é rejeitada.', variaveis: { consultor: 'Nome do consultor', badge: 'Nome do badge', motivo: 'Motivo' }, assuntoDefault: '❌ Candidatura rejeitada', corpoDefault: '<h2>Olá {{consultor}}</h2><p>A tua candidatura ao badge <strong>{{badge}}</strong> foi rejeitada.</p><p><strong>Motivo:</strong> {{motivo}}</p>' },
+  { code: 'alerta-sla', nome: 'Alerta de SLA ultrapassado', descricao: 'Enviado a TM/SLL com as candidaturas em atraso.', variaveis: { nome: 'Destinatário', total: 'Total em atraso', dias: 'Dias do SLA', tabela: 'Linhas da tabela' }, assuntoDefault: '⏰ SLA ultrapassado: {{total}} candidatura(s) em atraso', corpoDefault: '<h2>Olá {{nome}}</h2><p>Há <strong>{{total}}</strong> candidatura(s) há mais de {{dias}} dias.</p>{{tabela}}' },
+]
+let _mockTemplateOverrides = {}
+const _mockRender = (texto, vars) => String(texto || '').replace(/\{\{(\w+)\}\}/g, (_m, k) => (vars?.[k] != null ? String(vars[k]) : `[${k}]`))
+const _mockTemplate = (def) => {
+  const o = _mockTemplateOverrides[def.code]
+  return { ...def, assunto: o?.assunto || def.assuntoDefault, corpo: o?.corpo || def.corpoDefault, personalizado: Boolean(o), atualizadoEm: o?.atualizadoEm || null }
+}
+export async function getEmailTemplates() {
+  await delay()
+  return _mockTemplateDefs.map(_mockTemplate)
+}
+export async function saveEmailTemplate(code, body) {
+  await delay()
+  _mockTemplateOverrides = { ..._mockTemplateOverrides, [code]: { assunto: body.assunto, corpo: body.corpo, atualizadoEm: new Date().toISOString() } }
+  return _mockTemplate(_mockTemplateDefs.find((d) => d.code === code))
+}
+export async function resetEmailTemplate(code) {
+  await delay()
+  _mockTemplateOverrides = Object.fromEntries(Object.entries(_mockTemplateOverrides).filter(([k]) => k !== code))
+  return _mockTemplate(_mockTemplateDefs.find((d) => d.code === code))
+}
+export async function previewEmailTemplate(code, body) {
+  await delay(150)
+  const def = _mockTemplateDefs.find((d) => d.code === code)
+  const exemplo = { consultor: 'Maria Santos', badge: 'Azure Fundamentals', nivel: 'Júnior', pontos: 100, link: '#', nome: 'Maria Santos', total: 2, dias: 5, motivo: 'Evidências insuficientes.', tabela: '' }
+  return {
+    assunto: _mockRender(body?.assunto || def.assuntoDefault, exemplo),
+    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;"><div style="background-color: #003087; padding: 20px; text-align: center;"><h1 style="color: white; margin: 0;">SOFTINSA</h1></div><div style="padding: 30px; background-color: #f9f9f9;">${_mockRender(body?.corpo || def.corpoDefault, exemplo)}</div></div>`,
+  }
+}
+export async function testEmailTemplate() {
+  await delay(400)
+  return { mensagem: 'Email de teste enviado.', para: 'admin@exemplo.com' }
+}
+
 let _mockSlaConfigs = [
   { id: 1, name: 'SLA Standard — Talent', team: 'talent', responseDays: 5, alertDaysBeforeExpiration: 2, active: true, createdAt: new Date().toISOString() },
   { id: 2, name: 'SLA Standard — Service Line', team: 'serviceline', responseDays: 7, alertDaysBeforeExpiration: 2, active: true, createdAt: new Date().toISOString() },

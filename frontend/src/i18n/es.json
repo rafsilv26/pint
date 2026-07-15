@@ -782,6 +782,27 @@
       "guardar": "Guardar Configuraciones"
     }
   },
+  "adminEmailTemplates": {
+    "titulo": "Plantillas de email",
+    "subtitulo": "Personaliza el asunto y el contenido de los emails enviados por la plataforma.",
+    "escolhe": "Elige una plantilla a la izquierda para editarla.",
+    "personalizado": "Personalizada",
+    "padrao": "Predeterminada",
+    "assunto": "Asunto",
+    "corpo": "Cuerpo (HTML)",
+    "variaveis": "Variables disponibles",
+    "guardar": "Guardar",
+    "aGuardar": "Guardando…",
+    "guardado": "Plantilla guardada ✓",
+    "repor": "Restaurar predeterminada",
+    "reposto": "Plantilla restaurada ✓",
+    "preVisualizar": "Vista previa",
+    "previewAssunto": "Asunto",
+    "previewTitulo": "Vista previa del email",
+    "enviarTeste": "Enviar prueba",
+    "aEnviar": "Enviando…",
+    "testeEnviado": "Email de prueba enviado a {{para}} ✓"
+  },
   "adminPedidos": {
     "titulo": "Solicitudes de Insignias",
     "subtitulo": "Todas las candidaturas a insignias.",
@@ -1004,6 +1025,7 @@
       "politicas": "Políticas RGPD",
       "avisos": "Avisos",
       "informacoes": "Información",
+      "templatesEmail": "Plantillas de email",
       "definicoes": "Configuración"
     },
     "roles": {

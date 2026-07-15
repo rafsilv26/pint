@@ -230,6 +230,22 @@ export async function difundirAviso(body) {
   return http('/notifications/broadcast', { method: 'POST', body })
 }
 
+export async function getEmailTemplates() {
+  return http('/email-templates')
+}
+export async function saveEmailTemplate(code, body) {
+  return http(`/email-templates/${code}`, { method: 'PUT', body })
+}
+export async function resetEmailTemplate(code) {
+  return http(`/email-templates/${code}`, { method: 'DELETE' })
+}
+export async function previewEmailTemplate(code, body) {
+  return http(`/email-templates/${code}/preview`, { method: 'POST', body })
+}
+export async function testEmailTemplate(code) {
+  return http(`/email-templates/${code}/test`, { method: 'POST' })
+}
+
 export async function getSlaConfigs() {
   return http('/sla/configs')
 }

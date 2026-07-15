@@ -17,6 +17,7 @@ router.use('/gamification', protect, require('./gamificationRoutes'));
 router.use('/email-signature', protect, require('./emailSignatureRoutes'));
 router.use('/timeline', protect, require('./timelineRoutes'));
 router.use('/sla', protect, require('./slaRoutes'));
+router.use('/email-templates', protect, require('./emailTemplateRoutes'));
 router.use('/mobile-sync', protect, require('./mobileSyncRoutes'));
 
 module.exports = router;
