@@ -1,6 +1,7 @@
 const User = require('./User');
 const Badge = require('./Badge');
 const Candidatura = require('./Candidatura');
+const CandidaturaSubmission = require('./CandidaturaSubmission');
 const Evidencia = require('./Evidencia');
 const HistoricoCandidatura = require('./HistoricoCandidatura');
 const LearningPath = require('./LearningPath');
@@ -86,6 +87,12 @@ Candidatura.belongsTo(ServiceLineLeader, { foreignKey: 'serviceLineLeaderId', as
 
 SLAConfig.hasMany(Candidatura, { foreignKey: 'slaId' });
 Candidatura.belongsTo(SLAConfig, { foreignKey: 'slaId' });
+
+Candidatura.hasMany(CandidaturaSubmission, {
+  foreignKey: 'candidaturaId',
+  as: 'clientSubmissions'
+});
+CandidaturaSubmission.belongsTo(Candidatura, { foreignKey: 'candidaturaId' });
 
 // Evidence
 Candidatura.hasMany(Evidencia, { foreignKey: 'candidaturaId', as: 'evidencias' });
@@ -184,6 +191,7 @@ module.exports = {
   User,
   Badge,
   Candidatura,
+  CandidaturaSubmission,
   Evidencia,
   HistoricoCandidatura,
   LearningPath,

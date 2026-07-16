@@ -22,6 +22,11 @@ const Evidencia = sequelize.define('Evidencia', {
     type: DataTypes.INTEGER,
     allowNull: true
   },
+  clientEvidenceId: {
+    type: DataTypes.STRING(160),
+    allowNull: true,
+    comment: 'Identificador idempotente da evidência enviado pela aplicação mobile'
+  },
   requisitoId: {
     type: DataTypes.INTEGER,
     allowNull: false
@@ -61,7 +66,12 @@ const Evidencia = sequelize.define('Evidencia', {
   }
 }, {
   tableName: 'EVIDENCIA',
-  timestamps: false
+  timestamps: false,
+  indexes: [{
+    unique: true,
+    fields: ['candidaturaId', 'clientEvidenceId'],
+    name: 'evidencia_candidatura_client_evidence_unique'
+  }]
 });
 
 module.exports = Evidencia;

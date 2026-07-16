@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../l10n/app_language.dart';
 import '../models/dashboard_data.dart';
+import '../repositories/dashboard_repository.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../services/app_data_refresh_service.dart';
 import '../services/auth_service.dart';
 import '../services/push_notification_service.dart';
 import 'change_password_page.dart';
@@ -22,12 +26,44 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final AuthService authService = AuthService();
   final MobileApiRepository mobileRepository = MobileApiRepository();
+  final DashboardRepository dashboardRepository = DashboardRepository();
   late Future<_ProfileViewData> profileFuture;
+  late DashboardData currentData;
 
   @override
   void initState() {
     super.initState();
+    currentData = widget.data;
     profileFuture = loadProfileData();
+    AppDataRefreshService.instance.addListener(handleDataChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant ProfilePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.data, widget.data)) currentData = widget.data;
+  }
+
+  @override
+  void dispose() {
+    AppDataRefreshService.instance.removeListener(handleDataChanged);
+    super.dispose();
+  }
+
+  void handleDataChanged() {
+    unawaited(reloadLocal());
+  }
+
+  Future<void> reloadLocal() async {
+    final results = await Future.wait<Object>([
+      loadProfileData(),
+      dashboardRepository.getDashboard(),
+    ]);
+    if (!mounted) return;
+    setState(() {
+      profileFuture = Future.value(results[0] as _ProfileViewData);
+      currentData = results[1] as DashboardData;
+    });
   }
 
   Future<_ProfileViewData> loadProfileData() async {
@@ -78,7 +114,7 @@ class _ProfilePageState extends State<ProfilePage> {
         final profile = snapshot.data ?? const _ProfileViewData();
 
         return _ProfileContent(
-          data: widget.data,
+          data: currentData,
           profile: profile,
           onLogout: logout,
         );

@@ -471,6 +471,27 @@ class CatalogBadge {
   final CatalogApplication? application;
 
   bool get hasApplication => applicationStatus.isNotEmpty;
+
+  CatalogBadge copyWith({
+    String? applicationStatus,
+    CatalogApplication? application,
+  }) {
+    return CatalogBadge(
+      id: id,
+      title: title,
+      description: description,
+      level: level,
+      area: area,
+      points: points,
+      duration: duration,
+      type: type,
+      provider: provider,
+      imagePath: imagePath,
+      requirements: requirements,
+      applicationStatus: applicationStatus ?? this.applicationStatus,
+      application: application ?? this.application,
+    );
+  }
 }
 
 class CatalogApplication {

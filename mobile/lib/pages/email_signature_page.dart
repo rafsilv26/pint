@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../services/app_data_refresh_service.dart';
 import '../widgets/app_bottom_navigation.dart';
 
 class EmailSignaturePage extends StatefulWidget {
@@ -18,6 +21,8 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
   bool showCompanyLogo = true;
   bool loading = true;
   bool saving = false;
+  bool dirty = false;
+  bool applyingData = false;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController roleController = TextEditingController();
@@ -34,12 +39,38 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
   @override
   void initState() {
     super.initState();
+    for (final controller in _editableControllers) {
+      controller.addListener(markDirty);
+    }
+    AppDataRefreshService.instance.addListener(handleDataChanged);
     loadSignature();
+  }
+
+  List<TextEditingController> get _editableControllers => [
+    nameController,
+    roleController,
+    emailController,
+    phoneController,
+    websiteController,
+  ];
+
+  void markDirty() {
+    if (!applyingData) dirty = true;
+  }
+
+  void handleDataChanged() {
+    if (dirty || saving) {
+      return;
+    }
+    unawaited(loadSignature());
   }
 
   Future<void> loadSignature() async {
     final data = await repository.getEmailSignature();
     if (!mounted) {
+      return;
+    }
+    if (dirty || saving) {
       return;
     }
 
@@ -50,11 +81,14 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
   }
 
   void applySignatureData(EmailSignatureData data) {
+    applyingData = true;
     nameController.text = data.profile.name;
     roleController.text = data.profile.role;
     emailController.text = data.profile.email;
     websiteController.text = data.profile.website;
     badges = data.badges.map(_SignatureBadge.fromApi).toList();
+    applyingData = false;
+    dirty = false;
   }
 
   void toggleBadge(int index) {
@@ -68,6 +102,7 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
     }
 
     setState(() {
+      dirty = true;
       badges = [
         for (var i = 0; i < badges.length; i++)
           if (i == index)
@@ -131,6 +166,7 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
 
   @override
   void dispose() {
+    AppDataRefreshService.instance.removeListener(handleDataChanged);
     nameController.dispose();
     roleController.dispose();
     emailController.dispose();
@@ -178,6 +214,7 @@ class _EmailSignaturePageState extends State<EmailSignaturePage> {
                     saving: saving,
                     onLogoChanged: (value) {
                       setState(() {
+                        dirty = true;
                         showCompanyLogo = value;
                       });
                     },

@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../services/app_data_refresh_service.dart';
 import '../services/badges_api_service.dart';
 import '../services/app_sync_service.dart';
 
@@ -28,16 +29,26 @@ class _CatalogPageState extends State<CatalogPage> {
   void initState() {
     super.initState();
     badgesFuture = repository.getCatalogBadges();
+    AppDataRefreshService.instance.addListener(handleDataChanged);
   }
 
   @override
   void dispose() {
+    AppDataRefreshService.instance.removeListener(handleDataChanged);
     searchController.dispose();
     super.dispose();
   }
 
+  void handleDataChanged() {
+    unawaited(reloadLocal());
+  }
+
   Future<void> reload({bool force = false}) async {
     await AppSyncService().synchronizeIfNeeded(force: force);
+    await reloadLocal();
+  }
+
+  Future<void> reloadLocal() async {
     if (!mounted) {
       return;
     }
@@ -53,7 +64,7 @@ class _CatalogPageState extends State<CatalogPage> {
     List<EvidenceAttachment> evidenceFiles,
   ) async {
     try {
-      final message = await repository.submitCandidatura(
+      final result = await repository.submitCandidatura(
         badgeId: badge.id,
         evidenceFiles: evidenceFiles,
       );
@@ -62,8 +73,12 @@ class _CatalogPageState extends State<CatalogPage> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: AppText(message)));
-      unawaited(reload(force: true));
+      ).showSnackBar(SnackBar(content: AppText(result.message)));
+      if (result.isQueued) {
+        unawaited(reloadLocal());
+      } else {
+        unawaited(reload(force: true));
+      }
       return true;
     } on ApiRequestException catch (error) {
       if (!mounted) {
