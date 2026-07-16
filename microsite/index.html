@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="pt">
+<html lang="PT-pt">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Softinsa Badge Platform — plataforma de credenciais digitais verificáveis. Projeto PINT 2025.">
-<title>Softinsa Badge Platform — Credencial verificável · PINT 2025</title>
+<meta name="description" content="Softinsa Badge Platform | Projeto PINT 2025.">
+<title>Softinsa Badge Platform · PINT 2025</title>
 <style>
   :root {
     --paper: #F4F5F2;
@@ -27,31 +27,63 @@
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper: #0E1524; --surface: #141D30; --surface-2: #1B2740;
-      --ink: #EAEEF6; --ink-soft: #9EABC5; --line: #263450; --line-strong: #33456A;
-      --brand: #6E9BFF; --brand-deep: #4C7BEA; --seal: #D08A4E; --seal-soft: #2A2114;
-      --verify: #46B888; --shadow: 0 1px 1px rgba(0,0,0,.3), 0 22px 46px -22px rgba(0,0,0,.66);
+      --paper: #0E1524; 
+      --surface: #141D30; 
+      --surface-2: #1B2740;
+      --ink: #EAEEF6; 
+      --ink-soft: #9EABC5; 
+      --line: #263450; 
+      --line-strong: #33456A;
+      --brand: #6E9BFF; 
+      --brand-deep: #4C7BEA; 
+      --seal: #D08A4E; 
+      --seal-soft: #2A2114;
+      --verify: #46B888; 
+      --shadow: 0 1px 1px rgba(0,0,0,.3), 0 22px 46px -22px rgba(0,0,0,.66);
     }
   }
   :root[data-theme="light"] {
-    --paper:#F4F5F2; --surface:#FFFFFF; --surface-2:#ECEEE8; --ink:#17203A; --ink-soft:#4B5670;
-    --line:#DDE0D9; --line-strong:#C7CBC1; --brand:#1B3A8F; --brand-deep:#14306F; --seal:#A96A34;
-    --seal-soft:#EADFCF; --verify:#1E7A52; --shadow:0 1px 1px rgba(23,32,58,.04), 0 18px 40px -20px rgba(23,32,58,.22);
+    --paper:#F4F5F2; 
+    --surface:#FFFFFF; 
+    --surface-2:#ECEEE8; 
+    --ink:#17203A; 
+    --ink-soft:#4B5670;
+    --line:#DDE0D9; 
+    --line-strong:#C7CBC1; 
+    --brand:#1B3A8F; 
+    --brand-deep:#14306F; 
+    --seal:#A96A34;
+    --seal-soft:#EADFCF; 
+    --verify:#1E7A52; 
+    --shadow:0 1px 1px rgba(23,32,58,.04), 0 18px 40px -20px rgba(23,32,58,.22);
   }
   :root[data-theme="dark"] {
-    --paper:#0E1524; --surface:#141D30; --surface-2:#1B2740; --ink:#EAEEF6; --ink-soft:#9EABC5;
-    --line:#263450; --line-strong:#33456A; --brand:#6E9BFF; --brand-deep:#4C7BEA; --seal:#D08A4E;
-    --seal-soft:#2A2114; --verify:#46B888; --shadow:0 1px 1px rgba(0,0,0,.3), 0 22px 46px -22px rgba(0,0,0,.66);
+    --paper:#0E1524; 
+    --surface:#141D30; 
+    --surface-2:#1B2740; 
+    --ink:#EAEEF6; 
+    --ink-soft:#9EABC5;
+    --line:#263450; 
+    --line-strong:#33456A; 
+    --brand:#6E9BFF; 
+    --brand-deep:#4C7BEA; 
+    --seal:#D08A4E;
+    --seal-soft:#2A2114; 
+    --verify:#46B888; 
+    --shadow:0 1px 1px rgba(0,0,0,.3), 0 22px 46px -22px rgba(0,0,0,.66);
   }
 
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
+
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body {
     margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans);
     line-height: 1.62; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
   }
+
   .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 26px; }
+  
   a { color: var(--brand); text-decoration: none; }
   a:focus-visible, button:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
 
@@ -218,279 +250,488 @@
 </style>
 </head>
 <body>
-<nav class="nav">
-  <div class="wrap nav-in">
-    <span class="brand">
-      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="10.5" r="7" fill="none" stroke="var(--seal)" stroke-width="1.6"/>
-        <circle cx="12" cy="10.5" r="3.4" fill="var(--brand)"/>
-        <path d="M8.6 16 L7 22 L12 19.4 L17 22 L15.4 16" fill="none" stroke="var(--seal)" stroke-width="1.4"/>
-      </svg>
-      Softinsa Badges
-    </span>
-    <div class="nav-links">
-      <a href="#credencial">Credencial</a>
-      <a href="#workflow">Validação</a>
-      <a href="#niveis">Níveis</a>
-      <a href="#stack">Tecnologia</a>
-      <a class="btn btn-ghost" href="https://github.com/rafsilv26/pint" target="_blank" rel="noopener">Código-fonte</a>
-    </div>
-  </div>
-</nav>
-
-<header class="hero" id="credencial">
-  <div class="wrap hero-grid">
-    <div>
-      <span class="hero-tag">
-        <span class="tick"><svg width="9" height="9" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.2 L5 8.6 L9.5 3.5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        Projeto PINT 2025 · Softinsa
+  <nav class="nav">
+    <div class="wrap nav-in">
+      <span class="brand">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="10.5" r="7" fill="none" stroke="var(--seal)" stroke-width="1.6" />
+          <circle cx="12" cy="10.5" r="3.4" fill="var(--brand)" />
+          <path d="M8.6 16 L7 22 L12 19.4 L17 22 L15.4 16" fill="none" stroke="var(--seal)" stroke-width="1.4" />
+        </svg>
+        Softinsa Badges
       </span>
-      <h1>Formação que se torna<br>uma credencial verificável.</h1>
-      <p class="lead">Uma plataforma onde os consultores da Softinsa evidenciam competências, os gestores as validam por um circuito de aprovação auditável, e cada badge conquistado passa a ser uma credencial pública — com página própria, código de verificação e certificado em PDF.</p>
-      <div class="hero-cta">
-        <a class="btn btn-primary" href="#" data-link="app">Ver a plataforma</a>
-        <a class="btn btn-ghost" href="https://github.com/rafsilv26/pint" target="_blank" rel="noopener">Repositório</a>
+      <div class="nav-links">
+        <a href="#credencial">Credencial</a>
+        <a href="#workflow">Validação</a>
+        <a href="#niveis">Níveis</a>
+        <a href="#stack">Tecnologia</a>
+        <a class="btn btn-ghost" href="https://github.com/rafsilv26/pint" target="_blank"
+          rel="noopener">Código-fonte</a>
       </div>
     </div>
+  </nav>
 
-    <div class="cred" aria-label="Exemplo de credencial digital emitida pela plataforma">
-      <div class="cred-inner">
-        <canvas class="guilloche" width="520" height="360" aria-hidden="true"></canvas>
-        <div class="cred-body">
-          <div class="cred-top">
-            <div class="cred-issuer">
-              Emitido por<br>Softinsa · Jornada Técnica
+  <header class="hero" id="credencial">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="hero-tag">
+          <span class="tick"><svg width="9" height="9" viewBox="0 0 12 12" aria-hidden="true">
+              <path d="M2.5 6.2 L5 8.6 L9.5 3.5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg></span>
+          Projeto PINT 2025 · Softinsa
+        </span>
+        <h1>Formação que se torna<br>uma credencial verificável.</h1>
+        <p class="lead">Uma plataforma onde os consultores da Softinsa evidenciam competências, os gestores as validam
+          por um circuito de aprovação auditável, e cada badge conquistado passa a ser uma credencial pública — com
+          página própria, código de verificação e certificado em PDF.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#" data-link="app">Ver a plataforma</a>
+          <a class="btn btn-ghost" href="https://github.com/rafsilv26/pint" target="_blank"
+            rel="noopener">Repositório</a>
+        </div>
+      </div>
+
+      <div class="cred" aria-label="Exemplo de credencial digital emitida pela plataforma">
+        <div class="cred-inner">
+          <canvas class="guilloche" width="520" height="360" aria-hidden="true"></canvas>
+          <div class="cred-body">
+            <div class="cred-top">
+              <div class="cred-issuer">
+                Emitido por<br>Softinsa · Jornada Técnica
+              </div>
+              <svg class="seal" viewBox="0 0 80 80" aria-hidden="true">
+                <circle cx="40" cy="40" r="37" fill="none" stroke="var(--seal)" stroke-width="1.5"
+                  stroke-dasharray="1.5 4.5" />
+                <circle cx="40" cy="40" r="30" fill="none" stroke="var(--seal)" stroke-width="2.5" />
+                <circle cx="40" cy="40" r="24" fill="var(--seal-soft)" />
+                <path d="M30 40 l7 7 l14 -16" fill="none" stroke="var(--seal)" stroke-width="4" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
             </div>
-            <svg class="seal" viewBox="0 0 80 80" aria-hidden="true">
-              <circle cx="40" cy="40" r="37" fill="none" stroke="var(--seal)" stroke-width="1.5" stroke-dasharray="1.5 4.5"/>
-              <circle cx="40" cy="40" r="30" fill="none" stroke="var(--seal)" stroke-width="2.5"/>
-              <circle cx="40" cy="40" r="24" fill="var(--seal-soft)"/>
-              <path d="M30 40 l7 7 l14 -16" fill="none" stroke="var(--seal)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <p class="cred-title">OutSystems · Nível Sénior</p>
-          <p class="cred-holder">Concedida a <b>Rafael Silva</b> — Hybrid Cloud · Low Code</p>
-          <div class="cred-meta">
-            <div><span class="k">Código</span><span class="v">C3-OS</span></div>
-            <div><span class="k">Pontos</span><span class="v">320</span></div>
-            <div><span class="k">Emissão</span><span class="v">2025</span></div>
-          </div>
-          <div class="cred-verify">
-            <span class="vchk"><svg width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.2 L5 8.6 L9.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            Verificar · softinsa.pt/badge/8f3a-1c47-be09
+            <p class="cred-title">OutSystems · Nível Sénior</p>
+            <p class="cred-holder">Concedida a <b>Rafael Silva</b> — Hybrid Cloud · Low Code</p>
+            <div class="cred-meta">
+              <div><span class="k">Código</span><span class="v">C3-OS</span></div>
+              <div><span class="k">Pontos</span><span class="v">320</span></div>
+              <div><span class="k">Emissão</span><span class="v">2025</span></div>
+            </div>
+            <div class="cred-verify">
+              <span class="vchk"><svg width="13" height="13" viewBox="0 0 12 12" aria-hidden="true">
+                  <path d="M2.5 6.2 L5 8.6 L9.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                </svg></span>
+              Verificar · softinsa.pt/badge/8f3a-1c47-be09
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</header>
+  </header>
 
-<section style="padding-top:0">
-  <div class="wrap">
-    <div class="ledger">
-      <div><div class="n">4</div><div class="l meta">Perfis de utilizador</div></div>
-      <div><div class="n">7</div><div class="l meta">Estados de validação</div></div>
-      <div><div class="n">5</div><div class="l meta">Níveis por área</div></div>
-      <div><div class="n">3</div><div class="l meta">Línguas · PT EN ES</div></div>
-    </div>
-  </div>
-</section>
-
-<section id="porque">
-  <div class="wrap">
-    <div class="cols-2">
-      <div>
-        <p class="eyebrow">O problema</p>
-        <h2>Competências reais, sem forma de as provar.</h2>
-      </div>
-      <div class="stmt">
-        <p>A Softinsa organiza a formação em Learning Paths, Service Lines e níveis de progressão. As certificações vêm de fora — AWS, Microsoft, OutSystems, Udemy — e <b>faltava um sítio para as evidenciar, validar e mostrar</b>.</p>
-        <p>Sem isso: dificuldade em comprovar competências, nenhum incentivo à formação contínua, e credenciais dispersas que não projetam o talento interno da empresa.</p>
-        <p>Esta plataforma resolve os quatro pontos — <b>evidenciar, gamificar, padronizar e dar visibilidade</b> — num circuito único.</p>
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="ledger">
+        <div>
+          <div class="n">4</div>
+          <div class="l meta">Perfis de utilizador</div>
+        </div>
+        <div>
+          <div class="n">7</div>
+          <div class="l meta">Estados de validação</div>
+        </div>
+        <div>
+          <div class="n">5</div>
+          <div class="l meta">Níveis por área</div>
+        </div>
+        <div>
+          <div class="n">3</div>
+          <div class="l meta">Línguas · PT EN ES</div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<hr class="rule">
-
-<section id="funcionalidades">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">Funcionalidades</p>
-      <h2>Do catálogo à credencial pública.</h2>
-    </div>
-    <div class="feat">
-      <div class="feat-item"><div class="fh"><span class="fx">01</span><h3>Catálogo de badges</h3></div><p>Badges por área e nível, cada um com requisitos, descrição e pontos. Pesquisável mesmo fora da tua área.</p></div>
-      <div class="feat-item"><div class="fh"><span class="fx">02</span><h3>Submissão de evidências</h3></div><p>Upload de certificados e diplomas (PDF/imagem) no Cloudinary, com rascunho e várias evidências por requisito.</p></div>
-      <div class="feat-item"><div class="fh"><span class="fx">03</span><h3>Validação em dois níveis</h3></div><p>O Talent Manager valida evidência a evidência; o Service Line Leader dá a aprovação final. Cada decisão fica registada.</p></div>
-      <div class="feat-item"><div class="fh"><span class="fx">04</span><h3>Ranking e pontos</h3></div><p>Gamificação com pontuação por badge, ranking de consultores e conquistas especiais (badges premium).</p></div>
-      <div class="feat-item"><div class="fh"><span class="fx">05</span><h3>Certificado e verificação</h3></div><p>PDF personalizado e uma página pública por badge, com link único verificável e partilha no LinkedIn.</p></div>
-      <div class="feat-item"><div class="fh"><span class="fx">06</span><h3>Notificações multicanal</h3></div><p>Avisos in-app, email, push (Firebase) e integração com Teams/Slack. Alertas de SLA e de expiração.</p></div>
-      <div class="feat-item"><div class="fh"><span class="fx">07</span><h3>Relatórios e exportação</h3></div><p>KPIs por perfil, progresso nos Learning Paths e exportação real para Excel e PDF.</p></div>
-      <div class="feat-item"><div class="fh"><span class="fx">08</span><h3>Aplicação mobile</h3></div><p>App Flutter para o consultor, com sincronização offline em SQLite e notificações push.</p></div>
-      <div class="feat-item"><div class="fh"><span class="fx">09</span><h3>Administração</h3></div><p>Gestão de utilizadores, badges, níveis, políticas RGPD e SLA num back-office data-driven.</p></div>
-    </div>
-  </div>
-</section>
-
-<section id="workflow" class="flow">
-  <div class="wrap">
-    <div class="cols-2">
-      <div>
-        <p class="eyebrow">Circuito de validação</p>
-        <h2>Cada credencial deixa um rasto.</h2>
-        <p class="lead">Uma candidatura percorre sete estados. Cada transição verifica o estado de entrada, regista quem decidiu e quando, e notifica quem tem de agir a seguir — o histórico completo fica auditável.</p>
-      </div>
-      <div class="trail">
-        <div class="step"><span class="code">Open</span><span class="track"><span class="mark"></span></span><div class="body"><div class="name">Rascunho</div><div class="who">Consultor reúne as evidências</div></div></div>
-        <div class="step"><span class="code">Submitted</span><span class="track"><span class="mark"></span></span><div class="body"><div class="name">Submetida</div><div class="who">Entra na fila do Talent Manager</div></div></div>
-        <div class="step"><span class="code">In Validation</span><span class="track"><span class="mark"></span></span><div class="body"><div class="name">Em validação</div><div class="who">TM valida cada evidência</div></div></div>
-        <div class="step"><span class="code">Validated</span><span class="track"><span class="mark"></span></span><div class="body"><div class="name">Validada</div><div class="who">Enviada ao Service Line Leader</div></div></div>
-        <div class="step"><span class="code">In Approval</span><span class="track"><span class="mark"></span></span><div class="body"><div class="name">Em aprovação</div><div class="who">Aguarda a decisão final</div></div></div>
-        <div class="step done"><span class="code">Approved</span><span class="track"><span class="mark"></span></span><div class="body"><div class="name">Aprovada · badge emitido</div><div class="who">Pontos atribuídos, credencial pública</div></div></div>
-        <div class="step rej"><span class="code">Rejected</span><span class="track"><span class="mark"></span></span><div class="body"><div class="name">Rejeitada ou devolvida</div><div class="who">Feedback ao consultor para corrigir</div></div></div>
+  <section id="porque">
+    <div class="wrap">
+      <div class="cols-2">
+        <div>
+          <p class="eyebrow">O problema</p>
+          <h2>Competências reais, sem forma de as provar.</h2>
+        </div>
+        <div class="stmt">
+          <p>A Softinsa organiza a formação em Learning Paths, Service Lines e níveis de progressão. As certificações
+            vêm de fora — AWS, Microsoft, OutSystems, Udemy — e <b>faltava um sítio para as evidenciar, validar e
+              mostrar</b>.</p>
+          <p>Sem isso: dificuldade em comprovar competências, nenhum incentivo à formação contínua, e credenciais
+            dispersas que não projetam o talento interno da empresa.</p>
+          <p>Esta plataforma resolve os quatro pontos — <b>evidenciar, gamificar, padronizar e dar visibilidade</b> —
+            num circuito único.</p>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section id="niveis">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">Progressão · A → E</p>
-      <h2>Cinco níveis, um badge em cada.</h2>
-      <p>Cada área tem cinco níveis. Um consultor obtém o badge de um nível quando cumpre todos os requisitos desse nível (A1…A3). Pode candidatar-se a qualquer nível, desde que reúna os requisitos.</p>
-    </div>
-    <div class="levels">
-      <div class="level"><span class="badge-code">A</span><div><div class="lname">Júnior</div><div class="lreq">Requisitos A1 · A2 · A3</div></div><span class="lpts">1 badge</span></div>
-      <div class="level"><span class="badge-code">B</span><div><div class="lname">Intermédio</div><div class="lreq">Requisitos B1 · B2 · B3</div></div><span class="lpts">1 badge</span></div>
-      <div class="level"><span class="badge-code">C</span><div><div class="lname">Sénior</div><div class="lreq">Requisitos C1 · C2 · C3</div></div><span class="lpts">1 badge</span></div>
-      <div class="level"><span class="badge-code">D</span><div><div class="lname">Especialista</div><div class="lreq">Requisitos D1 · D2 · D3</div></div><span class="lpts">1 badge</span></div>
-      <div class="level"><span class="badge-code">E</span><div><div class="lname">Líder de conhecimento</div><div class="lreq">Requisitos E1 · E2 · E3</div></div><span class="lpts">1 badge</span></div>
-    </div>
-  </div>
-</section>
+  <hr class="rule">
 
-<hr class="rule">
-
-<section id="perfis">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">Perfis</p>
-      <h2>Quatro papéis, um circuito partilhado.</h2>
-    </div>
-    <div class="roles">
-      <div class="role"><span class="tag" style="background:var(--brand)">C</span><div><h3>Consultor</h3><p>Explora o catálogo, submete evidências, acompanha o estado dos pedidos em tempo real e conquista badges, pontos e certificados.</p></div></div>
-      <div class="role"><span class="tag" style="background:var(--verify)">TM</span><div><h3>Talent Manager</h3><p>Vê todas as submissões, valida evidência a evidência e decide: aprovar, rejeitar ou devolver para retificação.</p></div></div>
-      <div class="role"><span class="tag" style="background:var(--brand-deep)">SLL</span><div><h3>Service Line Leader</h3><p>Aprovação final, restrita à sua Service Line. Compara consultores, gera relatórios e emite o badge.</p></div></div>
-      <div class="role"><span class="tag" style="background:var(--seal)">A</span><div><h3>Administrador</h3><p>Gere utilizadores, badges, níveis, requisitos, políticas RGPD, SLA e notificações. Acesso total à plataforma.</p></div></div>
-    </div>
-  </div>
-</section>
-
-<hr class="rule">
-
-<section id="stack">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">Tecnologia</p>
-      <h2>Stack completo, ponta a ponta.</h2>
-    </div>
-    <div class="stack">
-      <div><h4>Frontend Web</h4><ul><li>React 19</li><li>Vite</li><li>React Router</li><li>Bootstrap 5</li><li>i18next</li></ul></div>
-      <div><h4>Backend</h4><ul><li>Node.js</li><li>Express 5</li><li>Sequelize ORM</li><li>JWT · bcrypt</li><li>Multer</li></ul></div>
-      <div><h4>Mobile</h4><ul><li>Flutter</li><li>SQLite offline</li><li>Firebase FCM</li></ul></div>
-      <div><h4>Dados · Infra</h4><ul><li>PostgreSQL · Neon</li><li>Cloudinary</li><li>Brevo · email</li><li>Vercel · Render</li></ul></div>
-    </div>
-  </div>
-</section>
-
-<hr class="rule">
-
-<section id="equipa">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">Equipa</p>
-      <h2>Quem emitiu esta plataforma.</h2>
-    </div>
-    <div class="team">
-      <div class="member"><div class="mono-id">Nº 29985</div><div class="mn">Miguel Barbosa</div><div class="mr">Desenvolvimento</div></div>
-      <div class="member"><div class="mono-id">Nº 30022</div><div class="mn">Rafael Silva</div><div class="mr">Desenvolvimento</div></div>
-      <div class="member"><div class="mono-id">Nº 30001</div><div class="mn">Simão Costa</div><div class="mr">Desenvolvimento</div></div>
-      <div class="member"><div class="mono-id">Nº 30012</div><div class="mn">Porfirio Rocha</div><div class="mr">Desenvolvimento</div></div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap">
-    <div class="foot-grid">
-      <div>
-        <span class="brand" style="font-size:1.2rem">
-          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="10.5" r="7" fill="none" stroke="var(--seal)" stroke-width="1.6"/>
-            <circle cx="12" cy="10.5" r="3.4" fill="var(--brand)"/>
-            <path d="M8.6 16 L7 22 L12 19.4 L17 22 L15.4 16" fill="none" stroke="var(--seal)" stroke-width="1.4"/>
-          </svg>
-          Softinsa Badge Platform
-        </span>
+  <section id="funcionalidades">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Funcionalidades</p>
+        <h2>Do catálogo à credencial pública.</h2>
       </div>
-      <div class="foot-links">
-        <a href="#" data-link="app">↗ Plataforma</a>
-        <a href="https://github.com/rafsilv26/pint" target="_blank" rel="noopener">↗ Repositório</a>
-        <a href="#" data-link="video">↗ Vídeo demo</a>
-        <a href="#" data-link="apk">↓ App Android</a>
+      <div class="feat">
+        <div class="feat-item">
+          <div class="fh"><span class="fx">01</span>
+            <h3>Catálogo de badges</h3>
+          </div>
+          <p>Badges por área e nível, cada um com requisitos, descrição e pontos. Pesquisável mesmo fora da tua área.
+          </p>
+        </div>
+        <div class="feat-item">
+          <div class="fh"><span class="fx">02</span>
+            <h3>Submissão de evidências</h3>
+          </div>
+          <p>Upload de certificados e diplomas (PDF/imagem) no Cloudinary, com rascunho e várias evidências por
+            requisito.</p>
+        </div>
+        <div class="feat-item">
+          <div class="fh"><span class="fx">03</span>
+            <h3>Validação em dois níveis</h3>
+          </div>
+          <p>O Talent Manager valida evidência a evidência; o Service Line Leader dá a aprovação final. Cada decisão
+            fica registada.</p>
+        </div>
+        <div class="feat-item">
+          <div class="fh"><span class="fx">04</span>
+            <h3>Ranking e pontos</h3>
+          </div>
+          <p>Gamificação com pontuação por badge, ranking de consultores e conquistas especiais (badges premium).</p>
+        </div>
+        <div class="feat-item">
+          <div class="fh"><span class="fx">05</span>
+            <h3>Certificado e verificação</h3>
+          </div>
+          <p>PDF personalizado e uma página pública por badge, com link único verificável e partilha no LinkedIn.</p>
+        </div>
+        <div class="feat-item">
+          <div class="fh"><span class="fx">06</span>
+            <h3>Notificações multicanal</h3>
+          </div>
+          <p>Avisos in-app, email, push (Firebase) e integração com Teams/Slack. Alertas de SLA e de expiração.</p>
+        </div>
+        <div class="feat-item">
+          <div class="fh"><span class="fx">07</span>
+            <h3>Relatórios e exportação</h3>
+          </div>
+          <p>KPIs por perfil, progresso nos Learning Paths e exportação real para Excel e PDF.</p>
+        </div>
+        <div class="feat-item">
+          <div class="fh"><span class="fx">08</span>
+            <h3>Aplicação mobile</h3>
+          </div>
+          <p>App Flutter para o consultor, com sincronização offline em SQLite e notificações push.</p>
+        </div>
+        <div class="feat-item">
+          <div class="fh"><span class="fx">09</span>
+            <h3>Administração</h3>
+          </div>
+          <p>Gestão de utilizadores, badges, níveis, políticas RGPD e SLA num back-office data-driven.</p>
+        </div>
       </div>
     </div>
-    <p class="foot-note">Projeto académico · PINT 2025. Softinsa é uma marca real, usada aqui em contexto educativo. A credencial em destaque é ilustrativa. Substituir os links marcados pelos endereços finais do projeto.</p>
-  </div>
-</footer>
+  </section>
 
-<script>
-  // Links do projeto — preenche os URLs finais e os botões passam a apontar lá.
-  const LINKS = {
-    app: "https://project-e69qy.vercel.app/", // preview Vercel (o hash muda a cada deploy)
-    video: "",
-    apk: ""
-  };
-  document.querySelectorAll('[data-link]').forEach((el) => {
-    const url = LINKS[el.getAttribute('data-link')];
-    if (url) { el.href = url; el.target = "_blank"; el.rel = "noopener"; }
-    else { el.addEventListener('click', (e) => { e.preventDefault(); alert('Link ainda por definir — edita o objeto LINKS no fim do ficheiro.'); }); }
-  });
+  <section id="workflow" class="flow">
+    <div class="wrap">
+      <div class="cols-2">
+        <div>
+          <p class="eyebrow">Circuito de validação</p>
+          <h2>Cada credencial deixa um rasto.</h2>
+          <p class="lead">Uma candidatura percorre sete estados. Cada transição verifica o estado de entrada, regista
+            quem decidiu e quando, e notifica quem tem de agir a seguir — o histórico completo fica auditável.</p>
+        </div>
+        <div class="trail">
+          <div class="step"><span class="code">Open</span><span class="track"><span class="mark"></span></span>
+            <div class="body">
+              <div class="name">Rascunho</div>
+              <div class="who">Consultor reúne as evidências</div>
+            </div>
+          </div>
+          <div class="step"><span class="code">Submitted</span><span class="track"><span class="mark"></span></span>
+            <div class="body">
+              <div class="name">Submetida</div>
+              <div class="who">Entra na fila do Talent Manager</div>
+            </div>
+          </div>
+          <div class="step"><span class="code">In Validation</span><span class="track"><span class="mark"></span></span>
+            <div class="body">
+              <div class="name">Em validação</div>
+              <div class="who">TM valida cada evidência</div>
+            </div>
+          </div>
+          <div class="step"><span class="code">Validated</span><span class="track"><span class="mark"></span></span>
+            <div class="body">
+              <div class="name">Validada</div>
+              <div class="who">Enviada ao Service Line Leader</div>
+            </div>
+          </div>
+          <div class="step"><span class="code">In Approval</span><span class="track"><span class="mark"></span></span>
+            <div class="body">
+              <div class="name">Em aprovação</div>
+              <div class="who">Aguarda a decisão final</div>
+            </div>
+          </div>
+          <div class="step done"><span class="code">Approved</span><span class="track"><span class="mark"></span></span>
+            <div class="body">
+              <div class="name">Aprovada · badge emitido</div>
+              <div class="who">Pontos atribuídos, credencial pública</div>
+            </div>
+          </div>
+          <div class="step rej"><span class="code">Rejected</span><span class="track"><span class="mark"></span></span>
+            <div class="body">
+              <div class="name">Rejeitada ou devolvida</div>
+              <div class="who">Feedback ao consultor para corrigir</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  // Guilloché: padrão de segurança (hipotrocóides sobrepostos), como nos
-  // certificados e notas. Estático; desenhado uma vez, sem animação.
-  (function () {
-    const canvas = document.querySelector('.guilloche');
-    if (!canvas || !canvas.getContext) return;
-    const ctx = canvas.getContext('2d');
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const cssW = canvas.clientWidth || 520, cssH = canvas.clientHeight || 360;
-    canvas.width = cssW * dpr; canvas.height = cssH * dpr;
-    ctx.scale(dpr, dpr);
-    const cx = cssW / 2, cy = cssH / 2;
-    const stroke = getComputedStyle(document.documentElement).getPropertyValue('--seal').trim() || '#A96A34';
-    ctx.strokeStyle = stroke;
-    ctx.globalAlpha = 0.16;
-    ctx.lineWidth = 0.5;
-    function rose(R, r, d, turns, scale) {
-      ctx.beginPath();
-      const steps = turns * 160;
-      for (let i = 0; i <= steps; i++) {
-        const t = (i / steps) * turns * Math.PI * 2;
-        const k = (R - r) / r;
-        const x = ((R - r) * Math.cos(t) + d * Math.cos(k * t)) * scale;
-        const y = ((R - r) * Math.sin(t) - d * Math.sin(k * t)) * scale;
-        if (i === 0) ctx.moveTo(cx + x, cy + y); else ctx.lineTo(cx + x, cy + y);
+  <section id="niveis">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Progressão · A → E</p>
+        <h2>Cinco níveis, um badge em cada.</h2>
+        <p>Cada área tem cinco níveis. Um consultor obtém o badge de um nível quando cumpre todos os requisitos desse
+          nível (A1…A3). Pode candidatar-se a qualquer nível, desde que reúna os requisitos.</p>
+      </div>
+      <div class="levels">
+        <div class="level"><span class="badge-code">A</span>
+          <div>
+            <div class="lname">Júnior</div>
+            <div class="lreq">Requisitos A1 · A2 · A3</div>
+          </div><span class="lpts">1 badge</span>
+        </div>
+        <div class="level"><span class="badge-code">B</span>
+          <div>
+            <div class="lname">Intermédio</div>
+            <div class="lreq">Requisitos B1 · B2 · B3</div>
+          </div><span class="lpts">1 badge</span>
+        </div>
+        <div class="level"><span class="badge-code">C</span>
+          <div>
+            <div class="lname">Sénior</div>
+            <div class="lreq">Requisitos C1 · C2 · C3</div>
+          </div><span class="lpts">1 badge</span>
+        </div>
+        <div class="level"><span class="badge-code">D</span>
+          <div>
+            <div class="lname">Especialista</div>
+            <div class="lreq">Requisitos D1 · D2 · D3</div>
+          </div><span class="lpts">1 badge</span>
+        </div>
+        <div class="level"><span class="badge-code">E</span>
+          <div>
+            <div class="lname">Líder de conhecimento</div>
+            <div class="lreq">Requisitos E1 · E2 · E3</div>
+          </div><span class="lpts">1 badge</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section id="perfis">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Perfis</p>
+        <h2>Quatro papéis, um circuito partilhado.</h2>
+      </div>
+      <div class="roles">
+        <div class="role"><span class="tag" style="background:var(--brand)">C</span>
+          <div>
+            <h3>Consultor</h3>
+            <p>Explora o catálogo, submete evidências, acompanha o estado dos pedidos em tempo real e conquista badges,
+              pontos e certificados.</p>
+          </div>
+        </div>
+        <div class="role"><span class="tag" style="background:var(--verify)">TM</span>
+          <div>
+            <h3>Talent Manager</h3>
+            <p>Vê todas as submissões, valida evidência a evidência e decide: aprovar, rejeitar ou devolver para
+              retificação.</p>
+          </div>
+        </div>
+        <div class="role"><span class="tag" style="background:var(--brand-deep)">SLL</span>
+          <div>
+            <h3>Service Line Leader</h3>
+            <p>Aprovação final, restrita à sua Service Line. Compara consultores, gera relatórios e emite o badge.</p>
+          </div>
+        </div>
+        <div class="role"><span class="tag" style="background:var(--seal)">A</span>
+          <div>
+            <h3>Administrador</h3>
+            <p>Gere utilizadores, badges, níveis, requisitos, políticas RGPD, SLA e notificações. Acesso total à
+              plataforma.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section id="stack">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Tecnologia</p>
+        <h2>Stack completo, ponta a ponta.</h2>
+      </div>
+      <div class="stack">
+        <div>
+          <h4>Frontend Web</h4>
+          <ul>
+            <li>React 19</li>
+            <li>Vite</li>
+            <li>React Router</li>
+            <li>Bootstrap 5</li>
+            <li>i18next</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Backend</h4>
+          <ul>
+            <li>Node.js</li>
+            <li>Express 5</li>
+            <li>Sequelize ORM</li>
+            <li>JWT · bcrypt</li>
+            <li>Multer</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Mobile</h4>
+          <ul>
+            <li>Flutter</li>
+            <li>SQLite offline</li>
+            <li>Firebase FCM</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Dados · Infra</h4>
+          <ul>
+            <li>PostgreSQL · Neon</li>
+            <li>Cloudinary</li>
+            <li>Brevo · email</li>
+            <li>Vercel · Render</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section id="equipa">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Equipa</p>
+        <h2>Quem emitiu esta plataforma.</h2>
+      </div>
+      <div class="team">
+        <div class="member">
+          <div class="mono-id">Nº 29985</div>
+          <div class="mn">Miguel Barbosa</div>
+          <div class="mr">Desenvolvimento</div>
+        </div>
+        <div class="member">
+          <div class="mono-id">Nº 30022</div>
+          <div class="mn">Rafael Silva</div>
+          <div class="mr">Desenvolvimento</div>
+        </div>
+        <div class="member">
+          <div class="mono-id">Nº 30001</div>
+          <div class="mn">Simão Costa</div>
+          <div class="mr">Desenvolvimento</div>
+        </div>
+        <div class="member">
+          <div class="mono-id">Nº 30012</div>
+          <div class="mn">Porfirio Rocha</div>
+          <div class="mr">Desenvolvimento</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <span class="brand" style="font-size:1.2rem">
+            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="10.5" r="7" fill="none" stroke="var(--seal)" stroke-width="1.6" />
+              <circle cx="12" cy="10.5" r="3.4" fill="var(--brand)" />
+              <path d="M8.6 16 L7 22 L12 19.4 L17 22 L15.4 16" fill="none" stroke="var(--seal)" stroke-width="1.4" />
+            </svg>
+            Softinsa Badge Platform
+          </span>
+        </div>
+        <div class="foot-links">
+          <a href="#" data-link="app">↗ Plataforma</a>
+          <a href="https://github.com/rafsilv26/pint" target="_blank" rel="noopener">↗ Repositório</a>
+          <a href="#" data-link="video">↗ Vídeo demo</a>
+          <a href="#" data-link="apk">↓ App Android</a>
+        </div>
+      </div>
+      <p class="foot-note">Projeto académico · PINT 2025. Softinsa é uma marca real, usada aqui em contexto educativo. A
+        credencial em destaque é ilustrativa. Substituir os links marcados pelos endereços finais do projeto.</p>
+    </div>
+  </footer>
+
+  <script>
+    const LINKS = {
+      app: "https://project-e69qy.vercel.app/", 
+      video: "",
+      apk: ""
+    };
+    document.querySelectorAll('[data-link]').forEach((el) => {
+      const url = LINKS[el.getAttribute('data-link')];
+      if (url) { el.href = url; el.target = "_blank"; el.rel = "noopener"; }
+      else { el.addEventListener('click', (e) => { e.preventDefault(); alert('Link ainda por definir — edita o objeto LINKS no fim do ficheiro.'); }); }
+    });
+
+
+    (function () {
+      const canvas = document.querySelector('.guilloche');
+      if (!canvas || !canvas.getContext) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const cssW = canvas.clientWidth || 520, cssH = canvas.clientHeight || 360;
+      canvas.width = cssW * dpr; canvas.height = cssH * dpr;
+      ctx.scale(dpr, dpr);
+      const cx = cssW / 2, cy = cssH / 2;
+      const stroke = getComputedStyle(document.documentElement).getPropertyValue('--seal').trim() || '#A96A34';
+      ctx.strokeStyle = stroke;
+      ctx.globalAlpha = 0.16;
+      ctx.lineWidth = 0.5;
+      function rose(R, r, d, turns, scale) {
+        ctx.beginPath();
+        const steps = turns * 160;
+        for (let i = 0; i <= steps; i++) {
+          const t = (i / steps) * turns * Math.PI * 2;
+          const k = (R - r) / r;
+          const x = ((R - r) * Math.cos(t) + d * Math.cos(k * t)) * scale;
+          const y = ((R - r) * Math.sin(t) - d * Math.sin(k * t)) * scale;
+          if (i === 0) ctx.moveTo(cx + x, cy + y); else ctx.lineTo(cx + x, cy + y);
+        }
+        ctx.stroke();
       }
-      ctx.stroke();
-    }
-    rose(120, 31, 68, 31, 1.35);
-    rose(120, 37, 54, 37, 1.05);
-    rose(90, 23, 44, 23, 1.5);
-  })();
-</script>
+      rose(120, 31, 68, 31, 1.35);
+      rose(120, 37, 54, 37, 1.05);
+      rose(90, 23, 44, 23, 1.5);
+    })();
+  </script>
 </body>
 </html>
