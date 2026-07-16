@@ -387,22 +387,30 @@ class _CatalogBadgeCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _MetaPill(
-                        icon: Icons.star_border,
-                        text: '${badge.points} pts',
-                      ),
-                      if (badge.level.isNotEmpty)
+                  LayoutBuilder(
+                    builder: (context, constraints) => Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
                         _MetaPill(
-                          icon: Icons.layers_outlined,
-                          text: badge.level,
+                          icon: Icons.star_border,
+                          text: '${badge.points} pts',
+                          maxWidth: constraints.maxWidth,
                         ),
-                      if (badge.area.isNotEmpty)
-                        _MetaPill(icon: Icons.work_outline, text: badge.area),
-                    ],
+                        if (badge.level.isNotEmpty)
+                          _MetaPill(
+                            icon: Icons.layers_outlined,
+                            text: badge.level,
+                            maxWidth: constraints.maxWidth,
+                          ),
+                        if (badge.area.isNotEmpty)
+                          _MetaPill(
+                            icon: Icons.work_outline,
+                            text: badge.area,
+                            maxWidth: constraints.maxWidth,
+                          ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -474,20 +482,24 @@ class BadgeDetailPage extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                _MetaPill(
-                                  icon: Icons.star_border,
-                                  text: '${badge.points} pontos',
-                                ),
-                                if (badge.level.isNotEmpty)
+                            LayoutBuilder(
+                              builder: (context, constraints) => Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
                                   _MetaPill(
-                                    icon: Icons.layers_outlined,
-                                    text: badge.level,
+                                    icon: Icons.star_border,
+                                    text: '${badge.points} pontos',
+                                    maxWidth: constraints.maxWidth,
                                   ),
-                              ],
+                                  if (badge.level.isNotEmpty)
+                                    _MetaPill(
+                                      icon: Icons.layers_outlined,
+                                      text: badge.level,
+                                      maxWidth: constraints.maxWidth,
+                                    ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -959,14 +971,20 @@ class _FallbackIcon extends StatelessWidget {
 }
 
 class _MetaPill extends StatelessWidget {
-  const _MetaPill({required this.icon, required this.text});
+  const _MetaPill({
+    required this.icon,
+    required this.text,
+    required this.maxWidth,
+  });
 
   final IconData icon;
   final String text;
+  final double maxWidth;
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: BoxConstraints(maxWidth: maxWidth),
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
         color: const Color(0xFFF1F5F9),
@@ -977,12 +995,16 @@ class _MetaPill extends StatelessWidget {
         children: [
           Icon(icon, color: const Color(0xFF475467), size: 13),
           const SizedBox(width: 4),
-          AppText(
-            text,
-            style: const TextStyle(
-              color: Color(0xFF475467),
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
+          Flexible(
+            child: AppText(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFF475467),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
