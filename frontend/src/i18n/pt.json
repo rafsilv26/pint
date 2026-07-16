@@ -1251,17 +1251,21 @@
       "iniciarValidacao": "Iniciar Validação",
       "validar": "Validar Candidatura",
       "rejeitarCand": "Rejeitar Candidatura",
+      "devolverCand": "Devolver",
       "cancelar": "Cancelar",
       "confirmarRejeicao": "Confirmar Rejeição",
+      "confirmarDevolucao": "Confirmar Devolução",
       "rejeitar": "Rejeitar",
       "aprovar": "Aprovar",
       "aProcessar": "A processar…"
     },
     "labels": {
-      "motivoRejeicao": "Motivo da rejeição"
+      "motivoRejeicao": "Motivo da rejeição",
+      "motivoDevolucao": "Motivo da devolução"
     },
     "placeholders": {
-      "motivoRejeicao": "Indica o motivo para o consultor poder corrigir…"
+      "motivoRejeicao": "Indica o motivo para o consultor poder corrigir…",
+      "motivoDevolucao": "Explica o que o consultor deve corrigir e reenviar…"
     },
     "tabs": {
       "evidencia": "Evidência #{{numero}}",
@@ -1295,6 +1299,8 @@
       "validadaDescricao": "A candidatura foi validada e enviada para aprovação final.",
       "rejeitadaTitulo": "Rejeitaste a badge «{{badge}}».",
       "rejeitadaDescricao": "A candidatura foi rejeitada e ficou registada no teu histórico.",
+      "devolvidaTitulo": "Devolveste a badge «{{badge}}» ao consultor.",
+      "devolvidaDescricao": "A candidatura voltou ao consultor para retificação.",
       "fechar": "Fechar aviso"
     },
     "historico": {

@@ -37,7 +37,7 @@ import TalentReportsPage from './pages/tm/TalentReportsPage'
 import TalentConsultantsPage from './pages/tm/TalentConsultantsPage'
 import TalentCatalogPage from './pages/tm/TalentCatalogPage'
 import TalentExpirationsPage from './pages/tm/TalentExpirationsPage'
-import TalentSearchPage from './pages/tm/TalentSearchPage'
+import GlobalSearchPage from './pages/GlobalSearchPage'
 import TalentLearningPathsPage from './pages/tm/TalentLearningPathsPage'
 import BadgesGridView from './components/BadgesGridView'
 
@@ -116,7 +116,7 @@ export default function App() {
           <Route path="/tm/informacoes" element={<AdminResourcePage resourceKey="information" readOnly />} />
           <Route path="/tm/assinatura" element={<EmailSignaturePage />} />
           <Route path="/tm/alterar-password" element={<ChangePasswordPage />} />
-          <Route path="/tm/pesquisa" element={<TalentSearchPage />} />
+          <Route path="/tm/pesquisa" element={<GlobalSearchPage />} />
           <Route path="/tm/conta" element={<ManagerContaPage />} />
         </Route>
 
@@ -128,6 +128,7 @@ export default function App() {
           <Route path="/sll/consultores/:id" element={<ManagerConsultorDetailPage />} />
           <Route path="/sll/badges" element={<BadgesGridView titulo={t('app.rotas.badges')} linkBase="/sll/badges" />} />
           <Route path="/sll/badges/:id" element={<ManagerBadgeDetailPage />} />
+          <Route path="/sll/pesquisa" element={<GlobalSearchPage />} />
           <Route path="/sll/relatorios" element={<SLLRelatoriosPage />} />
           <Route path="/sll/notificacoes" element={<NotificationsPage />} />
           <Route path="/sll/informacoes" element={<AdminResourcePage resourceKey="information" readOnly />} />
@@ -162,6 +163,7 @@ export default function App() {
           <Route path="/admin/consultor/:id" element={<PublicProfilePage />} />
           <Route path="/admin/pedidos" element={<AdminPedidosPage />} />
           <Route path="/admin/pedidos/:id" element={<AdminPedidoDetailPage />} />
+          <Route path="/admin/pesquisa" element={<GlobalSearchPage />} />
           <Route path="/admin/relatorios" element={<TalentReportsPage soIndicadores />} />
           <Route path="/admin/templates-email" element={<AdminEmailTemplatesPage />} />
           <Route path="/admin/definicoes" element={<AdminDefinicoesPage />} />

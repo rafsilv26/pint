@@ -19,5 +19,6 @@ router.use('/timeline', protect, require('./timelineRoutes'));
 router.use('/sla', protect, require('./slaRoutes'));
 router.use('/email-templates', protect, require('./emailTemplateRoutes'));
 router.use('/mobile-sync', protect, require('./mobileSyncRoutes'));
+router.use('/export', protect, require('./exportRoutes'));
 
 module.exports = router;

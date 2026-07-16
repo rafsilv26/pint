@@ -3,6 +3,7 @@ import { FileSpreadsheet, FileText } from 'lucide-react'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { useTranslation } from 'react-i18next'
+import { api, getToken } from '../services/http'
 
 export default function ExportButtons({ data, columns, filename }) {
   const { t } = useTranslation()
@@ -31,21 +32,45 @@ export default function ExportButtons({ data, columns, filename }) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
 
-  const exportarExcel = () => {
-    if (!data || data.length === 0) return alert(t('exportButtons.semDados'))
+  const descarregar = (blob, nome) => {
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = nome
+    link.click()
+    URL.revokeObjectURL(url)
+  }
 
-    setBusy('excel')
-
+  // Fallback local: tabela HTML com extens\u00e3o .xls. O Excel abre, mas n\u00e3o \u00e9 um
+  // xlsx real. Usado s\u00f3 se o backend falhar (ex.: modo mock / offline).
+  const exportarExcelHtml = () => {
     const table = `<table><thead><tr>${cols.map((c) => `<th>${escapeHtml(c.label)}</th>`).join('')}</tr></thead><tbody>${linhas.map((linha) => `<tr>${linha.map((value) => `<td>${escapeHtml(value)}</td>`).join('')}</tr>`).join('')}</tbody></table>`
     const documentHtml = `<html><head><meta charset="utf-8"></head><body>${table}</body></html>`
     const blob = new Blob(['\ufeff', documentHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' })
-    const link = document.createElement("a")
-    link.href = URL.createObjectURL(blob)
-    link.download = `${nomeFicheiro}.xls`
-    link.click()
-    URL.revokeObjectURL(link.href)
+    descarregar(blob, `${nomeFicheiro}.xls`)
+  }
 
-    setBusy(null)
+  const exportarExcel = async () => {
+    if (!data || data.length === 0) return alert(t('exportButtons.semDados'))
+
+    setBusy('excel')
+    // Reaproveita os valores j\u00e1 formatados de `linhas` (mesma ordem das colunas)
+    // e reconstr\u00f3i objetos indexados pela chave da coluna, para o backend.
+    const rows = linhas.map((arr) => cols.reduce((obj, c, i) => ({ ...obj, [c.key]: arr[i] }), {}))
+    try {
+      const token = getToken()
+      const resposta = await api.post(
+        '/export/xlsx',
+        { filename: nomeFicheiro, columns: cols.map((c) => ({ key: c.key, label: c.label })), rows },
+        { responseType: 'blob', headers: token ? { Authorization: `Bearer ${token}` } : {} },
+      )
+      descarregar(resposta.data, `${nomeFicheiro}.xlsx`)
+    } catch {
+      // Backend indispon\u00edvel \u2014 cai para o ficheiro HTML local.
+      exportarExcelHtml()
+    } finally {
+      setBusy(null)
+    }
   }
 
   const exportarPDF = () => {
