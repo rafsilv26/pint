@@ -139,7 +139,8 @@ exports.listResources = async (req, res) => {
 
     res.json(rows);
   } catch (error) {
-    res.status(error.statusCode || 500).json({ erro: error.message || 'Erro ao listar recurso.', details: error.message });
+    const status = error.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao listar recurso.' : error.message });
   }
 };
 
@@ -165,7 +166,8 @@ exports.getResource = async (req, res) => {
 
     res.json(row);
   } catch (error) {
-    res.status(error.statusCode || 500).json({ erro: error.message || 'Erro ao obter recurso.', details: error.message });
+    const status = error.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao obter recurso.' : error.message });
   }
 };
 
@@ -223,7 +225,7 @@ exports.createResource = async (req, res) => {
     const row = await config.model.create(payload);
     res.status(201).json(row);
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao criar recurso.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao criar recurso.' });
   }
 };
 
@@ -260,9 +262,8 @@ exports.updateResource = async (req, res) => {
     res.json(row);
   } catch (error) {
     // Agora o erro que aparece no navegador vai ser muito mais específico
-    const message = error.errors ? error.errors.map(e => `${e.path}: ${e.message}`).join(' | ') : error.message;
     console.error("ERRO NO UPDATE:", error); 
-    res.status(500).json({ erro: 'Erro ao atualizar.', details: message });
+    res.status(500).json({ erro: 'Erro ao atualizar.' });
   }
 };
 
@@ -284,7 +285,7 @@ exports.deleteResource = async (req, res) => {
 
     res.json({ mensagem: 'Registo removido com sucesso.' });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao remover recurso.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao remover recurso.' });
   }
 };
 

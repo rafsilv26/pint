@@ -80,7 +80,7 @@ exports.exportarCandidaturasExcel = async (req, res) => {
     res.end();
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao gerar Excel', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao gerar Excel' });
   }
 };
 
@@ -94,7 +94,7 @@ exports.downloadCertificado = async (req, res) => {
     await sendCertificate(req, res, result.award);
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao gerar certificado', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao gerar certificado' });
   }
 };
 
@@ -116,7 +116,8 @@ exports.downloadCertificadoGestao = async (req, res) => {
 
     await sendCertificate(req, res, award);
   } catch (erro) {
-    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao gerar certificado', details: erro.message });
+    const status = erro.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao gerar certificado' : erro.message });
   }
 };
 
@@ -155,7 +156,7 @@ exports.verificarBadge = async (req, res) => {
     });
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao verificar badge', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao verificar badge' });
   }
 };
 
@@ -224,6 +225,6 @@ exports.exportarCandidaturasPDF = async (req, res) => {
     doc.end();
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao gerar PDF', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao gerar PDF' });
   }
 };

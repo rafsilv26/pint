@@ -27,7 +27,7 @@ exports.listarMeusObjetivos = async (req, res) => {
     });
     res.json(objetivos.map(serialize));
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar objetivos.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao listar objetivos.' });
   }
 };
 
@@ -50,7 +50,7 @@ exports.criarObjetivo = async (req, res) => {
     });
     res.status(201).json(serialize(objetivo));
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao criar objetivo.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao criar objetivo.' });
   }
 };
 
@@ -70,7 +70,7 @@ exports.concluirObjetivo = async (req, res) => {
     });
     res.json(serialize(objetivo));
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao atualizar objetivo.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao atualizar objetivo.' });
   }
 };
 
@@ -89,7 +89,7 @@ exports.listarObjetivosConsultor = async (req, res) => {
     });
     res.json(objetivos.map(serialize));
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar objetivos do consultor.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao listar objetivos do consultor.' });
   }
 };
 
@@ -115,7 +115,7 @@ exports.criarObjetivoConsultor = async (req, res) => {
     });
     res.status(201).json(serialize(objetivo));
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao criar objetivo para o consultor.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao criar objetivo para o consultor.' });
   }
 };
 
@@ -130,7 +130,7 @@ exports.apagarObjetivoConsultor = async (req, res) => {
     await objetivo.update({ deletedAt: new Date() });
     res.json({ mensagem: 'Objetivo removido.' });
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao remover objetivo do consultor.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao remover objetivo do consultor.' });
   }
 };
 
@@ -150,6 +150,6 @@ exports.apagarObjetivo = async (req, res) => {
     await objetivo.update({ deletedAt: new Date() });
     res.json({ mensagem: 'Objetivo removido.' });
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao remover objetivo.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao remover objetivo.' });
   }
 };

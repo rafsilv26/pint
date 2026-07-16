@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { Plus, Pencil, Search, Trash2 } from 'lucide-react'
 import { PageHeader, Card, Spinner, ErrorState, EmptyState, Button } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 
 export default function AdminUsersPage() {
   const { t } = useTranslation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { data, loading, error, reload } = useAsync(() => api.getUsers())
   const { data: serviceLines } = useAsync(() => api.listResource('service-lines'))
   const { data: areas } = useAsync(() => api.listResource('areas'))
@@ -18,6 +19,11 @@ export default function AdminUsersPage() {
   const [erroForm, setErroForm] = useState(null)
   const [confirmar, setConfirmar] = useState(null)
   const rows = data || []
+  const search = searchParams.get('search') || ''
+  const normalizedSearch = search.trim().toLowerCase()
+  const filteredRows = normalizedSearch
+    ? rows.filter((user) => `${user.nome} ${user.email} ${(user.roles || []).join(' ')}`.toLowerCase().includes(normalizedSearch))
+    : rows
   const serviceLineOptions = serviceLines || []
   const areaOptions = areas || []
 
@@ -73,18 +79,28 @@ export default function AdminUsersPage() {
         title={t('adminUsers.titulo')}
         action={
           <div className="d-flex gap-2">
-            <ExportButtons data={rows} />
+            <ExportButtons data={filteredRows} />
             <Button onClick={() => abrir(null)}><Plus size={16} /> {t('adminUsers.adicionar')}</Button>
           </div>
         }
       />
+
+      <div className="position-relative mb-4" style={{ maxWidth: '28rem' }}>
+        <Search size={18} className="position-absolute text-secondary" style={{ left: '0.9rem', top: '50%', transform: 'translateY(-50%)' }} />
+        <input
+          value={search}
+          onChange={(event) => setSearchParams(event.target.value ? { search: event.target.value } : {}, { replace: true })}
+          placeholder={t('managerLayout.procurar')}
+          className="form-control rounded-pill ps-5"
+        />
+      </div>
 
       <Card className="overflow-hidden p-0">
         {loading ? (
           <div className="p-4"><Spinner /></div>
         ) : error ? (
           <div className="p-4"><ErrorState onRetry={reload} /></div>
-        ) : rows.length === 0 ? (
+        ) : filteredRows.length === 0 ? (
           <div className="p-4"><EmptyState title={t('adminUsers.vazioTitulo')} description={t('adminUsers.vazioDesc')} /></div>
         ) : (
           <div className="table-responsive">
@@ -99,7 +115,7 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((u) => (
+                {filteredRows.map((u) => (
                   <tr key={u.id}>
                     <td className="px-3 py-2 fw-medium">
                       <Link to={`/admin/utilizadores/${u.id}`} className="text-brand text-decoration-none">{u.nome}</Link>

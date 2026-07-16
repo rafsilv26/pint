@@ -76,7 +76,7 @@ export default function AdminEmailTemplatesPage() {
   }
 
   if (loading) return <Spinner />
-  if (error) return <ErrorState onRetry={reload} />
+  if (error) return <ErrorState message={error} onRetry={reload} />
 
   return (
     <div>

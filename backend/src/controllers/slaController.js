@@ -40,7 +40,7 @@ exports.listarConfigs = async (_req, res) => {
       efetivo: { talent, serviceline }
     });
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar SLAs.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao listar SLAs.' });
   }
 };
 
@@ -70,7 +70,7 @@ exports.criarConfig = async (req, res) => {
     });
     res.status(201).json(serialize(config));
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao criar SLA.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao criar SLA.' });
   }
 };
 
@@ -108,7 +108,7 @@ exports.atualizarConfig = async (req, res) => {
     await config.update(alteracoes);
     res.json(serialize(config));
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao atualizar SLA.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao atualizar SLA.' });
   }
 };
 
@@ -129,6 +129,6 @@ exports.apagarConfig = async (req, res) => {
     await config.destroy();
     res.json({ mensagem: 'SLA removido.' });
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao remover SLA.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao remover SLA.' });
   }
 };

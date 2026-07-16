@@ -32,7 +32,7 @@ exports.getMyEmailSignature = async (req, res) => {
       templateHtml: signatures[0]?.templateHtml || ''
     });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao obter assinatura de email.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao obter assinatura de email.' });
   }
 };
 
@@ -69,6 +69,6 @@ exports.saveMyEmailSignature = async (req, res) => {
       data: signatures
     });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao guardar assinatura de email.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao guardar assinatura de email.' });
   }
 };

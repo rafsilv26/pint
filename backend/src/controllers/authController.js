@@ -113,7 +113,7 @@ exports.register = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao registar o utilizador.', details: error.message });
+        res.status(500).json({ error: 'Erro ao registar o utilizador.' });
     }
 };
 
@@ -162,7 +162,7 @@ exports.signup = async (req, res) => {
 
         res.status(201).json({ message: 'Conta criada. Confirma o teu email para poderes entrar.' });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao criar a conta.', details: error.message });
+        res.status(500).json({ error: 'Erro ao criar a conta.' });
     }
 };
 
@@ -182,7 +182,7 @@ exports.resendConfirmation = async (req, res) => {
         await emailBoasVindas(user, `${frontendUrl()}/login`, `${frontendUrl()}/confirmar-email?token=${confirmToken}`);
         return res.json(resposta);
     } catch (error) {
-        return res.status(500).json({ message: 'Não foi possível reenviar o email de confirmação.', details: error.message });
+        return res.status(500).json({ message: 'Não foi possível reenviar o email de confirmação.' });
     }
 };
 
@@ -196,7 +196,7 @@ exports.listarAreasPublicas = async (_req, res) => {
         });
         res.json(areas);
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao listar áreas.', details: error.message });
+        res.status(500).json({ error: 'Erro ao listar áreas.' });
     }
 };
 
@@ -263,7 +263,7 @@ exports.login = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao processar o login.', details: error.message });
+        res.status(500).json({ error: 'Erro ao processar o login.' });
     }
 };
 
@@ -307,7 +307,7 @@ exports.forgotPassword = async (req, res) => {
 
         res.json(respostaNeutra);
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao processar o pedido de recuperação.', details: error.message });
+        res.status(500).json({ error: 'Erro ao processar o pedido de recuperação.' });
     }
 };
 
@@ -341,7 +341,7 @@ exports.resetPassword = async (req, res) => {
 
         res.json({ message: 'Password atualizada com sucesso. Já podes iniciar sessão.' });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao atualizar a password.', details: error.message });
+        res.status(500).json({ error: 'Erro ao atualizar a password.' });
     }
 };
 
@@ -375,10 +375,8 @@ exports.acceptPolicy = async (req, res) => {
             // têm lá registo), isto falha para Admin/TM/SLL. Ver nota no PR:
             // é preciso alterar essa FK para apontar para UTILIZADOR(id).
             if (dbError.name === 'SequelizeForeignKeyConstraintError') {
-                return res.status(500).json({
-                    error: 'Erro ao aceitar política.',
-                    details: 'A tabela ACEITACAO_POLITICA_RGPD tem uma foreign key restrita a consultores. É preciso alterar essa constraint para referenciar UTILIZADOR(id) em vez de CONSULTOR(consultorId).'
-                });
+                console.error('Constraint inválida em ACEITACAO_POLITICA_RGPD:', dbError);
+                return res.status(500).json({ error: 'Erro ao aceitar política.' });
             }
             throw dbError;
         }
@@ -386,7 +384,7 @@ exports.acceptPolicy = async (req, res) => {
         const pendingPolicies = await pendingPoliciesFor(req.user.id);
         res.json({ message: 'Política aceite com sucesso.', pendingPolicies });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao aceitar política.', details: error.message });
+        res.status(500).json({ error: 'Erro ao aceitar política.' });
     }
 };
 
@@ -410,7 +408,7 @@ exports.confirmEmail = async (req, res) => {
 
         res.json({ message: 'Email confirmado com sucesso. Já podes iniciar sessão.' });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao confirmar o email.', details: error.message });
+        res.status(500).json({ error: 'Erro ao confirmar o email.' });
     }
 };
 
@@ -450,6 +448,6 @@ exports.changePassword = async (req, res) => {
 
         res.json({ message: 'Password alterada com sucesso.' });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao alterar password.', details: error.message });
+        res.status(500).json({ error: 'Erro ao alterar password.' });
     }
 };

@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const candidaturaController = require('../controllers/candidaturaController');
-const upload = require('../middlewares/upload.middleware');
+const { receberEvidencias, validarConteudoFicheiros } = require('../middlewares/upload.middleware');
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
 
-router.post('/', authorize('Consultor'), upload.array('evidencias', 10), candidaturaController.submeterCandidatura);
+router.post('/', authorize('Consultor'), receberEvidencias, validarConteudoFicheiros, candidaturaController.submeterCandidatura);
 router.get('/minhas', candidaturaController.listarMinhasCandidaturas);
 // Rascunho/candidatura editável do consultor para um badge (retomar/adicionar)
 router.get('/rascunho', authorize('Consultor'), candidaturaController.getRascunho);

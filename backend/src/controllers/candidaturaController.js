@@ -332,7 +332,7 @@ exports.submeterCandidatura = async (req, res) => {
     })();
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao submeter candidatura.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao submeter candidatura.' });
   }
 };
 
@@ -346,7 +346,7 @@ exports.listarMinhasCandidaturas = async (req, res) => {
 
     res.json(candidaturas);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar candidaturas.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao listar candidaturas.' });
   }
 };
 
@@ -376,7 +376,7 @@ exports.getRascunho = async (req, res) => {
       }))
     });
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao obter rascunho.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao obter rascunho.' });
   }
 };
 
@@ -400,7 +400,7 @@ exports.apagarEvidencia = async (req, res) => {
     await evidencia.destroy();
     res.json({ mensagem: 'Evidência removida.' });
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao remover evidência.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao remover evidência.' });
   }
 };
 
@@ -446,7 +446,8 @@ exports.detalhesCandidatura = async (req, res) => {
 
     res.json({ ...candidatura.toJSON(), timeline });
   } catch (erro) {
-    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao buscar candidatura.', details: erro.message });
+    const status = erro.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao buscar candidatura.' : erro.message });
   }
 };
 
@@ -476,7 +477,8 @@ exports.listarCandidaturasPorConsultor = async (req, res) => {
 
     res.json(candidaturas);
   } catch (erro) {
-    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao listar candidaturas do consultor.', details: erro.message });
+    const status = erro.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao listar candidaturas do consultor.' : erro.message });
   }
 };
 
@@ -528,7 +530,8 @@ exports.getFechadasPorSemana = async (req, res) => {
 
     res.json(contagem);
   } catch (erro) {
-    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao calcular candidaturas fechadas.', details: erro.message });
+    const status = erro.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao calcular candidaturas fechadas.' : erro.message });
   }
 };
 
@@ -561,7 +564,8 @@ exports.getBadgesAtribuidosPorSemana = async (req, res) => {
 
     res.json(contagem);
   } catch (erro) {
-    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao calcular badges atribuídos.', details: erro.message });
+    const status = erro.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao calcular badges atribuídos.' : erro.message });
   }
 };
 
@@ -577,7 +581,8 @@ exports.listarCandidaturasTalent = async (_req, res) => {
 
     res.json(candidaturas);
   } catch (erro) {
-    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao listar candidaturas.', details: erro.message });
+    const status = erro.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao listar candidaturas.' : erro.message });
   }
 };
 
@@ -593,7 +598,8 @@ exports.listarTodasCandidaturas = async (_req, res) => {
 
     res.json(candidaturas);
   } catch (erro) {
-    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro ao listar candidaturas.', details: erro.message });
+    const status = erro.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao listar candidaturas.' : erro.message });
   }
 };
 
@@ -620,7 +626,7 @@ exports.validarEvidencia = async (req, res) => {
     res.json({ mensagem: 'Evidência atualizada.', evidencia });
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao validar evidência.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao validar evidência.' });
   }
 };
 
@@ -647,7 +653,7 @@ exports.validarTalentManager = async (req, res) => {
     if (decisao === 'APROVAR') {
       const evidencias = candidatura.evidencias || [];
       const faltaValidar = evidencias.some((e) => e.validado !== true);
-      if (evidencias.length > 0 && faltaValidar) {
+      if (evidencias.length === 0 || faltaValidar) {
         return res.status(400).json({ erro: 'Tens de validar todas as evidências antes de aprovar a candidatura.' });
       }
     }
@@ -708,7 +714,7 @@ exports.validarTalentManager = async (req, res) => {
     sendEmail(emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao validar candidatura.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao validar candidatura.' });
   }
 };
 
@@ -733,7 +739,7 @@ exports.listarCandidaturasServiceLine = async (req, res) => {
 
     res.json(candidaturas);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar candidaturas.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao listar candidaturas.' });
   }
 };
 
@@ -759,7 +765,7 @@ exports.listarTodasCandidaturasServiceLine = async (req, res) => {
 
     res.json(candidaturas);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar candidaturas.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao listar candidaturas.' });
   }
 };
 
@@ -867,6 +873,7 @@ exports.validarServiceLine = async (req, res) => {
     sendEmail(emailBadgeRejeitado, consultor, candidatura.Badge, comentario);
   } catch (erro) {
     console.error(erro);
-    res.status(erro.statusCode || 500).json({ erro: erro.message || 'Erro na aprovação final.', details: erro.message });
+    const status = erro.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro na aprovação final.' : erro.message });
   }
 };

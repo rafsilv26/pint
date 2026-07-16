@@ -3,6 +3,7 @@ import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Search, LogOut, Menu, X, PenLine } from 'lucide-react'
 import { useAuth } from '../../context/useAuth'
 import { getPanelForPath } from '../../config/navigation'
+import { getGlobalSearchTarget } from '../../config/globalSearch'
 import Logo from '../Logo'
 import ChangePasswordModal from '../ChangePasswordModal'
 import RgpdPolicyModal from '../RgpdPolicyModal'
@@ -29,10 +30,9 @@ export default function ManagerLayout() {
 
   const submitSearch = (event) => {
     event.preventDefault()
-    if (!globalSearch.trim()) return
-    const destination = base === '/tm' ? '/tm/pesquisa' : base === '/sll' ? '/sll/consultores' : '/admin/utilizadores'
-    const key = base === '/tm' ? 'q' : 'search'
-    navigate(`${destination}?${key}=${encodeURIComponent(globalSearch.trim())}`)
+    const target = getGlobalSearchTarget(location.pathname, globalSearch)
+    if (!target) return
+    navigate(target)
     setMobileOpen(false)
   }
 

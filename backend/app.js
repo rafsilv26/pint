@@ -10,26 +10,16 @@ const cors = require('cors');
 require('dotenv').config();
 const sequelize = require('./src/config/database');
 const { ensurePublicBadgeTokens } = require('./src/services/publicBadgeToken.service');
-require('./src/models'); // Importa os modelos para garantir que estão registrados no Sequelize
+require('./src/models'); // Regista todos os modelos no Sequelize.
+const { createCorsOptions } = require('./src/config/cors');
+const { prepararBaseDeDados } = require('./src/services/databaseStartup.service');
+const { runMigrations } = require('./src/services/migrationRunner.service');
 
 const app = express();
 
 // Middlewares Globais
-app.use(cors()); // Permite pedidos do Vite e Flutter
+app.use(cors(createCorsOptions()));
 app.use(express.json()); // Permite ler JSON no corpo do pedido (req.body)
-
-// Teste de Ligação à BD
-sequelize.authenticate()
-    .then(() => {
-        console.log('✅ Conetado ao Neon com sucesso!');
-        // Sincroniza os modelos com as tabelas reais da BD
-        return sequelize.sync({ alter: true });
-    })
-    .then(async () => {
-        await ensurePublicBadgeTokens();
-        console.log('🔄 Tabelas sincronizadas no Neon.');
-    })
-    .catch(err => console.error('❌ Erro crucial de ligação:', err));
 
 //Importar as rotas
 app.use('/api', require('./src/routes'));
@@ -50,15 +40,49 @@ app.get('/api/sla-check', async (req, res) => {
     try {
         res.json(await verificarSLA());
     } catch (erro) {
-        res.status(500).json({ error: 'Erro na verificação de SLA.', details: erro.message });
+        console.error('Erro na verificação de SLA:', erro);
+        res.status(500).json({ error: 'Erro na verificação de SLA.' });
     }
 });
 
-// Job interno: verifica os SLAs pouco depois do arranque e a cada 12 horas.
-iniciarJobSLA();
-iniciarJobExpiracoes();
+app.use((error, _req, res, next) => {
+    if (res.headersSent) return next(error);
+    const status = Number(error.statusCode) || 500;
+    if (status >= 500) console.error('Erro HTTP não tratado:', error);
+    return res.status(status).json({
+        error: status >= 500 ? 'Erro interno do servidor.' : error.message
+    });
+});
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor a correr na porta ${PORT}`);
-});
+
+const iniciarServidor = async () => {
+    try {
+        await prepararBaseDeDados({
+            sequelize,
+            executarMigrations: runMigrations,
+            tarefasDepoisDasMigrations: [ensurePublicBadgeTokens]
+        });
+
+        console.log('✅ Conetado ao Neon com sucesso!');
+        console.log('🔄 Migrations aplicadas no Neon.');
+
+        // Os jobs também dependem da BD e só devem arrancar depois das migrations.
+        iniciarJobSLA();
+        iniciarJobExpiracoes();
+
+        return app.listen(PORT, () => {
+            console.log(`Servidor a correr na porta ${PORT}`);
+        });
+    } catch (err) {
+        console.error('❌ Erro crucial de ligação:', err);
+        process.exitCode = 1;
+        return null;
+    }
+};
+
+if (require.main === module) {
+    iniciarServidor();
+}
+
+module.exports = { app, iniciarServidor };

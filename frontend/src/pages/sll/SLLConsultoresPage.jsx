@@ -15,7 +15,7 @@ export default function SLLConsultoresPage() {
   const labels = t('tmWorkspace', { returnObjects: true })
   const [params, setParams] = useSearchParams()
   const { data, loading, error, reload } = useAsync(() => api.getServiceLineConsultants())
-  const [search, setSearch] = useState(params.get('search') || '')
+  const search = params.get('search') || ''
   const [area, setArea] = useState('')
   useAutoRefresh(reload)
 
@@ -51,7 +51,6 @@ export default function SLLConsultoresPage() {
   ]
 
   const updateSearch = (value) => {
-    setSearch(value)
     setParams(value ? { search: value } : {}, { replace: true })
   }
 

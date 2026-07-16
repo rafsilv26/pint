@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useEffectEvent, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 export function useAsync(fn, deps = []) {
@@ -9,6 +9,9 @@ export function useAsync(fn, deps = []) {
   const [tick, setTick] = useState(0)
 
   const isFirstRender = useRef(true)
+  const dependencyKey = JSON.stringify(deps)
+  const execute = useEffectEvent(() => fn())
+  const errorMessage = useEffectEvent((error) => error.message || t('hooks.erroGenerico'))
 
   useEffect(() => {
     let alive = true
@@ -24,10 +27,10 @@ export function useAsync(fn, deps = []) {
         }
 
         setError(null)
-        return fn()
+        return execute()
       })
       .then((d) => alive && setData(d))
-      .catch((e) => alive && setError(e.message || t('hooks.erroGenerico')))
+      .catch((e) => alive && setError(errorMessage(e)))
       .finally(() => {
         if (alive) {
           setLoading(false)
@@ -39,7 +42,7 @@ export function useAsync(fn, deps = []) {
       alive = false
     }
 
-  }, [...deps, tick])
+  }, [dependencyKey, tick])
 
   const reload = () => setTick((t) => t + 1)
 

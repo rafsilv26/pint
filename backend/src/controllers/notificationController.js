@@ -19,7 +19,7 @@ exports.registerPushToken = async (req, res) => {
     });
     res.json({ mensagem: 'Dispositivo registado para notificações push.' });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao registar dispositivo.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao registar dispositivo.' });
   }
 };
 
@@ -29,7 +29,7 @@ exports.unregisterPushToken = async (req, res) => {
     if (token) await unregisterDeviceToken({ userId: req.user.id, token });
     res.json({ mensagem: 'Dispositivo removido das notificações push.' });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao remover dispositivo.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao remover dispositivo.' });
   }
 };
 
@@ -37,7 +37,7 @@ exports.getMyPushStatus = async (req, res) => {
   try {
     res.json(await getPushStatus(req.user.id));
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao obter estado das notificações push.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao obter estado das notificações push.' });
   }
 };
 
@@ -49,7 +49,7 @@ exports.broadcastAviso = async (req, res) => {
     const criados = await notificarTodosConsultores({ title, message, type: type || 'info' });
     res.status(201).json({ mensagem: 'Aviso difundido.', total: criados.length });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao difundir aviso.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao difundir aviso.' });
   }
 };
 
@@ -65,7 +65,7 @@ exports.getConfigGlobal = async (_req, res) => {
     });
     res.json({ emailEnabled: cfg.emailEnabled, pushEnabled: cfg.pushEnabled, daysBefore: cfg.daysBefore });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao obter definições.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao obter definições.' });
   }
 };
 
@@ -83,7 +83,7 @@ exports.saveConfigGlobal = async (req, res) => {
     });
     res.json({ mensagem: 'Definições guardadas.' });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao guardar definições.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao guardar definições.' });
   }
 };
 const { verificarSLA } = require('../services/sla.service');
@@ -93,7 +93,7 @@ exports.getMyNotificationPrefs = async (req, res) => {
   try {
     res.json(await getPrefs(req.user.id));
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao ler preferências.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao ler preferências.' });
   }
 };
 
@@ -102,7 +102,7 @@ exports.saveMyNotificationPrefs = async (req, res) => {
     const prefs = await savePrefs(req.user.id, req.body || {});
     res.json({ message: 'Preferências guardadas.', prefs });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao guardar preferências.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao guardar preferências.' });
   }
 };
 
@@ -112,7 +112,7 @@ exports.runSlaCheck = async (req, res) => {
   try {
     res.json(await verificarSLA());
   } catch (error) {
-    res.status(500).json({ erro: 'Erro na verificação de SLA.', details: error.message });
+    res.status(500).json({ erro: 'Erro na verificação de SLA.' });
   }
 };
 
@@ -131,7 +131,8 @@ exports.emailStatus = async (req, res) => {
     const { modo } = await verificarLigacao();
     status.ligacao = { ok: true, modo };
   } catch (erro) {
-    status.ligacao = { ok: false, code: erro.code, erro: erro.message, resposta: erro.response };
+    console.error('Erro ao verificar a ligação ao serviço de email:', erro);
+    status.ligacao = { ok: false };
     return res.status(500).json(status);
   }
 
@@ -145,7 +146,8 @@ exports.emailStatus = async (req, res) => {
       );
       status.envioTeste = { ok: true, para: destino };
     } catch (erro) {
-      status.envioTeste = { ok: false, para: destino, code: erro.code, erro: erro.message };
+      console.error('Erro ao enviar email de diagnóstico:', erro);
+      status.envioTeste = { ok: false, para: destino };
       return res.status(500).json(status);
     }
   }
@@ -165,7 +167,7 @@ exports.listNotifications = async (req, res) => {
       data: notices
     });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao listar notificacoes.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao listar notificacoes.' });
   }
 };
 
@@ -182,7 +184,7 @@ exports.markNotificationAsRead = async (req, res) => {
     await notice.update({ read: true, readAt: new Date() });
     res.json(notice);
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao marcar notificacao.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao marcar notificacao.' });
   }
 };
 
@@ -195,6 +197,6 @@ exports.markAllNotificationsAsRead = async (req, res) => {
 
     res.json({ mensagem: 'Notificacoes marcadas como lidas.' });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao marcar notificacoes.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao marcar notificacoes.' });
   }
 };

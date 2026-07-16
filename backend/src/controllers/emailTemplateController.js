@@ -29,7 +29,7 @@ exports.listarTemplates = async (_req, res) => {
     const porCode = Object.fromEntries(overrides.map((o) => [o.code, o]));
     res.json(Object.keys(TEMPLATE_DEFS).map((code) => juntarComOverride(code, porCode[code])));
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao listar templates de email.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao listar templates de email.' });
   }
 };
 
@@ -52,7 +52,7 @@ exports.guardarTemplate = async (req, res) => {
     await template.update({ subject, body, active: true, updatedBy: req.user.id, updatedAt: new Date() });
     res.json(juntarComOverride(code, template));
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao guardar template.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao guardar template.' });
   }
 };
 
@@ -65,7 +65,7 @@ exports.reporTemplate = async (req, res) => {
     await EmailTemplate.destroy({ where: { code } });
     res.json(juntarComOverride(code, null));
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao repor template.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao repor template.' });
   }
 };
 
@@ -84,7 +84,7 @@ exports.previewTemplate = async (req, res) => {
       html: layoutEmail(render(corpo, def.exemplo))
     });
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao pré-visualizar template.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao pré-visualizar template.' });
   }
 };
 
@@ -104,6 +104,6 @@ exports.enviarTeste = async (req, res) => {
     await enviarEmail(destino, `[TESTE] ${assunto}`, html);
     res.json({ mensagem: 'Email de teste enviado.', para: destino });
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao enviar email de teste.', details: erro.message });
+    res.status(500).json({ erro: 'Erro ao enviar email de teste.' });
   }
 };
