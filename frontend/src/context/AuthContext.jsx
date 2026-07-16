@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import * as api from '../services/api'
 import AuthContext from './authContextValue'
+import { invalidateTalentWorkspace } from '../services/talentWorkspace'
+import { invalidateServiceLineWorkspace } from '../services/serviceLineWorkspace'
 
 const STORAGE_KEY = 'softinsa.auth'
 const LAST_LOGIN_PREFIX = 'softinsa.lastLogin.'
@@ -72,6 +74,10 @@ export function AuthProvider({ children }) {
     setUser(null)
     setToken(null)
     clearAuth()
+    // Limpa as caches de módulo dos workspaces — senão o próximo utilizador a
+    // entrar na mesma aba (dentro dos 30s de TTL) podia ver dados do anterior.
+    invalidateTalentWorkspace()
+    invalidateServiceLineWorkspace()
   }
 
   function markPasswordChanged() {
