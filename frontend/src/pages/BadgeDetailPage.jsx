@@ -12,10 +12,24 @@ const HERO_TINTS = {
   violet: 'tint-violet',
 }
 
+// Estados de candidatura que ainda estão "vivos" (ainda em processo). APPROVED
+// já é conquista e REJECTED permite recandidatar, por isso ficam de fora.
+const ESTADOS_ATIVOS = ['OPEN', 'SUBMITTED', 'IN_VALIDATION', 'VALIDATED', 'IN_APPROVAL']
+
 export default function BadgeDetailPage() {
   const { t } = useTranslation()
   const { id } = useParams()
   const { data: badge, loading, error, reload } = useAsync(() => api.getBadge(id), [id])
+
+  // Estado do consultor para este badge: já conquistado e/ou com candidatura
+  // em curso. Serve só para decidir que ação mostrar — falha em silêncio.
+  const { data: estado } = useAsync(async () => {
+    const [conquistados, candidaturas] = await Promise.all([
+      api.getMeusBadges().catch(() => []),
+      api.getMinhasCandidaturas().catch(() => []),
+    ])
+    return { conquistados, candidaturas }
+  }, [id])
 
   const voltar = (
     <Link to="/catalogo" className="mb-3 d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
@@ -35,6 +49,17 @@ export default function BadgeDetailPage() {
     : t('badgeDetail.naoExpira')
 
   const pill = 'rounded-pill bg-white bg-opacity-75 px-2 py-1 fs-xs fw-semibold text-ink'
+
+  const jaConquistado = (estado?.conquistados || []).some(
+    (b) => Number(b.badgeId) === Number(badge.id) && b.valid !== false,
+  )
+  const candidaturaAtiva = (estado?.candidaturas || []).some(
+    (c) => Number(c.badge?.id) === Number(badge.id) && ESTADOS_ATIVOS.includes(c.status?.code),
+  )
+  // Só mostra "Candidatar" depois de confirmar o estado (estado != null) e se
+  // não houver conquista nem candidatura em curso. Evita o botão certo piscar
+  // antes da verificação chegar.
+  const podeCandidatar = Boolean(estado) && !jaConquistado && !candidaturaAtiva
 
   return (
     <div>
@@ -66,12 +91,28 @@ export default function BadgeDetailPage() {
             {badge.fornecedor && (
               <p className="mt-1 small text-ink text-opacity-75 mb-0">{t('badgeDetail.emitidoPor')} {badge.fornecedor}</p>
             )}
-            <Link
-              to={`/candidaturas/nova?badge=${badge.id}`}
-              className="mt-4 d-inline-flex align-items-center gap-2 rounded-3 btn btn-brand px-4 py-2 fw-semibold"
-            >
-              <Award size={18} /> {t('badgeDetail.candidatar')}
-            </Link>
+            {podeCandidatar && (
+              <Link
+                to={`/candidaturas/nova?badge=${badge.id}`}
+                className="mt-4 d-inline-flex align-items-center gap-2 rounded-3 btn btn-brand px-4 py-2 fw-semibold"
+              >
+                <Award size={18} /> {t('badgeDetail.candidatar')}
+              </Link>
+            )}
+            {jaConquistado && (
+              <span className="mt-4 d-inline-flex align-items-center gap-2 rounded-3 bg-white bg-opacity-75 px-4 py-2 fw-semibold text-success">
+                <CheckCircle2 size={18} /> {t('badgeDetail.jaConquistado')}
+              </span>
+            )}
+            {!jaConquistado && candidaturaAtiva && (
+              <Link
+                to="/candidaturas"
+                title={t('badgeDetail.candidaturaAtiva')}
+                className="mt-4 d-inline-flex align-items-center gap-2 rounded-3 btn btn-outline-dark bg-white px-4 py-2 fw-semibold"
+              >
+                <Clock size={18} /> {t('badgeDetail.verCandidatura')}
+              </Link>
+            )}
           </div>
 
           <div className="d-none d-sm-block flex-shrink-0 text-center">
