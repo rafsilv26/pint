@@ -18,7 +18,19 @@ migrate_working_dir/
 *.iws
 .idea/
 
-.claude 
+# AI assistants (Claude / Codex)
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.codex/
+AGENTS.md
+
+# graphify
+.graphify_ast.json
+.graphify_detect.json
+.graphify_uncached.txt
+graphify-out/
+
 .vscode
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line

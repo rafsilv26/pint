@@ -1,7 +1,7 @@
 import {
   Home, LayoutGrid, Medal, Trophy, User, Target,
   LayoutDashboard, ClipboardCheck, Route, Users, Award, FileBarChart, Bell, CalendarClock,
-  ShieldCheck, Info, Settings, Network, Boxes, BarChart3, ListChecks,
+  ShieldCheck, Info, Settings, Network, Boxes, BarChart3, ListChecks, Mail,
 } from 'lucide-react'
 
 export const getNavItems = (t) => [
@@ -49,6 +49,7 @@ const getAdminNav = (t) => [
   { to: '/admin/politicas', label: t('nav.admin.politicas'), icon: ShieldCheck },
   { to: '/admin/avisos', label: t('nav.admin.avisos'), icon: Bell },
   { to: '/admin/informacoes', label: t('nav.admin.informacoes'), icon: Info },
+  { to: '/admin/templates-email', label: t('nav.admin.templatesEmail', { defaultValue: 'Templates de email' }), icon: Mail },
   { to: '/admin/definicoes', label: t('nav.admin.definicoes'), icon: Settings },
 ]
 

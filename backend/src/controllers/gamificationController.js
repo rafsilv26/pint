@@ -75,6 +75,6 @@ exports.getGamification = async (req, res) => {
       timeline
     });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao carregar gamification.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao carregar gamification.' });
   }
 };

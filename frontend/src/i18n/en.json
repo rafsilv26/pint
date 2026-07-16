@@ -339,6 +339,25 @@
     "concluidoEm": "Completed on",
     "marcarConcluido": "Mark as done",
     "reabrir": "Reopen",
+    "remover": "Remove",
+    "atribuido": "Assigned",
+    "atribuidoTooltip": "Goal assigned by management — you can complete it but not remove it."
+  },
+  "timelineManager": {
+    "titulo": "Development timeline",
+    "subtitulo": "Create goals for this consultant — they will show up on their goals page.",
+    "tituloLabel": "Goal",
+    "tituloPlaceholder": "Ex: Complete Azure Fundamentals",
+    "tipoLabel": "Type",
+    "tipos": { "meta": "Goal", "milestone": "Milestone", "evento": "Event" },
+    "prazoLabel": "Target date",
+    "prioridadeLabel": "Priority",
+    "adicionar": "Add",
+    "vazioTitulo": "No goals",
+    "vazioDesc": "Create the first goal for this consultant.",
+    "prazo": "Due:",
+    "semPrazo": "No deadline",
+    "concluidoEm": "Completed on",
     "remover": "Remove"
   },
   "managerBadge": {
@@ -711,11 +730,27 @@
     "titulo": "Settings",
     "subtitulo": "General platform configurations.",
     "sla": {
-      "titulo": "SLA",
-      "subtitulo": "Request response deadline and alerts.",
-      "dias": "Response days",
-      "alertasLabel": "SLA Alerts",
-      "alertasDesc": "Send warnings when a request approaches the deadline"
+      "titulo": "SLA management",
+      "subtitulo": "Response deadlines for the Talent and Service Line teams. Each team's active SLA defines when overdue alerts (email and push) are sent.",
+      "equipaTalent": "Talent",
+      "equipaServiceLine": "Service Line",
+      "equipaGlobal": "Global",
+      "dias_one": "{{count}} response day",
+      "dias_other": "{{count}} response days",
+      "alertaResumo_one": "alert {{count}} day before",
+      "alertaResumo_other": "alert {{count}} days before",
+      "nomeLabel": "Name",
+      "nomePlaceholder": "Ex: Standard SLA",
+      "equipaLabel": "Team",
+      "diasLabel": "Days",
+      "alertaLabel": "Alert (days before)",
+      "adicionar": "Add SLA",
+      "vazio": "No SLAs configured — the default of 5 days is used.",
+      "ativa": "Active",
+      "remover": "Remove",
+      "verificar": "Run SLA check now",
+      "aVerificar": "Checking…",
+      "resumo": "Overdue: {{tm}} application(s) for the Talent team and {{sll}} for Service Line · {{emails}} alert email(s) sent"
     },
     "notificacoes": {
       "titulo": "Platform notifications",
@@ -723,7 +758,9 @@
       "email": "Email Notifications",
       "emailDesc": "Send application, approval and rejection emails",
       "push": "Push Notifications",
-      "pushDesc": "In-app push alerts (when available)"
+      "pushDesc": "In-app push alerts (when available)",
+      "diasExpiracao": "Expiration alert lead time",
+      "diasExpiracaoDesc": "How many days before a badge expires consultants are warned."
     },
     "broadcast": {
       "titulo": "Broadcast notice",
@@ -743,6 +780,27 @@
       "guardar": "Save Settings"
     }
   },
+  "adminEmailTemplates": {
+    "titulo": "Email templates",
+    "subtitulo": "Customize the subject and content of the emails sent by the platform.",
+    "escolhe": "Pick a template on the left to edit it.",
+    "personalizado": "Customized",
+    "padrao": "Default",
+    "assunto": "Subject",
+    "corpo": "Body (HTML)",
+    "variaveis": "Available variables",
+    "guardar": "Save",
+    "aGuardar": "Saving…",
+    "guardado": "Template saved ✓",
+    "repor": "Reset to default",
+    "reposto": "Template reset to default ✓",
+    "preVisualizar": "Preview",
+    "previewAssunto": "Subject",
+    "previewTitulo": "Email preview",
+    "enviarTeste": "Send test",
+    "aEnviar": "Sending…",
+    "testeEnviado": "Test email sent to {{para}} ✓"
+  },
   "adminPedidos": {
     "titulo": "Badge Requests",
     "subtitulo": "All badge applications.",
@@ -755,8 +813,10 @@
       "nivel": "Level",
       "pontos": "Points",
       "data": "Date",
+      "sla": "SLA",
       "estado": "Status"
-    }
+    },
+    "slaExcedido": "SLA exceeded"
   },
   "adminResource": {
     "adicionar": "Add {{singular}}",
@@ -963,6 +1023,7 @@
       "politicas": "GDPR Policies",
       "avisos": "Notices",
       "informacoes": "Information",
+      "templatesEmail": "Email templates",
       "definicoes": "Settings"
     },
     "roles": {

@@ -14,6 +14,8 @@ require('dotenv').config();
 //   EMAIL_USER    - remetente; tem de estar verificado em Brevo -> Senders
 // ---------------------------------------------------------------
 
+const { renderEmail } = require('./emailTemplate.service');
+
 const verificarConfig = () => {
   if (!process.env.BREVO_API_KEY) throw new Error('BREVO_API_KEY não está definida no ambiente.');
   if (!process.env.EMAIL_USER) throw new Error('EMAIL_USER não está definido no ambiente (é o remetente).');
@@ -64,211 +66,91 @@ const enviarEmail = async (para, assunto, html, { fetchImplementation = fetch } 
   }
 };
 
+// Envia um email de um tipo do registo de templates: resolve o template
+// efetivo (override do Admin ou padrão), substitui as variáveis e envia.
+const enviarComTemplate = async (code, para, vars) => {
+  const { assunto, html } = await renderEmail(code, vars);
+  return enviarEmail(para, assunto, html);
+};
+
 // Email ao consultor quando submete candidatura
 const emailCandidaturaSubmetida = async (consultor, badge) => {
-  await enviarEmail(
-    consultor.email,
-    '✅ Candidatura submetida com sucesso',
-    `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #003087; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
-        <p style="color: #cccccc; margin: 5px 0;">Plataforma de Badges</p>
-      </div>
-      <div style="padding: 30px; background-color: #f9f9f9;">
-        <h2>Olá ${consultor.nome}!</h2>
-        <p>A tua candidatura ao badge <strong>${badge.nome}</strong> foi submetida com sucesso.</p>
-        <p>Aguarda a validação do Talent Manager. Serás notificado por email.</p>
-        <div style="background-color: #e8f0fe; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Badge:</strong> ${badge.nome}</p>
-          <p style="margin: 5px 0;"><strong>Nível:</strong> ${badge.nivel}</p>
-          <p style="margin: 5px 0;"><strong>Estado:</strong> Submetido</p>
-        </div>
-        <p>Equipa Softinsa Badges</p>
-      </div>
-    </div>
-    `
-  );
+  await enviarComTemplate('candidatura-submetida', consultor.email, {
+    consultor: consultor.nome,
+    badge: badge.nome,
+    nivel: badge.nivel
+  });
 };
 
 // Email ao Talent Manager quando há nova candidatura
 const emailNovaSubmissao = async (talentManager, consultor, badge) => {
-  await enviarEmail(
-    talentManager.email,
-    '🔔 Nova candidatura para validar',
-    `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #003087; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
-        <p style="color: #cccccc; margin: 5px 0;">Plataforma de Badges</p>
-      </div>
-      <div style="padding: 30px; background-color: #f9f9f9;">
-        <h2>Nova candidatura recebida</h2>
-        <p>O consultor <strong>${consultor.nome}</strong> submeteu uma candidatura.</p>
-        <div style="background-color: #e8f0fe; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Consultor:</strong> ${consultor.nome}</p>
-          <p style="margin: 5px 0;"><strong>Badge:</strong> ${badge.nome}</p>
-          <p style="margin: 5px 0;"><strong>Nível:</strong> ${badge.nivel}</p>
-        </div>
-        <p>Acede à plataforma para validar as evidências.</p>
-      </div>
-    </div>
-    `
-  );
+  await enviarComTemplate('nova-submissao', talentManager.email, {
+    consultor: consultor.nome,
+    badge: badge.nome,
+    nivel: badge.nivel
+  });
 };
 
 // Email ao consultor quando Talent Manager aprova
 const emailEnviadoParaServiceLine = async (consultor, badge) => {
-  await enviarEmail(
-    consultor.email,
-    '🔄 Candidatura em validação final',
-    `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #003087; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
-      </div>
-      <div style="padding: 30px; background-color: #f9f9f9;">
-        <h2>Olá ${consultor.nome}!</h2>
-        <p>A tua candidatura ao badge <strong>${badge.nome}</strong> foi validada pelo Talent Manager.</p>
-        <p>Está agora em validação final pelo Service Line Leader.</p>
-      </div>
-    </div>
-    `
-  );
+  await enviarComTemplate('enviado-service-line', consultor.email, {
+    consultor: consultor.nome,
+    badge: badge.nome
+  });
 };
 
 // Email ao Service Line Leader quando o Talent Manager valida uma
 // candidatura e esta fica à espera da decisão final dele
 const emailNovaValidacaoSLL = async (serviceLineLeader, consultor, badge) => {
-  await enviarEmail(
-    serviceLineLeader.email,
-    '🔔 Candidatura à espera da tua aprovação final',
-    `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #003087; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
-        <p style="color: #cccccc; margin: 5px 0;">Plataforma de Badges</p>
-      </div>
-      <div style="padding: 30px; background-color: #f9f9f9;">
-        <h2>Candidatura validada pelo Talent Manager</h2>
-        <p>A candidatura do consultor <strong>${consultor.nome}</strong> foi validada pelo Talent Manager e está agora à espera da tua aprovação final.</p>
-        <div style="background-color: #e8f0fe; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Consultor:</strong> ${consultor.nome}</p>
-          <p style="margin: 5px 0;"><strong>Badge:</strong> ${badge.nome}</p>
-          <p style="margin: 5px 0;"><strong>Nível:</strong> ${badge.nivel || badge.Level?.nome || ''}</p>
-        </div>
-        <p>Acede à plataforma para tomar a decisão final.</p>
-      </div>
-    </div>
-    `
-  );
+  await enviarComTemplate('nova-validacao-sll', serviceLineLeader.email, {
+    consultor: consultor.nome,
+    badge: badge.nome,
+    nivel: badge.nivel || badge.Level?.nome || ''
+  });
 };
 
 // Email ao consultor quando badge aprovado
 const emailBadgeAprovado = async (consultor, badge, uuid) => {
-  return enviarEmail(
-    consultor.email,
-    '🎉 Badge aprovado!',
-    `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #003087; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
-      </div>
-      <div style="padding: 30px; background-color: #f9f9f9;">
-        <h2>Parabéns ${consultor.nome}! 🎉</h2>
-        <p>O teu badge <strong>${badge.nome}</strong> foi aprovado!</p>
-        <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Badge:</strong> ${badge.nome}</p>
-          <p style="margin: 5px 0;"><strong>Nível:</strong> ${badge.nivel || badge.Level?.nome || ''}</p>
-          <p style="margin: 5px 0;"><strong>Pontos:</strong> ${badge.ponto ?? badge.pontos ?? 0}</p>
-        </div>
-        <a href="${(process.env.FRONTEND_URL || process.env.APP_URL || '').replace(/\/$/, '')}/badge/${uuid}"
-           style="background-color: #003087; color: white; padding: 10px 20px; 
-                  text-decoration: none; border-radius: 5px;">
-          Ver Badge
-        </a>
-      </div>
-    </div>
-    `
-  );
+  return enviarComTemplate('badge-aprovado', consultor.email, {
+    consultor: consultor.nome,
+    badge: badge.nome,
+    nivel: badge.nivel || badge.Level?.nome || '',
+    pontos: badge.ponto ?? badge.pontos ?? 0,
+    link: `${(process.env.FRONTEND_URL || process.env.APP_URL || '').replace(/\/$/, '')}/badge/${uuid}`
+  });
 };
 
 // Email ao consultor quando rejeitado
 const emailBadgeRejeitado = async (consultor, badge, motivo) => {
-  await enviarEmail(
-    consultor.email,
-    '❌ Candidatura rejeitada',
-    `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #003087; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
-      </div>
-      <div style="padding: 30px; background-color: #f9f9f9;">
-        <h2>Olá ${consultor.nome}</h2>
-        <p>A tua candidatura ao badge <strong>${badge.nome}</strong> foi rejeitada.</p>
-        <div style="background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Motivo:</strong> ${motivo}</p>
-        </div>
-        <p>Podes submeter uma nova candidatura com as evidências corretas.</p>
-      </div>
-    </div>
-    `
-  );
+  await enviarComTemplate('badge-rejeitado', consultor.email, {
+    consultor: consultor.nome,
+    badge: badge.nome,
+    motivo
+  });
 };
 
 // Email com o link de recuperação de password (fluxo "esqueci-me da password")
 const emailRecuperarPassword = async (user, link) => {
-  await enviarEmail(
-    user.email,
-    '🔑 Recuperação de password',
-    `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #003087; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
-        <p style="color: #cccccc; margin: 5px 0;">Plataforma de Badges</p>
-      </div>
-      <div style="padding: 30px; background-color: #f9f9f9;">
-        <h2>Olá ${user.nome}!</h2>
-        <p>Recebemos um pedido para repor a password da tua conta.</p>
-        <p>Clica no botão abaixo para definires uma nova password. O link é válido durante <strong>1 hora</strong>.</p>
-        <p style="text-align: center; margin: 30px 0;">
-          <a href="${link}"
-             style="background-color: #003087; color: white; padding: 12px 24px;
-                    text-decoration: none; border-radius: 5px;">
-            Definir nova password
-          </a>
-        </p>
-        <p style="color: #666; font-size: 13px;">Se não pediste esta recuperação, ignora este email — a tua password mantém-se igual.</p>
-        <p>Equipa Softinsa Badges</p>
-      </div>
-    </div>
-    `
-  );
+  await enviarComTemplate('recuperar-password', user.email, {
+    nome: user.nome,
+    link
+  });
 };
 
 // Email de boas-vindas quando o Admin regista um novo utilizador.
 // confirmLink (opcional): link para confirmar o endereço de email.
 const emailBoasVindas = async (user, loginLink, confirmLink, tempPassword) => {
-  await enviarEmail(
-    user.email,
-    '👋 A tua conta na Plataforma de Badges foi criada',
-    `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #003087; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
-        <p style="color: #cccccc; margin: 5px 0;">Plataforma de Badges</p>
-      </div>
-      <div style="padding: 30px; background-color: #f9f9f9;">
-        <h2>Bem-vindo(a), ${user.nome}!</h2>
-        <p>Foi criada uma conta para ti na Plataforma de Badges da Softinsa.</p>
-        <div style="background-color: #e8f0fe; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Email de acesso:</strong> ${user.email}</p>
-          ${tempPassword ? `<p style="margin: 8px 0 0;"><strong>Password temporária:</strong> <code style="background:#fff;padding:2px 6px;border-radius:4px;">${tempPassword}</code></p>` : ''}
-        </div>
-        <p>${tempPassword
-          ? 'Usa a password temporária acima no primeiro acesso. Vais ser convidado(a) a definir uma nova password.'
-          : 'No primeiro acesso vais entrar com a password que definiste.'}</p>
-        ${confirmLink ? `
+  await enviarComTemplate('boas-vindas', user.email, {
+    nome: user.nome,
+    email: user.email,
+    loginLink,
+    blocoPassword: tempPassword
+      ? `<p style="margin: 8px 0 0;"><strong>Password temporária:</strong> <code style="background:#fff;padding:2px 6px;border-radius:4px;">${tempPassword}</code></p>`
+      : '',
+    instrucoes: tempPassword
+      ? 'Usa a password temporária acima no primeiro acesso. Vais ser convidado(a) a definir uma nova password.'
+      : 'No primeiro acesso vais entrar com a password que definiste.',
+    blocoConfirmar: confirmLink ? `
         <p style="text-align: center; margin: 30px 0 10px;">
           <a href="${confirmLink}"
              style="background-color: #2e7d32; color: white; padding: 12px 24px;
@@ -277,19 +159,8 @@ const emailBoasVindas = async (user, loginLink, confirmLink, tempPassword) => {
           </a>
         </p>
         <p style="color: #666; font-size: 13px; text-align: center;">Confirma que este endereço de email é teu.</p>
-        ` : ''}
-        <p style="text-align: center; margin: 20px 0 30px;">
-          <a href="${loginLink}"
-             style="background-color: #003087; color: white; padding: 12px 24px;
-                    text-decoration: none; border-radius: 5px;">
-            Aceder à plataforma
-          </a>
-        </p>
-        <p>Equipa Softinsa Badges</p>
-      </div>
-    </div>
-    `
-  );
+        ` : ''
+  });
 };
 
 // Alerta de SLA ultrapassado, enviado a Talent Managers / Service Line
@@ -302,55 +173,21 @@ const emailAlertaSLA = async (user, atrasadas, responseDays) => {
           <td style="padding: 6px 10px; border-bottom: 1px solid #e0e0e0; text-align: center; color: #c62828; font-weight: bold;">${c.diasEmEspera}</td>
         </tr>`).join('');
 
-  await enviarEmail(
-    user.email,
-    `⏰ SLA ultrapassado: ${atrasadas.length} candidatura(s) em atraso`,
-    `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #003087; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
-        <p style="color: #cccccc; margin: 5px 0;">Plataforma de Badges</p>
-      </div>
-      <div style="padding: 30px; background-color: #f9f9f9;">
-        <h2>Olá ${user.nome}</h2>
-        <p>Há <strong>${atrasadas.length} candidatura(s)</strong> à espera de decisão há mais de <strong>${responseDays} dia(s)</strong> (SLA definido):</p>
-        <table style="width: 100%; border-collapse: collapse; background: white; margin: 20px 0; font-size: 14px;">
-          <tr style="background-color: #e8f0fe;">
-            <th style="padding: 8px 10px; text-align: left;">Badge</th>
-            <th style="padding: 8px 10px; text-align: left;">Consultor</th>
-            <th style="padding: 8px 10px;">Dias em espera</th>
-          </tr>
-          ${linhas}
-        </table>
-        <p>Acede à plataforma para tomares as decisões pendentes.</p>
-        <p>Equipa Softinsa Badges</p>
-      </div>
-    </div>
-    `
-  );
+  await enviarComTemplate('alerta-sla', user.email, {
+    nome: user.nome,
+    total: atrasadas.length,
+    dias: responseDays,
+    tabela: linhas
+  });
 };
 
 // Email ao consultor quando send back
 const emailSendBack = async (consultor, badge, comentario) => {
-  await enviarEmail(
-    consultor.email,
-    '↩️ Candidatura devolvida para correção',
-    `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #003087; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0;">SOFTINSA</h1>
-      </div>
-      <div style="padding: 30px; background-color: #f9f9f9;">
-        <h2>Olá ${consultor.nome}</h2>
-        <p>A tua candidatura ao badge <strong>${badge.nome}</strong> foi devolvida para correção.</p>
-        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Comentário:</strong> ${comentario}</p>
-        </div>
-        <p>Por favor corrige as evidências e volta a submeter.</p>
-      </div>
-    </div>
-    `
-  );
+  await enviarComTemplate('send-back', consultor.email, {
+    consultor: consultor.nome,
+    badge: badge.nome,
+    comentario
+  });
 };
 
 module.exports = {

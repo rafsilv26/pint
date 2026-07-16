@@ -116,7 +116,8 @@ exports.listConsultants = async (req, res) => {
       data
     });
   } catch (error) {
-    res.status(error.statusCode || 500).json({ erro: error.message || 'Erro ao listar consultores.', details: error.message });
+    const status = error.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao listar consultores.' : error.message });
   }
 };
 
@@ -135,35 +136,47 @@ exports.getConsultant = async (req, res) => {
       req.user.id
     ));
   } catch (error) {
-    res.status(error.statusCode || 500).json({ erro: error.message || 'Erro ao obter consultor.', details: error.message });
+    const status = error.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao obter consultor.' : error.message });
   }
 };
 
 
 exports.updateConsultant = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = Number(req.params.id);
     const { name, biography, linkedinUrl } = req.body;
 
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ erro: 'Identificador de consultor inválido.' });
+    }
+
     // Verifica se é o próprio utilizador
-    if (req.user.id !== parseInt(id)) {
+    if (req.user.id !== id) {
       return res.status(403).json({ erro: 'Não tens permissão para editar este perfil' });
+    }
+
+    if (!String(name || '').trim()) {
+      return res.status(400).json({ erro: 'O nome é obrigatório.' });
     }
 
     // Atualiza o nome na tabela User
     await User.update(
-      { nome: name },
+      { nome: String(name).trim() },
       { where: { id } }
     );
 
     // Atualiza ou cria o registo na tabela Consultant
     const [consultor, criado] = await Consultant.findOrCreate({
       where: { consultorId: id },
-      defaults: { biography, linkedinUrl }
+      defaults: { biography: String(biography || '').trim(), linkedinUrl: String(linkedinUrl || '').trim() }
     });
 
     if (!criado) {
-      await consultor.update({ biography, linkedinUrl });
+      await consultor.update({
+        biography: String(biography || '').trim(),
+        linkedinUrl: String(linkedinUrl || '').trim()
+      });
     }
 
     res.json({ mensagem: 'Perfil atualizado com sucesso!' });

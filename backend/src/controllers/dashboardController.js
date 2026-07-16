@@ -193,7 +193,7 @@ exports.getDashboard = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao carregar dashboard.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao carregar dashboard.' });
   }
 };
 
@@ -294,6 +294,6 @@ exports.getAtividadeAdmin = async (req, res) => {
 
     res.json(items.slice(0, limiteTotal));
   } catch (error) {
-    res.status(500).json({ erro: 'Erro ao carregar atividade recente.', details: error.message });
+    res.status(500).json({ erro: 'Erro ao carregar atividade recente.' });
   }
 };

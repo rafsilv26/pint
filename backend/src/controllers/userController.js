@@ -38,7 +38,7 @@ exports.getAllUsers = async (_req, res) => {
 
         res.json(await Promise.all(users.map(serializeUser)));
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao listar utilizadores.', details: error.message });
+        res.status(500).json({ error: 'Erro ao listar utilizadores.' });
     }
 };
 
@@ -54,7 +54,7 @@ exports.getUserById = async (req, res) => {
 
         res.json(await serializeUser(user));
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao obter utilizador.', details: error.message });
+        res.status(500).json({ error: 'Erro ao obter utilizador.' });
     }
 };
 
@@ -108,7 +108,7 @@ exports.updateUser = async (req, res) => {
             user: await serializeUser(user)
         });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao atualizar utilizador.', details: error.message });
+        res.status(500).json({ error: 'Erro ao atualizar utilizador.' });
     }
 };
 
@@ -126,6 +126,6 @@ exports.deleteUser = async (req, res) => {
         res.json({ message: 'Utilizador removido definitivamente com sucesso.' });
     } catch (error) {
         console.error("Erro ao eliminar utilizador:", error);
-        res.status(500).json({ error: 'Erro ao remover utilizador.', details: error.message });
+        res.status(500).json({ error: 'Erro ao remover utilizador.' });
     }
 };

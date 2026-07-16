@@ -230,6 +230,38 @@ export async function difundirAviso(body) {
   return http('/notifications/broadcast', { method: 'POST', body })
 }
 
+export async function getEmailTemplates() {
+  return http('/email-templates')
+}
+export async function saveEmailTemplate(code, body) {
+  return http(`/email-templates/${code}`, { method: 'PUT', body })
+}
+export async function resetEmailTemplate(code) {
+  return http(`/email-templates/${code}`, { method: 'DELETE' })
+}
+export async function previewEmailTemplate(code, body) {
+  return http(`/email-templates/${code}/preview`, { method: 'POST', body })
+}
+export async function testEmailTemplate(code) {
+  return http(`/email-templates/${code}/test`, { method: 'POST' })
+}
+
+export async function getSlaConfigs() {
+  return http('/sla/configs')
+}
+export async function criarSlaConfig(body) {
+  return http('/sla/configs', { method: 'POST', body })
+}
+export async function atualizarSlaConfig(id, body) {
+  return http(`/sla/configs/${id}`, { method: 'PUT', body })
+}
+export async function apagarSlaConfig(id) {
+  return http(`/sla/configs/${id}`, { method: 'DELETE' })
+}
+export async function runSlaCheck() {
+  return http('/notifications/sla-check', { method: 'POST' })
+}
+
 export async function getMeusObjetivos() {
   return http('/timeline/minha').catch(() => [])
 }
@@ -241,6 +273,16 @@ export async function concluirObjetivo(id, concluido = true) {
 }
 export async function apagarObjetivo(id) {
   return http(`/timeline/${id}`, { method: 'DELETE' })
+}
+
+export async function getObjetivosConsultor(consultorId) {
+  return http(`/timeline/consultor/${consultorId}`).catch(() => [])
+}
+export async function criarObjetivoConsultor(consultorId, body) {
+  return http(`/timeline/consultor/${consultorId}`, { method: 'POST', body })
+}
+export async function apagarObjetivoConsultor(consultorId, id) {
+  return http(`/timeline/consultor/${consultorId}/${id}`, { method: 'DELETE' })
 }
 
 export async function getMeusBadges() {
@@ -631,6 +673,8 @@ export async function getAdminPedidos() {
       nivel: c.Badge?.nivelId != null ? String(c.Badge.nivelId) : '—',
       pontos: c.Badge?.ponto ?? 0,
       status: { code, name: c.status?.name || i18next.t('api.status.submetido'), cor: CODE_COR[code] || 'gray' },
+      slaLimite: c.dataSlaLimite ? new Date(c.dataSlaLimite).toLocaleDateString('pt-PT') : null,
+      slaExcedido: Boolean(c.slaExcedido),
     }
   })
 }

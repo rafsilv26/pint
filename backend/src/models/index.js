@@ -30,6 +30,7 @@ const ExternalIntegration = require('./ExternalIntegration');
 const EmailSignature = require('./EmailSignature');
 const LogsWorkflow = require('./LogsWorkflow');
 const DevicePushToken = require('./DevicePushToken');
+const EmailTemplate = require('./EmailTemplate');
 
 // User roles associations
 User.hasOne(Administrator, { foreignKey: 'adminId' });
@@ -211,5 +212,6 @@ module.exports = {
   ExternalIntegration,
   EmailSignature,
   LogsWorkflow,
-  DevicePushToken
+  DevicePushToken,
+  EmailTemplate
 };

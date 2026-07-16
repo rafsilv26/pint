@@ -12,6 +12,11 @@ const SLAConfig = sequelize.define('SLAConfig', {
         allowNull: false,
         comment: "Ex: 'SLA Standard', 'SLA Premium'"
     },
+    team: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+        comment: "Equipa a que o SLA se aplica: 'talent', 'serviceline' ou null (global, aplica-se às duas)"
+    },
     responseDays: {
         type: DataTypes.INTEGER,
         allowNull: false,

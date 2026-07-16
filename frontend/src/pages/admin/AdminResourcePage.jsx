@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { PageHeader, Card, Spinner, ErrorState, EmptyState, Button } from '../../components/ui'
 import ExportButtons from '../../components/ExportButtons'
@@ -7,10 +7,14 @@ import * as api from '../../services/api'
 import { getAdminResources } from '../../config/adminResources';
 import { useTranslation } from 'react-i18next';
 
-export default function AdminResourcePage({ resourceKey, readOnly = false, variants = null }) {
+export default function AdminResourcePage(props) {
+  return <AdminResourceContent key={props.resourceKey} {...props} />
+}
+
+function AdminResourceContent({ resourceKey, readOnly = false, variants = null }) {
   const { t } = useTranslation();
 
-  const allResources = getAdminResources(t);
+  const allResources = useMemo(() => getAdminResources(t), [t]);
   const [activeKey, setActiveKey] = useState(resourceKey)
   const cfg = allResources[activeKey]
   const { data, loading, error, reload } = useAsync(() => api.listResource(cfg.resource), [activeKey])
@@ -25,19 +29,12 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
 
   const rows = data || []
 
-  useEffect(() => {
-    setActiveKey(resourceKey)
-    setEditing(null)
-    setForm({})
-    setErroForm(null)
-    setConfirmar(null)
-    setErroDelete(null)
-  }, [resourceKey])
-
   const getPrimaryKey = (row) =>
     row?.policyId ?? row?.noticeId ?? row?.infoId ?? row?.areaId ?? row?.badgePremiumId ?? row?.id ?? null;
 
   useEffect(() => {
+    let alive = true
+
     async function loadOptions() {
       const newOptions = {}
 
@@ -67,11 +64,12 @@ export default function AdminResourcePage({ resourceKey, readOnly = false, varia
           } catch (err) { console.error('Erro ao carregar consultores para dropdown:', err); }
         }
       }
-      setDropdownOptions(newOptions);
+      if (alive) setDropdownOptions(newOptions);
     }
     loadOptions();
 
-  }, [activeKey]);
+    return () => { alive = false }
+  }, [activeKey, allResources]);
 
   function trocarVariante(key) {
     if (key === activeKey) return

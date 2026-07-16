@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
-import { ArrowLeft, Award, Star, Sparkles, Calendar, Mail, ExternalLink, Network, Trophy, FileText, FileDown, ChevronRight, Download, Clock3, Target } from 'lucide-react'
+import { ArrowLeft, Award, Star, Sparkles, Calendar, Mail, ExternalLink, Network, Trophy, FileText, FileDown, ChevronRight, Download } from 'lucide-react'
 import { Card, Spinner, ErrorState, EmptyState, StatusPill } from '../components/ui'
+import ConsultorTimelineManager from '../components/ConsultorTimelineManager'
 import { useAsync } from '../hooks/useAsync'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
@@ -39,7 +40,6 @@ export default function ManagerConsultorDetailPage() {
   ]
   const badgesConquistados = c.badgesConquistados || []
   const specialAchievements = c.specialAchievements || []
-  const timeline = c.timeline || []
   const listaHistorico = historico || []
 
   const downloadCertificate = async (badgeId) => {
@@ -186,7 +186,7 @@ export default function ManagerConsultorDetailPage() {
 
       {(talentView || serviceLineView) && <div className="mt-4 row g-4">
         <div className="col-lg-6"><Card className="h-100"><h2 className="mb-3 h6 fw-bold"><Sparkles size={17} className="me-2 text-warning" />{t('tmWorkspace.specialAchievements')}</h2>{specialAchievements.length === 0 ? <p className="small text-muted mb-0">{t('tmWorkspace.noSpecialAchievements')}</p> : <div className="d-flex flex-column gap-3">{specialAchievements.map((item) => <div key={`${item.badgePremiumId}-${item.achievementDate}`} className="rounded-3 border p-3"><p className="small fw-bold mb-1">{item.name}</p><p className="fs-xs text-muted mb-1">{item.description || item.criteriaDescription}</p><p className="fs-xs text-muted mb-0">{item.achievementDate ? new Date(item.achievementDate).toLocaleDateString() : '—'}</p></div>)}</div>}</Card></div>
-        {talentView && <div className="col-lg-6"><Card className="h-100"><h2 className="mb-3 h6 fw-bold"><Target size={17} className="me-2 text-primary" />{t('tmWorkspace.developmentTimeline')}</h2>{timeline.length === 0 ? <p className="small text-muted mb-0">{t('tmWorkspace.noGoals')}</p> : <div className="d-flex flex-column gap-3">{timeline.map((item) => <div key={item.timelineId} className="d-flex gap-3"><div className="d-flex align-items-center justify-content-center rounded-circle bg-brand-light text-brand flex-shrink-0" style={{ width: 32, height: 32 }}><Clock3 size={15} /></div><div><p className="small fw-bold mb-0">{item.title}</p><p className="fs-xs text-muted mb-1">{item.type} · {item.status}</p>{item.expectedDate && <p className="fs-xs text-muted mb-0">{t('tmWorkspace.expected')}: {new Date(item.expectedDate).toLocaleDateString()}</p>}</div></div>)}</div>}</Card></div>}
+        {talentView && <div className="col-lg-6"><ConsultorTimelineManager consultorId={c.id} className="h-100" /></div>}
       </div>}
 
       <Card className="mt-4 overflow-hidden p-0">

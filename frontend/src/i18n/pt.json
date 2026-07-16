@@ -339,6 +339,25 @@
     "concluidoEm": "Concluído em",
     "marcarConcluido": "Marcar como concluído",
     "reabrir": "Reabrir",
+    "remover": "Remover",
+    "atribuido": "Atribuído",
+    "atribuidoTooltip": "Objetivo atribuído pela gestão — podes concluí-lo mas não removê-lo."
+  },
+  "timelineManager": {
+    "titulo": "Timeline de desenvolvimento",
+    "subtitulo": "Cria objetivos para este consultor — vão aparecer na página de objetivos dele.",
+    "tituloLabel": "Objetivo",
+    "tituloPlaceholder": "Ex: Completar Azure Fundamentals",
+    "tipoLabel": "Tipo",
+    "tipos": { "meta": "Meta", "milestone": "Milestone", "evento": "Evento" },
+    "prazoLabel": "Data-alvo",
+    "prioridadeLabel": "Prioridade",
+    "adicionar": "Adicionar",
+    "vazioTitulo": "Sem objetivos",
+    "vazioDesc": "Cria o primeiro objetivo para este consultor.",
+    "prazo": "Prazo:",
+    "semPrazo": "Sem prazo",
+    "concluidoEm": "Concluído em",
     "remover": "Remover"
   },
   "managerBadge": {
@@ -701,11 +720,29 @@
     "titulo": "Definições",
     "subtitulo": "Configurações gerais da plataforma.",
     "sla": {
-      "titulo": "SLA",
-      "subtitulo": "Prazo de resposta a pedidos e alertas.",
-      "dias": "Dias de resposta",
-      "alertasLabel": "Alertas de SLA",
-      "alertasDesc": "Enviar avisos quando um pedido se aproxima do prazo"
+      "titulo": "Gestão de SLAs",
+      "subtitulo": "Prazos de resposta das equipas de Talent e Service Line. O SLA ativo de cada equipa define quando os alertas de atraso (email e push) são enviados.",
+      "equipaTalent": "Talent",
+      "equipaServiceLine": "Service Line",
+      "equipaGlobal": "Global",
+      "dias_one": "{{count}} dia de resposta",
+      "dias_many": "{{count}} dias de resposta",
+      "dias_other": "{{count}} dias de resposta",
+      "alertaResumo_one": "alerta {{count}} dia antes",
+      "alertaResumo_many": "alerta {{count}} dias antes",
+      "alertaResumo_other": "alerta {{count}} dias antes",
+      "nomeLabel": "Nome",
+      "nomePlaceholder": "Ex: SLA Standard",
+      "equipaLabel": "Equipa",
+      "diasLabel": "Dias",
+      "alertaLabel": "Alerta (dias antes)",
+      "adicionar": "Adicionar SLA",
+      "vazio": "Sem SLAs configurados — é usado o valor por omissão de 5 dias.",
+      "ativa": "Ativo",
+      "remover": "Remover",
+      "verificar": "Correr verificação de SLA agora",
+      "aVerificar": "A verificar…",
+      "resumo": "Em atraso: {{tm}} candidatura(s) na equipa de Talent e {{sll}} na Service Line · {{emails}} email(s) de alerta enviados"
     },
     "notificacoes": {
       "titulo": "Notificações da plataforma",
@@ -713,7 +750,9 @@
       "email": "Notificações por Email",
       "emailDesc": "Enviar emails de candidatura, aprovação e rejeição",
       "push": "Notificações Push",
-      "pushDesc": "Alertas push na aplicação (quando disponível)"
+      "pushDesc": "Alertas push na aplicação (quando disponível)",
+      "diasExpiracao": "Antecedência dos alertas de expiração",
+      "diasExpiracaoDesc": "Quantos dias antes de um badge expirar os consultores são avisados."
     },
     "broadcast": {
       "titulo": "Difundir aviso",
@@ -733,6 +772,27 @@
       "guardar": "Guardar Definições"
     }
   },
+  "adminEmailTemplates": {
+    "titulo": "Templates de email",
+    "subtitulo": "Personaliza o assunto e o conteúdo dos emails enviados pela plataforma.",
+    "escolhe": "Escolhe um template à esquerda para o editar.",
+    "personalizado": "Personalizado",
+    "padrao": "Padrão",
+    "assunto": "Assunto",
+    "corpo": "Corpo (HTML)",
+    "variaveis": "Variáveis disponíveis",
+    "guardar": "Guardar",
+    "aGuardar": "A guardar…",
+    "guardado": "Template guardado ✓",
+    "repor": "Repor padrão",
+    "reposto": "Template reposto para o padrão ✓",
+    "preVisualizar": "Pré-visualizar",
+    "previewAssunto": "Assunto",
+    "previewTitulo": "Pré-visualização do email",
+    "enviarTeste": "Enviar teste",
+    "aEnviar": "A enviar…",
+    "testeEnviado": "Email de teste enviado para {{para}} ✓"
+  },
   "adminPedidos": {
     "titulo": "Pedido de Badges",
     "subtitulo": "Todas as candidaturas a badges.",
@@ -745,8 +805,10 @@
       "nivel": "Nível",
       "pontos": "Pontos",
       "data": "Data",
+      "sla": "SLA",
       "estado": "Estado"
-    }
+    },
+    "slaExcedido": "SLA excedido"
   },
   "adminResource": {
     "adicionar": "Adicionar {{singular}}",
@@ -953,6 +1015,7 @@
       "politicas": "Políticas RGPD",
       "avisos": "Avisos",
       "informacoes": "Informações",
+      "templatesEmail": "Templates de email",
       "definicoes": "Definições"
     },
     "roles": {

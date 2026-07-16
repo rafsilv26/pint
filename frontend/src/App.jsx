@@ -53,6 +53,7 @@ import AdminUserDetailPage from './pages/admin/AdminUserDetailPage'
 import AdminPedidosPage from './pages/admin/AdminPedidosPage'
 import AdminPedidoDetailPage from './pages/admin/AdminPedidoDetailPage'
 import AdminDefinicoesPage from './pages/admin/AdminDefinicoesPage'
+import AdminEmailTemplatesPage from './pages/admin/AdminEmailTemplatesPage'
 
 import ManagerConsultorDetailPage from './pages/ManagerConsultorDetailPage'
 import ManagerBadgeDetailPage from './pages/ManagerBadgeDetailPage'
@@ -162,6 +163,7 @@ export default function App() {
           <Route path="/admin/pedidos" element={<AdminPedidosPage />} />
           <Route path="/admin/pedidos/:id" element={<AdminPedidoDetailPage />} />
           <Route path="/admin/relatorios" element={<TalentReportsPage soIndicadores />} />
+          <Route path="/admin/templates-email" element={<AdminEmailTemplatesPage />} />
           <Route path="/admin/definicoes" element={<AdminDefinicoesPage />} />
           <Route path="/admin/assinatura" element={<EmailSignaturePage />} />
           <Route path="/admin/alterar-password" element={<ChangePasswordPage />} />

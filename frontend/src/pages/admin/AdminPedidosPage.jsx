@@ -54,6 +54,7 @@ export default function AdminPedidosPage() {
                   <th className="px-3 py-2">{t('adminPedidos.tabela.nivel')}</th>
                   <th className="px-3 py-2">{t('adminPedidos.tabela.pontos')}</th>
                   <th className="px-3 py-2">{t('adminPedidos.tabela.data')}</th>
+                  <th className="px-3 py-2">{t('adminPedidos.tabela.sla')}</th>
                   <th className="px-3 py-2">{t('adminPedidos.tabela.estado')}</th>
                 </tr>
               </thead>
@@ -67,7 +68,11 @@ export default function AdminPedidosPage() {
                     <td className="px-3 py-2 text-ink">{c.badge}</td>
                     <td className="px-3 py-2 text-muted">{c.nivel}</td>
                     <td className="px-3 py-2 text-muted">{c.pontos}</td>
-                    <td className="px-3 py-2 text-muted">{c.data}</td>
+                    <td className="px-3 py-2">
+                      {c.slaExcedido
+                        ? <span className="badge rounded-pill text-bg-danger">{t('adminPedidos.slaExcedido')}</span>
+                        : <span className="text-muted">{c.slaLimite || '—'}</span>}
+                    </td>
                     <td className="px-3 py-2"><StatusPill status={c.status} /></td>
                   </tr>
                 ))}

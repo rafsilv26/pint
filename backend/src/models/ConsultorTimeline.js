@@ -50,6 +50,11 @@ const ConsultorTimeline = sequelize.define('ConsultorTimeline', {
         allowNull: true,
         comment: '1 (alta) a 5 (baixa)'
     },
+    createdBy: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        comment: 'userId de quem criou; null = registos antigos (tratados como do próprio consultor)'
+    },
     createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW

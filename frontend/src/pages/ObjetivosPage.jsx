@@ -103,6 +103,7 @@ export default function ObjetivosPage() {
                     <div className="d-flex align-items-center gap-2 flex-wrap">
                       <p className={`fw-semibold mb-0 ${o.concluido ? 'text-muted text-decoration-line-through' : 'text-ink'}`}>{o.title}</p>
                       {!o.concluido && <span className={`badge rounded-pill ${p.cls}`}>{t(`objetivos.prioridades.${p.key}`)}</span>}
+                      {o.atribuido && <span className="badge rounded-pill text-bg-info" title={t('objetivos.atribuidoTooltip')}>{t('objetivos.atribuido')}</span>}
                     </div>
                     <p className="mt-1 mb-0 d-flex align-items-center gap-1 fs-xs text-muted">
                       <Calendar size={12} />
@@ -115,9 +116,11 @@ export default function ObjetivosPage() {
                     <button onClick={() => alternar(o)} className="btn btn-link btn-sm p-0 text-muted" title={o.concluido ? t('objetivos.reabrir') : t('objetivos.marcarConcluido')}>
                       {o.concluido ? <RotateCcw size={16} /> : <CheckCircle2 size={16} />}
                     </button>
-                    <button onClick={() => remover(o.id)} className="btn btn-link btn-sm p-0 text-danger" title={t('objetivos.remover')}>
-                      <Trash2 size={16} />
-                    </button>
+                    {!o.atribuido && (
+                      <button onClick={() => remover(o.id)} className="btn btn-link btn-sm p-0 text-danger" title={t('objetivos.remover')}>
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </Card>
