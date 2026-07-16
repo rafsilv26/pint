@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../services/app_sync_service.dart';
+import '../services/app_sync_trigger_service.dart';
 import '../services/auth_service.dart';
+import '../services/candidatura_outbox_service.dart';
 import '../services/push_notification_service.dart';
 import 'change_password_page.dart';
 import 'home_page.dart';
@@ -40,8 +44,10 @@ class _AuthGateState extends State<AuthGate> {
   Future<_AuthState> _checkSessionAndSync() async {
     final isLoggedIn = await authService.isLoggedIn();
     if (isLoggedIn) {
-      await AppSyncService().synchronizeIfNeeded();
-      await PushNotificationService.instance.initialize();
+      // O registo PUSH e auxiliar: permissões, Firebase ou a rede nunca devem
+      // impedir o utilizador de entrar e trabalhar com os dados locais.
+      unawaited(PushNotificationService.instance.initialize());
+      unawaited(_synchronizeSession());
       final mustChangePassword = await authService.mustChangePassword();
       final pendingPolicies = await authService.getPendingPolicies();
       return _AuthState(
@@ -52,6 +58,17 @@ class _AuthGateState extends State<AuthGate> {
     }
 
     return const _AuthState.loggedOut();
+  }
+
+  Future<void> _synchronizeSession() async {
+    try {
+      final synchronized = await AppSyncService().synchronizeIfNeeded();
+      if (!synchronized && await CandidaturaOutboxService().hasPendingWork()) {
+        AppSyncTriggerService.instance.requestSync();
+      }
+    } catch (_) {
+      // A app abre sempre com SQLite; o lifecycle volta a tentar mais tarde.
+    }
   }
 
   @override

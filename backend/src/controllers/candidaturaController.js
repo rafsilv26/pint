@@ -1,7 +1,9 @@
 const { Op } = require('sequelize');
 const { randomUUID } = require('crypto');
+const sequelize = require('../config/database');
 const {
   Candidatura,
+  CandidaturaSubmission,
   Evidencia,
   Badge,
   BadgeStatus,
@@ -30,6 +32,13 @@ const {
   getBadgeIdsDaServiceLine
 } = require('../services/serviceLineScope.service');
 const { sendPushToUser } = require('../services/pushNotification.service');
+const {
+  normalizeClientSubmissionId,
+  normalizeBadgeId,
+  resolveClientEvidenceIds,
+  withClientSubmissionTransaction,
+  getPendingEvidenceUploads
+} = require('../services/candidaturaIdempotency.service');
 
 const STATUS = {
   OPEN: 'OPEN',
@@ -143,185 +152,435 @@ const calcularExpiracao = (badge) => {
   return data;
 };
 
+const submissionError = (statusCode, message, extra = {}) => {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  error.responseBody = { erro: message, ...extra };
+  return error;
+};
+
+const replayResult = (submission) => ({
+  statusCode: Number(submission.responseStatus) || 200,
+  body: submission.responseBody,
+  notify: false
+});
+
+const legacySubmissionResult = async ({
+  candidatura,
+  submittedId,
+  openId,
+  transaction
+}) => {
+  const submissionHistory = candidatura.estadoId === openId
+    ? await HistoricoCandidatura.findOne({
+      where: { candidaturaId: candidatura.id, estadoNovo: submittedId },
+      attributes: ['id'],
+      transaction
+    })
+    : null;
+  const wasSubmitted = candidatura.estadoId !== openId || Boolean(submissionHistory);
+  return {
+    statusCode: 200,
+    body: wasSubmitted
+      ? {
+        mensagem: 'Candidatura submetida com sucesso.',
+        candidaturaId: candidatura.id,
+        idempotentReplay: true
+      }
+      : {
+        mensagem: 'Rascunho guardado.',
+        candidaturaId: candidatura.id,
+        estado: STATUS.OPEN,
+        idempotentReplay: true
+      },
+    notify: false
+  };
+};
+
+const rememberClientSubmission = async ({
+  consultorId,
+  badgeId,
+  candidatura,
+  clientSubmissionId,
+  result,
+  transaction
+}) => {
+  if (!clientSubmissionId) return result;
+  await CandidaturaSubmission.findOrCreate({
+    where: { consultorId, clientSubmissionId },
+    defaults: {
+      badgeId,
+      candidaturaId: candidatura.id,
+      responseStatus: result.statusCode,
+      responseBody: result.body
+    },
+    transaction
+  });
+  return result;
+};
+
 exports.submeterCandidatura = async (req, res) => {
   try {
     // Extrair dados da requisição
-    const { badgeId, requisitoIds = [], descricao } = req.body;
+    const { requisitoIds = [], descricao } = req.body;
+    const badgeId = normalizeBadgeId(req.body.badgeId);
+    const clientSubmissionId = normalizeClientSubmissionId(req.body.clientSubmissionId);
     // rascunho === true -> "Guardar": fica no estado OPEN, aceita evidências
     // parciais e NÃO exige cobertura dos requisitos obrigatórios.
     const rascunho = String(req.body.rascunho) === 'true';
     const consultorId = req.user.id;
     const ficheiros = req.files || [];
 
-    // Validar badge
-    const badge = await Badge.findByPk(badgeId);
-    if (!badge || badge.ativo === false) {
-      return res.status(404).json({ erro: 'Badge não encontrada ou inativa.' });
-    }
-
-    // Validar consultor
-    const consultant = await Consultant.findByPk(consultorId);
-    if (!consultant) {
-      return res.status(403).json({ erro: 'Apenas consultores podem submeter candidaturas.' });
-    }
-
     const statuses = await getStatuses([STATUS.OPEN, STATUS.SUBMITTED, STATUS.IN_VALIDATION, STATUS.VALIDATED, STATUS.IN_APPROVAL]);
     const openId = statuses[STATUS.OPEN].statusId;
     const submitted = statuses[STATUS.SUBMITTED] || await getStatus(STATUS.SUBMITTED);
     const submittedId = submitted.statusId;
+    let badgeForNotification = null;
 
-    // A candidatura é EDITÁVEL enquanto está OPEN (rascunho) ou SUBMITTED (à
-    // espera do Talent Manager). Assim que o TM a valida, fica bloqueada.
-    const editableIds = [openId, submittedId];
-    const bloqueada = await Candidatura.findOne({
-      where: {
-        consultorId,
-        badgeId,
-        estadoId: { [Op.in]: Object.values(statuses).map((s) => s.statusId).filter((id) => !editableIds.includes(id)) }
+    const result = await withClientSubmissionTransaction({
+      sequelize,
+      consultorId,
+      clientSubmissionId,
+      badgeId
+    }, async (transaction) => {
+      // O helper já adquiriu os locks antes desta primeira leitura. Dois POST
+      // concorrentes ficam serializados mesmo em processos Render diferentes.
+      // Um reenvio mobile com a mesma chave nunca volta a criar candidatura,
+      // evidências, histórico ou emails.
+      const submission = clientSubmissionId
+        ? await CandidaturaSubmission.findOne({
+          where: { consultorId, clientSubmissionId },
+          transaction,
+          lock: transaction.LOCK.UPDATE
+        })
+        : null;
+      if (submission && Number(submission.badgeId) !== Number(badgeId)) {
+        throw submissionError(
+          409,
+          'A chave desta submissão já foi utilizada noutra candidatura.'
+        );
       }
-    });
-    if (bloqueada) {
-      return res.status(400).json({ erro: 'Esta candidatura já está em validação e não pode ser alterada.' });
-    }
+      if (submission) return replayResult(submission);
 
-    // Reaproveita a candidatura editável existente (OPEN ou SUBMITTED).
-    let candidatura = await Candidatura.findOne({
-      where: { consultorId, badgeId, estadoId: { [Op.in]: editableIds } }
-    });
-    const jaSubmetida = Boolean(candidatura) && candidatura.estadoId === submittedId;
-
-    // Emparelha cada NOVO ficheiro com o requisito que evidencia (mesma ordem).
-    const idsRequisitos = (Array.isArray(requisitoIds) ? requisitoIds : [requisitoIds])
-      .map((id) => Number(id))
-      .filter((id) => Number.isInteger(id));
-    if (idsRequisitos.length !== ficheiros.length) {
-      return res.status(400).json({ erro: 'Cada evidência tem de estar associada a um requisito.' });
-    }
-
-    // Requisitos do nível deste badge.
-    const requisitosDoNivel = await Requirement.findAll({
-      where: { nivelId: badge.nivelId, deletedAt: null },
-      attributes: ['id', 'obrigatorio']
-    });
-    const idsValidos = new Set(requisitosDoNivel.map((r) => r.id));
-    if (idsRequisitos.some((id) => !idsValidos.has(id))) {
-      return res.status(400).json({ erro: 'Uma das evidências está associada a um requisito que não pertence a este badge.' });
-    }
-
-    // Evidências já existentes (pode haver várias por requisito).
-    const evidenciasExistentes = candidatura
-      ? await Evidencia.findAll({ where: { candidaturaId: candidatura.id }, attributes: ['id', 'requisitoId'] })
-      : [];
-    const requisitosCobertos = new Set(evidenciasExistentes.map((e) => e.requisitoId));
-    idsRequisitos.forEach((id) => requisitosCobertos.add(id));
-
-    // Editar uma candidatura SUBMITTED só serve para ADICIONAR evidências.
-    if (jaSubmetida && ficheiros.length === 0) {
-      return res.status(400).json({ erro: 'Anexa pelo menos uma evidência para adicionar.' });
-    }
-
-    // Mínimo: pelo menos uma evidência no total.
-    if (requisitosCobertos.size === 0) {
-      return res.status(400).json({ erro: 'Tens de anexar pelo menos uma evidência.' });
-    }
-
-    // Só ao SUBMETER um rascunho: todos os requisitos obrigatórios cobertos.
-    if (!rascunho && !jaSubmetida) {
-      const obrigatoriosEmFalta = requisitosDoNivel.filter(
-        (r) => r.obrigatorio !== false && !requisitosCobertos.has(r.id)
-      );
-      if (obrigatoriosEmFalta.length > 0) {
-        return res.status(400).json({
-          erro: 'Tens de submeter evidência para todos os requisitos obrigatórios deste badge.',
-          requisitosEmFalta: obrigatoriosEmFalta.map((r) => r.id)
+      // Compatibilidade com candidaturas criadas antes da existência do
+      // ledger. A chave antiga é registada antes de poder ser substituída por
+      // uma nova tentativa depois de SEND_BACK.
+      const candidaturaIdempotente = clientSubmissionId
+        ? await Candidatura.findOne({
+          where: { consultorId, clientSubmissionId },
+          transaction,
+          lock: transaction.LOCK.UPDATE
+        })
+        : null;
+      if (
+        candidaturaIdempotente &&
+        Number(candidaturaIdempotente.badgeId) !== Number(badgeId)
+      ) {
+        throw submissionError(
+          409,
+          'A chave desta submissão já foi utilizada noutra candidatura.'
+        );
+      }
+      if (candidaturaIdempotente) {
+        const result = await legacySubmissionResult({
+          candidatura: candidaturaIdempotente,
+          submittedId,
+          openId,
+          transaction
+        });
+        return rememberClientSubmission({
+          consultorId,
+          badgeId,
+          candidatura: candidaturaIdempotente,
+          clientSubmissionId,
+          result,
+          transaction
         });
       }
-    }
 
-    // Cria a candidatura (estado OPEN) se ainda não existir.
-    if (!candidatura) {
-      candidatura = await Candidatura.create({
-        consultorId,
-        badgeId,
-        estadoId: openId,
-        dataSubmicao: new Date()
+      // Só pedidos novos ou um rascunho OPEN ainda incompleto dependem do
+      // estado atual do catálogo. Um replay já confirmado terminou acima,
+      // mesmo se a candidatura tiver sido devolvida para OPEN ou a badge tiver
+      // entretanto sido desativada/alterada.
+      const idsRequisitos = (Array.isArray(requisitoIds) ? requisitoIds : [requisitoIds])
+        .map((id) => Number(id))
+        .filter((id) => Number.isInteger(id));
+      if (idsRequisitos.length !== ficheiros.length) {
+        throw submissionError(400, 'Cada evidência tem de estar associada a um requisito.');
+      }
+      const clientEvidenceIds = resolveClientEvidenceIds({
+        rawIds: req.body.clientEvidenceIds ?? req.body['clientEvidenceIds[]'],
+        clientSubmissionId,
+        fileCount: ficheiros.length
       });
-    }
 
-    // Multi-evidência: os novos ficheiros são ADICIONADOS (não substituem os
-    // existentes). Para trocar/remover, o consultor apaga a evidência à parte.
-    await Promise.all(
-      ficheiros.map(async (ficheiro, index) => {
-        const url = await uploadFicheiro(ficheiro);
-        return Evidencia.create({
+      const badge = await Badge.findByPk(badgeId, { transaction });
+      if (!badge || badge.ativo === false) {
+        throw submissionError(404, 'Badge não encontrada ou inativa.');
+      }
+      badgeForNotification = badge;
+
+      const consultant = await Consultant.findByPk(consultorId, { transaction });
+      if (!consultant) {
+        throw submissionError(403, 'Apenas consultores podem submeter candidaturas.');
+      }
+
+      const requisitosDoNivel = await Requirement.findAll({
+        where: { nivelId: badge.nivelId, deletedAt: null },
+        attributes: ['id', 'obrigatorio'],
+        transaction
+      });
+      const idsValidos = new Set(requisitosDoNivel.map((requisito) => requisito.id));
+      if (idsRequisitos.some((id) => !idsValidos.has(id))) {
+        throw submissionError(
+          400,
+          'Uma das evidências está associada a um requisito que não pertence a este badge.'
+        );
+      }
+
+      // A candidatura é EDITÁVEL enquanto está OPEN ou SUBMITTED. Assim que o
+      // TM a valida, fica bloqueada.
+      const editableIds = [openId, submittedId];
+      const bloqueada = await Candidatura.findOne({
+        where: {
+          consultorId,
+          badgeId,
+          estadoId: {
+            [Op.in]: Object.values(statuses)
+              .map((status) => status.statusId)
+              .filter((id) => !editableIds.includes(id))
+          }
+        },
+        transaction
+      });
+      if (bloqueada) {
+        throw submissionError(
+          400,
+          'Esta candidatura já está em validação e não pode ser alterada.'
+        );
+      }
+
+      // O row lock também protege uma candidatura editável legada sem chave
+      // quando dois pedidos tentam adotá-la ao mesmo tempo.
+      let candidatura = await Candidatura.findOne({
+        where: { consultorId, badgeId, estadoId: { [Op.in]: editableIds } },
+        transaction,
+        lock: transaction.LOCK.UPDATE
+      });
+
+      // Uma candidatura criada anteriormente pelo site pode não ter chave.
+      // Atribuímo-la ANTES de uploads/histórico/estado, dentro da transação.
+      if (candidatura && clientSubmissionId) {
+        if (
+          candidatura.clientSubmissionId &&
+          candidatura.clientSubmissionId !== clientSubmissionId
+        ) {
+          const previousResult = await legacySubmissionResult({
+            candidatura,
+            submittedId,
+            openId,
+            transaction
+          });
+          await rememberClientSubmission({
+            consultorId,
+            badgeId,
+            candidatura,
+            clientSubmissionId: candidatura.clientSubmissionId,
+            result: previousResult,
+            transaction
+          });
+          await candidatura.update({ clientSubmissionId }, { transaction });
+        }
+        if (!candidatura.clientSubmissionId) {
+          await candidatura.update({ clientSubmissionId }, { transaction });
+        }
+      }
+
+      const jaSubmetida = Boolean(candidatura) && candidatura.estadoId === submittedId;
+
+      // Evidências já existentes (pode haver várias para o mesmo requisito).
+      const evidenciasExistentes = candidatura
+        ? await Evidencia.findAll({
+          where: { candidaturaId: candidatura.id },
+          attributes: ['id', 'requisitoId', 'clientEvidenceId'],
+          transaction,
+          lock: transaction.LOCK.UPDATE
+        })
+        : [];
+      const requisitosCobertos = new Set(
+        evidenciasExistentes.map((evidence) => evidence.requisitoId)
+      );
+      idsRequisitos.forEach((id) => requisitosCobertos.add(id));
+
+      if (jaSubmetida && ficheiros.length === 0) {
+        throw submissionError(400, 'Anexa pelo menos uma evidência para adicionar.');
+      }
+
+      // Só é exigida evidência quando o nível da badge tem requisitos.
+      if (requisitosDoNivel.length > 0 && requisitosCobertos.size === 0) {
+        throw submissionError(400, 'Tens de anexar pelo menos uma evidência.');
+      }
+
+      // Só ao SUBMETER um rascunho: todos os requisitos obrigatórios cobertos.
+      if (!rascunho && !jaSubmetida) {
+        const obrigatoriosEmFalta = requisitosDoNivel.filter(
+          (requisito) =>
+            requisito.obrigatorio !== false && !requisitosCobertos.has(requisito.id)
+        );
+        if (obrigatoriosEmFalta.length > 0) {
+          throw submissionError(
+            400,
+            'Tens de submeter evidência para todos os requisitos obrigatórios deste badge.',
+            { requisitosEmFalta: obrigatoriosEmFalta.map((requisito) => requisito.id) }
+          );
+        }
+      }
+
+      if (!candidatura) {
+        candidatura = await Candidatura.create({
+          consultorId,
+          badgeId,
+          estadoId: openId,
+          dataSubmicao: new Date(),
+          clientSubmissionId
+        }, { transaction });
+      }
+
+      // A deduplicação é feita pelo ID exato da evidência, nunca apenas pelo
+      // requisito. Assim, duas evidências do mesmo requisito são preservadas.
+      const uploads = getPendingEvidenceUploads({
+        files: ficheiros,
+        requirementIds: idsRequisitos,
+        evidenceIds: clientEvidenceIds,
+        existingEvidence: evidenciasExistentes
+      });
+
+      // Sequencial de propósito: se um upload falhar, não ficam operações DB
+      // ainda em execução depois de a transação começar o rollback.
+      for (const { file, requirementId, clientEvidenceId } of uploads) {
+        const url = await uploadFicheiro(file);
+        await Evidencia.create({
           url,
-          nomeFicheiro: ficheiro.originalname,
-          tipo: ficheiro.mimetype === 'application/pdf' ? 'PDF' : 'IMAGEM',
+          nomeFicheiro: file.originalname,
+          tipo: file.mimetype === 'application/pdf' ? 'PDF' : 'IMAGEM',
           candidaturaId: candidatura.id,
-          requisitoId: idsRequisitos[index],
+          clientEvidenceId,
+          requisitoId: requirementId,
           descricao,
           uploadedBy: consultorId
+        }, { transaction });
+      }
+
+      if (jaSubmetida) {
+        await HistoricoCandidatura.create({
+          candidaturaId: candidatura.id,
+          userId: consultorId,
+          estadoAnterior: submittedId,
+          estadoNovo: submittedId,
+          motivo: 'Evidências adicionadas'
+        }, { transaction });
+        const evidenceResult = {
+          statusCode: 200,
+          body: {
+            mensagem: 'Evidências adicionadas.',
+            candidaturaId: candidatura.id,
+            estado: STATUS.SUBMITTED
+          },
+          notify: false
+        };
+        return rememberClientSubmission({
+          consultorId,
+          badgeId,
+          candidatura,
+          clientSubmissionId,
+          result: evidenceResult,
+          transaction
         });
-      })
-    );
+      }
 
-    // Adicionar evidências a uma candidatura JÁ SUBMETIDA — mantém SUBMITTED.
-    if (jaSubmetida) {
-      await HistoricoCandidatura.create({
-        candidaturaId: candidatura.id,
-        userId: consultorId,
-        estadoAnterior: submittedId,
-        estadoNovo: submittedId,
-        motivo: 'Evidências adicionadas'
-      });
-      return res.status(200).json({ mensagem: 'Evidências adicionadas.', candidaturaId: candidatura.id, estado: STATUS.SUBMITTED });
-    }
+      if (rascunho) {
+        await HistoricoCandidatura.create({
+          candidaturaId: candidatura.id,
+          userId: consultorId,
+          estadoAnterior: openId,
+          estadoNovo: openId,
+          motivo: 'Rascunho guardado'
+        }, { transaction });
+        const draftResult = {
+          statusCode: 200,
+          body: {
+            mensagem: 'Rascunho guardado.',
+            candidaturaId: candidatura.id,
+            estado: STATUS.OPEN
+          },
+          notify: false
+        };
+        return rememberClientSubmission({
+          consultorId,
+          badgeId,
+          candidatura,
+          clientSubmissionId,
+          result: draftResult,
+          transaction
+        });
+      }
 
-    // "Guardar": mantém OPEN e termina aqui (sem emails de submissão).
-    if (rascunho) {
+      await candidatura.update(
+        { estadoId: submittedId, dataSubmicao: new Date() },
+        { transaction }
+      );
       await HistoricoCandidatura.create({
         candidaturaId: candidatura.id,
         userId: consultorId,
         estadoAnterior: openId,
-        estadoNovo: openId,
-        motivo: 'Rascunho guardado'
+        estadoNovo: submittedId,
+        motivo: 'Candidatura submetida'
+      }, { transaction });
+
+      const submittedResult = {
+        statusCode: 201,
+        body: {
+          mensagem: 'Candidatura submetida com sucesso.',
+          candidaturaId: candidatura.id
+        },
+        notify: true
+      };
+      return rememberClientSubmission({
+        consultorId,
+        badgeId,
+        candidatura,
+        clientSubmissionId,
+        result: submittedResult,
+        transaction
       });
-      return res.status(200).json({ mensagem: 'Rascunho guardado.', candidaturaId: candidatura.id, estado: STATUS.OPEN });
-    }
-
-    // "Submeter": passa OPEN -> SUBMITTED.
-    await candidatura.update({ estadoId: submittedId, dataSubmicao: new Date() });
-    await HistoricoCandidatura.create({
-      candidaturaId: candidatura.id,
-      userId: consultorId,
-      estadoAnterior: openId,
-      estadoNovo: submittedId,
-      motivo: 'Candidatura submetida'
     });
 
-    // Responder já ao consultor — os emails de notificação são lentos (SMTP)
-    // e não devem atrasar a resposta ao pedido.
-    res.status(201).json({
-      mensagem: 'Candidatura submetida com sucesso.',
-      candidaturaId: candidatura.id
-    });
+    // A resposta e as notificações só acontecem depois do COMMIT.
+    res.status(result.statusCode).json(result.body);
 
     // Notificações por email em background (não bloqueiam a resposta)
-    (async () => {
+    if (result.notify) (async () => {
       try {
         const consultor = await User.findByPk(consultorId);
         if (!consultor) return;
-        await sendEmail(emailCandidaturaSubmetida, consultor, badge);
+        await sendEmail(emailCandidaturaSubmetida, consultor, badgeForNotification);
 
         const talentManagers = await User.findAll({
           include: [{ association: User.associations.TalentManager, required: true }]
         }).catch(() => []);
-        await Promise.all(talentManagers.map((tm) => sendEmail(emailNovaSubmissao, tm, consultor, badge)));
+        await Promise.all(talentManagers.map((tm) =>
+          sendEmail(emailNovaSubmissao, tm, consultor, badgeForNotification)
+        ));
       } catch (erroEmail) {
         console.error('Erro ao enviar notificações de submissão:', erroEmail.message);
       }
     })();
   } catch (erro) {
+    if (erro.statusCode) {
+      return res.status(erro.statusCode).json(
+        erro.responseBody || { erro: erro.message }
+      );
+    }
     console.error(erro);
     res.status(500).json({ erro: 'Erro ao submeter candidatura.', details: erro.message });
   }

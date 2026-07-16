@@ -384,6 +384,6 @@ String fakeValidToken() {
   }
 
   final header = encodePart({'alg': 'HS256', 'typ': 'JWT'});
-  final payload = encodePart({'exp': 4102444800});
+  final payload = encodePart({'id': 1, 'exp': 4102444800});
   return '$header.$payload.signature';
 }

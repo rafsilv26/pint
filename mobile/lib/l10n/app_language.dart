@@ -484,6 +484,16 @@ class AppStrings {
           'Enable notifications to receive real-time alerts about approvals and expiring badges.',
       'Não foi possível submeter candidatura.':
           'Could not submit the application.',
+      'Candidatura guardada no telemóvel. Será enviada automaticamente quando houver Internet.':
+          'Application saved on this device. It will be sent automatically when Internet is available.',
+      'Pendente de envio': 'Pending upload',
+      'Falha no envio': 'Upload failed',
+      'Guardada no telemóvel e a aguardar ligação à Internet.':
+          'Saved on this device and waiting for an Internet connection.',
+      'Não foi possível enviar a candidatura.':
+          'The application could not be sent.',
+      'Sessão expirada. Inicia sessão novamente.':
+          'Your session expired. Sign in again.',
       'Catálogo de Badges': 'Badge Catalog',
       'Pesquisar badges...': 'Search badges...',
       'Todos': 'All',
@@ -890,6 +900,16 @@ class AppStrings {
           'Activa las notificaciones para recibir alertas en tiempo real sobre aprobaciones y badges próximos a caducar.',
       'Não foi possível submeter candidatura.':
           'No se pudo enviar la candidatura.',
+      'Candidatura guardada no telemóvel. Será enviada automaticamente quando houver Internet.':
+          'Candidatura guardada en el dispositivo. Se enviará automáticamente cuando haya Internet.',
+      'Pendente de envio': 'Pendiente de envío',
+      'Falha no envio': 'Error de envío',
+      'Guardada no telemóvel e a aguardar ligação à Internet.':
+          'Guardada en el dispositivo y a la espera de conexión a Internet.',
+      'Não foi possível enviar a candidatura.':
+          'No se pudo enviar la candidatura.',
+      'Sessão expirada. Inicia sessão novamente.':
+          'La sesión ha caducado. Inicia sesión de nuevo.',
       'Catálogo de Badges': 'Catálogo de Badges',
       'Pesquisar badges...': 'Buscar badges...',
       'Todos': 'Todos',
