@@ -165,6 +165,17 @@ exports.submeterCandidatura = async (req, res) => {
       return res.status(403).json({ erro: 'Apenas consultores podem submeter candidaturas.' });
     }
 
+    // Bloqueia recandidatura a um badge JÁ CONQUISTADO. A badge aprovada vive
+    // em CONSULTOR_BADGE, não numa candidatura ativa, por isso a verificação de
+    // estados abaixo não a apanha. Só bloqueia se a conquista continua VÁLIDA —
+    // uma badge expirada (valid=false) pode ser recandidatada (renovação).
+    const jaConquistada = await ConsultorBadge.findOne({
+      where: { consultorId, badgeId, valid: true }
+    });
+    if (jaConquistada) {
+      return res.status(400).json({ erro: 'Já conquistaste este badge.' });
+    }
+
     const statuses = await getStatuses([STATUS.OPEN, STATUS.SUBMITTED, STATUS.IN_VALIDATION, STATUS.VALIDATED, STATUS.IN_APPROVAL]);
     const openId = statuses[STATUS.OPEN].statusId;
     const submitted = statuses[STATUS.SUBMITTED] || await getStatus(STATUS.SUBMITTED);
