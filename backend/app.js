@@ -25,7 +25,10 @@ app.use(express.json()); // Permite ler JSON no corpo do pedido (req.body)
 app.use('/api', require('./src/routes'));
 
 app.get('/api/teste', (req, res) => {
-    res.json({ mensagem: 'API funcionando!', data: new Date() });
+    // `build` é um marcador para confirmar QUE código está realmente em
+    // produção. Se este valor não aparecer no /api/teste do Render, a deploy
+    // mais recente não foi aplicada (está a servir uma build antiga).
+    res.json({ mensagem: 'API funcionando!', data: new Date(), build: 'rgpd-reaccept-2026-07-17' });
 });
 
 // Verificação de SLA acionável por um cron externo (ex.: cron-job.org),
