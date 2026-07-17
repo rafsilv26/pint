@@ -38,6 +38,7 @@ const models = {
     upsert: async (payload) => { awardPayload = payload; return payload; }
   },
   Notice: { create: async (payload) => ({ ...payload, noticeId: 1 }) },
+  ExternalIntegration: { findAll: async () => [] },
   User: { associations: { TalentManager: {}, ServiceLineLeader: {} }, findAll: async () => [], findByPk: async () => null },
   EvidenciaModelUnused: {},
   Level: {},
@@ -49,6 +50,10 @@ const mockModule = (relativePath, exports) => {
   require.cache[resolved] = { id: resolved, filename: resolved, loaded: true, exports };
 };
 
+mockModule('../src/config/database', {
+  query: async () => [[], null],
+  transaction: async (callback) => callback({ LOCK: { UPDATE: 'UPDATE' } })
+});
 mockModule('../src/models', models);
 mockModule('../src/services/cloudinary.service', { uploadFicheiro: async () => 'https://files.example/evidence' });
 mockModule('../src/services/email.service', {
