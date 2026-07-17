@@ -255,7 +255,7 @@ export default function ManagerContaPage() {
       <Card className="mt-4">
         <h2 className="mb-3 d-flex align-items-center gap-2 fw-semibold text-ink"><Globe2 size={18} className="text-brand" />{t('managerConta.idioma')}</h2>
         <div className="btn-group w-100" role="group" aria-label={t('managerConta.idioma')}>
-          {[['pt', 'Português'], ['en', 'English'], ['es', 'Español']].map(([code, label]) => <button key={code} type="button" onClick={() => i18n.changeLanguage(code)} className={`btn ${i18n.language.startsWith(code) ? 'btn-brand' : 'btn-outline-secondary'}`}>{label}</button>)}
+          {[['pt', 'Português'], ['en', 'English'], ['es', 'Español']].map(([code, label]) => <button key={code} type="button" onClick={() => { i18n.changeLanguage(code); api.saveIdioma(code).catch(() => {}) }} className={`btn ${i18n.language.startsWith(code) ? 'btn-brand' : 'btn-outline-secondary'}`}>{label}</button>)}
         </div>
         {isServiceLineLeader && <Link to="/sll/assinatura" className="mt-3 btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2"><PenLine size={16} />{t('tmWorkspace.signature.emailSignature')}</Link>}
       </Card>

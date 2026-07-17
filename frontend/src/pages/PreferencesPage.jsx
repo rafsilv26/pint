@@ -77,6 +77,8 @@ export default function PreferencesPage() {
 
   const mudarIdioma = (novoIdioma) => {
     i18n.changeLanguage(novoIdioma)
+    // Persiste na BD para o idioma ser reaplicado no próximo login.
+    api.saveIdioma(novoIdioma).catch(() => {})
   }
 
   return (

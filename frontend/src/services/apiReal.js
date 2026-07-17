@@ -57,6 +57,7 @@ export async function login({ email, password }) {
       id: u.id, nome: u.nome, email: u.email,
       role: u.role || (u.roles || [])[0] || null,
       roles: u.roles || [], area: u.area || '',
+      idioma: u.idioma || null,
       mustChangePassword: u.mustChangePassword,
       pendingPolicies: u.pendingPolicies || [],
     },
@@ -97,6 +98,12 @@ export async function me() {
 
 export async function acceptPolicy(policyId) {
   return http('/auth/accept-policy', { method: 'POST', body: { policyId } })
+}
+
+// Guarda a preferência de idioma do utilizador na base de dados,
+// para ser reaplicada no próximo login.
+export async function saveIdioma(idioma) {
+  return http('/auth/idioma', { method: 'PUT', body: { idioma } })
 }
 
 export async function getDashboard() {

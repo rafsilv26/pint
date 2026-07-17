@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import i18n from 'i18next'
 import * as api from '../services/api'
 import AuthContext from './authContextValue'
 import { invalidateTalentWorkspace } from '../services/talentWorkspace'
@@ -15,6 +16,15 @@ function persistAuth(data) {
 function clearAuth() {
   localStorage.removeItem(STORAGE_KEY)
   sessionStorage.removeItem(STORAGE_KEY)
+}
+
+// Aplica o idioma guardado na BD (pt/en/es) — a preferência do utilizador
+// sobrepõe-se ao que o browser tinha em cache.
+function applyUserLanguage(idioma) {
+  const code = String(idioma || '').toLowerCase()
+  if (['pt', 'en', 'es'].includes(code) && !i18n.language?.startsWith(code)) {
+    i18n.changeLanguage(code)
+  }
 }
 
 function readStoredAuth() {
@@ -42,6 +52,7 @@ export function AuthProvider({ children }) {
         if (fresh?.id) {
           setUser((current) => ({ ...current, ...fresh }))
           persistAuth({ token: initialAuth.token, user: { ...initialAuth.user, ...fresh } })
+          applyUserLanguage(fresh.idioma)
         }
       })
       .catch(() => {
@@ -61,6 +72,7 @@ export function AuthProvider({ children }) {
     const greetingKind = !lastLogin ? 'welcome' : now - lastLogin >= FIFTEEN_DAYS ? 'welcomeBack' : 'time'
     const user = { ...authenticatedUser, greetingKind }
     localStorage.setItem(`${LAST_LOGIN_PREFIX}${authenticatedUser.id}`, String(now))
+    applyUserLanguage(authenticatedUser.idioma)
 
     authStore = lembrar ? localStorage : sessionStorage
     clearAuth()
