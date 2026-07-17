@@ -359,7 +359,8 @@
     "pontos": "pts",
     "certificado": "Certificate",
     "paginaPublica": "Public page",
-    "partilhar": "Share"
+    "partilhar": "Share",
+    "adicionarCertificacao": "Add to LinkedIn"
   },
   "dashboardAlertas": {
     "marcoTitulo": "Milestone reached! 🎉",

@@ -4,7 +4,7 @@ import { PageHeader, Card, Spinner, EmptyState, ErrorState } from '../components
 import LinkedinGlyph from '../components/LinkedinGlyph'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
-import { partilharLinkedin } from '../utils/share'
+import { partilharLinkedin, adicionarCertificacaoLinkedin } from '../utils/share'
 import { useTranslation } from 'react-i18next'
 
 function formatarData(d, locale = 'pt-PT') {
@@ -85,14 +85,23 @@ export default function HistoryPage() {
                       <ExternalLink size={16} /> {t('historico.paginaPublica')}
                     </Link>
                     {b.valid && !expirado && (
-                      <button
-                        onClick={() => partilharLinkedin(b.publicToken)}
-                        className="btn btn-sm d-inline-flex align-items-center gap-1 text-white ms-auto"
-                        style={{ backgroundColor: '#0a66c2' }}
-                        title={t('historico.partilhar')}
-                      >
-                        <LinkedinGlyph size={15} /> {t('historico.partilhar')}
-                      </button>
+                      <>
+                        <button
+                          onClick={() => adicionarCertificacaoLinkedin(b)}
+                          className="btn btn-sm d-inline-flex align-items-center gap-1 text-white ms-auto"
+                          style={{ backgroundColor: '#0a66c2' }}
+                          title={t('historico.adicionarCertificacao')}
+                        >
+                          <LinkedinGlyph size={15} /> {t('historico.adicionarCertificacao')}
+                        </button>
+                        <button
+                          onClick={() => partilharLinkedin(b.publicToken)}
+                          className="btn btn-sm d-inline-flex align-items-center gap-1 border text-brand bg-white"
+                          title={t('historico.partilhar')}
+                        >
+                          <LinkedinGlyph size={15} /> {t('historico.partilhar')}
+                        </button>
+                      </>
                     )}
                   </div>
                 </Card>
