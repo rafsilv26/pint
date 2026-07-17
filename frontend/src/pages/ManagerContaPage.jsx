@@ -100,12 +100,6 @@ export default function ManagerContaPage() {
               {serviceLineProfile.serviceLine.nome}
             </p>
           )}
-          {isTalentManager && talentProfile && (
-            <p className="small text-muted mt-1 mb-0 d-flex align-items-center gap-1">
-              <Globe2 size={14} aria-hidden="true" />
-              {t('managerConta.talent.globalScope')}
-            </p>
-          )}
         </div>
       </Card>
 
