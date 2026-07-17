@@ -2,6 +2,7 @@ const { Notice, NotificationConfig } = require('../models');
 const { verificarLigacao, enviarEmail } = require('../services/email.service');
 const { getPrefs, savePrefs } = require('../services/notificationPrefs.service');
 const { notificarTodosConsultores } = require('../services/notification.service');
+const { verificarLembretesTimeline } = require('../services/timelineReminder.service');
 const {
   registerDeviceToken,
   unregisterDeviceToken,
@@ -157,6 +158,9 @@ exports.emailStatus = async (req, res) => {
 
 exports.listNotifications = async (req, res) => {
   try {
+    // Garante que os lembretes ficam disponíveis assim que o utilizador abre
+    // o website, mesmo se o alojamento tiver suspendido o job periódico.
+    await verificarLembretesTimeline(req.user.id);
     const notices = await Notice.findAll({
       where: { userId: req.user.id },
       order: [['createdAt', 'DESC']]

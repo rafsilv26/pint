@@ -157,6 +157,7 @@ export default function DashboardPage() {
                     </div>
                     <p className="mt-3 mb-0 fw-semibold text-ink">{r.nome}</p>
                     <p className="fs-xs text-muted mb-0">{r.nivel}</p>
+                    {r.motivo && <p className="mt-2 mb-0 fs-xs text-brand">{r.motivo}</p>}
                   </Link>
                 </div>
               ))}

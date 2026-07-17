@@ -10,7 +10,6 @@ const {
   Level,
   Notice,
   PolicyRGPD,
-  Requirement,
   ServiceLine,
   User
 } = require('../models');
@@ -81,27 +80,86 @@ const getCurrentUserRanking = async (consultorId) => {
   return index === -1 ? ranking.length + 1 : index + 1;
 };
 
-const getRecommendations = async ({ consultant, acquiredBadgeIds }) => {
+const normalizarOrdemNivel = (ordem) => String(ordem || '').trim().toLocaleUpperCase();
+
+// Os níveis são guardados como letras (A, B, C, ...), mas esta comparação
+// também mantém um comportamento correto caso, no futuro, passem a ser 1, 2,
+// 3, ... . Não dependemos da ordem em que a BD devolve os registos.
+const compararOrdemNivel = (a, b) => normalizarOrdemNivel(a).localeCompare(
+  normalizarOrdemNivel(b),
+  'pt-PT',
+  { numeric: true }
+);
+
+const planoDeProgressao = ({ badges, acquiredBadges, areaId }) => {
+  const pertenceAArea = (award) => !areaId || Number(award?.Badge?.Level?.areaId) === Number(areaId);
+  const niveisConcluidos = [...new Set(
+    acquiredBadges
+      .filter(pertenceAArea)
+      .map((award) => normalizarOrdemNivel(award.Badge?.Level?.ordem))
+      .filter(Boolean)
+  )].sort(compararOrdemNivel);
+  const niveisDisponiveis = [...new Set(
+    badges
+      .map((badge) => normalizarOrdemNivel(badge.Level?.ordem))
+      .filter(Boolean)
+  )].sort(compararOrdemNivel);
+
+  const ultimoNivelConcluido = niveisConcluidos.at(-1) || null;
+  const nivelAlvo = ultimoNivelConcluido
+    ? niveisDisponiveis.find((nivel) => compararOrdemNivel(nivel, ultimoNivelConcluido) > 0) || null
+    : niveisDisponiveis[0] || null;
+
+  return { ultimoNivelConcluido, nivelAlvo };
+};
+
+const getRecommendations = async ({ consultant, acquiredBadges, activeBadgeIds }) => {
   const levelWhere = consultant?.areaId ? { areaId: consultant.areaId } : undefined;
+  const excludedBadgeIds = [...new Set([
+    ...acquiredBadges.map((award) => award.badgeId),
+    ...activeBadgeIds
+  ])];
 
   const badges = await Badge.findAll({
     where: {
       ativo: true,
-      id: { [Op.notIn]: acquiredBadgeIds.length ? acquiredBadgeIds : [0] }
+      // Não recomendamos badges já conquistadas nem uma badge cuja
+      // candidatura já está a decorrer; seria uma sugestão inútil.
+      id: { [Op.notIn]: excludedBadgeIds.length ? excludedBadgeIds : [0] }
     },
     include: [
       {
         model: Level,
         where: levelWhere,
-        required: Boolean(levelWhere),
-        include: [{ model: Requirement, as: 'requirements', required: false }]
+        required: Boolean(levelWhere)
       }
     ],
-    order: [['ponto', 'DESC'], ['nome', 'ASC']],
-    limit: 4
+    order: [['nome', 'ASC']]
   });
 
-  return badges.map((badge) => ({
+  const { ultimoNivelConcluido, nivelAlvo } = planoDeProgressao({
+    badges,
+    acquiredBadges,
+    areaId: consultant?.areaId
+  });
+
+  // Se já atingiu o nível mais alto disponível, não voltamos a sugerir níveis
+  // inferiores apenas para preencher cartões: não seriam uma progressão real.
+  if (ultimoNivelConcluido && !nivelAlvo) return [];
+
+  return badges
+    .sort((a, b) => {
+      // O nível seguinte é sempre a primeira escolha. Dentro do mesmo nível,
+      // badges com mais pontos aparecem primeiro.
+      const prioridadeA = normalizarOrdemNivel(a.Level?.ordem) === nivelAlvo ? 0 : 1;
+      const prioridadeB = normalizarOrdemNivel(b.Level?.ordem) === nivelAlvo ? 0 : 1;
+      if (prioridadeA !== prioridadeB) return prioridadeA - prioridadeB;
+      const porNivel = compararOrdemNivel(a.Level?.ordem, b.Level?.ordem);
+      if (porNivel !== 0) return porNivel;
+      return Number(b.ponto || 0) - Number(a.ponto || 0) || a.nome.localeCompare(b.nome, 'pt-PT');
+    })
+    .slice(0, 4)
+    .map((badge) => ({
     id: badge.id,
     title: badge.nome,
     description: badge.descricao || 'Recomendado para a sua evolucao profissional.',
@@ -109,7 +167,11 @@ const getRecommendations = async ({ consultant, acquiredBadgeIds }) => {
     tag: badge.Level?.ordem ? `Nivel ${badge.Level.ordem}` : '',
     points: Number(badge.ponto || 0),
     duration: badge.duracaoMeses ? `${badge.duracaoMeses} meses` : '',
-    prerequisites: (badge.Level?.requirements || []).map((requirement) => requirement.titulo),
+    reason: ultimoNivelConcluido && nivelAlvo
+      ? { code: 'NEXT_LEVEL', previousLevel: ultimoNivelConcluido, targetLevel: nivelAlvo }
+      : nivelAlvo
+        ? { code: 'START_LEVEL', targetLevel: nivelAlvo }
+        : { code: 'AREA_FALLBACK' },
     iconName: badge.tipo || badge.fornecedor || 'badge'
   }));
 };
@@ -123,7 +185,7 @@ exports.getDashboard = async (req, res) => {
     const [awards, activeApplications, notice, premiumAwards] = await Promise.all([
       ConsultorBadge.findAll({
         where: { consultorId, valid: true },
-        include: [{ model: Badge }],
+        include: [{ model: Badge, include: [{ model: Level }] }],
         order: [['obtainedDate', 'DESC']]
       }),
       Candidatura.findAll({
@@ -141,10 +203,10 @@ exports.getDashboard = async (req, res) => {
       (sum, award) => sum + Number(award.pointsObtained ?? award.Badge?.ponto ?? 0),
       0
     );
-    const acquiredBadgeIds = awards.map((award) => award.badgeId);
     const applicationsInProgress = activeApplications.filter((application) =>
       ACTIVE_APPLICATION_STATUSES.includes(application.status?.code)
     );
+    const activeBadgeIds = applicationsInProgress.map((application) => application.badgeId);
     const learningPath = consultant?.Area?.ServiceLine?.LearningPath;
     const totalPathBadges = await Badge.count({
       include: [
@@ -170,7 +232,14 @@ exports.getDashboard = async (req, res) => {
       return res.status(204).send();
     }
 
-    const recommendations = await getRecommendations({ consultant, acquiredBadgeIds });
+    const awardsInArea = consultant?.areaId
+      ? awards.filter((award) => Number(award.Badge?.Level?.areaId) === Number(consultant.areaId))
+      : awards;
+    const recommendations = await getRecommendations({
+      consultant,
+      acquiredBadges: awards,
+      activeBadgeIds
+    });
     const ranking = await getCurrentUserRanking(consultorId);
 
     res.json({
@@ -180,7 +249,7 @@ exports.getDashboard = async (req, res) => {
         greeting: getGreeting(),
         totalPoints,
         learningPathTitle: learningPath ? `Learning Path: ${learningPath.nome}` : 'Learning Path',
-        learningPathProgress: totalPathBadges > 0 ? Math.min(1, awards.length / totalPathBadges) : 0,
+        learningPathProgress: totalPathBadges > 0 ? Math.min(1, awardsInArea.length / totalPathBadges) : 0,
         noticeTitle: notice?.title || '',
         noticeMessage: notice?.message || '',
         specialAchievementTitle: 'Conquistas especiais',
@@ -196,6 +265,9 @@ exports.getDashboard = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao carregar dashboard.' });
   }
 };
+
+// Exportado apenas para testes unitários da regra de progressão, sem chamar a BD.
+exports.__private__ = { compararOrdemNivel, planoDeProgressao };
 
 // Atividade recente agregada de várias entidades, para o painel de controlo do Admin.
 // Junta as criações mais recentes de utilizadores, badges, candidaturas, badges

@@ -31,6 +31,18 @@ const TINTS = ['salmon', 'sky', 'emerald', 'violet']
 const tintFor = (s = '') => TINTS[[...String(s)].reduce((a, c) => a + c.charCodeAt(0), 0) % TINTS.length]
 const dataPT = (d) => (d ? new Date(d).toLocaleDateString('pt-PT') : '—')
 const statusName = (code, fallback = code || '—') => i18next.t(`api.statusCodes.${code}`, { defaultValue: fallback })
+const recommendationReason = (reason = {}) => {
+  if (reason.code === 'NEXT_LEVEL') {
+    return i18next.t('dashboard.recomendacaoProximoNivel', {
+      anterior: reason.previousLevel,
+      nivel: reason.targetLevel,
+    })
+  }
+  if (reason.code === 'START_LEVEL') {
+    return i18next.t('dashboard.recomendacaoInicio', { nivel: reason.targetLevel })
+  }
+  return i18next.t('dashboard.recomendacaoArea')
+}
 const localizeTalentRow = (row) => ({
   ...row,
   status: row.status ? { ...row.status, name: statusName(row.status.code, row.status.name) } : row.status,
@@ -115,7 +127,11 @@ export async function getDashboard() {
       progresso: Math.round((d.learningPathProgress ?? 0) * 100),
     },
     recomendados: (d.recommendations || []).slice(0, 3).map((r, i) => ({
-      id: r.id, nome: r.title, nivel: r.level || '', tint: TINTS[i % TINTS.length],
+      id: r.id,
+      nome: r.title,
+      nivel: r.level || '',
+      motivo: recommendationReason(r.reason),
+      tint: TINTS[i % TINTS.length],
     })),
     perfil: { nome: d.userName || '', cargo: '', nivel: '', pontos: d.totalPoints ?? 0, posicao: d.ranking ?? '—' },
     eventos: [],
@@ -678,4 +694,3 @@ export async function getAdminPedidos() {
     }
   })
 }
-

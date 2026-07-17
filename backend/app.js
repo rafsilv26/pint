@@ -33,6 +33,7 @@ app.get('/api/teste', (req, res) => {
 // Protegida por chave: GET /api/sla-check?key=<CRON_SECRET>
 const { verificarSLA, iniciarJobSLA } = require('./src/services/sla.service');
 const { iniciarJobExpiracoes } = require('./src/services/expirationAlert.service');
+const { verificarLembretesTimeline, iniciarJobLembretesTimeline } = require('./src/services/timelineReminder.service');
 app.get('/api/sla-check', async (req, res) => {
     if (!process.env.CRON_SECRET || req.query.key !== process.env.CRON_SECRET) {
         return res.status(401).json({ message: 'Chave inválida.' });
@@ -42,6 +43,20 @@ app.get('/api/sla-check', async (req, res) => {
     } catch (erro) {
         console.error('Erro na verificação de SLA:', erro);
         res.status(500).json({ error: 'Erro na verificação de SLA.' });
+    }
+});
+
+// Executa também os lembretes de objetivos quando um cron externo desperta o
+// serviço (útil em alojamentos que suspendem processos inativos).
+app.get('/api/timeline-reminders-check', async (req, res) => {
+    if (!process.env.CRON_SECRET || req.query.key !== process.env.CRON_SECRET) {
+        return res.status(401).json({ message: 'Chave inválida.' });
+    }
+    try {
+        res.json(await verificarLembretesTimeline());
+    } catch (erro) {
+        console.error('Erro na verificação de lembretes da timeline:', erro);
+        res.status(500).json({ error: 'Erro na verificação de lembretes da timeline.' });
     }
 });
 
@@ -70,6 +85,7 @@ const iniciarServidor = async () => {
         // Os jobs também dependem da BD e só devem arrancar depois das migrations.
         iniciarJobSLA();
         iniciarJobExpiracoes();
+        iniciarJobLembretesTimeline();
 
         return app.listen(PORT, () => {
             console.log(`Servidor a correr na porta ${PORT}`);
