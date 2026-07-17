@@ -22,7 +22,6 @@ import NotificationsPage from './pages/NotificationsPage'
 import RankingPage from './pages/RankingPage'
 import ProfilePage from './pages/ProfilePage'
 import PreferencesPage from './pages/PreferencesPage'
-import IntegrationsPage from './pages/IntegrationsPage'
 import EmailSignaturePage from './pages/EmailSignaturePage'
 import ChangePasswordPage from './pages/ChangePasswordPage'
 import EscolhaAreaPage from './pages/EscolhaAreaPage'
@@ -91,7 +90,6 @@ export default function App() {
           <Route path="/ranking" element={<RankingPage />} />
           <Route path="/perfil" element={<ProfilePage />} />
           <Route path="/perfil/preferencias" element={<PreferencesPage />} />
-          <Route path="/perfil/integracoes" element={<IntegrationsPage />} />
           <Route path="/perfil/assinatura" element={<EmailSignaturePage />} />
           <Route path="/perfil/alterar-password" element={<ChangePasswordPage />} />
           <Route path="/perfil/publico" element={<PublicProfilePage />} />

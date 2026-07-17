@@ -69,51 +69,6 @@ export async function saveNotificationPrefs(prefs) {
   return { message: i18next.t('api.mensagens.preferenciasGuardadas'), prefs: { ...mockNotificationPrefs } }
 }
 
-let mockIntegrations = []
-
-export async function getIntegrations() {
-  await delay()
-  return clone(mockIntegrations)
-}
-
-export async function saveIntegration({ platform, label, webhookUrl, active }) {
-  await delay()
-  const current = mockIntegrations.find((item) => item.platform === platform)
-  const value = {
-    id: current?.id || Date.now(),
-    platform,
-    label: label || (platform === 'slack' ? 'Canal Slack' : 'Canal Microsoft Teams'),
-    active: typeof active === 'boolean' ? active : current?.active !== false,
-    configured: Boolean(webhookUrl || current?.configured),
-    webhookMasked: webhookUrl ? `${new URL(webhookUrl).origin}/••••••••` : current?.webhookMasked,
-    createdAt: current?.createdAt || new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }
-  mockIntegrations = current
-    ? mockIntegrations.map((item) => item.id === current.id ? value : item)
-    : [...mockIntegrations, value]
-  return clone(value)
-}
-
-export async function testIntegration() {
-  await delay()
-  return { mensagem: 'Mensagem de teste enviada com sucesso.' }
-}
-
-export async function updateIntegration(id, changes) {
-  await delay()
-  mockIntegrations = mockIntegrations.map((item) =>
-    item.id === Number(id) ? { ...item, ...changes, updatedAt: new Date().toISOString() } : item
-  )
-  return clone(mockIntegrations.find((item) => item.id === Number(id)))
-}
-
-export async function deleteIntegration(id) {
-  await delay()
-  mockIntegrations = mockIntegrations.filter((item) => item.id !== Number(id))
-  return { mensagem: 'Integração removida.' }
-}
-
 export async function getDashboard() {
   await delay()
   return clone(mockDashboard)

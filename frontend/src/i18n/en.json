@@ -35,36 +35,7 @@
       "diretorio": "Consultants Directory",
       "diretorioDesc": "Explore your colleagues' profiles",
       "preferencias": "Preferences",
-      "preferenciasDesc": "Notifications and language",
-      "integracoes": "Teams and Slack",
-      "integracoesDesc": "Receive notifications in a corporate channel"
-    }
-  },
-  "integracoes": {
-    "titulo": "Integrations",
-    "subtitulo": "Connect the platform to Slack or Microsoft Teams to receive notifications in a corporate channel.",
-    "voltar": "Back to Profile",
-    "configurar": "Configure connection",
-    "ligacoes": "Configured connections",
-    "nomeCanal": "Connection name",
-    "nomeCanalPlaceholder": "E.g. Certifications team",
-    "webhook": "Webhook URL",
-    "webhookAjuda": "The URL is provided by Slack or by the Teams Workflows app.",
-    "webhookAtualizar": "Leave empty to keep the current webhook or paste another one to replace it.",
-    "criarWebhook": "How to create a webhook in {{platform}}",
-    "ligar": "Connect platform",
-    "atualizar": "Update connection",
-    "aGuardar": "Saving…",
-    "testar": "Test",
-    "remover": "Remove integration",
-    "vazio": "You do not have any integrations configured yet.",
-    "confirmarRemocao": "Remove the {{platform}} connection?",
-    "segurancaTitulo": "Protected credential",
-    "segurancaTexto": "The webhook URL is encrypted on the server, is never shown in full again, and can only be managed by the account owner.",
-    "feedback": {
-      "guardada": "Integration saved successfully.",
-      "teste": "Test message sent successfully.",
-      "removida": "Integration removed."
+      "preferenciasDesc": "Notifications and language"
     }
   },
   "auth": {

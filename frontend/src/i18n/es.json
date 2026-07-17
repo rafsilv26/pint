@@ -35,36 +35,7 @@
       "diretorio": "Directorio de Consultores",
       "diretorioDesc": "Explora los perfiles de tus colegas",
       "preferencias": "Preferencias",
-      "preferenciasDesc": "Notificaciones e idioma",
-      "integracoes": "Teams y Slack",
-      "integracoesDesc": "Recibe notificaciones en un canal corporativo"
-    }
-  },
-  "integracoes": {
-    "titulo": "Integraciones",
-    "subtitulo": "Conecta la plataforma con Slack o Microsoft Teams para recibir notificaciones en un canal corporativo.",
-    "voltar": "Volver al Perfil",
-    "configurar": "Configurar conexión",
-    "ligacoes": "Conexiones configuradas",
-    "nomeCanal": "Nombre de la conexión",
-    "nomeCanalPlaceholder": "Ej.: Equipo de certificaciones",
-    "webhook": "URL del webhook",
-    "webhookAjuda": "La URL es proporcionada por Slack o por la aplicación Workflows de Teams.",
-    "webhookAtualizar": "Déjalo vacío para mantener el webhook actual o pega otro para sustituirlo.",
-    "criarWebhook": "Cómo crear un webhook en {{platform}}",
-    "ligar": "Conectar plataforma",
-    "atualizar": "Actualizar conexión",
-    "aGuardar": "Guardando…",
-    "testar": "Probar",
-    "remover": "Eliminar integración",
-    "vazio": "Todavía no tienes ninguna integración configurada.",
-    "confirmarRemocao": "¿Eliminar la conexión con {{platform}}?",
-    "segurancaTitulo": "Credencial protegida",
-    "segurancaTexto": "La URL del webhook se cifra en el servidor, nunca vuelve a mostrarse completa y solo puede gestionarla el propietario de la cuenta.",
-    "feedback": {
-      "guardada": "Integración guardada correctamente.",
-      "teste": "Mensaje de prueba enviado correctamente.",
-      "removida": "Integración eliminada."
+      "preferenciasDesc": "Notificaciones e idioma"
     }
   },
   "auth": {

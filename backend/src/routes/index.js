@@ -13,7 +13,6 @@ router.use('/badges', protect, require('./badgeRoutes'));
 router.use('/dashboard', protect, require('./dashboardRoutes'));
 router.use('/consultants', protect, require('./consultantRoutes'));
 router.use('/notifications', protect, require('./notificationRoutes'));
-router.use('/integrations', protect, require('./integrationRoutes'));
 router.use('/gamification', protect, require('./gamificationRoutes'));
 router.use('/email-signature', protect, require('./emailSignatureRoutes'));
 router.use('/timeline', protect, require('./timelineRoutes'));

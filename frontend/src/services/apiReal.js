@@ -75,26 +75,6 @@ export async function saveNotificationPrefs(prefs) {
   return http('/notifications/preferences', { method: 'PUT', body: prefs })
 }
 
-export async function getIntegrations() {
-  return http('/integrations')
-}
-
-export async function saveIntegration(integration) {
-  return http('/integrations', { method: 'POST', body: integration })
-}
-
-export async function testIntegration(id) {
-  return http(`/integrations/${id}/test`, { method: 'POST' })
-}
-
-export async function updateIntegration(id, changes) {
-  return http(`/integrations/${id}`, { method: 'PATCH', body: changes })
-}
-
-export async function deleteIntegration(id) {
-  return http(`/integrations/${id}`, { method: 'DELETE' })
-}
-
 export async function changePassword({ currentPassword, newPassword, areaId }) {
   return http('/auth/change-password', { method: 'PUT', body: { currentPassword, newPassword, areaId } })
 }
@@ -698,3 +678,4 @@ export async function getAdminPedidos() {
     }
   })
 }
+

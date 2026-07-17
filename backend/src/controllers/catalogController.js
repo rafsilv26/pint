@@ -23,6 +23,7 @@ const RESOURCES = {
   'consultor-badge-premium': { model: models.ConsultorBadgePremium },
   timeline: { model: models.ConsultorTimeline },
   rankings: { model: models.RankingSnapshot },
+  integrations: { model: models.ExternalIntegration },
   'email-signatures': { model: models.EmailSignature },
   policies: { model: models.PolicyRGPD },
   'policy-acceptances': { model: models.PolicyRGPDAcceptance }

@@ -1,6 +1,5 @@
 const { Notice, Consultant } = require('../models');
 const { sendPushToUser } = require('./pushNotification.service');
-const { notificarIntegracoes } = require('./webhookIntegration.service');
 
 // Cria uma notificação/aviso (linha na tabela AVISOS) para um utilizador.
 // type: 'info' | 'warning' | 'success' | 'error'
@@ -9,9 +8,6 @@ const criarNotificacao = async ({ userId, title, message, type = 'info' }) => {
   const notice = await Notice.create({ userId, title, message: message || null, type });
   sendPushToUser(userId, { title, body: message, type }).catch((error) =>
     console.error('Erro ao enviar push:', error.message)
-  );
-  notificarIntegracoes(userId, { title, message }).catch((error) =>
-    console.error('Erro ao enviar para integração externa:', error.message)
   );
   return notice;
 };
@@ -29,10 +25,9 @@ const notificarTodosConsultores = async ({ title, message, type = 'info' }) => {
     type
   }));
   const notices = await Notice.bulkCreate(linhas);
-  await Promise.allSettled(consultores.flatMap((consultor) => [
-    sendPushToUser(consultor.consultorId, { title, body: message, type }),
-    notificarIntegracoes(consultor.consultorId, { title, message })
-  ]));
+  await Promise.allSettled(consultores.map((consultor) =>
+    sendPushToUser(consultor.consultorId, { title, body: message, type })
+  ));
   return notices;
 };
 
