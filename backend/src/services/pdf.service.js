@@ -9,19 +9,6 @@ const INK = '#2B2B2B';
 const GRAY = '#6B7280';
 const SOFT = '#FBFAF6';
 
-// Estrela de 5 pontas centrada em (cx, cy).
-const drawStar = (doc, cx, cy, outer, inner, color) => {
-  const points = [];
-  for (let i = 0; i < 10; i += 1) {
-    const radius = i % 2 === 0 ? outer : inner;
-    const angle = (Math.PI / 5) * i - Math.PI / 2;
-    points.push([cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)]);
-  }
-  doc.moveTo(points[0][0], points[0][1]);
-  points.slice(1).forEach(([x, y]) => doc.lineTo(x, y));
-  doc.closePath().fill(color);
-};
-
 // Losango decorativo (usado nos separadores e cantos).
 const drawDiamond = (doc, cx, cy, size, color) => {
   doc.moveTo(cx, cy - size)
@@ -30,18 +17,6 @@ const drawDiamond = (doc, cx, cy, size, color) => {
      .lineTo(cx - size, cy)
      .closePath()
      .fill(color);
-};
-
-// Selo/medalha desenhado no rodapé do certificado.
-const drawSeal = (doc, cx, cy) => {
-  doc.circle(cx, cy, 40).lineWidth(2).stroke(NAVY);
-  doc.circle(cx, cy, 34).fill(NAVY);
-  doc.circle(cx, cy, 30).lineWidth(1).stroke(GOLD);
-  drawStar(doc, cx, cy - 4, 13, 5.5, GOLD);
-  doc.fillColor(GOLD)
-     .font('Helvetica-Bold')
-     .fontSize(6.5)
-     .text('SOFTINSA', cx - 40, cy + 14, { width: 80, align: 'center', characterSpacing: 1 });
 };
 
 const gerarCertificado = (consultor, badge, dataAprovacao) => {
@@ -142,8 +117,9 @@ const gerarCertificado = (consultor, badge, dataAprovacao) => {
       centerText(`ÁREA: ${String(badge.area).toUpperCase()}`, 348, { characterSpacing: 2 });
     }
 
-    // Selo
-    drawSeal(doc, W / 2, 420);
+    // Separador inferior
+    doc.moveTo(W / 2 - 150, 410).lineTo(W / 2 + 150, 410).lineWidth(1).stroke('#DDD6C4');
+    drawDiamond(doc, W / 2, 410, 3, GOLD);
 
     // Data
     doc.fillColor(INK)
@@ -151,7 +127,7 @@ const gerarCertificado = (consultor, badge, dataAprovacao) => {
        .fontSize(12);
     centerText(
       `Data de atribuição: ${new Date(dataAprovacao).toLocaleDateString('pt-PT')}`,
-      478
+      432
     );
 
     // Link de verificação
@@ -159,7 +135,7 @@ const gerarCertificado = (consultor, badge, dataAprovacao) => {
     doc.fillColor(NAVY)
        .font('Helvetica')
        .fontSize(9.5);
-    centerText(`Verificar autenticidade em: ${verifyUrl}`, 500, { characterSpacing: 0.3 });
+    centerText(`Verificar autenticidade em: ${verifyUrl}`, 456, { characterSpacing: 0.3 });
 
     doc.end();
   });

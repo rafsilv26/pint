@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Coins, Award, Crown } from 'lucide-react'
 import { PageHeader, Spinner, ErrorState, EmptyState } from './ui'
@@ -14,26 +14,30 @@ const TECH_TINTS = {
   violet: 'tint-violet-soft',
 }
 
+// Cache a nível de módulo: cada vista (scope/tipo) faz fetch à DB remota uma
+// vez e fica em memória durante o TTL, sobrevivendo a sair/voltar à página.
+// Trocas de scope/tipo dentro do TTL são instantâneas, sem ir ao backend.
+const CACHE_TTL = 60_000
+const badgesCache = new Map()
+
 export default function BadgesGridView({ titulo, linkBase, permitirCatalogoGlobal = false }) {
   const { t } = useTranslation()
   const [scope, setScope] = useState('mine')
   const [tipo, setTipo] = useState('badges')
-  // Cache por vista: cada scope/tipo faz fetch à DB remota uma vez; trocas
-  // seguintes são instantâneas. Auto-refresh invalida só a vista ativa.
-  const cache = useRef({})
   const keyFor = () => (tipo === 'premium' ? 'premium' : `badges:${scope}`)
   const { data, loading, error, reload } = useAsync(
     () => {
       const key = keyFor()
-      if (cache.current[key]) return cache.current[key]
+      const hit = badgesCache.get(key)
+      if (hit && Date.now() - hit.at < CACHE_TTL) return hit.data
       const req = tipo === 'premium'
         ? api.getBadgesPremium()
         : api.getBadges({ scope: scope === 'all' ? 'all' : undefined })
-      return Promise.resolve(req).then((d) => { cache.current[key] = d; return d })
+      return Promise.resolve(req).then((d) => { badgesCache.set(key, { data: d, at: Date.now() }); return d })
     },
     [scope, tipo]
   )
-  const refresh = () => { delete cache.current[keyFor()]; reload() }
+  const refresh = () => { badgesCache.delete(keyFor()); reload() }
   useAutoRefresh(refresh)
   const [q, setQ] = useState('')
 
