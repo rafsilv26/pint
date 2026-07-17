@@ -888,7 +888,10 @@
     "vazioTitulo": "Nenhum badge encontrado",
     "vazioDesc": "Tenta outra pesquisa.",
     "nivel": "Nível",
-    "pontos": "pontos"
+    "pontos": "pontos",
+    "filtroCatalogo": "Âmbito do catálogo",
+    "minhaServiceLine": "Da minha Service Line",
+    "todosBadges": "Todos os badges"
   },
   "logout": {
     "pergunta": "Pretende terminar a sua sessão?",

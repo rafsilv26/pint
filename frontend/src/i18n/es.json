@@ -898,7 +898,10 @@
     "vazioTitulo": "No se encontraron insignias",
     "vazioDesc": "Intenta otra búsqueda.",
     "nivel": "Nivel",
-    "pontos": "puntos"
+    "pontos": "puntos",
+    "filtroCatalogo": "Ámbito del catálogo",
+    "minhaServiceLine": "Mi Service Line",
+    "todosBadges": "Todas las insignias"
   },
   "logout": {
     "pergunta": "¿Quieres cerrar sesión?",

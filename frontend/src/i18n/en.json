@@ -896,7 +896,10 @@
     "vazioTitulo": "No badges found",
     "vazioDesc": "Try another search.",
     "nivel": "Level",
-    "pontos": "points"
+    "pontos": "points",
+    "filtroCatalogo": "Catalog scope",
+    "minhaServiceLine": "My Service Line",
+    "todosBadges": "All badges"
   },
   "logout": {
     "pergunta": "Do you want to sign out?",

@@ -126,7 +126,7 @@ export default function App() {
           <Route path="/sll/pedidos/:id" element={<SLLPedidoDetailPage />} />
           <Route path="/sll/consultores" element={<SLLConsultoresPage />} />
           <Route path="/sll/consultores/:id" element={<ManagerConsultorDetailPage />} />
-          <Route path="/sll/badges" element={<BadgesGridView titulo={t('app.rotas.badges')} linkBase="/sll/badges" />} />
+          <Route path="/sll/badges" element={<BadgesGridView titulo={t('app.rotas.badges')} linkBase="/sll/badges" permitirCatalogoGlobal />} />
           <Route path="/sll/badges/:id" element={<ManagerBadgeDetailPage />} />
           <Route path="/sll/pesquisa" element={<GlobalSearchPage />} />
           <Route path="/sll/relatorios" element={<SLLRelatoriosPage />} />

@@ -14,9 +14,13 @@ const TECH_TINTS = {
   violet: 'tint-violet-soft',
 }
 
-export default function BadgesGridView({ titulo, linkBase }) {
+export default function BadgesGridView({ titulo, linkBase, permitirCatalogoGlobal = false }) {
   const { t } = useTranslation()
-  const { data, loading, error, reload } = useAsync(() => api.getBadges())
+  const [scope, setScope] = useState('mine')
+  const { data, loading, error, reload } = useAsync(
+    () => api.getBadges({ scope: scope === 'all' ? 'all' : undefined }),
+    [scope]
+  )
   useAutoRefresh(reload)
   const [q, setQ] = useState('')
 
@@ -30,6 +34,28 @@ export default function BadgesGridView({ titulo, linkBase }) {
   return (
     <div>
       <PageHeader title={tituloFinal} />
+      {permitirCatalogoGlobal && (
+        <div className="mb-4 d-flex flex-wrap gap-2" role="tablist" aria-label={t('badgesGrid.filtroCatalogo')}>
+          <button
+            type="button"
+            onClick={() => setScope('mine')}
+            className={`btn btn-sm ${scope === 'mine' ? 'btn-brand' : 'btn-outline-secondary'}`}
+            role="tab"
+            aria-selected={scope === 'mine'}
+          >
+            {t('badgesGrid.minhaServiceLine')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setScope('all')}
+            className={`btn btn-sm ${scope === 'all' ? 'btn-brand' : 'btn-outline-secondary'}`}
+            role="tab"
+            aria-selected={scope === 'all'}
+          >
+            {t('badgesGrid.todosBadges')}
+          </button>
+        </div>
+      )}
       <div className="position-relative mb-4" style={{ maxWidth: '24rem' }}>
         <Search size={18} className="position-absolute text-secondary" style={{ left: '0.9rem', top: '50%', transform: 'translateY(-50%)' }} />
         <input

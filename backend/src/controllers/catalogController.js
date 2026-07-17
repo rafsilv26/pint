@@ -41,7 +41,8 @@ const getConfig = (req, res) => {
 const buildWhere = (query) => {
   const where = {};
   Object.entries(query).forEach(([key, value]) => {
-    if (['limit', 'offset', 'order'].includes(key) || value === undefined || value === '') {
+    // scope é uma instrução de apresentação/autorização, não uma coluna da BD.
+    if (['limit', 'offset', 'order', 'scope'].includes(key) || value === undefined || value === '') {
       return;
     }
     where[key] = value;
@@ -74,6 +75,13 @@ const assertResourceAccess = (req) => {
 const restringirCatalogoPorServiceLine = async (req, resource, whereClause) => {
   const serviceLineId = await getServiceLineScopeForUser(req.user);
   if (!serviceLineId || !RECURSOS_DA_SERVICE_LINE.has(resource)) return whereClause;
+
+  // O SLL pode consultar o catálogo global de badges (modo scope=all), mas
+  // continua sem acesso às restantes estruturas de outras Service Lines.
+  // Apenas mostramos badges ativas, isto é, realmente disponíveis.
+  if (resource === 'badges' && req.query.scope === 'all') {
+    return { ...whereClause, ativo: true };
+  }
 
   const areas = await models.Area.findAll({ where: { serviceLineId }, attributes: ['id'] });
   const areaIds = areas.map((row) => row.id);
@@ -150,12 +158,23 @@ exports.getResource = async (req, res) => {
     const config = getConfig(req, res);
     if (!config) return;
 
-    const row = await config.model.findByPk(req.params.id);
+    const isBadge = req.params.resource === 'badges';
+    const row = await config.model.findByPk(req.params.id, isBadge ? {
+      include: [{
+        model: models.Level,
+        include: [
+          { model: models.Requirement, as: 'requirements', required: false },
+          { model: models.Area, include: [{ model: models.ServiceLine, include: [models.LearningPath] }] }
+        ]
+      }]
+    } : undefined);
     if (!row) {
       return res.status(404).json({ erro: 'Registo não encontrado.' });
     }
 
-    if (req.user && RECURSOS_DA_SERVICE_LINE.has(req.params.resource)) {
+    // Um SLL pode abrir o detalhe de qualquer badge que encontrou no catálogo
+    // global. As restantes entidades continuam limitadas à sua Service Line.
+    if (req.user && RECURSOS_DA_SERVICE_LINE.has(req.params.resource) && !isBadge) {
       const scopedWhere = await restringirCatalogoPorServiceLine(req, req.params.resource, {});
       const primaryKey = config.model.primaryKeyAttribute;
       const allowed = await config.model.findAll({ where: scopedWhere, attributes: [primaryKey] });

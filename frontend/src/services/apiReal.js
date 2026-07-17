@@ -159,13 +159,30 @@ function adaptBadge(b = {}) {
     publicToken: b.publicToken,
   }
 }
-export async function getBadges() {
-  const rows = await http('/catalog/badges')
+export async function getBadges({ scope } = {}) {
+  const query = scope === 'all' ? '?scope=all' : ''
+  const rows = await http(`/catalog/badges${query}`)
   return (rows || []).map(adaptBadge)
 }
 export async function getBadge(id) {
   const raw = await http(`/catalog/badges/${id}`)
   const badge = adaptBadge(raw)
+  const nestedLevel = raw?.Level
+  if (nestedLevel) {
+    badge.requisitos = (nestedLevel.requirements || []).map((r) => ({
+      id: r.requisitoId ?? r.id,
+      titulo: r.titulo ?? r.descricao ?? '',
+      descricao: r.descricao || '',
+      obrigatorio: r.obrigatorio !== false,
+      ordem: r.ordem,
+      icone: r.icone || '',
+    }))
+    badge.nivel = nestedLevel.nome || nestedLevel.ordem || badge.nivel
+    badge.area = nestedLevel.Area?.nome || ''
+    badge.serviceLine = nestedLevel.Area?.ServiceLine?.nome || ''
+    badge.learningPath = nestedLevel.Area?.ServiceLine?.LearningPath?.nome || ''
+    return badge
+  }
   if (raw?.nivelId != null) {
     const [reqs, levels, areas, serviceLines, learningPaths] = await Promise.all([
       http(`/catalog/requirements?nivelId=${raw.nivelId}`).catch(() => []),
