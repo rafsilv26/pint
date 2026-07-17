@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../l10n/app_language.dart';
 import '../models/consultant_profile.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../services/app_data_refresh_service.dart';
 import '../widgets/app_bottom_navigation.dart';
 
 class ConsultantDetailPage extends StatefulWidget {
@@ -24,6 +27,24 @@ class _ConsultantDetailPageState extends State<ConsultantDetailPage> {
   void initState() {
     super.initState();
     detailFuture = repository.getConsultantDetail(widget.consultant);
+    AppDataRefreshService.instance.addListener(handleDataChanged);
+  }
+
+  @override
+  void dispose() {
+    AppDataRefreshService.instance.removeListener(handleDataChanged);
+    super.dispose();
+  }
+
+  void handleDataChanged() {
+    unawaited(reloadLocal());
+  }
+
+  Future<void> reloadLocal() async {
+    if (!mounted) return;
+    final future = repository.getConsultantDetail(widget.consultant);
+    setState(() => detailFuture = future);
+    await future;
   }
 
   @override

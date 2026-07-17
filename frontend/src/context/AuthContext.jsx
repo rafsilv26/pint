@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import * as api from '../services/api'
+import { clearHttpCache } from '../services/http'
 import AuthContext from './authContextValue'
 import { invalidateTalentWorkspace } from '../services/talentWorkspace'
 import { invalidateServiceLineWorkspace } from '../services/serviceLineWorkspace'
@@ -55,6 +56,7 @@ export function AuthProvider({ children }) {
   }, [initialAuth])
 
   async function login(credentials, lembrar = true) {
+    clearHttpCache()
     const { token, user: authenticatedUser } = await api.login(credentials)
     const now = Date.now()
     const lastLogin = Number(localStorage.getItem(`${LAST_LOGIN_PREFIX}${authenticatedUser.id}`) || 0)
@@ -71,6 +73,7 @@ export function AuthProvider({ children }) {
   }
 
   function logout() {
+    clearHttpCache()
     setUser(null)
     setToken(null)
     clearAuth()

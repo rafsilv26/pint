@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -5,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../services/app_data_refresh_service.dart';
 import '../services/badges_api_service.dart';
 import '../services/app_sync_service.dart';
 
@@ -26,16 +29,29 @@ class _CatalogPageState extends State<CatalogPage> {
   void initState() {
     super.initState();
     badgesFuture = repository.getCatalogBadges();
+    AppDataRefreshService.instance.addListener(handleDataChanged);
   }
 
   @override
   void dispose() {
+    AppDataRefreshService.instance.removeListener(handleDataChanged);
     searchController.dispose();
     super.dispose();
   }
 
-  Future<void> reload() async {
-    await AppSyncService().synchronizeIfNeeded();
+  void handleDataChanged() {
+    unawaited(reloadLocal());
+  }
+
+  Future<void> reload({bool force = false}) async {
+    await AppSyncService().synchronizeIfNeeded(force: force);
+    await reloadLocal();
+  }
+
+  Future<void> reloadLocal() async {
+    if (!mounted) {
+      return;
+    }
     final future = repository.getCatalogBadges();
     setState(() {
       badgesFuture = future;
@@ -48,17 +64,21 @@ class _CatalogPageState extends State<CatalogPage> {
     List<EvidenceAttachment> evidenceFiles,
   ) async {
     try {
-      final message = await repository.submitCandidatura(
+      final result = await repository.submitCandidatura(
         badgeId: badge.id,
         evidenceFiles: evidenceFiles,
       );
-      await reload();
       if (!mounted) {
         return true;
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: AppText(message)));
+      ).showSnackBar(SnackBar(content: AppText(result.message)));
+      if (result.isQueued) {
+        unawaited(reloadLocal());
+      } else {
+        unawaited(reload(force: true));
+      }
       return true;
     } on ApiRequestException catch (error) {
       if (!mounted) {
@@ -367,22 +387,30 @@ class _CatalogBadgeCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _MetaPill(
-                        icon: Icons.star_border,
-                        text: '${badge.points} pts',
-                      ),
-                      if (badge.level.isNotEmpty)
+                  LayoutBuilder(
+                    builder: (context, constraints) => Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
                         _MetaPill(
-                          icon: Icons.layers_outlined,
-                          text: badge.level,
+                          icon: Icons.star_border,
+                          text: '${badge.points} pts',
+                          maxWidth: constraints.maxWidth,
                         ),
-                      if (badge.area.isNotEmpty)
-                        _MetaPill(icon: Icons.work_outline, text: badge.area),
-                    ],
+                        if (badge.level.isNotEmpty)
+                          _MetaPill(
+                            icon: Icons.layers_outlined,
+                            text: badge.level,
+                            maxWidth: constraints.maxWidth,
+                          ),
+                        if (badge.area.isNotEmpty)
+                          _MetaPill(
+                            icon: Icons.work_outline,
+                            text: badge.area,
+                            maxWidth: constraints.maxWidth,
+                          ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -454,20 +482,24 @@ class BadgeDetailPage extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                _MetaPill(
-                                  icon: Icons.star_border,
-                                  text: '${badge.points} pontos',
-                                ),
-                                if (badge.level.isNotEmpty)
+                            LayoutBuilder(
+                              builder: (context, constraints) => Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
                                   _MetaPill(
-                                    icon: Icons.layers_outlined,
-                                    text: badge.level,
+                                    icon: Icons.star_border,
+                                    text: '${badge.points} pontos',
+                                    maxWidth: constraints.maxWidth,
                                   ),
-                              ],
+                                  if (badge.level.isNotEmpty)
+                                    _MetaPill(
+                                      icon: Icons.layers_outlined,
+                                      text: badge.level,
+                                      maxWidth: constraints.maxWidth,
+                                    ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -568,8 +600,8 @@ class BadgeDetailPage extends StatelessWidget {
               SizedBox(
                 height: 52,
                 child: FilledButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
+                  onPressed: () async {
+                    final submitted = await Navigator.of(context).push<bool>(
                       MaterialPageRoute(
                         builder: (context) => BadgeEvidenceSubmissionPage(
                           badge: badge,
@@ -577,6 +609,9 @@ class BadgeDetailPage extends StatelessWidget {
                         ),
                       ),
                     );
+                    if (submitted == true && context.mounted) {
+                      Navigator.of(context).pop(true);
+                    }
                   },
                   icon: const Icon(Icons.arrow_forward),
                   label: const AppText('Candidatar a Badge'),
@@ -696,15 +731,14 @@ class _BadgeEvidenceSubmissionPageState
       return;
     }
 
+    if (success) {
+      Navigator.of(context).pop(true);
+      return;
+    }
+
     setState(() {
       isSubmitting = false;
     });
-
-    if (success) {
-      final navigator = Navigator.of(context);
-      navigator.pop();
-      navigator.pop();
-    }
   }
 
   @override
@@ -937,14 +971,20 @@ class _FallbackIcon extends StatelessWidget {
 }
 
 class _MetaPill extends StatelessWidget {
-  const _MetaPill({required this.icon, required this.text});
+  const _MetaPill({
+    required this.icon,
+    required this.text,
+    required this.maxWidth,
+  });
 
   final IconData icon;
   final String text;
+  final double maxWidth;
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: BoxConstraints(maxWidth: maxWidth),
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
         color: const Color(0xFFF1F5F9),
@@ -955,12 +995,16 @@ class _MetaPill extends StatelessWidget {
         children: [
           Icon(icon, color: const Color(0xFF475467), size: 13),
           const SizedBox(width: 4),
-          AppText(
-            text,
-            style: const TextStyle(
-              color: Color(0xFF475467),
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
+          Flexible(
+            child: AppText(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFF475467),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],

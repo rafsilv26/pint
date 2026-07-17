@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../l10n/app_language.dart';
 import '../models/dashboard_data.dart';
 import '../repositories/dashboard_repository.dart';
 import '../repositories/mobile_api_repository.dart';
+import '../services/app_data_refresh_service.dart';
 import '../widgets/app_bottom_navigation.dart';
 import 'catalog_page.dart';
 import 'gamification_page.dart';
@@ -26,6 +29,8 @@ class _HomePageState extends State<HomePage> {
   late Future<DashboardData> dashboardFuture;
 
   int selectedIndex = 0;
+  bool dashboardRefreshPending = false;
+  int dashboardReloadGeneration = 0;
 
   @override
   void initState() {
@@ -33,6 +38,7 @@ class _HomePageState extends State<HomePage> {
     selectedIndex = AppBottomNavigationDestination.home.index;
     AppNavigationController.select(AppBottomNavigationDestination.home);
     AppNavigationController.destination.addListener(updateSelectedDestination);
+    AppDataRefreshService.instance.addListener(handleDataChanged);
     dashboardFuture = repository.getDashboard();
   }
 
@@ -41,7 +47,31 @@ class _HomePageState extends State<HomePage> {
     AppNavigationController.destination.removeListener(
       updateSelectedDestination,
     );
+    AppDataRefreshService.instance.removeListener(handleDataChanged);
     super.dispose();
+  }
+
+  void handleDataChanged() {
+    if (selectedIndex != AppBottomNavigationDestination.home.index) {
+      dashboardRefreshPending = true;
+      return;
+    }
+    unawaited(reloadDashboardLocal());
+  }
+
+  Future<void> reloadDashboardLocal() async {
+    final generation = ++dashboardReloadGeneration;
+    final data = await repository.getDashboard();
+    if (!mounted || generation != dashboardReloadGeneration) return;
+    if (selectedIndex != AppBottomNavigationDestination.home.index) {
+      dashboardRefreshPending = true;
+      return;
+    }
+
+    dashboardRefreshPending = false;
+    setState(() {
+      dashboardFuture = Future.value(data);
+    });
   }
 
   void updateSelectedDestination() {
@@ -53,6 +83,10 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       selectedIndex = nextIndex;
     });
+    if (nextIndex == AppBottomNavigationDestination.home.index &&
+        dashboardRefreshPending) {
+      unawaited(reloadDashboardLocal());
+    }
   }
 
   @override

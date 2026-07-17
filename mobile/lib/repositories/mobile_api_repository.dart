@@ -1,17 +1,35 @@
 import '../models/consultant_profile.dart';
 import '../models/mobile_api_data.dart';
+import '../models/pending_badge_application.dart';
+import '../services/auth_service.dart';
+import '../services/app_data_refresh_service.dart';
 import '../services/badges_api_service.dart';
+import '../services/candidatura_outbox_service.dart';
 import '../services/local_badges_database.dart';
 
 class MobileApiRepository {
   MobileApiRepository({
     BadgesApiService? apiService,
     LocalBadgesDatabase? database,
-  }) : apiService = apiService ?? BadgesApiService(),
-       database = database ?? LocalBadgesDatabase.instance;
+    CandidaturaOutbox? candidaturaOutbox,
+    Future<int?> Function()? currentUserIdProvider,
+  }) {
+    this.apiService = apiService ?? BadgesApiService();
+    this.database = database ?? LocalBadgesDatabase.instance;
+    this.currentUserIdProvider =
+        currentUserIdProvider ?? AuthService().getCurrentUserId;
+    this.candidaturaOutbox =
+        candidaturaOutbox ??
+        CandidaturaOutboxService(
+          apiService: this.apiService,
+          database: this.database,
+        );
+  }
 
-  final BadgesApiService apiService;
-  final LocalBadgesDatabase database;
+  late final BadgesApiService apiService;
+  late final LocalBadgesDatabase database;
+  late final CandidaturaOutbox candidaturaOutbox;
+  late final Future<int?> Function() currentUserIdProvider;
 
   Future<bool> syncAvailableMobileData() async {
     final results = await Future.wait([
@@ -26,6 +44,8 @@ class MobileApiRepository {
 
   Future<bool> syncCatalogData() async {
     try {
+      final ownerUserId = await currentUserIdProvider();
+      if (ownerUserId == null) return false;
       final results = await Future.wait([
         apiService.fetchCatalogResource('learning-paths'),
         apiService.fetchCatalogResource('service-lines'),
@@ -62,7 +82,8 @@ class MobileApiRepository {
         snapshot['consultorBadgePremium'] = consultantBadgePremium;
       }
 
-      await database.upsertApiSnapshot(snapshot);
+      if (await currentUserIdProvider() != ownerUserId) return false;
+      await database.upsertApiSnapshot(snapshot, ownerUserId: ownerUserId);
       return true;
     } catch (_) {
       return false;
@@ -80,37 +101,90 @@ class MobileApiRepository {
   }
 
   Future<List<CatalogBadge>> getCatalogBadges() async {
-    return database.getCatalogBadges();
+    final ownerUserId = await currentUserIdProvider();
+    final badges = await database.getCatalogBadges(ownerUserId: ownerUserId);
+    if (ownerUserId == null) return badges;
+    final pending = await database.getPendingBadgeApplications(
+      ownerUserId,
+      states: const ['queued', 'sent'],
+    );
+    final pendingBadgeIds = pending.map((item) => item.badgeId).toSet();
+    return badges.map((badge) {
+      if (badge.hasApplication || !pendingBadgeIds.contains(badge.id)) {
+        return badge;
+      }
+      return badge.copyWith(applicationStatus: 'Pendente de envio');
+    }).toList();
   }
 
   Future<List<MyBadgeApplication>> getMyBadgeApplications() async {
-    return database.getMyBadgeApplications();
+    final ownerUserId = await currentUserIdProvider();
+    if (ownerUserId == null) return const [];
+    final applications = await database.getMyBadgeApplications(
+      ownerUserId: ownerUserId,
+    );
+    final pending = await database.getPendingBadgeApplications(ownerUserId);
+    if (pending.isEmpty) return applications;
+
+    final catalogById = {
+      for (final badge in await database.getCatalogBadges(
+        ownerUserId: ownerUserId,
+      ))
+        badge.id: badge,
+    };
+    final existingBadgeIds = applications.map((item) => item.badgeId).toSet();
+    for (final item in pending) {
+      if (existingBadgeIds.contains(item.badgeId)) continue;
+      final badge = catalogById[item.badgeId];
+      applications.add(
+        MyBadgeApplication(
+          id: -1000000 - item.localId,
+          badgeId: item.badgeId,
+          title: badge?.title ?? 'Badge #${item.badgeId}',
+          description: item.hasFailed
+              ? item.lastError ?? 'Não foi possível enviar a candidatura.'
+              : 'Guardada no telemóvel e a aguardar ligação à Internet.',
+          status: item.hasFailed ? 'SYNC_FAILED' : 'PENDING_SYNC',
+          statusLabel: item.hasFailed ? 'Falha no envio' : 'Pendente de envio',
+          points: badge?.points ?? 0,
+          imagePath: badge?.imagePath ?? '',
+          evidences: item.evidences.map((evidence) {
+            return ApplicationEvidence(
+              id: -evidence.id,
+              requirementId: evidence.requirementId,
+              fileName: evidence.originalName,
+              url: '',
+              type: 'LOCAL',
+            );
+          }).toList(),
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+        ),
+      );
+    }
+    applications.sort((a, b) {
+      final first = a.updatedAt ?? a.createdAt;
+      final second = b.updatedAt ?? b.createdAt;
+      if (first == null && second == null) return 0;
+      if (first == null) return 1;
+      if (second == null) return -1;
+      return second.compareTo(first);
+    });
+    return applications;
   }
 
-  Future<String> submitCandidatura({
+  Future<BadgeApplicationSubmissionResult> submitCandidatura({
     required int badgeId,
     List<EvidenceAttachment> evidenceFiles = const [],
     String? descricao,
   }) async {
-    final response = await apiService.submitCandidatura(
+    final result = await candidaturaOutbox.submit(
       badgeId: badgeId,
       evidenceFiles: evidenceFiles,
-      descricao: descricao,
+      description: descricao,
     );
-    await syncCatalogData();
-    await syncNotifications();
-    await syncGamification();
-    return _apiMessage(response) ?? 'Candidatura submetida com sucesso.';
-  }
-
-  String? _apiMessage(Map<String, dynamic>? response) {
-    final message =
-        response?['mensagem'] ?? response?['message'] ?? response?['erro'];
-    if (message is String && message.trim().isNotEmpty) {
-      return message;
-    }
-
-    return null;
+    AppDataRefreshService.instance.dataChanged();
+    return result;
   }
 
   Future<bool> syncConsultantsDirectory() async {
