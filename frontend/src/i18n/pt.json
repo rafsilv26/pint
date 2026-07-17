@@ -979,7 +979,8 @@
     "botoes": {
       "aceitando": "A registar…",
       "aceitar": "Li e aceito",
-      "sair": "Não posso aceitar agora? Terminar sessão"
+      "sair": "Não posso aceitar agora? Terminar sessão",
+      "prosseguir": "Li e prosseguir"
     }
   },
   "exportButtons": {

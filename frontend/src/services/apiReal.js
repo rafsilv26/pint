@@ -744,6 +744,7 @@ export async function getUsers() {
   const rows = await http('/users')
   return (rows || []).map((u) => ({
     id: u.id, nome: u.nome, email: u.email, roles: u.roles || [], ativo: u.ativo !== false,
+    areaId: u.areaId ?? null, serviceLineId: u.serviceLineId ?? null,
   }))
 }
 export async function createUser(body) {

@@ -39,7 +39,7 @@ export default function AdminUsersPage() {
     setEditing(u || {})
     setForm(u
       ? { nome: u.nome, email: u.email, role: (u.roles || [])[0] || 'Consultor', ativo: u.ativo, serviceLineId: u.serviceLineId || '', areaId: u.areaId || '' }
-      : { nome: '', email: '', password: '', role: 'Consultor', serviceLineId: '', areaId: '' })
+      : { nome: '', email: '', password: '', role: 'Consultor', serviceLineId: '' })
     setErroForm(null)
   }
   function fechar() { setEditing(null); setForm({}) }
@@ -54,11 +54,11 @@ export default function AdminUsersPage() {
     setErroForm(null)
     try {
       const serviceLineId = form.role === 'ServiceLineLeader' ? Number(form.serviceLineId) : undefined
-      const areaId = form.role === 'Consultor' ? Number(form.areaId) : undefined
       if (editing?.id) {
+        const areaId = form.role === 'Consultor' ? Number(form.areaId) : undefined
         await api.updateUser(editing.id, { nome: form.nome, email: form.email, roles: [form.role], ativo: form.ativo, serviceLineId, areaId })
       } else {
-        await api.createUser({ nome: form.nome, email: form.email, password: form.password, roles: [form.role], serviceLineId, areaId })
+        await api.createUser({ nome: form.nome, email: form.email, password: form.password, roles: [form.role], serviceLineId })
       }
       fechar()
       reload()
@@ -181,7 +181,7 @@ export default function AdminUsersPage() {
                   </select>
                 </label>
               )}
-              {form.role === 'Consultor' && (
+              {editing.id && form.role === 'Consultor' && (
                 <label className="d-block">
                   <span className="mb-1 d-block small fw-medium text-ink">{t('adminUsers.modal.area')} <span className="text-muted fw-normal">({t('adminUsers.modal.areaOpcional')})</span></span>
                   <select

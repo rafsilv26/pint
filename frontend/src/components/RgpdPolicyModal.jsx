@@ -69,26 +69,34 @@ export default function RgpdPolicyModal({ policies }) {
 
         {erro && <div className="mb-3 rounded-3 bg-danger-subtle px-3 py-2 small text-danger">{erro}</div>}
 
-        <label className="mb-3 d-flex align-items-start gap-2 small text-ink" style={{ cursor: 'pointer' }}>
-          <input
-            type="checkbox"
-            className="form-check-input mt-1 flex-shrink-0"
-            checked={confirmoLeitura}
-            onChange={(e) => setConfirmoLeitura(e.target.checked)}
-          />
-          {t('rgpdPolicyModal.confirmoLeitura')}
-        </label>
+        {obrigatoria && (
+          <label className="mb-3 d-flex align-items-start gap-2 small text-ink" style={{ cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              className="form-check-input mt-1 flex-shrink-0"
+              checked={confirmoLeitura}
+              onChange={(e) => setConfirmoLeitura(e.target.checked)}
+            />
+            {t('rgpdPolicyModal.confirmoLeitura')}
+          </label>
+        )}
 
         <button onClick={handleAceitar} disabled={loading || (obrigatoria && !confirmoLeitura)} className="btn btn-primary w-100">
-          {loading ? t('rgpdPolicyModal.botoes.aceitando') : t('rgpdPolicyModal.botoes.aceitar')}
+          {loading
+            ? t('rgpdPolicyModal.botoes.aceitando')
+            : obrigatoria
+              ? t('rgpdPolicyModal.botoes.aceitar')
+              : t('rgpdPolicyModal.botoes.prosseguir')}
         </button>
 
-        <button
-          onClick={() => { logout(); navigate('/login') }}
-          className="btn btn-link mt-2 w-100 text-center text-muted text-decoration-none"
-        >
-          {t('rgpdPolicyModal.botoes.sair')}
-        </button>
+        {obrigatoria && (
+          <button
+            onClick={() => { logout(); navigate('/login') }}
+            className="btn btn-link mt-2 w-100 text-center text-muted text-decoration-none"
+          >
+            {t('rgpdPolicyModal.botoes.sair')}
+          </button>
+        )}
       </div>
     </div>
   )
