@@ -1,5 +1,8 @@
 const PDFDocument = require('pdfkit');
+const path = require('path');
+const fs = require('fs');
 
+const LOGO_PATH = path.join(__dirname, '..', 'assets', 'softinsa-logo.png');
 const NAVY = '#003087';
 const GOLD = '#C8A24B';
 const INK = '#2B2B2B';
@@ -71,39 +74,51 @@ const gerarCertificado = (consultor, badge, dataAprovacao) => {
       drawDiamond(doc, x, y, 6, GOLD);
     });
 
-    // Cabeçalho — empresa
-    doc.fillColor(NAVY)
-       .font('Helvetica-Bold')
-       .fontSize(34);
-    centerText('SOFTINSA', 66, { characterSpacing: 4 });
+    // Cabeçalho — banda navy com logo (logo é branco, precisa fundo escuro)
+    const bandW = 330;
+    const bandH = 70;
+    const bandX = (W - bandW) / 2;
+    const bandY = 48;
+    doc.roundedRect(bandX, bandY, bandW, bandH, 12).fill(NAVY);
+
+    if (fs.existsSync(LOGO_PATH)) {
+      const logoW = 250;
+      const logoH = logoW * (475 / 3143);
+      doc.image(LOGO_PATH, (W - logoW) / 2, bandY + (bandH - logoH) / 2, { width: logoW });
+    } else {
+      doc.fillColor('#FFFFFF')
+         .font('Helvetica-Bold')
+         .fontSize(30);
+      centerText('SOFTINSA', bandY + 22, { characterSpacing: 4 });
+    }
 
     doc.fillColor(GRAY)
        .font('Helvetica')
        .fontSize(10.5);
-    centerText('AN IBM GROUP COMPANY', 108, { characterSpacing: 3 });
+    centerText('AN IBM GROUP COMPANY', 130, { characterSpacing: 3 });
 
     // Separador com losango central
-    doc.moveTo(W / 2 - 150, 134).lineTo(W / 2 - 12, 134).lineWidth(1).stroke(GOLD);
-    doc.moveTo(W / 2 + 12, 134).lineTo(W / 2 + 150, 134).lineWidth(1).stroke(GOLD);
-    drawDiamond(doc, W / 2, 134, 4, GOLD);
+    doc.moveTo(W / 2 - 150, 156).lineTo(W / 2 - 12, 156).lineWidth(1).stroke(GOLD);
+    doc.moveTo(W / 2 + 12, 156).lineTo(W / 2 + 150, 156).lineWidth(1).stroke(GOLD);
+    drawDiamond(doc, W / 2, 156, 4, GOLD);
 
     // Título do certificado
     doc.fillColor(INK)
        .font('Helvetica')
        .fontSize(16);
-    centerText('CERTIFICADO DE COMPETÊNCIA DIGITAL', 154, { characterSpacing: 3 });
+    centerText('CERTIFICADO DE COMPETÊNCIA DIGITAL', 174, { characterSpacing: 3 });
 
     // Fórmula
     doc.fillColor(GRAY)
        .font('Helvetica-Oblique')
        .fontSize(13);
-    centerText('Certifica-se que', 200);
+    centerText('Certifica-se que', 208);
 
     // Nome do consultor
     doc.fillColor(NAVY)
        .font('Times-Bold')
        .fontSize(34);
-    centerText(consultor.nome || consultor.email, 222);
+    centerText(consultor.nome || consultor.email, 230);
 
     // Floreado dourado sob o nome
     doc.moveTo(W / 2 - 90, 272).lineTo(W / 2 + 90, 272).lineWidth(1.2).stroke(GOLD);
