@@ -69,10 +69,12 @@ const gerarCertificado = (consultor, badge, dataAprovacao) => {
        .text(badge.nome, 0, 295, { align: 'center' });
 
     // Nível
-    doc.fillColor('#666666')
-       .fontSize(14)
-       .font('Helvetica')
-       .text(`Nível: ${badge.nivel}`, 0, 330, { align: 'center' });
+    if (badge.nivel) {
+      doc.fillColor('#666666')
+         .fontSize(14)
+         .font('Helvetica')
+         .text(`Nível: ${badge.nivel}`, 0, 330, { align: 'center' });
+    }
 
     // Linha separadora
     doc.moveTo(100, 360)

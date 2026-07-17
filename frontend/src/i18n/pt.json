@@ -923,7 +923,12 @@
     "pontos": "pontos",
     "filtroCatalogo": "Âmbito do catálogo",
     "minhaServiceLine": "Da minha Service Line",
-    "todosBadges": "Todos os badges"
+    "todosBadges": "Todos os badges",
+    "badgesTab": "Badges",
+    "premiumTab": "Badges Premium",
+    "premiumCriterio": "Critério",
+    "premiumVazioTitulo": "Nenhum badge premium",
+    "premiumVazioDesc": "Ainda não há badges premium definidos."
   },
   "logout": {
     "pergunta": "Pretende terminar a sua sessão?",

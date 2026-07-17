@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Coins, Award } from 'lucide-react'
+import { Search, Coins, Award, Crown } from 'lucide-react'
 import { PageHeader, Spinner, ErrorState, EmptyState } from './ui'
 import { useAsync } from '../hooks/useAsync'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
@@ -17,9 +17,10 @@ const TECH_TINTS = {
 export default function BadgesGridView({ titulo, linkBase, permitirCatalogoGlobal = false }) {
   const { t } = useTranslation()
   const [scope, setScope] = useState('mine')
+  const [tipo, setTipo] = useState('badges')
   const { data, loading, error, reload } = useAsync(
-    () => api.getBadges({ scope: scope === 'all' ? 'all' : undefined }),
-    [scope]
+    () => (tipo === 'premium' ? api.getBadgesPremium() : api.getBadges({ scope: scope === 'all' ? 'all' : undefined })),
+    [scope, tipo]
   )
   useAutoRefresh(reload)
   const [q, setQ] = useState('')
@@ -27,14 +28,34 @@ export default function BadgesGridView({ titulo, linkBase, permitirCatalogoGloba
   if (error) return <ErrorState onRetry={reload} />
   if (loading || !data) return <Spinner />
 
-  const lista = data.filter((b) => b.ativo !== false && `${b.nome} ${b.nivel} ${b.fornecedor}`.toLowerCase().includes(q.toLowerCase()))
+  const query = q.toLowerCase()
+  const lista = tipo === 'premium'
+    ? data.filter((b) => b.ativo !== false && `${b.nome} ${b.descricao} ${b.criterio}`.toLowerCase().includes(query))
+    : data.filter((b) => b.ativo !== false && `${b.nome} ${b.nivel} ${b.fornecedor}`.toLowerCase().includes(query))
 
   const tituloFinal = titulo || t('badgesGrid.tituloDefault')
 
   return (
     <div>
       <PageHeader title={tituloFinal} />
-      {permitirCatalogoGlobal && (
+
+      <div className="d-inline-flex rounded-3 bg-white p-1 border mb-4">
+        <button
+          type="button"
+          onClick={() => setTipo('badges')}
+          className={`btn btn-sm rounded-2 fw-medium ${tipo === 'badges' ? 'btn-brand' : 'btn-link text-muted text-decoration-none'}`}
+        >
+          {t('badgesGrid.badgesTab')}
+        </button>
+        <button
+          type="button"
+          onClick={() => setTipo('premium')}
+          className={`btn btn-sm rounded-2 fw-medium d-inline-flex align-items-center gap-1 ${tipo === 'premium' ? 'btn-brand' : 'btn-link text-muted text-decoration-none'}`}
+        >
+          <Crown size={14} /> {t('badgesGrid.premiumTab')}
+        </button>
+      </div>
+      {permitirCatalogoGlobal && tipo === 'badges' && (
         <div className="mb-4 d-flex flex-wrap gap-2" role="tablist" aria-label={t('badgesGrid.filtroCatalogo')}>
           <button
             type="button"
@@ -67,10 +88,35 @@ export default function BadgesGridView({ titulo, linkBase, permitirCatalogoGloba
       </div>
       {lista.length === 0 ? (
         <EmptyState
-          icon={Award}
-          title={t('badgesGrid.vazioTitulo')}
-          description={t('badgesGrid.vazioDesc')}
+          icon={tipo === 'premium' ? Crown : Award}
+          title={tipo === 'premium' ? t('badgesGrid.premiumVazioTitulo') : t('badgesGrid.vazioTitulo')}
+          description={tipo === 'premium' ? t('badgesGrid.premiumVazioDesc') : t('badgesGrid.vazioDesc')}
         />
+      ) : tipo === 'premium' ? (
+        <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+          {lista.map((b) => (
+            <div key={b.id} className="col">
+              <div className="h-100 overflow-hidden rounded-4 border bg-white shadow-sm">
+                <div className="d-flex align-items-center justify-content-center tint-violet-soft" style={{ height: '6rem' }}>
+                  <div className="avatar-circle bg-white text-warning-emphasis" style={{ height: '3.5rem', width: '3.5rem' }}>
+                    <Crown size={22} />
+                  </div>
+                </div>
+                <div className="p-3">
+                  <p className="fw-semibold text-ink mb-1 d-flex align-items-center gap-1">
+                    <Crown size={15} className="text-warning-emphasis" /> {b.nome}
+                  </p>
+                  {b.descricao && <p className="small text-muted mb-2">{b.descricao}</p>}
+                  {b.criterio && (
+                    <p className="fs-xs text-muted mb-0">
+                      <span className="fw-medium">{t('badgesGrid.premiumCriterio')}:</span> {b.criterio}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
           {lista.map((b) => {

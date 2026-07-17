@@ -921,7 +921,12 @@
     "pontos": "points",
     "filtroCatalogo": "Catalog scope",
     "minhaServiceLine": "My Service Line",
-    "todosBadges": "All badges"
+    "todosBadges": "All badges",
+    "badgesTab": "Badges",
+    "premiumTab": "Premium Badges",
+    "premiumCriterio": "Criteria",
+    "premiumVazioTitulo": "No premium badges",
+    "premiumVazioDesc": "No premium badges defined yet."
   },
   "logout": {
     "pergunta": "Do you want to sign out?",

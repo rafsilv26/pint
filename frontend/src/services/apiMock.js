@@ -78,6 +78,19 @@ export async function getBadges() {
   await delay()
   return clone(mockBadges)
 }
+export async function getBadgesPremium() {
+  await delay()
+  return clone(ensure('badge-premium'))
+    .filter((b) => b.active !== false)
+    .map((b) => ({
+      id: b.id ?? b.badgePremiumId,
+      nome: b.name,
+      descricao: b.description || '',
+      criterio: b.criteriaDescription || '',
+      icone: b.icon || '',
+      ativo: b.active !== false,
+    }))
+}
 export async function getBadge(id) {
   await delay()
   return clone(mockBadges.find((b) => b.id === Number(id)) || null)
@@ -622,6 +635,10 @@ const adminStore = {
   requirements: [
     { id: 1, titulo: 'Certificado oficial', descricao: 'Certificado reconhecido pela entidade.' },
     { id: 2, titulo: 'Projeto prático', descricao: 'Projeto validado por um Talent Manager.' },
+  ],
+  'badge-premium': [
+    { id: 1, name: 'Especialista Mobile', description: 'Reconhecimento por excelência em desenvolvimento mobile.', criteriaDescription: 'Concluir 5 badges de nível Especialista na área Mobile.', icon: 'star', active: true },
+    { id: 2, name: 'Mentor do Ano', description: 'Atribuído a consultores com papel de mentoria destacado.', criteriaDescription: 'Nomeação anual pelo Service Line Leader.', icon: 'award', active: true },
   ],
 }
 const ensure = (r) => (adminStore[r] = adminStore[r] || [])

@@ -176,6 +176,19 @@ export async function getBadges({ scope } = {}) {
   const rows = await http(`/catalog/badges${query}`)
   return (rows || []).map(adaptBadge)
 }
+export async function getBadgesPremium() {
+  const rows = await http('/catalog/badge-premium').catch(() => [])
+  return (rows || [])
+    .filter((b) => b.active !== false)
+    .map((b) => ({
+      id: b.badgePremiumId ?? b.id,
+      nome: b.name || i18next.t('api.generic.badge', { defaultValue: 'Badge Premium' }),
+      descricao: b.description || '',
+      criterio: b.criteriaDescription || '',
+      icone: b.icon || '',
+      ativo: b.active !== false,
+    }))
+}
 export async function getBadge(id) {
   const raw = await http(`/catalog/badges/${id}`)
   const badge = adaptBadge(raw)

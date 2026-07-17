@@ -18,6 +18,7 @@ export const acceptPolicy = impl.acceptPolicy
 
 export const getDashboard = impl.getDashboard
 export const getBadges = impl.getBadges
+export const getBadgesPremium = impl.getBadgesPremium
 export const getBadge = impl.getBadge
 
 export const getMinhasCandidaturas = impl.getMinhasCandidaturas

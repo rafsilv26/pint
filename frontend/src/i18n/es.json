@@ -923,7 +923,12 @@
     "pontos": "puntos",
     "filtroCatalogo": "Ámbito del catálogo",
     "minhaServiceLine": "Mi Service Line",
-    "todosBadges": "Todas las insignias"
+    "todosBadges": "Todas las insignias",
+    "badgesTab": "Insignias",
+    "premiumTab": "Insignias Premium",
+    "premiumCriterio": "Criterio",
+    "premiumVazioTitulo": "Sin insignias premium",
+    "premiumVazioDesc": "Aún no hay insignias premium definidas."
   },
   "logout": {
     "pergunta": "¿Quieres cerrar sesión?",
