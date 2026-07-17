@@ -11,21 +11,39 @@ export default function RgpdPolicyModal({ policies }) {
   const [erro, setErro] = useState(null)
   const [loading, setLoading] = useState(false)
   const [confirmoLeitura, setConfirmoLeitura] = useState(false)
+  // Políticas não obrigatórias que o utilizador fechou nesta sessão sem as
+  // marcar como lidas: não voltam a aparecer até ao próximo arranque da app.
+  const [dispensadas, setDispensadas] = useState(() => new Set())
 
-  const politica = policies[0]
-  const total = policies.length
+  const fila = policies.filter((p) => !dispensadas.has(p.policyId))
+  const politica = fila[0]
+  if (!politica) return null
 
+  const obrigatoria = politica.mandatory !== false
+  const total = fila.length
+
+  // Regista a leitura/aceitação. Para as obrigatórias exige o checkbox de
+  // confirmação; para as não obrigatórias basta o clique ("Li e compreendi").
   async function handleAceitar() {
-    if (!confirmoLeitura) return
+    if (obrigatoria && !confirmoLeitura) return
     setErro(null)
     setLoading(true)
     try {
       await acceptPolicy(politica.policyId)
+      setConfirmoLeitura(false)
     } catch (err) {
       setErro(err.message || t('rgpdPolicyModal.erro'))
     } finally {
       setLoading(false)
     }
+  }
+
+  // Só disponível para não obrigatórias: fecha sem registar, reaparece no
+  // próximo arranque da app.
+  function handleFechar() {
+    setDispensadas((prev) => new Set(prev).add(politica.policyId))
+    setConfirmoLeitura(false)
+    setErro(null)
   }
 
   return (
@@ -40,9 +58,10 @@ export default function RgpdPolicyModal({ policies }) {
           </div>
           <div>
             <h2 className="h5 fw-bold text-ink mb-0">{politica.title || t('rgpdPolicyModal.titulo')}</h2>
-            {politica.version && (
-              <span className="fs-xs text-muted">{t('rgpdPolicyModal.versao', { versao: politica.version })}</span>
-            )}
+            <span className="fs-xs text-muted">
+              {politica.version && t('rgpdPolicyModal.versao', { versao: politica.version })}
+              {!obrigatoria && ` · ${t('rgpdPolicyModal.opcional', 'Opcional')}`}
+            </span>
           </div>
         </div>
 
@@ -52,7 +71,11 @@ export default function RgpdPolicyModal({ policies }) {
           </p>
         )}
 
-        <p className="mb-3 small text-muted">{t('rgpdPolicyModal.descricao')}</p>
+        <p className="mb-3 small text-muted">
+          {obrigatoria
+            ? t('rgpdPolicyModal.descricao')
+            : t('rgpdPolicyModal.descricaoOpcional', 'Esta política é informativa. Não precisa de ser aceite, mas recomendamos a sua leitura.')}
+        </p>
 
         {politica.description && (
           <div
@@ -65,26 +88,45 @@ export default function RgpdPolicyModal({ policies }) {
 
         {erro && <div className="mb-3 rounded-3 bg-danger-subtle px-3 py-2 small text-danger">{erro}</div>}
 
-        <label className="mb-3 d-flex align-items-start gap-2 small text-ink" style={{ cursor: 'pointer' }}>
-          <input
-            type="checkbox"
-            className="form-check-input mt-1 flex-shrink-0"
-            checked={confirmoLeitura}
-            onChange={(e) => setConfirmoLeitura(e.target.checked)}
-          />
-          {t('rgpdPolicyModal.confirmoLeitura')}
-        </label>
-
-        <button onClick={handleAceitar} disabled={loading || !confirmoLeitura} className="btn btn-primary w-100">
-          {loading ? t('rgpdPolicyModal.botoes.aceitando') : t('rgpdPolicyModal.botoes.aceitar')}
-        </button>
+        {obrigatoria && (
+          <label className="mb-3 d-flex align-items-start gap-2 small text-ink" style={{ cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              className="form-check-input mt-1 flex-shrink-0"
+              checked={confirmoLeitura}
+              onChange={(e) => setConfirmoLeitura(e.target.checked)}
+            />
+            {t('rgpdPolicyModal.confirmoLeitura')}
+          </label>
+        )}
 
         <button
-          onClick={() => { logout(); navigate('/login') }}
-          className="btn btn-link mt-2 w-100 text-center text-muted text-decoration-none"
+          onClick={handleAceitar}
+          disabled={loading || (obrigatoria && !confirmoLeitura)}
+          className="btn btn-primary w-100"
         >
-          {t('rgpdPolicyModal.botoes.sair')}
+          {loading
+            ? t('rgpdPolicyModal.botoes.aceitando')
+            : obrigatoria
+              ? t('rgpdPolicyModal.botoes.aceitar')
+              : t('rgpdPolicyModal.botoes.liCompreendi', 'Li e compreendi')}
         </button>
+
+        {obrigatoria ? (
+          <button
+            onClick={() => { logout(); navigate('/login') }}
+            className="btn btn-link mt-2 w-100 text-center text-muted text-decoration-none"
+          >
+            {t('rgpdPolicyModal.botoes.sair')}
+          </button>
+        ) : (
+          <button
+            onClick={handleFechar}
+            className="btn btn-link mt-2 w-100 text-center text-muted text-decoration-none"
+          >
+            {t('rgpdPolicyModal.botoes.fechar', 'Fechar')}
+          </button>
+        )}
       </div>
     </div>
   )

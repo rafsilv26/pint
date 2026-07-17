@@ -2,36 +2,38 @@ const { Op } = require('sequelize');
 const PolicyRGPD = require('../models/PolicyRGPD');
 const PolicyRGPDAcceptance = require('../models/PolicyRGPDAcceptance');
 
-// Devolve as políticas RGPD ativas + obrigatórias + em vigor que o consultor
-// indicado (consultorId = User.id) ainda não aceitou. Usada no login/me para
-// forçar a aceitação antes de deixar entrar na plataforma.
+// Devolve as políticas RGPD ativas + em vigor que o consultor indicado
+// (consultorId = User.id) ainda não aceitou/leu. Inclui as OBRIGATÓRIAS
+// (que bloqueiam a entrada até serem aceites) e as NÃO obrigatórias (que não
+// exigem aceitação mas têm de ser apresentadas ao utilizador na mesma). O
+// cliente distingue as duas pelo campo `mandatory`.
 async function getPendingPolicies(consultorId) {
   const now = new Date();
 
-  const politicasObrigatorias = await PolicyRGPD.findAll({
+  const politicas = await PolicyRGPD.findAll({
     where: {
       active: true,
-      mandatory: true,
       effectiveDate: { [Op.lte]: now },
       [Op.or]: [
         { expirationDate: null },
         { expirationDate: { [Op.gt]: now } },
       ],
     },
-    order: [['effectiveDate', 'ASC']],
+    // Obrigatórias primeiro: são as que bloqueiam e devem ser tratadas antes.
+    order: [['mandatory', 'DESC'], ['effectiveDate', 'ASC']],
   });
 
-  if (!politicasObrigatorias.length) return [];
+  if (!politicas.length) return [];
 
   const aceitacoes = await PolicyRGPDAcceptance.findAll({
     where: {
       consultorId,
-      policyId: { [Op.in]: politicasObrigatorias.map((p) => p.policyId) },
+      policyId: { [Op.in]: politicas.map((p) => p.policyId) },
     },
   });
   const idsAceites = new Set(aceitacoes.map((a) => a.policyId));
 
-  return politicasObrigatorias.filter((p) => !idsAceites.has(p.policyId));
+  return politicas.filter((p) => !idsAceites.has(p.policyId));
 }
 
 module.exports = { getPendingPolicies };

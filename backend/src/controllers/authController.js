@@ -28,6 +28,7 @@ const pendingPoliciesFor = async (userId) => {
         title: p.title,
         description: p.description,
         version: p.version,
+        mandatory: p.mandatory !== false,
     }));
 };
 

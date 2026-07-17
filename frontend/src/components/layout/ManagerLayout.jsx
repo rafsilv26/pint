@@ -16,7 +16,11 @@ export default function ManagerLayout() {
   const navigate = useNavigate()
   const pendingPolicies = user?.pendingPolicies || []
   const bloqueadoPassword = Boolean(user?.mustChangePassword)
-  const bloqueadoRgpd = !bloqueadoPassword && pendingPolicies.length > 0
+  // Só as políticas OBRIGATÓRIAS bloqueiam. As não obrigatórias aparecem no
+  // modal para o utilizador ver, mas podem ser fechadas sem bloquear.
+  const temObrigatoria = pendingPolicies.some((p) => p.mandatory !== false)
+  const bloqueadoRgpd = !bloqueadoPassword && temObrigatoria
+  const mostrarRgpd = !bloqueadoPassword && pendingPolicies.length > 0
   const bloqueado = bloqueadoPassword || bloqueadoRgpd
   const [mobileOpen, setMobileOpen] = useState(false)
   const [globalSearch, setGlobalSearch] = useState('')
@@ -113,7 +117,7 @@ export default function ManagerLayout() {
       </div>
 
       {bloqueadoPassword && <ChangePasswordModal />}
-      {bloqueadoRgpd && <RgpdPolicyModal key={pendingPolicies[0]?.policyId} policies={pendingPolicies} />}
+      {mostrarRgpd && <RgpdPolicyModal key={pendingPolicies[0]?.policyId} policies={pendingPolicies} />}
       {confirmLogout &&<div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 p-3" style={{ zIndex: 1100 }} role="dialog" aria-modal="true" aria-labelledby="logout-title"><div className="bg-white rounded-3 shadow p-4 w-100" style={{ maxWidth: 420 }}><h2 id="logout-title" className="h5 fw-bold text-ink">{t('managerLayout.confirmarTitulo')}</h2><p className="small text-muted">{t('managerLayout.confirmarTexto')}</p><div className="d-flex justify-content-end gap-2"><button type="button" className="btn btn-outline-secondary" onClick={() => setConfirmLogout(false)}>{t('managerLayout.cancelar')}</button><button type="button" className="btn btn-danger" onClick={() => { setConfirmLogout(false); logout(); navigate('/login') }}>{t('managerLayout.confirmar')}</button></div></div></div>}
     </div>
   )
