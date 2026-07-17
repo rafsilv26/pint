@@ -52,6 +52,14 @@ const getConfig = (req, res) => {
   return config;
 };
 
+// Sobe a versão (minor) de uma política: '1.0' -> '1.1', '2.3' -> '2.4'.
+const proximaVersao = (versaoAtual) => {
+  const partes = String(versaoAtual || '1.0').split('.');
+  const major = partes[0] || '1';
+  const minor = Number(partes[1] || 0) + 1;
+  return `${major}.${minor}`;
+};
+
 const buildWhere = (query) => {
   const where = {};
   Object.entries(query).forEach(([key, value]) => {
@@ -293,6 +301,23 @@ exports.updateResource = async (req, res) => {
 
         // Remove campos que não devem ser alterados, se necessário
         delete payload.createdAt;
+    }
+
+    // Ao EDITAR o conteúdo de uma política RGPD (título/descrição), sobe a
+    // versão e apaga as aceitações antigas desse policyId: assim
+    // getPendingPolicies volta a apresentá-la e TODOS têm de a reaceitar.
+    // Alterar só flags como active/mandatory não conta como novo conteúdo.
+    if (req.params.resource === 'policies') {
+      const conteudoMudou =
+        (payload.title !== undefined && payload.title !== row.title) ||
+        (payload.description !== undefined && payload.description !== row.description);
+      if (conteudoMudou) {
+        if (!payload.version || payload.version === row.version) {
+          payload.version = proximaVersao(row.version);
+        }
+        payload.effectiveDate = payload.effectiveDate || new Date();
+        await models.PolicyRGPDAcceptance.destroy({ where: { policyId: row.policyId } });
+      }
     }
 
     // 4. ATUALIZA USANDO O PAYLOAD TRATADO (NÃO O REQ.BODY)
