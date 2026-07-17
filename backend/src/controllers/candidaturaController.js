@@ -617,6 +617,7 @@ exports.listarMinhasCandidaturas = async (req, res) => {
 
     res.json(candidaturas);
   } catch (erro) {
+    console.error('Erro ao listar minhas candidaturas:', erro);
     res.status(500).json({ erro: 'Erro ao listar candidaturas.' });
   }
 };

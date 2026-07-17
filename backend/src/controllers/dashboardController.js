@@ -193,6 +193,7 @@ exports.getDashboard = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Erro ao carregar dashboard:', error);
     res.status(500).json({ erro: 'Erro ao carregar dashboard.' });
   }
 };

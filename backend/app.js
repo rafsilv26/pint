@@ -57,6 +57,10 @@ app.use((error, _req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 const iniciarServidor = async () => {
+    const servidor = app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Servidor a correr na porta ${PORT}`);
+    });
+
     try {
         await prepararBaseDeDados({
             sequelize,
@@ -71,13 +75,12 @@ const iniciarServidor = async () => {
         iniciarJobSLA();
         iniciarJobExpiracoes();
 
-        return app.listen(PORT, () => {
-            console.log(`Servidor a correr na porta ${PORT}`);
-        });
+        return servidor;
     } catch (err) {
         console.error('❌ Erro crucial de ligação:', err);
-        process.exitCode = 1;
-        return null;
+        // A porta fica disponível para o Render conseguir apresentar os logs e
+        // reiniciar o serviço. A causa da falha continua visível acima.
+        return servidor;
     }
 };
 
