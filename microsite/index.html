@@ -146,7 +146,7 @@
   .cred-verify { display: flex; align-items: center; gap: 9px; margin-top: 18px; font-family: var(--mono); font-size: 11px; color: var(--ink-soft); word-break: break-all; }
   .cred-verify .vchk { color: var(--verify); flex-shrink: 0; }
 
-  .ledger { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .ledger { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   @media (max-width: 620px) { .ledger { grid-template-columns: repeat(2, 1fr); } .ledger > div:nth-child(-n+2) { border-bottom: 1px solid var(--line); } }
   .ledger > div { padding: 26px 8px 26px 0; }
   .ledger > div + div { padding-left: 26px; border-left: 1px solid var(--line); }
@@ -217,12 +217,20 @@
   .stack li { font-size: .96rem; color: var(--ink); border-top: 1px solid var(--line); padding-top: 9px; }
   .stack li:first-child { border-top: 0; padding-top: 0; }
 
-  .team { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--line); }
-  @media (max-width: 720px) { .team { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 420px) { .team { grid-template-columns: 1fr; } }
+  .team { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; border: 1px solid var(--line); }
   .member { padding: 26px 22px; border-right: 1px solid var(--line); }
   .member:last-child { border-right: 0; }
-  @media (max-width: 720px) { .member:nth-child(2) { border-right: 0; } .member:nth-child(-n+2){ border-bottom: 1px solid var(--line); } }
+  @media (max-width: 720px) {
+    .team { grid-template-columns: 1fr 1fr; }
+    .member { border-bottom: 1px solid var(--line); }
+    .member:nth-child(2n) { border-right: 0; }
+    .member:last-child { grid-column: 1 / -1; border-right: 0; border-bottom: 0; }
+  }
+  @media (max-width: 420px) {
+    .team { grid-template-columns: 1fr; }
+    .member { border-right: 0; }
+    .member:last-child { border-bottom: 0; }
+  }
   .member .mono-id { font-family: var(--mono); font-size: 11px; color: var(--seal); letter-spacing: .08em; }
   .member .mn { font-family: var(--serif); font-size: 1.16rem; margin-top: 10px; }
   .member .mr { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-soft); margin-top: 4px; }
@@ -250,7 +258,6 @@
       <div class="nav-links">
         <a href="#credencial">Credencial</a>
         <a href="#workflow">Validação</a>
-        <a href="#niveis">Níveis</a>
         <a href="#stack">Tecnologia</a>
       </div>
     </div>
@@ -499,48 +506,6 @@
     </div>
   </section>
 
-  <section id="niveis">
-    <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">Progressão · A → E</p>
-        <h2>Cinco níveis, um badge em cada.</h2>
-        <p>Cada área tem cinco níveis. Um consultor obtém o badge de um nível quando cumpre todos os requisitos desse
-          nível (A1…A3). Pode candidatar-se a qualquer nível, desde que reúna os requisitos.</p>
-      </div>
-      <div class="levels">
-        <div class="level"><span class="badge-code">A</span>
-          <div>
-            <div class="lname">Júnior</div>
-            <div class="lreq">Requisitos A1 · A2 · A3</div>
-          </div><span class="lpts">1 badge</span>
-        </div>
-        <div class="level"><span class="badge-code">B</span>
-          <div>
-            <div class="lname">Intermédio</div>
-            <div class="lreq">Requisitos B1 · B2 · B3</div>
-          </div><span class="lpts">1 badge</span>
-        </div>
-        <div class="level"><span class="badge-code">C</span>
-          <div>
-            <div class="lname">Sénior</div>
-            <div class="lreq">Requisitos C1 · C2 · C3</div>
-          </div><span class="lpts">1 badge</span>
-        </div>
-        <div class="level"><span class="badge-code">D</span>
-          <div>
-            <div class="lname">Especialista</div>
-            <div class="lreq">Requisitos D1 · D2 · D3</div>
-          </div><span class="lpts">1 badge</span>
-        </div>
-        <div class="level"><span class="badge-code">E</span>
-          <div>
-            <div class="lname">Líder de conhecimento</div>
-            <div class="lreq">Requisitos E1 · E2 · E3</div>
-          </div><span class="lpts">1 badge</span>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <hr class="rule">
 
@@ -659,6 +624,11 @@
         <div class="member">
           <div class="mono-id">Nº 30012</div>
           <div class="mn">Porfirio Rocha</div>
+          <div class="mr">Desenvolvimento</div>
+        </div>
+        <div class="member">
+          <div class="mono-id">Nº 31489</div>
+          <div class="mn">Tiago Bento</div>
           <div class="mr">Desenvolvimento</div>
         </div>
       </div>
