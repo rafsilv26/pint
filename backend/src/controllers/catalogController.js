@@ -314,6 +314,13 @@ exports.updateResource = async (req, res) => {
       if (conteudoMudou && (!payload.version || payload.version === row.version)) {
         payload.version = proximaVersao(row.version);
       }
+      // NUNCA deixar a data de eficácia ficar vazia num update: o formulário
+      // pode enviá-la a null (input date não formata o datetime ISO antigo), e
+      // getPendingPolicies exige effectiveDate <= agora — com null a política
+      // nunca reaparecia. Mantém a data original (ou agora, se não houver).
+      if (!payload.effectiveDate) {
+        payload.effectiveDate = row.effectiveDate || new Date();
+      }
       await models.PolicyRGPDAcceptance.destroy({ where: { policyId: row.policyId } });
     }
 
