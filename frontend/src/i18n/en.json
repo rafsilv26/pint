@@ -1259,21 +1259,17 @@
       "iniciarValidacao": "Start Validation",
       "validar": "Validate Application",
       "rejeitarCand": "Reject Application",
-      "devolverCand": "Send Back",
       "cancelar": "Cancel",
       "confirmarRejeicao": "Confirm Rejection",
-      "confirmarDevolucao": "Confirm Send Back",
       "rejeitar": "Reject",
       "aprovar": "Approve",
       "aProcessar": "Processing…"
     },
     "labels": {
-      "motivoRejeicao": "Reason for rejection",
-      "motivoDevolucao": "Reason for sending back"
+      "motivoRejeicao": "Reason for rejection"
     },
     "placeholders": {
-      "motivoRejeicao": "Indicate the reason so the consultant can fix it…",
-      "motivoDevolucao": "Explain what the consultant must fix and resubmit…"
+      "motivoRejeicao": "Indicate the reason so the consultant can fix it…"
     },
     "tabs": {
       "evidencia": "Evidence #{{numero}}",
@@ -1307,8 +1303,6 @@
       "validadaDescricao": "The application was validated and sent for final approval.",
       "rejeitadaTitulo": "You rejected the «{{badge}}» badge.",
       "rejeitadaDescricao": "The application was rejected and recorded in your history.",
-      "devolvidaTitulo": "You sent the «{{badge}}» badge back to the consultant.",
-      "devolvidaDescricao": "The application was returned to the consultant for correction.",
       "fechar": "Close notification"
     },
     "historico": {

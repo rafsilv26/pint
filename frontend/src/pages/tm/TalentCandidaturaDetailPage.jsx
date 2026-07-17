@@ -40,27 +40,24 @@ export default function TalentCandidaturaDetailPage() {
   const requisitosEmFalta = evidenceCoverage.missing
   const todasEvidenciasValidadas = evidenceCoverage.complete
 
-  // Cada decisão do Talent Manager leva a um separador e a um feedback próprios.
-  const DECISAO_META = {
-    APROVAR: { tab: 'validadas', type: 'success', tituloKey: 'talentCandidaturas.feedback.validadaTitulo', descKey: 'talentCandidaturas.feedback.validadaDescricao' },
-    REJEITAR: { tab: 'rejeitadas', type: 'danger', tituloKey: 'talentCandidaturas.feedback.rejeitadaTitulo', descKey: 'talentCandidaturas.feedback.rejeitadaDescricao' },
-    SEND_BACK: { tab: 'processo', type: 'warning', tituloKey: 'talentCandidaturas.feedback.devolvidaTitulo', descKey: 'talentCandidaturas.feedback.devolvidaDescricao' },
-  }
-
   async function decidir(decisao) {
     setSubmitting(true)
     setMsg(null)
     try {
       const result = await api.validarTalentManager(c.id, { decisao, comentario })
-      const meta = DECISAO_META[decisao]
+      const validada = decisao === 'APROVAR'
       navigate('/tm/candidaturas', {
         replace: true,
         state: {
-          tab: meta.tab,
+          tab: validada ? 'validadas' : 'rejeitadas',
           feedback: {
-            type: meta.type,
-            title: t(meta.tituloKey, { badge: c.badge.nome }),
-            message: result?.mensagem || result?.message || t(meta.descKey),
+            type: validada ? 'success' : 'danger',
+            title: t(validada
+              ? 'talentCandidaturas.feedback.validadaTitulo'
+              : 'talentCandidaturas.feedback.rejeitadaTitulo', { badge: c.badge.nome }),
+            message: result?.mensagem || result?.message || t(validada
+              ? 'talentCandidaturas.feedback.validadaDescricao'
+              : 'talentCandidaturas.feedback.rejeitadaDescricao'),
           },
         },
       })
@@ -129,13 +126,6 @@ export default function TalentCandidaturaDetailPage() {
                     {submitting ? t('talentCandidaturaDetail.botoes.aProcessar') : t('talentCandidaturaDetail.botoes.validar')}
                   </button>
                   <button
-                    onClick={() => setAcao('devolver')}
-                    disabled={submitting}
-                    className="btn btn-warning fw-semibold"
-                  >
-                    {t('talentCandidaturaDetail.botoes.devolverCand')}
-                  </button>
-                  <button
                     onClick={() => setAcao('rejeitar')}
                     disabled={submitting}
                     className="btn btn-danger fw-semibold"
@@ -163,34 +153,6 @@ export default function TalentCandidaturaDetailPage() {
           <p className="fs-xs text-ink mb-0">{c.badge.nivel}</p>
         </div>
       </div>
-
-      {acao === 'devolver' && (
-        <Card className="mt-3 border-warning-subtle bg-warning-subtle">
-          <label className="d-block small fw-medium text-ink">
-            {t('talentCandidaturaDetail.labels.motivoDevolucao')}
-          </label>
-          <textarea
-            value={comentario}
-            onChange={(e) => setComentario(e.target.value)}
-            rows={2}
-            placeholder={t('talentCandidaturaDetail.placeholders.motivoDevolucao')}
-            className="form-control mt-2"
-          />
-          <div className="mt-2 d-flex justify-content-end gap-2">
-            <button onClick={() => setAcao(null)} className="btn btn-outline-secondary bg-white btn-sm">
-              {t('talentCandidaturaDetail.botoes.cancelar')}
-            </button>
-            <button
-              onClick={() => decidir('SEND_BACK')}
-              disabled={submitting || !comentario.trim()}
-              className="btn btn-warning btn-sm d-flex align-items-center gap-2 fw-semibold"
-            >
-              {submitting && <span className="spinner-border spinner-border-sm" />}
-              {submitting ? t('talentCandidaturaDetail.botoes.aProcessar') : t('talentCandidaturaDetail.botoes.confirmarDevolucao')}
-            </button>
-          </div>
-        </Card>
-      )}
 
       {acao === 'rejeitar' && (
         <Card className="mt-3 border-danger-subtle bg-danger-subtle">

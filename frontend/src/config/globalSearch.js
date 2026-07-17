@@ -3,10 +3,13 @@ export function getGlobalSearchTarget(pathname, query) {
   if (!value) return null
 
   const base = `/${String(pathname || '').split('/')[1] || ''}`
-  // Todos os perfis de gestão vão para a mesma página de pesquisa global
-  // (consultores + badges + candidaturas), específica do seu prefixo de rota.
-  const bases = ['/tm', '/sll', '/admin']
-  if (!bases.includes(base)) return null
+  const targets = {
+    '/tm': { pathname: '/tm/pesquisa', key: 'q' },
+    '/sll': { pathname: '/sll/consultores', key: 'search' },
+    '/admin': { pathname: '/admin/utilizadores', key: 'search' },
+  }
+  const target = targets[base]
+  if (!target) return null
 
-  return `${base}/pesquisa?q=${encodeURIComponent(value)}`
+  return `${target.pathname}?${target.key}=${encodeURIComponent(value)}`
 }

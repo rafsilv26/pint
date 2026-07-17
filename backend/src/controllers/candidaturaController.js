@@ -32,7 +32,6 @@ const {
   getBadgeIdsDaServiceLine
 } = require('../services/serviceLineScope.service');
 const { sendPushToUser } = require('../services/pushNotification.service');
-const { notificarIntegracoes } = require('../services/webhookIntegration.service');
 const { getSLAConfigForTeam } = require('../services/sla.service');
 const {
   normalizeClientSubmissionId,
@@ -110,10 +109,6 @@ const createNotice = async (userId, title, message, type = 'info') => {
     const notice = await Notice.create({ userId, title, message, type, read: false });
     sendPushToUser(userId, { title, body: message, type }).catch((error) =>
       console.error('Erro ao enviar push:', error.message)
-    );
-    // Empurra também para integrações externas (Teams/Slack) do utilizador.
-    notificarIntegracoes(userId, { title, message }).catch((error) =>
-      console.error('Erro ao notificar integrações:', error.message)
     );
     return notice;
   } catch (error) {
@@ -911,25 +906,14 @@ exports.validarTalentManager = async (req, res) => {
       return res.status(404).json({ erro: 'Candidatura não encontrada.' });
     }
 
-    const statuses = await getStatuses([STATUS.SUBMITTED, STATUS.VALIDATED, STATUS.REJECTED, STATUS.OPEN]);
+    const statuses = await getStatuses([STATUS.SUBMITTED, STATUS.VALIDATED, STATUS.REJECTED]);
     if (candidatura.estadoId !== statuses[STATUS.SUBMITTED].statusId) {
       return res.status(400).json({ erro: 'Candidatura não está submetida.' });
     }
 
-    // Rejeitar ou devolver (Send Back) exige comentário — o consultor precisa
-    // de saber o que corrigir (guião: "Retorna ao consultor com comentário").
-    if (['REJEITAR', 'SEND_BACK'].includes(decisao) && !String(comentario || '').trim()) {
-      return res.status(400).json({ erro: 'É obrigatório indicar um comentário para rejeitar ou devolver a candidatura.' });
-    }
-
-    // Send Back devolve ao consultor para retificação (volta a OPEN, editável);
-    // Rejeitar fecha a candidatura (REJECTED); Aprovar envia ao Service Line.
-    let nextStatus;
-    if (decisao === 'APROVAR') nextStatus = statuses[STATUS.VALIDATED];
-    else if (decisao === 'REJEITAR') nextStatus = statuses[STATUS.REJECTED];
-    else if (decisao === 'SEND_BACK') nextStatus = statuses[STATUS.OPEN];
+    const nextStatus = decisao === 'APROVAR' ? statuses[STATUS.VALIDATED] : statuses[STATUS.REJECTED];
     if (!nextStatus) {
-      return res.status(400).json({ erro: 'Decisão inválida. Use APROVAR, REJEITAR ou SEND_BACK.' });
+      return res.status(400).json({ erro: 'Decisão inválida. Use APROVAR ou REJEITAR.' });
     }
 
     // É obrigatório validar todas as evidências antes de poder aprovar a candidatura.
@@ -983,19 +967,6 @@ exports.validarTalentManager = async (req, res) => {
           console.error('Erro ao notificar Service Line Leaders:', erroEmail.message);
         }
       })();
-      return;
-    }
-
-    // Send Back: devolvida ao consultor para retificação (volta a editável).
-    if (decisao === 'SEND_BACK') {
-      res.json({ mensagem: 'Candidatura devolvida ao consultor para retificação.' });
-      createNotice(
-        candidatura.consultorId,
-        'Candidatura devolvida para retificação',
-        `${candidatura.Badge?.nome || 'Badge'}: ${comentario}`,
-        'warning'
-      );
-      sendEmail(emailSendBack, consultor, candidatura.Badge, comentario);
       return;
     }
 
