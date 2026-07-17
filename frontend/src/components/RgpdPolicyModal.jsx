@@ -4,64 +4,33 @@ import { ShieldCheck } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
 import { useTranslation } from 'react-i18next'
 
-// Políticas não obrigatórias recusadas ficam guardadas por utilizador+versão no
-// localStorage: o utilizador escolheu "Não aceitar", não gravamos nada na BD
-// (só a aceitação é registada), mas não voltamos a perguntar em cada login.
-const chaveRecusadas = (userId) => `politicas-recusadas-${userId || 'x'}`
-const idRecusa = (p) => `${p.policyId}:${p.version || ''}`
-
-function carregarRecusadas(userId) {
-  try {
-    return new Set(JSON.parse(localStorage.getItem(chaveRecusadas(userId)) || '[]'))
-  } catch {
-    return new Set()
-  }
-}
-
 export default function RgpdPolicyModal({ policies }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { user, acceptPolicy, logout } = useAuth()
+  const { acceptPolicy, logout } = useAuth()
   const [erro, setErro] = useState(null)
   const [loading, setLoading] = useState(false)
   const [confirmoLeitura, setConfirmoLeitura] = useState(false)
-  const [recusadas, setRecusadas] = useState(() => carregarRecusadas(user?.id))
 
-  // Mostra as obrigatórias sempre; as não obrigatórias só se ainda não foram
-  // recusadas localmente por este utilizador.
-  const visiveis = (policies || []).filter(
-    (p) => p.mandatory !== false || !recusadas.has(idRecusa(p))
-  )
-  if (visiveis.length === 0) return null
-
-  const politica = visiveis[0]
-  const total = visiveis.length
+  const politica = policies[0]
+  const total = policies.length
   const obrigatoria = politica.mandatory !== false
 
-  async function handleAceitar() {
+  // Regista a decisão na BD: aceitar (accepted=true, conta p/ compliance) ou
+  // não aceitar (accepted=false). Em ambos os casos a política sai dos
+  // pendentes e não volta a ser perguntada — mesmo que limpe o localStorage.
+  async function decidir(accepted) {
     if (obrigatoria && !confirmoLeitura) return
     setErro(null)
     setLoading(true)
     try {
-      await acceptPolicy(politica.policyId)
+      await acceptPolicy(politica.policyId, accepted)
       setConfirmoLeitura(false)
     } catch (err) {
       setErro(err.message || t('rgpdPolicyModal.erro'))
     } finally {
       setLoading(false)
     }
-  }
-
-  // "Não aceitar": não grava na BD, apenas marca localmente para não voltar a
-  // perguntar. Avança para a próxima política (ou fecha o modal).
-  function handleNaoAceitar() {
-    const proximas = new Set(recusadas)
-    proximas.add(idRecusa(politica))
-    try {
-      localStorage.setItem(chaveRecusadas(user?.id), JSON.stringify([...proximas]))
-    } catch { /* ignora */ }
-    setConfirmoLeitura(false)
-    setRecusadas(proximas)
   }
 
   return (
@@ -113,7 +82,7 @@ export default function RgpdPolicyModal({ policies }) {
               {t('rgpdPolicyModal.confirmoLeitura')}
             </label>
 
-            <button onClick={handleAceitar} disabled={loading || !confirmoLeitura} className="btn btn-primary w-100">
+            <button onClick={() => decidir(true)} disabled={loading || !confirmoLeitura} className="btn btn-primary w-100">
               {loading ? t('rgpdPolicyModal.botoes.aceitando') : t('rgpdPolicyModal.botoes.aceitar')}
             </button>
 
@@ -126,10 +95,10 @@ export default function RgpdPolicyModal({ policies }) {
           </>
         ) : (
           <div className="d-flex gap-2">
-            <button onClick={handleNaoAceitar} disabled={loading} className="btn btn-outline-secondary w-50">
+            <button onClick={() => decidir(false)} disabled={loading} className="btn btn-outline-secondary w-50">
               {t('rgpdPolicyModal.botoes.naoAceitar')}
             </button>
-            <button onClick={handleAceitar} disabled={loading} className="btn btn-primary w-50">
+            <button onClick={() => decidir(true)} disabled={loading} className="btn btn-primary w-50">
               {loading ? t('rgpdPolicyModal.botoes.aceitando') : t('rgpdPolicyModal.botoes.aceitarSimples')}
             </button>
           </div>

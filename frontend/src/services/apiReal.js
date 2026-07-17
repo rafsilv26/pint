@@ -96,8 +96,8 @@ export async function me() {
   return http('/auth/me')
 }
 
-export async function acceptPolicy(policyId) {
-  return http('/auth/accept-policy', { method: 'POST', body: { policyId } })
+export async function acceptPolicy(policyId, accepted = true) {
+  return http('/auth/accept-policy', { method: 'POST', body: { policyId, accepted } })
 }
 
 // Guarda a preferência de idioma do utilizador na base de dados,

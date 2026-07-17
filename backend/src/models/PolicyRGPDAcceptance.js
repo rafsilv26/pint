@@ -13,7 +13,13 @@ const PolicyRGPDAcceptance = sequelize.define('PolicyRGPDAcceptance', {
     acceptanceDate: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
-        comment: 'Quando aceitou'
+        comment: 'Quando decidiu (aceitou ou recusou)'
+    },
+    accepted: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+        comment: 'true = aceitou; false = viu e recusou (só true conta p/ compliance)'
     },
     originIP: {
         type: DataTypes.STRING(45),

@@ -368,14 +368,21 @@ exports.acceptPolicy = async (req, res) => {
             return res.status(404).json({ message: 'Política não encontrada.' });
         }
 
+        // accepted=false só é permitido para políticas NÃO obrigatórias: o
+        // utilizador viu e recusou, deixamos de perguntar mas não conta como
+        // aceitação. As obrigatórias têm de ser sempre aceites.
+        const aceite = req.body.accepted !== false || policy.mandatory !== false;
+
         try {
-            await PolicyRGPDAcceptance.findOrCreate({
-                where: { policyId, consultorId: req.user.id },
-                defaults: {
-                    acceptanceDate: new Date(),
-                    originIP: req.ip,
-                    userAgent: req.headers['user-agent'] || null
-                }
+            // upsert (PK composta policyId+consultorId): uma recusa anterior pode
+            // ser convertida em aceitação numa entrada posterior, e vice-versa.
+            await PolicyRGPDAcceptance.upsert({
+                policyId,
+                consultorId: req.user.id,
+                accepted: aceite,
+                acceptanceDate: new Date(),
+                originIP: req.ip,
+                userAgent: req.headers['user-agent'] || null
             });
         } catch (dbError) {
             // Se a BD tiver uma foreign key que só aceita CONSULTORID de quem

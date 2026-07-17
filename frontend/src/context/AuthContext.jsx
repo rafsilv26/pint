@@ -104,8 +104,8 @@ export function AuthProvider({ children }) {
     })
   }
 
-  async function acceptPolicy(policyId) {
-    const resultado = await api.acceptPolicy(policyId)
+  async function acceptPolicy(policyId, accepted = true) {
+    const resultado = await api.acceptPolicy(policyId, accepted)
     setUser((prev) => {
       if (!prev) return prev
       const pendingPolicies = resultado?.pendingPolicies
