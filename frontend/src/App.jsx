@@ -160,7 +160,7 @@ export default function App() {
           <Route path="/admin/informacoes" element={<AdminResourcePage resourceKey="information" />} />
           <Route path="/admin/utilizadores" element={<AdminUsersPage />} />
           <Route path="/admin/utilizadores/:id" element={<AdminUserDetailPage />} />
-          <Route path="/admin/consultor/:id" element={<PublicProfilePage />} />
+          <Route path="/admin/consultor/:id" element={<ManagerConsultorDetailPage />} />
           <Route path="/admin/pedidos" element={<AdminPedidosPage />} />
           <Route path="/admin/pedidos/:id" element={<AdminPedidoDetailPage />} />
           <Route path="/admin/pesquisa" element={<GlobalSearchPage />} />
