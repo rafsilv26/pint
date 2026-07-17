@@ -33,7 +33,7 @@ router.put('/serviceline/:id/validar', authorize('ServiceLineLeader', 'Admin'), 
 router.get('/fechadas-semana', authorize('TalentManager', 'ServiceLineLeader', 'Admin'), candidaturaController.getFechadasPorSemana);
 
 // Estatística para o gráfico "Badges Atribuídos" do painel de controlo do SLL
-router.get('/badges-semana', authorize('ServiceLineLeader', 'Admin'), candidaturaController.getBadgesAtribuidosPorSemana);
+router.get('/badges-semana', authorize('ServiceLineLeader', 'Admin', 'TalentManager'), candidaturaController.getBadgesAtribuidosPorSemana);
 
 // Histórico de candidaturas de um consultor (o próprio, ou TM/SLL/Admin)
 router.get('/consultor/:id', candidaturaController.listarCandidaturasPorConsultor);

@@ -3,19 +3,19 @@
     "consultor": {
       "inicio": "Início",
       "catalogo": "Catálogo de Badges",
-      "meusBadges": "Meus Badges",
+      "meusBadges": "Minhas candidaturas",
       "objetivos": "Objetivos",
       "ranking": "Ranking",
       "perfil": "Perfil"
     },
     "tm": {
       "dashboard": "Dashboard",
-      "candidaturas": "Candidaturas de Badge",
+      "candidaturas": "Pedidos de Badge",
       "catalogo": "Catálogo de Badges",
       "learningPaths": "Learning Paths",
       "consultores": "Consultores",
       "relatorios": "Relatórios",
-      "validades": "Validades",
+      "validades": "Expiração de badges",
       "notificacoes": "Notificações",
       "informacoes": "Informações"
     },
@@ -23,7 +23,7 @@
       "dashboard": "Painel de Controlo",
       "consultores": "Consultores",
       "badges": "Badges",
-      "pedidos": "Pedidos",
+      "pedidos": "Pedidos de badges",
       "relatorios": "Relatórios",
       "notificacoes": "Notificações",
       "informacoes": "Informações"
@@ -201,7 +201,7 @@
     "resultados_other": "{{count}} badges"
   },
   "candidaturas": {
-    "titulo": "Meus Badges",
+    "titulo": "Minhas candidaturas",
     "nova": "Nova Candidatura",
     "pesquisar": "Pesquisar Candidaturas...",
     "vazioTitulo": "Sem candidaturas",
@@ -1624,7 +1624,7 @@
       "complete": "Cobertura completa"
     },
     "expirations": {
-      "title": "Validade dos badges",
+      "title": "Badges quase a expirar",
       "subtitle": "Badges expiradas ou próximas da data de renovação",
       "attention": "Requer atenção",
       "expiring": "A expirar",
