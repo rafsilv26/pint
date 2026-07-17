@@ -61,7 +61,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <DashboardAlerts />
+      <DashboardAlerts conquistas={data.conquistasEspeciais} />
 
       <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
         {data.stats.map((s, i) => (

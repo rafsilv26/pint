@@ -200,6 +200,9 @@ export const mockDashboard = {
     { id: 1, nome: 'Jornada Técnica', progresso: 45, obtidos: 5, total: 11, emCurso: 2 },
     { id: 2, nome: 'Cloud & DevOps', progresso: 20, obtidos: 2, total: 10, emCurso: 1 },
   ],
+  conquistasEspeciais: [
+    { id: 1, nome: 'Especialista Mobile', descricao: 'Excelência em desenvolvimento mobile.', criterio: '5 badges Especialista Mobile.', data: '2026-06-01' },
+  ],
   stats: [
     { label: 'Pontos Totais', value: '1250', delta: '+12%', tint: 'violet', deltaTint: 'green' },
     { label: 'Badges Conquistados', value: '8', delta: '+2', tint: 'violet', deltaTint: 'green' },

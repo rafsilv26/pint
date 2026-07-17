@@ -375,7 +375,8 @@
     "objetivoItem": "{{title}} — {{dias}} day left",
     "objetivoItem_other": "{{title}} — {{dias}} days left",
     "objetivoHoje": "{{title}} — due today",
-    "verObjetivos": "View goals"
+    "verObjetivos": "View goals",
+    "premioTitulo": "Special milestone unlocked! 🎉"
   },
   "objetivos": {
     "titulo": "My Goals",

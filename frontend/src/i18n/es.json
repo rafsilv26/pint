@@ -375,7 +375,8 @@
     "objetivoItem": "{{title}} — queda {{dias}} día",
     "objetivoItem_other": "{{title}} — quedan {{dias}} días",
     "objetivoHoje": "{{title}} — el plazo es hoy",
-    "verObjetivos": "Ver objetivos"
+    "verObjetivos": "Ver objetivos",
+    "premioTitulo": "¡Logro especial desbloqueado! 🎉"
   },
   "objetivos": {
     "titulo": "Mis Objetivos",

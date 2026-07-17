@@ -1,31 +1,33 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Trophy, Clock, X, Target } from 'lucide-react'
+import { Clock, X, Target, Crown } from 'lucide-react'
 import { useAsync } from '../hooks/useAsync'
 import { useAuth } from '../context/useAuth'
 import { useTranslation } from 'react-i18next'
 import * as api from '../services/api'
 
-const MARCOS = [1, 3, 5, 10, 15, 25, 50]
 const DIAS_ALERTA = 60
 
-export default function DashboardAlerts() {
+export default function DashboardAlerts({ conquistas = [] }) {
   const { t } = useTranslation()
   const { user } = useAuth()
   const { data: badges } = useAsync(() => api.getMeusBadges())
   const { data: objetivos } = useAsync(() => api.getMeusObjetivos())
-  const [marcoDispensado, setMarcoDispensado] = useState(false)
+  const [premiosDispensados, setPremiosDispensados] = useState(false)
 
   if (!badges) return null
   const validos = badges.filter((b) => b.valid !== false)
 
-  const chave = `marco-consultor-${user?.id || 'x'}`
-  const vistoAntes = Number(localStorage.getItem(chave) || 0)
-  const atingido = MARCOS.filter((m) => validos.length >= m).pop() || 0
-  const mostrarMarco = atingido > vistoAntes && !marcoDispensado
-  const dispensarMarco = () => {
-    localStorage.setItem(chave, String(atingido))
-    setMarcoDispensado(true)
+  // Celebração de marcos: badges premium (conquistas especiais) recém-atingidos.
+  // Guarda os ids já vistos por consultor; mostra só os que ainda não celebrou.
+  const chavePremios = `premios-consultor-${user?.id || 'x'}`
+  let vistosPremios = []
+  try { vistosPremios = JSON.parse(localStorage.getItem(chavePremios) || '[]') } catch { vistosPremios = [] }
+  const novosPremios = (conquistas || []).filter((c) => !vistosPremios.includes(c.id))
+  const mostrarPremios = novosPremios.length > 0 && !premiosDispensados
+  const dispensarPremios = () => {
+    localStorage.setItem(chavePremios, JSON.stringify((conquistas || []).map((c) => c.id)))
+    setPremiosDispensados(true)
   }
 
   const hoje = new Date()
@@ -42,18 +44,20 @@ export default function DashboardAlerts() {
     .filter((o) => o.dias >= 0 && o.dias <= DIAS_ALERTA)
     .sort((a, b) => a.dias - b.dias)
 
-  if (!mostrarMarco && aExpirar.length === 0 && objetivosAlerta.length === 0) return null
+  if (!mostrarPremios && aExpirar.length === 0 && objetivosAlerta.length === 0) return null
 
   return (
     <div className="d-flex flex-column gap-3">
-      {mostrarMarco && (
-        <div className="rounded-3 bg-gradient-brand p-4 text-white shadow-sm d-flex align-items-center gap-3">
-          <Trophy size={28} className="flex-shrink-0" />
+      {mostrarPremios && (
+        <div className="rounded-3 p-4 text-white shadow-sm d-flex align-items-center gap-3" style={{ background: 'linear-gradient(90deg,#8b5cf6,#d946ef)' }}>
+          <Crown size={28} className="flex-shrink-0" />
           <div className="flex-grow-1 min-w-0">
-            <p className="fw-bold mb-0">{t('dashboardAlertas.marcoTitulo')}</p>
-            <p className="small text-white-50 mb-0">{t('dashboardAlertas.marcoTexto', { count: atingido })}</p>
+            <p className="fw-bold mb-1">{t('dashboardAlertas.premioTitulo')}</p>
+            <p className="small text-white mb-0" style={{ opacity: 0.9 }}>
+              {novosPremios.map((c) => c.nome).join(' · ')}
+            </p>
           </div>
-          <button onClick={dispensarMarco} className="btn btn-sm btn-light flex-shrink-0" title={t('dashboardAlertas.marcoDispensar')}>
+          <button onClick={dispensarPremios} className="btn btn-sm btn-light flex-shrink-0" title={t('dashboardAlertas.marcoDispensar')}>
             <X size={16} />
           </button>
         </div>

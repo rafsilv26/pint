@@ -134,6 +134,13 @@ export async function getDashboard() {
       total: p.total ?? 0,
       emCurso: p.emCurso ?? 0,
     })),
+    conquistasEspeciais: (d.specialAchievements || []).map((a) => ({
+      id: a.id,
+      nome: a.name,
+      descricao: a.description || '',
+      criterio: a.criteria || '',
+      data: a.date || null,
+    })),
     recomendados: (d.recommendations || []).slice(0, 3).map((r, i) => ({
       id: r.id,
       nome: r.title,

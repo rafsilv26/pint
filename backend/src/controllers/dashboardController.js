@@ -256,7 +256,11 @@ exports.getDashboard = async (req, res) => {
         where: { userId: consultorId },
         order: [['createdAt', 'DESC']]
       }),
-      ConsultorBadgePremium.findAll({ where: { consultorId } }).catch(() => [])
+      ConsultorBadgePremium.findAll({
+        where: { consultorId },
+        include: [{ model: BadgePremium, required: false }],
+        order: [['achievementDate', 'DESC']]
+      }).catch(() => [])
     ]);
 
     const totalPoints = awards.reduce(
@@ -308,6 +312,13 @@ exports.getDashboard = async (req, res) => {
         noticeMessage: notice?.message || '',
         specialAchievementTitle: 'Conquistas especiais',
         specialAchievementMessage: `${premiumAwards.length} conquistas desbloqueadas!`,
+        specialAchievements: premiumAwards.map((award) => ({
+          id: award.badgePremiumId,
+          name: award.BadgePremium?.name || 'Conquista especial',
+          description: award.BadgePremium?.description || '',
+          criteria: award.BadgePremium?.criteriaDescription || '',
+          date: award.achievementDate || award.createdAt || null
+        })),
         areaNome: consultant?.Area?.nome || '',
         recommendations,
         badgesWon: awards.length,
