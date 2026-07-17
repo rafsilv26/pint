@@ -1620,7 +1620,7 @@
     },
     "evidenceCoverage": {
       "title": "Required evidence coverage",
-      "summary": "{{covered}} of {{total}} requirements covered by validated evidence.",
+      "summary": "{{covered}} of {{total}} requirements with submitted evidence.",
       "missing_one": "1 requirement missing",
       "missing_other": "{{count}} requirements missing",
       "complete": "Complete coverage"

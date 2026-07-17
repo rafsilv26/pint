@@ -121,8 +121,8 @@ export function getExpirationState(expirationDate, valid = true, now = new Date(
 
 export function getEvidenceCoverage(requirements, evidences) {
   const required = array(requirements).filter((requirement) => requirement.obrigatorio !== false)
-  const coveredIds = new Set(array(evidences).filter((evidence) => evidence.validado === true).map((evidence) => Number(evidence.requisitoId)))
-  const missing = required.filter((requirement) => !coveredIds.has(Number(requirement.id)))
+  const submittedIds = new Set(array(evidences).map((evidence) => Number(evidence.requisitoId)))
+  const missing = required.filter((requirement) => !submittedIds.has(Number(requirement.id)))
   return {
     required,
     missing,
