@@ -186,6 +186,19 @@ export async function getSlaConfigs() {
   await delay()
   return { configs: clone(_mockSlaConfigs), efetivo: _slaEfetivo() }
 }
+export async function saveSlaTeam(team, responseDays) {
+  await delay()
+  const dias = Number(responseDays)
+  const existente = _mockSlaConfigs.find((c) => c.team === team)
+  _mockSlaConfigs = _mockSlaConfigs.map((c) => (c.team === team ? { ...c, active: false } : c))
+  if (existente) {
+    _mockSlaConfigs = _mockSlaConfigs.map((c) => (c.id === existente.id ? { ...c, responseDays: dias, active: true } : c))
+    return clone(_mockSlaConfigs.find((c) => c.id === existente.id))
+  }
+  const novo = { id: Date.now(), name: team === 'talent' ? 'SLA Talent' : 'SLA Service Line', team, responseDays: dias, alertDaysBeforeExpiration: null, active: true, createdAt: new Date().toISOString() }
+  _mockSlaConfigs = [novo, ..._mockSlaConfigs]
+  return clone(novo)
+}
 export async function criarSlaConfig(body) {
   await delay()
   const ativa = body.active !== false

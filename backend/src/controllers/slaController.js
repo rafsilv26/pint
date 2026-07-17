@@ -112,6 +112,41 @@ exports.atualizarConfig = async (req, res) => {
   }
 };
 
+// PUT /sla/team/:team — define, de forma simples, o prazo (dias) de uma
+// equipa. Reaproveita a config existente da equipa ou cria uma; garante que
+// fica a única ativa dessa equipa. É o que a UI simplificada usa.
+exports.definirEquipa = async (req, res) => {
+  try {
+    const team = normalizarTeam(req.params.team);
+    if (!team) return res.status(400).json({ erro: 'Equipa inválida (usa "talent" ou "serviceline").' });
+
+    const dias = Number(req.body.responseDays);
+    if (!Number.isInteger(dias) || dias < 1) {
+      return res.status(400).json({ erro: 'Os dias de resposta têm de ser um inteiro positivo.' });
+    }
+
+    await desativarOutrosDaEquipa(team);
+
+    const existente = await SLAConfig.findOne({ where: { team }, order: [['createdAt', 'DESC']] });
+    let config;
+    if (existente) {
+      await existente.update({ responseDays: dias, active: true, updatedAt: new Date() });
+      config = existente;
+    } else {
+      config = await SLAConfig.create({
+        name: team === 'talent' ? 'SLA Talent' : 'SLA Service Line',
+        team,
+        responseDays: dias,
+        createdBy: req.user.id,
+        active: true
+      });
+    }
+    res.json(serialize(config));
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao definir SLA.' });
+  }
+};
+
 // DELETE /sla/configs/:id — remove; se estiver associado a candidaturas
 // (FK slaId), não pode ser apagado — desativa-se.
 exports.apagarConfig = async (req, res) => {

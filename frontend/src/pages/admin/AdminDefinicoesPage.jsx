@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Clock, Bell, Megaphone, Users, Award, ClipboardCheck, Layers, Send, Plus, Trash2, PlayCircle } from 'lucide-react'
+import { Clock, Bell, Megaphone, Users, Award, ClipboardCheck, Layers, Send, PlayCircle } from 'lucide-react'
 import { PageHeader, Card, Toggle, Spinner, ErrorState } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
@@ -19,57 +19,62 @@ function ToggleRow({ label, desc, checked, onChange }) {
   )
 }
 
-const SLA_TEAMS = ['talent', 'serviceline', 'global']
+const SLA_EQUIPAS = [
+  {
+    key: 'talent',
+    label: 'Talent Manager',
+    desc: 'Validam as evidências que os consultores submetem.',
+  },
+  {
+    key: 'serviceline',
+    label: 'Service Line Leader',
+    desc: 'Aprovam os badges já validados, na sua área.',
+  },
+]
 
-// Gestão dos SLAs por equipa (guião — bónus Gestor 10). O SLA ativo de cada
-// equipa define o prazo usado pela verificação de atrasos (emails + push).
+// Prazos de resposta por equipa. Cada equipa tem um só número: ao fim de
+// quantos dias um pedido parado gera um alerta (email + notificação).
 function SlaManagerCard() {
   const { t } = useTranslation()
   const { data, loading, error, reload } = useAsync(() => api.getSlaConfigs())
 
-  const [form, setForm] = useState({ name: '', team: 'talent', responseDays: 5, alertDaysBeforeExpiration: '' })
+  const [dias, setDias] = useState({ talent: 5, serviceline: 5 })
+  const [carregado, setCarregado] = useState(false)
   const [guardando, setGuardando] = useState(false)
+  const [guardado, setGuardado] = useState(false)
   const [erro, setErro] = useState('')
   const [verificando, setVerificando] = useState(false)
   const [resumo, setResumo] = useState(null)
 
-  const configs = data?.configs || []
-  const efetivo = data?.efetivo
+  // Preenche os campos com os prazos efetivos assim que chegam do servidor.
+  if (data?.efetivo && !carregado) {
+    setCarregado(true)
+    setDias({
+      talent: data.efetivo.talent?.responseDays ?? 5,
+      serviceline: data.efetivo.serviceline?.responseDays ?? 5,
+    })
+  }
 
-  const teamLabel = (team) =>
-    team === 'talent' ? t('adminDefinicoes.sla.equipaTalent')
-      : team === 'serviceline' ? t('adminDefinicoes.sla.equipaServiceLine')
-        : t('adminDefinicoes.sla.equipaGlobal')
+  const ajustar = (key, delta) =>
+    setDias((d) => ({ ...d, [key]: Math.max(1, Number(d[key] || 1) + delta) }))
 
-  async function adicionar(e) {
-    e.preventDefault()
-    if (!form.name.trim()) return
+  async function guardar() {
     setGuardando(true)
     setErro('')
+    setGuardado(false)
     try {
-      await api.criarSlaConfig({
-        name: form.name.trim(),
-        team: form.team === 'global' ? null : form.team,
-        responseDays: Number(form.responseDays),
-        alertDaysBeforeExpiration: form.alertDaysBeforeExpiration === '' ? null : Number(form.alertDaysBeforeExpiration),
-      })
-      setForm({ name: '', team: 'talent', responseDays: 5, alertDaysBeforeExpiration: '' })
+      await Promise.all([
+        api.saveSlaTeam('talent', Math.max(1, Number(dias.talent) || 1)),
+        api.saveSlaTeam('serviceline', Math.max(1, Number(dias.serviceline) || 1)),
+      ])
+      setGuardado(true)
+      setTimeout(() => setGuardado(false), 2000)
       reload()
     } catch (err) {
       setErro(err.message)
     } finally {
       setGuardando(false)
     }
-  }
-
-  async function alternarAtiva(c) {
-    setErro('')
-    try { await api.atualizarSlaConfig(c.id, { active: !c.active }); reload() } catch (err) { setErro(err.message) }
-  }
-
-  async function remover(id) {
-    setErro('')
-    try { await api.apagarSlaConfig(id); reload() } catch (err) { setErro(err.message) }
   }
 
   async function verificar() {
@@ -82,90 +87,71 @@ function SlaManagerCard() {
   return (
     <Card className="mt-4">
       <h2 className="mb-1 d-flex align-items-center gap-2 fw-semibold text-ink">
-        <Clock size={18} className="text-brand" /> {t('adminDefinicoes.sla.titulo')}
+        <Clock size={18} className="text-brand" /> {t('adminDefinicoes.sla.titulo', 'Prazos de resposta')}
       </h2>
-      <p className="fs-xs text-muted mb-3">{t('adminDefinicoes.sla.subtitulo')}</p>
+      <p className="fs-xs text-muted mb-3">
+        {t('adminDefinicoes.sla.novoSubtitulo', 'Ao fim de quantos dias um pedido parado gera um alerta (email + notificação) à equipa responsável.')}
+      </p>
 
       {loading ? <Spinner /> : error ? <ErrorState onRetry={reload} /> : (
         <>
-          {efetivo && (
-            <div className="d-flex flex-wrap gap-2 mb-3">
-              <span className="rounded-pill bg-brand-light text-brand px-3 py-1 fs-xs fw-semibold">
-                {t('adminDefinicoes.sla.equipaTalent')}: {t('adminDefinicoes.sla.dias', { count: efetivo.talent.responseDays })}
-              </span>
-              <span className="rounded-pill bg-brand-light text-brand px-3 py-1 fs-xs fw-semibold">
-                {t('adminDefinicoes.sla.equipaServiceLine')}: {t('adminDefinicoes.sla.dias', { count: efetivo.serviceline.responseDays })}
-              </span>
-            </div>
-          )}
-
-          {configs.length === 0 ? (
-            <p className="small text-muted">{t('adminDefinicoes.sla.vazio')}</p>
-          ) : (
-            <div className="d-flex flex-column gap-2 mb-3">
-              {configs.map((c) => (
-                <div key={c.id} className={`d-flex align-items-center gap-3 rounded-3 border p-3 ${c.active ? 'bg-white' : 'bg-light'}`}>
-                  <div className="flex-grow-1 min-w-0">
-                    <div className="d-flex align-items-center gap-2 flex-wrap">
-                      <p className={`small fw-semibold mb-0 ${c.active ? 'text-ink' : 'text-muted'}`}>{c.name}</p>
-                      <span className="badge rounded-pill text-bg-secondary">{teamLabel(c.team)}</span>
-                      {c.active && <span className="badge rounded-pill text-bg-success">{t('adminDefinicoes.sla.ativa')}</span>}
-                    </div>
-                    <p className="fs-xs text-muted mb-0 mt-1">
-                      {t('adminDefinicoes.sla.dias', { count: c.responseDays })}
-                      {c.alertDaysBeforeExpiration != null && ` · ${t('adminDefinicoes.sla.alertaResumo', { count: c.alertDaysBeforeExpiration })}`}
-                    </p>
-                  </div>
-                  <Toggle checked={c.active} onChange={() => alternarAtiva(c)} />
-                  <button onClick={() => remover(c.id)} className="btn btn-link btn-sm p-0 text-danger flex-shrink-0" title={t('adminDefinicoes.sla.remover')}>
-                    <Trash2 size={15} />
-                  </button>
+          <div className="d-flex flex-column gap-2">
+            {SLA_EQUIPAS.map((eq) => (
+              <div key={eq.key} className="d-flex align-items-center justify-content-between gap-3 rounded-3 border p-3">
+                <div className="min-w-0">
+                  <p className="small fw-semibold text-ink mb-0">{eq.label}</p>
+                  <p className="fs-xs text-muted mb-0">{eq.desc}</p>
                 </div>
-              ))}
-            </div>
-          )}
+                <div className="d-flex align-items-center gap-1 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => ajustar(eq.key, -1)}
+                    className="btn btn-outline-secondary btn-sm px-2 fw-bold"
+                    aria-label={`Menos um dia (${eq.label})`}
+                  >−</button>
+                  <input
+                    type="number"
+                    min={1}
+                    value={dias[eq.key]}
+                    onChange={(e) => setDias((d) => ({ ...d, [eq.key]: e.target.value }))}
+                    className="form-control form-control-sm text-center"
+                    style={{ width: '3.5rem' }}
+                    aria-label={`Dias (${eq.label})`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => ajustar(eq.key, 1)}
+                    className="btn btn-outline-secondary btn-sm px-2 fw-bold"
+                    aria-label={`Mais um dia (${eq.label})`}
+                  >+</button>
+                  <span className="small text-muted ms-1">{t('adminDefinicoes.sla.unidadeDias', 'dias')}</span>
+                </div>
+              </div>
+            ))}
+          </div>
 
-          <form onSubmit={adicionar} className="row g-2 align-items-end border-top pt-3">
-            <div className="col-12 col-md-4">
-              <label className="form-label small fw-medium mb-1">{t('adminDefinicoes.sla.nomeLabel')}</label>
-              <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t('adminDefinicoes.sla.nomePlaceholder')} className="form-control form-control-sm" />
-            </div>
-            <div className="col-4 col-md-3">
-              <label className="form-label small fw-medium mb-1">{t('adminDefinicoes.sla.equipaLabel')}</label>
-              <select value={form.team} onChange={(e) => setForm({ ...form, team: e.target.value })} className="form-select form-select-sm">
-                {SLA_TEAMS.map((team) => <option key={team} value={team}>{teamLabel(team === 'global' ? null : team)}</option>)}
-              </select>
-            </div>
-            <div className="col-4 col-md-2">
-              <label className="form-label small fw-medium mb-1">{t('adminDefinicoes.sla.diasLabel')}</label>
-              <input type="number" min={1} value={form.responseDays} onChange={(e) => setForm({ ...form, responseDays: e.target.value })} className="form-control form-control-sm" />
-            </div>
-            <div className="col-4 col-md-2">
-              <label className="form-label small fw-medium mb-1">{t('adminDefinicoes.sla.alertaLabel')}</label>
-              <input type="number" min={0} value={form.alertDaysBeforeExpiration} onChange={(e) => setForm({ ...form, alertDaysBeforeExpiration: e.target.value })} className="form-control form-control-sm" />
-            </div>
-            <div className="col-12 col-md-1">
-              <button type="submit" disabled={guardando || !form.name.trim()} className="btn btn-brand btn-sm w-100 d-flex align-items-center justify-content-center" title={t('adminDefinicoes.sla.adicionar')}>
-                <Plus size={16} />
-              </button>
-            </div>
-          </form>
-
-          <div className="mt-3 border-top pt-3">
+          <div className="d-flex flex-wrap align-items-center gap-2 mt-3">
+            <button onClick={guardar} disabled={guardando} className="btn btn-brand btn-sm">
+              {guardado
+                ? t('adminDefinicoes.sla.guardado', 'Guardado ✓')
+                : guardando
+                  ? t('adminDefinicoes.sla.aGuardar', 'A guardar…')
+                  : t('adminDefinicoes.sla.guardar', 'Guardar prazos')}
+            </button>
             <button type="button" onClick={verificar} disabled={verificando} className="btn btn-outline-secondary bg-white btn-sm d-inline-flex align-items-center gap-2">
               <PlayCircle size={15} /> {verificando ? t('adminDefinicoes.sla.aVerificar') : t('adminDefinicoes.sla.verificar')}
             </button>
-            {resumo && (
-              <p className="mt-2 mb-0 rounded-3 bg-success-subtle text-success-emphasis px-3 py-2 small">
-                {t('adminDefinicoes.sla.resumo', {
-                  tm: resumo.pendentesTalentManager,
-                  sll: resumo.pendentesServiceLine,
-                  emails: resumo.emailsEnviados,
-                })}
-              </p>
-            )}
           </div>
 
+          {resumo && (
+            <p className="mt-2 mb-0 rounded-3 bg-success-subtle text-success-emphasis px-3 py-2 small">
+              {t('adminDefinicoes.sla.resumo', {
+                tm: resumo.pendentesTalentManager,
+                sll: resumo.pendentesServiceLine,
+                emails: resumo.emailsEnviados,
+              })}
+            </p>
+          )}
           {erro && <p className="mt-2 mb-0 fs-xs text-danger">{erro}</p>}
         </>
       )}

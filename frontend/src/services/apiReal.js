@@ -331,6 +331,9 @@ export async function testEmailTemplate(code) {
 export async function getSlaConfigs() {
   return http('/sla/configs')
 }
+export async function saveSlaTeam(team, responseDays) {
+  return http(`/sla/team/${team}`, { method: 'PUT', body: { responseDays } })
+}
 export async function criarSlaConfig(body) {
   return http('/sla/configs', { method: 'POST', body })
 }

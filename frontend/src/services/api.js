@@ -35,6 +35,7 @@ export const resetEmailTemplate = impl.resetEmailTemplate
 export const previewEmailTemplate = impl.previewEmailTemplate
 export const testEmailTemplate = impl.testEmailTemplate
 export const getSlaConfigs = impl.getSlaConfigs
+export const saveSlaTeam = impl.saveSlaTeam
 export const criarSlaConfig = impl.criarSlaConfig
 export const atualizarSlaConfig = impl.atualizarSlaConfig
 export const apagarSlaConfig = impl.apagarSlaConfig
