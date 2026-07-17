@@ -128,6 +128,9 @@ exports.getDashboard = async (req, res) => {
       }),
       Candidatura.findAll({
         where: { consultorId },
+        // Compatível com o esquema anterior enquanto a migration dos IDs
+        // offline aguarda por um lock durante o deploy.
+        attributes: { exclude: ['clientSubmissionId'] },
         include: [{ association: 'status' }]
       }),
       Notice.findOne({

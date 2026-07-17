@@ -70,7 +70,12 @@ const getStatuses = async (codes) => {
 const candidaturaInclude = [
   { model: Badge },
   { model: BadgeStatus, as: 'status' },
-  { model: Evidencia, as: 'evidencias', include: [{ model: Requirement }] },
+  {
+    model: Evidencia,
+    as: 'evidencias',
+    attributes: { exclude: ['clientEvidenceId'] },
+    include: [{ model: Requirement }]
+  },
   { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] },
   {
     model: HistoricoCandidatura,
@@ -92,7 +97,11 @@ const candidaturaIncludeMinimo = [
 ];
 const candidaturaIncludeTalentManager = [
   ...candidaturaIncludeMinimo,
-  { model: Evidencia, as: 'evidencias' }
+  {
+    model: Evidencia,
+    as: 'evidencias',
+    attributes: { exclude: ['clientEvidenceId'] }
+  }
 ];
 
 const sendEmail = async (fn, ...args) => {
@@ -606,6 +615,9 @@ exports.listarMinhasCandidaturas = async (req, res) => {
   try {
     const candidaturas = await Candidatura.findAll({
       where: { consultorId: req.user.id },
+      // Estes IDs servem apenas para idempotência de escrita. A listagem pode
+      // funcionar durante o curto período em que a migration ainda reintenta.
+      attributes: { exclude: ['clientSubmissionId'] },
       include: candidaturaInclude,
       order: [['createdAt', 'DESC']]
     });
@@ -628,7 +640,12 @@ exports.getRascunho = async (req, res) => {
     const [open, submitted] = await Promise.all([getStatus(STATUS.OPEN), getStatus(STATUS.SUBMITTED)]);
     const candidatura = await Candidatura.findOne({
       where: { consultorId, badgeId, estadoId: { [Op.in]: [open.statusId, submitted.statusId] } },
-      include: [{ model: Evidencia, as: 'evidencias' }]
+      attributes: { exclude: ['clientSubmissionId'] },
+      include: [{
+        model: Evidencia,
+        as: 'evidencias',
+        attributes: { exclude: ['clientEvidenceId'] }
+      }]
     });
     if (!candidatura) return res.json(null);
 
