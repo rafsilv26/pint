@@ -97,19 +97,24 @@ const restringirCatalogoPorServiceLine = async (req, resource, whereClause) => {
     return { ...whereClause, ativo: true };
   }
 
-  const areas = await models.Area.findAll({ where: { serviceLineId }, attributes: ['id'] });
-  const areaIds = areas.map((row) => row.id);
-  const levels = await models.Level.findAll({ where: { areaId: { [Op.in]: areaIds.length ? areaIds : [-1] } }, attributes: ['id'] });
-  const levelIds = levels.map((row) => row.id);
-
-  if (resource === 'service-lines') return { ...whereClause, id: serviceLineId };
-  if (resource === 'areas') return { ...whereClause, serviceLineId };
-  if (resource === 'levels') return { ...whereClause, areaId: { [Op.in]: areaIds.length ? areaIds : [-1] } };
-  if (resource === 'requirements') return { ...whereClause, nivelId: { [Op.in]: levelIds.length ? levelIds : [-1] } };
+  // Badges "da minha Service Line": resolve direto por join, sem as queries
+  // intermédias de areas/levels que só servem os outros recursos.
   if (resource === 'badges') {
     const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
     return { ...whereClause, id: { [Op.in]: badgeIds.length ? badgeIds : [-1] } };
   }
+  if (resource === 'service-lines') return { ...whereClause, id: serviceLineId };
+  if (resource === 'areas') return { ...whereClause, serviceLineId };
+
+  const areas = await models.Area.findAll({ where: { serviceLineId }, attributes: ['id'] });
+  const areaIds = areas.map((row) => row.id);
+
+  if (resource === 'levels') return { ...whereClause, areaId: { [Op.in]: areaIds.length ? areaIds : [-1] } };
+
+  const levels = await models.Level.findAll({ where: { areaId: { [Op.in]: areaIds.length ? areaIds : [-1] } }, attributes: ['id'] });
+  const levelIds = levels.map((row) => row.id);
+
+  if (resource === 'requirements') return { ...whereClause, nivelId: { [Op.in]: levelIds.length ? levelIds : [-1] } };
 
   const serviceLine = await models.ServiceLine.findByPk(serviceLineId, { attributes: ['learningPathId'] });
   return { ...whereClause, id: serviceLine?.learningPathId || -1 };

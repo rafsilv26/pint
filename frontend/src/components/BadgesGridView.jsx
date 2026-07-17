@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Coins, Award, Crown } from 'lucide-react'
 import { PageHeader, Spinner, ErrorState, EmptyState } from './ui'
@@ -18,14 +18,26 @@ export default function BadgesGridView({ titulo, linkBase, permitirCatalogoGloba
   const { t } = useTranslation()
   const [scope, setScope] = useState('mine')
   const [tipo, setTipo] = useState('badges')
+  // Cache por vista: cada scope/tipo faz fetch à DB remota uma vez; trocas
+  // seguintes são instantâneas. Auto-refresh invalida só a vista ativa.
+  const cache = useRef({})
+  const keyFor = () => (tipo === 'premium' ? 'premium' : `badges:${scope}`)
   const { data, loading, error, reload } = useAsync(
-    () => (tipo === 'premium' ? api.getBadgesPremium() : api.getBadges({ scope: scope === 'all' ? 'all' : undefined })),
+    () => {
+      const key = keyFor()
+      if (cache.current[key]) return cache.current[key]
+      const req = tipo === 'premium'
+        ? api.getBadgesPremium()
+        : api.getBadges({ scope: scope === 'all' ? 'all' : undefined })
+      return Promise.resolve(req).then((d) => { cache.current[key] = d; return d })
+    },
     [scope, tipo]
   )
-  useAutoRefresh(reload)
+  const refresh = () => { delete cache.current[keyFor()]; reload() }
+  useAutoRefresh(refresh)
   const [q, setQ] = useState('')
 
-  if (error) return <ErrorState onRetry={reload} />
+  if (error) return <ErrorState onRetry={refresh} />
   // useAsync mantém data antiga durante a troca de tipo; ignora até coincidir shape
   const rowsArePremium = data && data.length > 0 && data[0].requisitos === undefined
   const stale = data && data.length > 0 && rowsArePremium !== (tipo === 'premium')
