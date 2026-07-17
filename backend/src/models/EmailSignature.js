@@ -13,7 +13,7 @@ const EmailSignature = sequelize.define('EmailSignature', {
     },
     badgeId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     templateHtml: {
         type: DataTypes.TEXT,

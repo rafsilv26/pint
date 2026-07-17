@@ -41,9 +41,11 @@ exports.saveMyEmailSignature = async (req, res) => {
     const badgeIds = [...new Set(req.body.badgeIds || [])].slice(0, 4);
     const templateHtml = req.body.templateHtml || null;
 
-    const ownedAwards = await ConsultorBadge.findAll({
-      where: { consultorId: req.user.id, valid: true, badgeId: badgeIds }
-    });
+    const ownedAwards = badgeIds.length
+      ? await ConsultorBadge.findAll({
+          where: { consultorId: req.user.id, valid: true, badgeId: badgeIds }
+        })
+      : [];
     const ownedBadgeIds = ownedAwards.map((award) => award.badgeId);
 
     if (ownedBadgeIds.length !== badgeIds.length) {
@@ -55,11 +57,18 @@ exports.saveMyEmailSignature = async (req, res) => {
       { where: { consultorId: req.user.id, active: true } }
     );
 
-    const signatures = await Promise.all(ownedBadgeIds.map((badgeId) =>
+    // Sem badges (ex.: Service Line Leader/Talent Manager/Admin, ou consultor
+    // que optou por não mostrar badges) guardamos uma única linha sem badgeId,
+    // só para persistir o templateHtml e os dados pessoais da assinatura.
+    const linhasParaCriar = ownedBadgeIds.length
+      ? ownedBadgeIds.map((badgeId) => ({ badgeId, templateHtml }))
+      : [{ badgeId: null, templateHtml }];
+
+    const signatures = await Promise.all(linhasParaCriar.map((linha) =>
       EmailSignature.create({
         consultorId: req.user.id,
-        badgeId,
-        templateHtml,
+        badgeId: linha.badgeId,
+        templateHtml: linha.templateHtml,
         active: true
       })
     ));
