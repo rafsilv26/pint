@@ -7,7 +7,8 @@ const {
   User,
   ConsultorBadge,
   CertificateDownload,
-  Level
+  Level,
+  Area
 } = require('../models');
 const { gerarCertificado } = require('../services/pdf.service');
 const { gerarExcelCandidaturas } = require('../services/excel.service');
@@ -38,7 +39,7 @@ const findAwardByPublicToken = async (publicToken) => {
   const award = await ConsultorBadge.findOne({
     where: { publicToken },
     include: [
-      { model: Badge, include: [{ model: Level }] },
+      { model: Badge, include: [{ model: Level, include: [{ model: Area }] }] },
       { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] }
     ],
     order: [['obtainedDate', 'DESC']]
@@ -47,18 +48,11 @@ const findAwardByPublicToken = async (publicToken) => {
   return award ? { badge: award.Badge, award } : null;
 };
 
-const nivelLabel = (level) => {
-  if (!level) return null;
-  if (level.nome) return level.nome;
-  if (level.ordem) return `Nível ${level.ordem}`;
-  return null;
-};
-
 const sendCertificate = async (req, res, award) => {
   const consultor = award.Consultant?.User;
   const pdfBuffer = await gerarCertificado(
     consultor,
-    { ...award.Badge.toJSON(), publicToken: award.publicToken, nivel: nivelLabel(award.Badge.Level) },
+    { ...award.Badge.toJSON(), publicToken: award.publicToken, area: award.Badge.Level?.Area?.nome || null },
     award.obtainedDate
   );
 
@@ -115,7 +109,7 @@ exports.downloadCertificadoGestao = async (req, res) => {
     const award = await ConsultorBadge.findOne({
       where: { consultorId, badgeId },
       include: [
-        { model: Badge, include: [{ model: Level }] },
+        { model: Badge, include: [{ model: Level, include: [{ model: Area }] }] },
         { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] }
       ],
       order: [['obtainedDate', 'DESC']]

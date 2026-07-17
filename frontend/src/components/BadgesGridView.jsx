@@ -26,7 +26,10 @@ export default function BadgesGridView({ titulo, linkBase, permitirCatalogoGloba
   const [q, setQ] = useState('')
 
   if (error) return <ErrorState onRetry={reload} />
-  if (loading || !data) return <Spinner />
+  // useAsync mantém data antiga durante a troca de tipo; ignora até coincidir shape
+  const rowsArePremium = data && data.length > 0 && data[0].requisitos === undefined
+  const stale = data && data.length > 0 && rowsArePremium !== (tipo === 'premium')
+  if (loading || !data || stale) return <Spinner />
 
   const query = q.toLowerCase()
   const lista = tipo === 'premium'

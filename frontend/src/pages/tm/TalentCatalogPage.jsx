@@ -24,6 +24,9 @@ export default function TalentCatalogPage() {
   const rows = useMemo(() => data || [], [data])
   const options = useMemo(() => ({ areas: [...new Set(rows.map((row) => row.area).filter(Boolean))].sort(), levels: [...new Set(rows.map((row) => row.nivel).filter(Boolean))].sort() }), [rows])
   const isPremium = tipo === 'premium'
+  // useAsync mantém data antiga durante a troca de tipo; ignora até coincidir shape
+  const rowsArePremium = rows.length > 0 && rows[0].requisitos === undefined
+  const stale = rows.length > 0 && rowsArePremium !== isPremium
   const filtered = isPremium
     ? rows.filter((row) => row.ativo !== false && `${row.nome} ${row.descricao} ${row.criterio}`.toLowerCase().includes(search.toLowerCase()))
     : rows.filter((row) =>
@@ -34,7 +37,7 @@ export default function TalentCatalogPage() {
     )
   const exportRows = isPremium
     ? filtered.map((row) => ({ nome: row.nome, descricao: row.descricao, criterio: row.criterio }))
-    : filtered.map((row) => ({ nome: row.nome, fornecedor: row.fornecedor, nivel: row.nivel, area: row.area, serviceLine: row.serviceLine, pontos: row.ponto, requisitos: row.requisitos.length, validade: row.duracaoMeses ? `${row.duracaoMeses} meses` : labels.common.semExpiracao, estado: row.ativo === false ? labels.catalog.inactive : labels.catalog.active }))
+    : filtered.map((row) => ({ nome: row.nome, fornecedor: row.fornecedor, nivel: row.nivel, area: row.area, serviceLine: row.serviceLine, pontos: row.ponto, requisitos: (row.requisitos || []).length, validade: row.duracaoMeses ? `${row.duracaoMeses} meses` : labels.common.semExpiracao, estado: row.ativo === false ? labels.catalog.inactive : labels.catalog.active }))
   return (
     <div>
       <PageHeader
@@ -132,7 +135,7 @@ export default function TalentCatalogPage() {
         </select>
         </>}
       </div>
-      {loading ? (
+      {loading || stale ? (
         <Spinner />
       ) : error ? (
         <ErrorState message={error} onRetry={reload} />
@@ -204,7 +207,7 @@ export default function TalentCatalogPage() {
                   </p>
                   <div className="mt-auto d-flex justify-content-between fs-xs">
                     <span>
-                      {badge.requisitos.length}{" "}
+                      {(badge.requisitos || []).length}{" "}
                       {labels.common.requisitos.toLowerCase()}
                     </span>
                     <strong className="text-brand">
