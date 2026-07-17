@@ -17,6 +17,7 @@ router.post('/reset-password', authController.resetPassword);
 router.post('/confirm-email', authController.confirmEmail);
 router.get('/me', protect, authController.me);
 router.put('/change-password', protect, authController.changePassword);
+router.put('/idioma', protect, authController.updateIdioma);
 router.post('/accept-policy', protect, authController.acceptPolicy);
 
 module.exports = router;

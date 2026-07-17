@@ -452,3 +452,22 @@ exports.changePassword = async (req, res) => {
         res.status(500).json({ error: 'Erro ao alterar password.' });
     }
 };
+
+// O próprio utilizador guarda a sua preferência de idioma (pt/en/es), para
+// que ao voltar a fazer login a plataforma abra no idioma escolhido.
+exports.updateIdioma = async (req, res) => {
+    try {
+        const idioma = String(req.body.idioma || '').toLowerCase();
+        if (!['pt', 'en', 'es'].includes(idioma)) {
+            return res.status(400).json({ message: 'Idioma invalido. Valores aceites: pt, en, es.' });
+        }
+
+        const user = await User.findByPk(req.user.id);
+        user.idioma = idioma;
+        await user.save();
+
+        res.json({ message: 'Idioma atualizado com sucesso.', idioma });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao atualizar o idioma.' });
+    }
+};

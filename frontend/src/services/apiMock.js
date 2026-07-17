@@ -355,6 +355,11 @@ export async function acceptPolicy() {
   return { message: 'Política aceite com sucesso.', pendingPolicies: [] }
 }
 
+export async function saveIdioma(idioma) {
+  await delay(200)
+  return { message: 'Idioma atualizado com sucesso.', idioma }
+}
+
 export async function getTalentDashboard() {
   await delay()
   return clone(mockTalentDashboard)

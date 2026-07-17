@@ -15,6 +15,7 @@ export const confirmarEmail = impl.confirmarEmail
 export const changePassword = impl.changePassword
 export const me = impl.me
 export const acceptPolicy = impl.acceptPolicy
+export const saveIdioma = impl.saveIdioma
 
 export const getDashboard = impl.getDashboard
 export const getBadges = impl.getBadges
