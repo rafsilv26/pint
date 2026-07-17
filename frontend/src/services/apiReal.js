@@ -157,6 +157,10 @@ function adaptBadge(b = {}) {
     requisitos: [],
     slug: b.slug,
     publicToken: b.publicToken,
+    areaId: b.Level?.areaId ?? b.Level?.Area?.id ?? null,
+    area: b.Level?.Area?.nome || '',
+    serviceLineId: b.Level?.Area?.serviceLineId ?? b.Level?.Area?.ServiceLine?.id ?? null,
+    serviceLine: b.Level?.Area?.ServiceLine?.nome || '',
   }
 }
 export async function getBadges({ scope } = {}) {

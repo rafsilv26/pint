@@ -19,12 +19,17 @@ export default function CatalogPage() {
   const { t } = useTranslation()
   const { data: badges, loading, error, reload } = useAsync(() => api.getBadges())
   const [pesquisa, setPesquisa] = useState('')
+  const [area, setArea] = useState('')
   const [pagina, setPagina] = useState(1)
 
   if (error) return <ErrorState onRetry={reload} />
   if (loading || !badges) return <Spinner />
 
+  // Áreas distintas presentes no catálogo, para o filtro. Default = todas.
+  const areas = [...new Set(badges.map((b) => b.area).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-PT'))
+
   const filtrados = badges.filter((b) =>
+    (!area || b.area === area) &&
     `${b.nome} ${b.nivel} ${b.fornecedor}`.toLowerCase().includes(pesquisa.toLowerCase())
   )
   const totalPaginas = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA))
@@ -49,6 +54,17 @@ export default function CatalogPage() {
               className="form-control rounded-pill ps-5"
             />
           </div>
+          {areas.length > 0 && (
+            <select
+              value={area}
+              onChange={(e) => { setArea(e.target.value); setPagina(1) }}
+              className="form-select rounded-pill w-auto"
+              aria-label={t('catalogo.filtrarArea', 'Filtrar por área')}
+            >
+              <option value="">{t('catalogo.todasAreas', 'Todas as áreas')}</option>
+              {areas.map((a) => <option key={a} value={a}>{a}</option>)}
+            </select>
+          )}
           <span className="small text-muted text-nowrap d-none d-sm-inline">
             {t('catalogo.resultados', { count: filtrados.length })}
           </span>

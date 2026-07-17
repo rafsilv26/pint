@@ -10,7 +10,21 @@ const RESOURCES = {
   areas: { model: models.Area },
   levels: { model: models.Level },
   requirements: { model: models.Requirement },
-  badges: { model: models.Badge, beforeCreate: (body) => ({ publicToken: randomUUID(), ...body }) },
+  badges: {
+    model: models.Badge,
+    beforeCreate: (body) => ({ publicToken: randomUUID(), ...body }),
+    // Traz a área/service line de cada badge (via Level) para permitir
+    // filtrar o catálogo por área do lado do cliente.
+    listInclude: [{
+      model: models.Level,
+      attributes: ['id', 'ordem', 'nome', 'areaId'],
+      include: [{
+        model: models.Area,
+        attributes: ['id', 'nome', 'serviceLineId'],
+        include: [{ model: models.ServiceLine, attributes: ['id', 'nome'] }]
+      }]
+    }]
+  },
   'badge-statuses': { model: models.BadgeStatus },
   'sla-configs': { model: models.SLAConfig },
   'notification-configs': { model: models.NotificationConfig },
@@ -141,6 +155,7 @@ exports.listResources = async (req, res) => {
 
     const rows = await config.model.findAll({
       where: whereClause,
+      include: config.listInclude,
       limit: req.query.limit ? Number(req.query.limit) : undefined,
       offset: req.query.offset ? Number(req.query.offset) : undefined
     });
