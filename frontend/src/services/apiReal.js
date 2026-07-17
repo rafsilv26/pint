@@ -126,6 +126,14 @@ export async function getDashboard() {
       titulo: d.learningPathTitle || 'Learning Path',
       progresso: Math.round((d.learningPathProgress ?? 0) * 100),
     },
+    learningPaths: (d.learningPaths || []).map((p) => ({
+      id: p.id,
+      nome: p.nome,
+      progresso: Math.round((p.progresso ?? 0) * 100),
+      obtidos: p.obtidos ?? 0,
+      total: p.total ?? 0,
+      emCurso: p.emCurso ?? 0,
+    })),
     recomendados: (d.recommendations || []).slice(0, 3).map((r, i) => ({
       id: r.id,
       nome: r.title,

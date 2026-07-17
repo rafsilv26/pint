@@ -74,21 +74,47 @@ export default function DashboardPage() {
       <div className="row g-4">
         <div className="col-lg-8 d-flex flex-column gap-4">
 
-          {data.learningPath && (
+          {(data.learningPaths?.length > 0 || data.learningPath) && (
             <Card>
-              <div className="d-flex align-items-center justify-content-between mb-2">
-                <h2 className="fw-semibold text-ink mb-0 d-flex align-items-center gap-2">
-                  <Route size={18} className="text-brand" /> {data.learningPath.titulo}
-                </h2>
-                <span className="fw-bold text-brand">{data.learningPath.progresso}%</span>
-              </div>
-              <div className="rounded-pill bg-light overflow-hidden" style={{ height: '0.625rem' }}>
-                <div
-                  className="h-100 rounded-pill"
-                  style={{ width: `${data.learningPath.progresso}%`, background: 'linear-gradient(90deg,#8b5cf6,#d946ef)' }}
-                />
-              </div>
-              <p className="mt-2 mb-0 fs-xs text-muted">{t('dashboard.progressoLearningPath')}</p>
+              <h2 className="fw-semibold text-ink mb-3 d-flex align-items-center gap-2">
+                <Route size={18} className="text-brand" /> {t('dashboard.learningPathsTitulo')}
+              </h2>
+              {data.learningPaths?.length > 0 ? (
+                <div className="d-flex flex-column gap-3">
+                  {data.learningPaths.map((p) => (
+                    <div key={p.id}>
+                      <div className="d-flex align-items-center justify-content-between mb-1">
+                        <p className="small fw-medium text-ink mb-0 text-truncate">{p.nome}</p>
+                        <span className="small fw-bold text-brand flex-shrink-0 ms-2">{p.progresso}%</span>
+                      </div>
+                      <div className="rounded-pill bg-light overflow-hidden" style={{ height: '0.625rem' }}>
+                        <div
+                          className="h-100 rounded-pill"
+                          style={{ width: `${p.progresso}%`, background: 'linear-gradient(90deg,#8b5cf6,#d946ef)' }}
+                        />
+                      </div>
+                      <p className="mt-1 mb-0 fs-xs text-muted">
+                        {t('dashboard.learningPathDetalhe', { obtidos: p.obtidos, total: p.total })}
+                        {p.emCurso > 0 && ` · ${t('dashboard.learningPathEmCurso', { n: p.emCurso })}`}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div>
+                  <div className="d-flex align-items-center justify-content-between mb-1">
+                    <p className="small fw-medium text-ink mb-0">{data.learningPath.titulo}</p>
+                    <span className="small fw-bold text-brand">{data.learningPath.progresso}%</span>
+                  </div>
+                  <div className="rounded-pill bg-light overflow-hidden" style={{ height: '0.625rem' }}>
+                    <div
+                      className="h-100 rounded-pill"
+                      style={{ width: `${data.learningPath.progresso}%`, background: 'linear-gradient(90deg,#8b5cf6,#d946ef)' }}
+                    />
+                  </div>
+                  <p className="mt-2 mb-0 fs-xs text-muted">{t('dashboard.progressoLearningPath')}</p>
+                </div>
+              )}
             </Card>
           )}
 

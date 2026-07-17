@@ -196,6 +196,10 @@ export const mockDashboard = {
   userName: 'Rafael',
   areaNome: 'OutSystems Development',
   learningPath: { titulo: 'Learning Path: Jornada Técnica', progresso: 45 },
+  learningPaths: [
+    { id: 1, nome: 'Jornada Técnica', progresso: 45, obtidos: 5, total: 11, emCurso: 2 },
+    { id: 2, nome: 'Cloud & DevOps', progresso: 20, obtidos: 2, total: 10, emCurso: 1 },
+  ],
   stats: [
     { label: 'Pontos Totais', value: '1250', delta: '+12%', tint: 'violet', deltaTint: 'green' },
     { label: 'Badges Conquistados', value: '8', delta: '+2', tint: 'violet', deltaTint: 'green' },

@@ -176,6 +176,66 @@ const getRecommendations = async ({ consultant, acquiredBadges, activeBadgeIds }
   }));
 };
 
+// Progresso do consultor em cada learning path: badges distintos obtidos vs
+// total de badges ativos do path (via Level -> Area -> ServiceLine -> LearningPath).
+const getLearningPathsProgress = async ({ awards, activeBadgeIds, ownLearningPathId }) => {
+  const pathBadges = await Badge.findAll({
+    attributes: ['id'],
+    where: { ativo: true },
+    include: [
+      {
+        model: Level,
+        required: true,
+        attributes: ['id'],
+        include: [
+          {
+            model: Area,
+            required: true,
+            attributes: ['id'],
+            include: [
+              {
+                model: ServiceLine,
+                required: true,
+                attributes: ['id', 'learningPathId'],
+                include: [{ model: LearningPath, required: true, attributes: ['id', 'nome'] }]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  });
+
+  const obtainedIds = new Set(awards.map((award) => Number(award.badgeId)));
+  const inProgressIds = new Set(activeBadgeIds.map(Number));
+
+  const byPath = new Map();
+  for (const badge of pathBadges) {
+    const path = badge.Level?.Area?.ServiceLine?.LearningPath;
+    if (!path) continue;
+    let entry = byPath.get(path.id);
+    if (!entry) {
+      entry = { id: path.id, nome: path.nome, total: 0, obtidos: 0, emCurso: 0 };
+      byPath.set(path.id, entry);
+    }
+    entry.total += 1;
+    if (obtainedIds.has(Number(badge.id))) entry.obtidos += 1;
+    else if (inProgressIds.has(Number(badge.id))) entry.emCurso += 1;
+  }
+
+  return [...byPath.values()]
+    .filter((entry) => entry.obtidos > 0 || entry.emCurso > 0 || Number(entry.id) === Number(ownLearningPathId))
+    .map((entry) => ({
+      ...entry,
+      progresso: entry.total > 0 ? Math.min(1, entry.obtidos / entry.total) : 0
+    }))
+    .sort((a, b) => {
+      if (Number(a.id) === Number(ownLearningPathId)) return -1;
+      if (Number(b.id) === Number(ownLearningPathId)) return 1;
+      return b.progresso - a.progresso;
+    });
+};
+
 exports.getDashboard = async (req, res) => {
   try {
     const user = req.user.data;
@@ -208,16 +268,12 @@ exports.getDashboard = async (req, res) => {
     );
     const activeBadgeIds = applicationsInProgress.map((application) => application.badgeId);
     const learningPath = consultant?.Area?.ServiceLine?.LearningPath;
-    const totalPathBadges = await Badge.count({
-      include: [
-        {
-          model: Level,
-          required: true,
-          where: consultant?.areaId ? { areaId: consultant.areaId } : undefined
-        }
-      ],
-      where: { ativo: true }
-    }).catch(() => 0);
+    const learningPaths = await getLearningPathsProgress({
+      awards,
+      activeBadgeIds,
+      ownLearningPathId: learningPath?.id
+    }).catch(() => []);
+    const ownPath = learningPaths.find((entry) => Number(entry.id) === Number(learningPath?.id));
 
     const updatedAt = latestDate(
       user.updatedAt,
@@ -232,9 +288,6 @@ exports.getDashboard = async (req, res) => {
       return res.status(204).send();
     }
 
-    const awardsInArea = consultant?.areaId
-      ? awards.filter((award) => Number(award.Badge?.Level?.areaId) === Number(consultant.areaId))
-      : awards;
     const recommendations = await getRecommendations({
       consultant,
       acquiredBadges: awards,
@@ -249,7 +302,8 @@ exports.getDashboard = async (req, res) => {
         greeting: getGreeting(),
         totalPoints,
         learningPathTitle: learningPath ? `Learning Path: ${learningPath.nome}` : 'Learning Path',
-        learningPathProgress: totalPathBadges > 0 ? Math.min(1, awardsInArea.length / totalPathBadges) : 0,
+        learningPathProgress: ownPath?.progresso ?? 0,
+        learningPaths,
         noticeTitle: notice?.title || '',
         noticeMessage: notice?.message || '',
         specialAchievementTitle: 'Conquistas especiais',

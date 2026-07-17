@@ -1,10 +1,55 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "badges": "Badges",
-    "candidaturas": "Applications",
-    "perfil": "Profile",
-    "logout": "Sign Out"
+    "consultor": {
+      "inicio": "Home",
+      "catalogo": "Badge Catalog",
+      "meusBadges": "My Badges",
+      "objetivos": "Goals",
+      "ranking": "Ranking",
+      "perfil": "Profile"
+    },
+    "tm": {
+      "dashboard": "Dashboard",
+      "candidaturas": "Badge Applications",
+      "catalogo": "Badge Catalog",
+      "learningPaths": "Learning Paths",
+      "consultores": "Consultants",
+      "relatorios": "Reports",
+      "validades": "Expirations",
+      "notificacoes": "Notifications",
+      "informacoes": "Information"
+    },
+    "sll": {
+      "dashboard": "Dashboard",
+      "consultores": "Consultants",
+      "badges": "Badges",
+      "pedidos": "Requests",
+      "relatorios": "Reports",
+      "notificacoes": "Notifications",
+      "informacoes": "Information"
+    },
+    "admin": {
+      "dashboard": "Dashboard",
+      "utilizadores": "Users",
+      "badges": "Badges",
+      "badgesPremium": "Premium Badges",
+      "pedidos": "Badge Requests",
+      "relatorios": "Reports",
+      "learningPaths": "Learning Paths",
+      "serviceLines": "Service Lines",
+      "areas": "Areas",
+      "niveis": "Levels",
+      "requisitos": "Requirements",
+      "politicas": "GDPR Policies",
+      "avisos": "Notices",
+      "informacoes": "Information",
+      "templatesEmail": "Email templates",
+      "definicoes": "Settings"
+    },
+    "roles": {
+      "admin": "Administrator"
+    },
+    "painelDefault": "Panel"
   },
   "perfil": {
     "titulo": "Profile & Settings",
@@ -82,7 +127,7 @@
       "tema": "Theme",
       "claro": "Light",
       "escuro": "Dark",
-      "automatico": "Automatic",
+      "auto": "Automatic",
       "badgesPorPagina": "Badges per Page",
       "mostrarImagens": "Show Badge Images"
     },
@@ -139,7 +184,10 @@
     "nivel": "Level",
     "pontosConquistados": "Points Earned",
     "posicao": "Position",
-    "verPerfilCompleto": "View Full Profile"
+    "verPerfilCompleto": "View Full Profile",
+    "learningPathsTitulo": "Learning Paths",
+    "learningPathDetalhe": "{{obtidos}} of {{total}} badges earned",
+    "learningPathEmCurso": "{{n}} in progress"
   },
   "catalogo": {
     "titulo": "Badge Catalog",
@@ -336,7 +384,11 @@
     "tituloPlaceholder": "Ex: Earn Outsystems Junior badge",
     "prazoLabel": "Target date",
     "prioridadeLabel": "Priority",
-    "prioridades": { "alta": "High", "media": "Medium", "baixa": "Low" },
+    "prioridades": {
+      "alta": "High",
+      "media": "Medium",
+      "baixa": "Low"
+    },
     "adicionar": "Add",
     "vazioTitulo": "No goals",
     "vazioDesc": "Create your first goal.",
@@ -355,7 +407,11 @@
     "tituloLabel": "Goal",
     "tituloPlaceholder": "Ex: Complete Azure Fundamentals",
     "tipoLabel": "Type",
-    "tipos": { "meta": "Goal", "milestone": "Milestone", "evento": "Event" },
+    "tipos": {
+      "meta": "Goal",
+      "milestone": "Milestone",
+      "evento": "Event"
+    },
     "prazoLabel": "Target date",
     "prioridadeLabel": "Priority",
     "adicionar": "Add",
@@ -365,16 +421,6 @@
     "semPrazo": "No deadline",
     "concluidoEm": "Completed on",
     "remover": "Remove"
-  },
-  "managerBadge": {
-    "naoEncontrado": "Badge not found.",
-    "voltar": "Go back",
-    "pontos": "points",
-    "badgeDe": "Badge for",
-    "descricao": "Description",
-    "requisitos": "Requirements",
-    "semRequisitos": "No specific requirements.",
-    "requisitoTextoExtra": "Requirement necessary to earn this badge."
   },
   "managerBadge": {
     "naoEncontrado": "Badge not found.",
@@ -441,22 +487,60 @@
         "timeline": "Development timeline"
       },
       "fields": {
-        "field": "Field", "value": "Value", "role": "Role", "rank": "Ranking",
-        "linkedin": "LinkedIn", "biography": "Biography",
-        "name": "Name", "email": "Email", "area": "Area", "serviceLine": "Service Line",
-        "learningPath": "Learning Path", "startDate": "Consultant since", "points": "Points",
-        "badges": "Badges", "applications": "Applications", "approved": "Approved",
-        "rejected": "Rejected", "inProgress": "In progress", "progress": "Progress",
-        "badge": "Badge", "level": "Level", "obtainedAt": "Earned on", "expiresAt": "Expires on",
-        "validity": "Validity", "trackingId": "Request", "status": "Status",
-        "submittedAt": "Submitted on", "decisionAt": "Decision on", "comment": "Comment",
-        "transition": "Transition", "author": "Owner", "date": "Date", "reason": "Reason",
-        "file": "File", "requirement": "Requirement", "validation": "Validation", "url": "URL",
-        "achievement": "Achievement", "description": "Description", "goal": "Goal", "type": "Type",
+        "field": "Field",
+        "value": "Value",
+        "role": "Role",
+        "rank": "Ranking",
+        "linkedin": "LinkedIn",
+        "biography": "Biography",
+        "name": "Name",
+        "email": "Email",
+        "area": "Area",
+        "serviceLine": "Service Line",
+        "learningPath": "Learning Path",
+        "startDate": "Consultant since",
+        "points": "Points",
+        "badges": "Badges",
+        "applications": "Applications",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "inProgress": "In progress",
+        "progress": "Progress",
+        "badge": "Badge",
+        "level": "Level",
+        "obtainedAt": "Earned on",
+        "expiresAt": "Expires on",
+        "validity": "Validity",
+        "trackingId": "Request",
+        "status": "Status",
+        "submittedAt": "Submitted on",
+        "decisionAt": "Decision on",
+        "comment": "Comment",
+        "transition": "Transition",
+        "author": "Owner",
+        "date": "Date",
+        "reason": "Reason",
+        "file": "File",
+        "requirement": "Requirement",
+        "validation": "Validation",
+        "url": "URL",
+        "achievement": "Achievement",
+        "description": "Description",
+        "goal": "Goal",
+        "type": "Type",
         "expectedDate": "Expected date"
       },
-      "validity": { "valid": "Valid", "soon": "Expiring", "expired": "Expired", "permanent": "No expiration" },
-      "evidence": { "validated": "Validated", "rejected": "Rejected", "pending": "Pending" }
+      "validity": {
+        "valid": "Valid",
+        "soon": "Expiring",
+        "expired": "Expired",
+        "permanent": "No expiration"
+      },
+      "evidence": {
+        "validated": "Validated",
+        "rejected": "Rejected",
+        "pending": "Pending"
+      }
     }
   },
   "managerConta": {
@@ -538,72 +622,6 @@
       "aviso": "WARNING",
       "sucesso": "SUCCESS",
       "erro": "ERROR"
-    }
-  },
-  "preferencias": {
-    "titulo": "Preferences",
-    "subtitulo": "Customize your experience on the platform",
-    "voltar": "Back to Profile",
-    "guardar": "Save Preferences",
-    "guardado": "Preferences saved ✓",
-    "notificacoes": {
-      "titulo": "Notifications",
-      "email": "Email Notifications",
-      "emailDesc": "Receive notifications in your email",
-      "aprovado": "Badge Approved",
-      "aprovadoDesc": "When an application is approved",
-      "rejeitado": "Badge Rejected or Sent Back",
-      "rejeitadoDesc": "When an application is rejected or returned",
-      "novos": "New Badges Available",
-      "novosDesc": "When there are new badges to apply for",
-      "ranking": "Ranking Updates",
-      "rankingDesc": "Significant changes in your position",
-      "semanal": "Weekly Summary",
-      "semanalDesc": "Weekly email with your progress",
-      "mensal": "Monthly Report",
-      "mensalDesc": "Detailed report of your achievements"
-    },
-    "visualizacao": {
-      "titulo": "Display",
-      "idioma": "Language",
-      "tema": "Theme",
-      "claro": "Light",
-      "escuro": "Dark",
-      "auto": "Automatic",
-      "badgesPorPagina": "Badges per Page",
-      "mostrarImagens": "Show Badge Images"
-    },
-    "privacidade": {
-      "titulo": "Privacy",
-      "perfilPublico": "Public Profile",
-      "perfilPublicoDesc": "Allow other consultants to see your profile",
-      "diretorio": "Appear in Directory",
-      "diretorioDesc": "Show up in the consultants list",
-      "badges": "Show Badges Publicly",
-      "badgesDesc": "Display your badges on your public profile",
-      "pontos": "Show Points Publicly",
-      "pontosDesc": "Display your score in the ranking"
-    },
-    "resumo": {
-      "titulo": "Settings Summary",
-      "notifEmail": "Email Notifications",
-      "ativadas": "Enabled",
-      "desativadas": "Disabled",
-      "idioma": "Language",
-      "tema": "Theme",
-      "perfilPublico": "Public Profile",
-      "sim": "Yes",
-      "nao": "No"
-    },
-    "estatisticas": {
-      "titulo": "Your Statistics",
-      "pontos": "Points",
-      "badges": "Badges",
-      "ranking": "Ranking"
-    },
-    "dica": {
-      "titulo": "Tip",
-      "texto": "Preferences are saved and applied on all devices where you access the platform."
     }
   },
   "publicBadge": {
@@ -774,7 +792,11 @@
       "titulo_campo": "Title",
       "tituloPlaceholder": "Ex: New Learning Path available",
       "tipo": "Type",
-      "tipos": { "info": "Info", "warning": "Warning", "success": "Success" },
+      "tipos": {
+        "info": "Info",
+        "warning": "Warning",
+        "success": "Success"
+      },
       "mensagem": "Message",
       "mensagemPlaceholder": "Notice details…",
       "enviar": "Broadcast to all",
@@ -976,69 +998,71 @@
     }
   },
   "admin": {
-    "generic": { "nome": "Name", "titulo": "Title", "descricao": "Description", "mensagem": "Message", "tipo": "Type", "ativo": "Active", "lida": "Read", "data": "Date", "dataInicio": "Start date", "dataFim": "End date" },
-    "badges": { "titulo": "Badges", "singular": "Badge", "campos": { "nivel": "Level", "pontos": "Points" } },
-    "learningPaths": { "titulo": "Learning Paths", "singular": "Learning Path" },
-    "badgePremium": { "titulo": "Premium Badges", "singular": "Premium Badge" },
-    "policies": { "titulo": "GDPR Policies", "singular": "Policy", "campos": { "versao": "Version" } },
-    "notices": { "titulo": "Notices", "singular": "Notice", "destinatario": "Recipient", "todosConsultores": "All consultants" },
-    "information": { "titulo": "Information", "singular": "Information" },
-    "serviceLines": { "titulo": "Service Lines", "singular": "Service Line" },
-    "areas": { "titulo": "Areas", "singular": "Area" },
-    "levels": { "titulo": "Levels", "singular": "Level", "campos": { "codigo": "Code", "ordem": "Order" } },
-    "requirements": { "titulo": "Requirements", "singular": "Requirement" }
-  },
-  "nav": {
-    "consultor": {
-      "inicio": "Home",
-      "catalogo": "Badge Catalog",
-      "meusBadges": "My Badges",
-      "objetivos": "Goals",
-      "ranking": "Ranking",
-      "perfil": "Profile"
+    "generic": {
+      "nome": "Name",
+      "titulo": "Title",
+      "descricao": "Description",
+      "mensagem": "Message",
+      "tipo": "Type",
+      "ativo": "Active",
+      "lida": "Read",
+      "data": "Date",
+      "dataInicio": "Start date",
+      "dataFim": "End date"
     },
-    "tm": {
-      "dashboard": "Dashboard",
-      "candidaturas": "Badge Applications",
-      "catalogo": "Badge Catalog",
-      "learningPaths": "Learning Paths",
-      "consultores": "Consultants",
-      "relatorios": "Reports",
-      "validades": "Expirations",
-      "notificacoes": "Notifications",
-      "informacoes": "Information"
+    "badges": {
+      "titulo": "Badges",
+      "singular": "Badge",
+      "campos": {
+        "nivel": "Level",
+        "pontos": "Points"
+      }
     },
-    "sll": {
-      "dashboard": "Dashboard",
-      "consultores": "Consultants",
-      "badges": "Badges",
-      "pedidos": "Requests",
-      "relatorios": "Reports",
-      "notificacoes": "Notifications",
-      "informacoes": "Information"
+    "learningPaths": {
+      "titulo": "Learning Paths",
+      "singular": "Learning Path"
     },
-    "admin": {
-      "dashboard": "Dashboard",
-      "utilizadores": "Users",
-      "badges": "Badges",
-      "badgesPremium": "Premium Badges",
-      "pedidos": "Badge Requests",
-      "relatorios": "Reports",
-      "learningPaths": "Learning Paths",
-      "serviceLines": "Service Lines",
-      "areas": "Areas",
-      "niveis": "Levels",
-      "requisitos": "Requirements",
-      "politicas": "GDPR Policies",
-      "avisos": "Notices",
-      "informacoes": "Information",
-      "templatesEmail": "Email templates",
-      "definicoes": "Settings"
+    "badgePremium": {
+      "titulo": "Premium Badges",
+      "singular": "Premium Badge"
     },
-    "roles": {
-      "admin": "Administrator"
+    "policies": {
+      "titulo": "GDPR Policies",
+      "singular": "Policy",
+      "campos": {
+        "versao": "Version"
+      }
     },
-    "painelDefault": "Panel"
+    "notices": {
+      "titulo": "Notices",
+      "singular": "Notice",
+      "destinatario": "Recipient",
+      "todosConsultores": "All consultants"
+    },
+    "information": {
+      "titulo": "Information",
+      "singular": "Information"
+    },
+    "serviceLines": {
+      "titulo": "Service Lines",
+      "singular": "Service Line"
+    },
+    "areas": {
+      "titulo": "Areas",
+      "singular": "Area"
+    },
+    "levels": {
+      "titulo": "Levels",
+      "singular": "Level",
+      "campos": {
+        "codigo": "Code",
+        "ordem": "Order"
+      }
+    },
+    "requirements": {
+      "titulo": "Requirements",
+      "singular": "Requirement"
+    }
   },
   "atualizarPassword": {
     "titulo": "Update Password",
@@ -1118,7 +1142,15 @@
     "badgesAtribuidos": "Badges Awarded",
     "badgesAtribuidosTotal": "{{count}} in the last 7 days",
     "semDados": "No data for the period.",
-    "diasSemana": ["M", "T", "W", "T", "F", "S", "S"],
+    "diasSemana": [
+      "M",
+      "T",
+      "W",
+      "T",
+      "F",
+      "S",
+      "S"
+    ],
     "atividadeRecente": "Recent Activity"
   },
   "sllPedidoDetail": {
@@ -1168,7 +1200,13 @@
       "rejeitados": "Rejected",
       "devolvidos": "Sent back"
     },
-    "tabs": { "todos": "All", "pendentes": "Pending", "aprovados": "Approved", "rejeitados": "Rejected", "devolvidos": "Sent back" },
+    "tabs": {
+      "todos": "All",
+      "pendentes": "Pending",
+      "aprovados": "Approved",
+      "rejeitados": "Rejected",
+      "devolvidos": "Sent back"
+    },
     "pesquisar": "Search request",
     "verMais": "Show {{count}} more",
     "fecharAviso": "Close notification",
@@ -1176,8 +1214,17 @@
       "titulo": "Decision history",
       "subtitulo": "Latest approvals, rejections and returns, from newest to oldest.",
       "filtro": "Filter decision history",
-      "tabs": { "todas": "All", "aprovacoes": "Approvals", "rejeicoes": "Rejections", "devolucoes": "Sent back" },
-      "estados": { "APPROVED": "Approved", "REJECTED": "Rejected", "OPEN": "Sent back" },
+      "tabs": {
+        "todas": "All",
+        "aprovacoes": "Approvals",
+        "rejeicoes": "Rejections",
+        "devolucoes": "Sent back"
+      },
+      "estados": {
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "OPEN": "Sent back"
+      },
       "vazioTitulo": "No decisions recorded",
       "vazioDescricao": "There are no decisions of this type in your Service Line yet.",
       "semComentario": "No comment.",
@@ -1200,8 +1247,22 @@
   "sllRelatorios": {
     "titulo": "Reports",
     "subtitulo": "Reports and exports for your Service Line",
-    "filtros": { "area": "Area", "todasAreas": "All areas", "experiencia": "Experience", "todasExperiencias": "All", "estado": "Status", "todosEstados": "All statuses", "desde": "From", "ate": "To", "limpar": "Clear" },
-    "experiencia": { "0-11": "Less than 1 year", "12-35": "1 to 3 years", "36+": "More than 3 years" },
+    "filtros": {
+      "area": "Area",
+      "todasAreas": "All areas",
+      "experiencia": "Experience",
+      "todasExperiencias": "All",
+      "estado": "Status",
+      "todosEstados": "All statuses",
+      "desde": "From",
+      "ate": "To",
+      "limpar": "Clear"
+    },
+    "experiencia": {
+      "0-11": "Less than 1 year",
+      "12-35": "1 to 3 years",
+      "36+": "More than 3 years"
+    },
     "mesesExperiencia": "{{count}} months",
     "distribuicaoEstados": "Requests by status",
     "distribuicaoAreas": "Activity by area",
@@ -1209,7 +1270,7 @@
     "comparacaoTitulo": "Consultant comparison",
     "premiumTitulo": "Service Line special achievements",
     "exportacoesTitulo": "Exports",
-    "semDados": "No data for the selected filters.",
+    "semDados": "No data to show.",
     "semDadosDescricao": "Change the period or area to view other results.",
     "resumo": {
       "badgesAtribuidos": "Badges awarded",
@@ -1249,12 +1310,11 @@
       "email": "Email",
       "area": "Area",
       "serviceLine": "Service Line",
-      "badges": "Badges"
-      ,"progresso": "Progress",
+      "badges": "Badges",
+      "progresso": "Progress",
       "premium": "Premium",
       "experiencia": "Experience"
-    },
-    "semDados": "No data to show."
+    }
   },
   "talentCandidaturaDetail": {
     "voltar": "Back",
@@ -1321,8 +1381,15 @@
       "titulo": "Decision history",
       "subtitulo": "Latest validations and rejections, from newest to oldest.",
       "filtro": "Filter decision history",
-      "tabs": { "todas": "All", "validadas": "Validated", "rejeitadas": "Rejected" },
-      "estados": { "VALIDATED": "Validated", "REJECTED": "Rejected" },
+      "tabs": {
+        "todas": "All",
+        "validadas": "Validated",
+        "rejeitadas": "Rejected"
+      },
+      "estados": {
+        "VALIDATED": "Validated",
+        "REJECTED": "Rejected"
+      },
       "vazioTitulo": "No decisions recorded",
       "vazioDescricao": "There are no decisions of this type in your history yet.",
       "semComentario": "No comment.",
@@ -1354,7 +1421,15 @@
     "pedidosFechados": "Closed requests",
     "pedidosFechadosTotal": "{{count}} in the last 7 days",
     "semDados": "No data for the period.",
-    "diasSemana": ["M", "T", "W", "T", "F", "S", "S"],
+    "diasSemana": [
+      "M",
+      "T",
+      "W",
+      "T",
+      "F",
+      "S",
+      "S"
+    ],
     "atividadeRecente": "Recent Activity"
   },
   "api": {
@@ -1378,7 +1453,15 @@
       "submetido": "Submitted",
       "validada": "Validated"
     },
-    "statusCodes": { "OPEN": "Open", "SUBMITTED": "Submitted", "IN_VALIDATION": "Under validation", "VALIDATED": "Validated by Talent Manager", "IN_APPROVAL": "Under approval", "APPROVED": "Approved", "REJECTED": "Rejected" },
+    "statusCodes": {
+      "OPEN": "Open",
+      "SUBMITTED": "Submitted",
+      "IN_VALIDATION": "Under validation",
+      "VALIDATED": "Validated by Talent Manager",
+      "IN_APPROVAL": "Under approval",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
     "tm": {
       "stats": {
         "consultores": "Consultants",
@@ -1425,19 +1508,171 @@
     }
   },
   "tmWorkspace": {
-    "common": { "nome": "Name", "email": "Email", "consultor": "Consultant", "badge": "Badge", "area": "Area", "serviceLine": "Service Line", "estado": "Status", "data": "Date", "pontos": "Points", "badges": "Badges", "nivel": "Level", "requisitos": "Requirements", "semExpiracao": "No expiration", "semDados": "No data for the selected filters.", "limparFiltros": "Clear filters", "todasAreas": "All areas", "todasServiceLines": "All Service Lines", "todosNiveis": "All levels", "verTodos": "View all", "verTodas": "View all" },
-    "status": { "all": "All statuses", "open": "Open", "submitted": "Submitted", "validation": "Under validation", "validated": "Validated", "approval": "Under approval", "approved": "Approved", "rejected": "Rejected" },
-    "reports": { "title": "Reports", "subtitle": "Global badge and application indicators", "applications": "Applications", "consultants": "Consultants", "registeredUsers": "Registered users", "awards": "Badges awarded", "approvals": "Approvals", "rejections": "Rejections", "specialAchievements": "Special achievements", "achievement": "Achievement", "criteria": "Criteria", "from": "From", "to": "To", "learningPath": "Learning Path", "allLearningPaths": "All Learning Paths", "allBadges": "All badges", "statusDistribution": "Distribution by status", "areaDistribution": "Applications by area", "learningPathDistribution": "Badges by Learning Path", "levelDistribution": "Badges by level", "badgeDistribution": "Awards by badge", "monthlyPercentage": "% of badges by month", "awardedPoints": "Points awarded", "obtained": "Obtained on", "expires": "Expires on", "progress": "Progress" },
-    "consultants": { "title": "Consultants", "subtitle": "Progress, badges and goals for all consultants", "search": "Search consultant", "allValidity": "All validity states", "expiring": "Expiring", "expired": "Expired", "empty": "No consultants", "emptyDescription": "No results match the selected filters.", "inProgress": "in progress", "areaProgress": "Area progress" },
-    "catalog": { "title": "Badge catalog", "subtitle": "Badges, descriptions and requirements by area", "search": "Search badge", "empty": "No badges", "emptyDescription": "No results match the selected filters.", "validity": "Validity", "provider": "Provider", "available": "Available", "active": "Active", "inactive": "Inactive", "all": "All" },
-    "badgeDetail": { "required": "Required", "optional": "Optional", "monthsValidity_one": "1 month validity", "monthsValidity_other": "{{count}} months validity" },
-    "evidenceCoverage": { "title": "Required evidence coverage", "summary": "{{covered}} of {{total}} requirements covered by validated evidence.", "missing_one": "1 requirement missing", "missing_other": "{{count}} requirements missing", "complete": "Complete coverage" },
-    "expirations": { "title": "Badge validity", "subtitle": "Expired badges and badges approaching renewal", "attention": "Needs attention", "expiring": "Expiring", "expired": "Expired", "all": "All", "empty": "No badges in this state", "emptyDescription": "There are no badges for the selected filter.", "obtained": "Obtained on", "expires": "Expires on", "days": "Days remaining", "valid": "Valid", "permanent": "No expiration" },
-    "dashboard": { "consultantProgress": "Consultant progress", "validity": "Validity to monitor", "noExpirations": "No expired or expiring badges.", "review": "Review applications", "openReports": "Open reports", "learningPaths": "Learning paths", "greeting": { "welcome": "Welcome", "welcomeBack": "Welcome back", "morning": "Good morning", "afternoon": "Good afternoon", "evening": "Good evening" } },
-    "applications": { "inProgress": "In progress", "approved": "Approved", "rejected": "Rejected", "all": "All", "reports": "Reports", "search": "Search application" },
-    "search": { "title": "Search", "subtitle": "Consultants, badges and applications", "placeholder": "Search the whole dashboard", "startTitle": "Start searching", "startDescription": "Enter a name, badge, area or application number.", "emptyTitle": "No results", "emptyDescription": "No results were found for this search.", "viewAllApplications": "View all applications" },
-    "learningPaths": { "title": "Learning Paths", "subtitle": "Progression structure, badges and consultants by area", "search": "Search Learning Path, Service Line or area", "empty": "No Learning Paths", "unassigned": "No Learning Path", "averageProgress": "Average progress", "serviceLineCount_one": "1 Service Line", "serviceLineCount_other": "{{count}} Service Lines", "consultantCount_one": "1 consultant", "consultantCount_other": "{{count}} consultants", "badgeCount_one": "1 badge", "badgeCount_other": "{{count}} badges" },
-    "signature": { "noBadges": "There are no earned badges linked to this account.", "emailSignature": "Email signature", "persistenceRequiresBadge": "The HTML was copied, but the current API only saves a signature when at least one earned badge is selected." },
+    "common": {
+      "nome": "Name",
+      "email": "Email",
+      "consultor": "Consultant",
+      "badge": "Badge",
+      "area": "Area",
+      "serviceLine": "Service Line",
+      "estado": "Status",
+      "data": "Date",
+      "pontos": "Points",
+      "badges": "Badges",
+      "nivel": "Level",
+      "requisitos": "Requirements",
+      "semExpiracao": "No expiration",
+      "semDados": "No data for the selected filters.",
+      "limparFiltros": "Clear filters",
+      "todasAreas": "All areas",
+      "todasServiceLines": "All Service Lines",
+      "todosNiveis": "All levels",
+      "verTodos": "View all",
+      "verTodas": "View all"
+    },
+    "status": {
+      "all": "All statuses",
+      "open": "Open",
+      "submitted": "Submitted",
+      "validation": "Under validation",
+      "validated": "Validated",
+      "approval": "Under approval",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "Global badge and application indicators",
+      "applications": "Applications",
+      "consultants": "Consultants",
+      "registeredUsers": "Registered users",
+      "awards": "Badges awarded",
+      "approvals": "Approvals",
+      "rejections": "Rejections",
+      "specialAchievements": "Special achievements",
+      "achievement": "Achievement",
+      "criteria": "Criteria",
+      "from": "From",
+      "to": "To",
+      "learningPath": "Learning Path",
+      "allLearningPaths": "All Learning Paths",
+      "allBadges": "All badges",
+      "statusDistribution": "Distribution by status",
+      "areaDistribution": "Applications by area",
+      "learningPathDistribution": "Badges by Learning Path",
+      "levelDistribution": "Badges by level",
+      "badgeDistribution": "Awards by badge",
+      "monthlyPercentage": "% of badges by month",
+      "awardedPoints": "Points awarded",
+      "obtained": "Obtained on",
+      "expires": "Expires on",
+      "progress": "Progress"
+    },
+    "consultants": {
+      "title": "Consultants",
+      "subtitle": "Progress, badges and goals for all consultants",
+      "search": "Search consultant",
+      "allValidity": "All validity states",
+      "expiring": "Expiring",
+      "expired": "Expired",
+      "empty": "No consultants",
+      "emptyDescription": "No results match the selected filters.",
+      "inProgress": "in progress",
+      "areaProgress": "Area progress"
+    },
+    "catalog": {
+      "title": "Badge catalog",
+      "subtitle": "Badges, descriptions and requirements by area",
+      "search": "Search badge",
+      "empty": "No badges",
+      "emptyDescription": "No results match the selected filters.",
+      "validity": "Validity",
+      "provider": "Provider",
+      "available": "Available",
+      "active": "Active",
+      "inactive": "Inactive",
+      "all": "All"
+    },
+    "badgeDetail": {
+      "required": "Required",
+      "optional": "Optional",
+      "monthsValidity_one": "1 month validity",
+      "monthsValidity_other": "{{count}} months validity"
+    },
+    "evidenceCoverage": {
+      "title": "Required evidence coverage",
+      "summary": "{{covered}} of {{total}} requirements covered by validated evidence.",
+      "missing_one": "1 requirement missing",
+      "missing_other": "{{count}} requirements missing",
+      "complete": "Complete coverage"
+    },
+    "expirations": {
+      "title": "Badge validity",
+      "subtitle": "Expired badges and badges approaching renewal",
+      "attention": "Needs attention",
+      "expiring": "Expiring",
+      "expired": "Expired",
+      "all": "All",
+      "empty": "No badges in this state",
+      "emptyDescription": "There are no badges for the selected filter.",
+      "obtained": "Obtained on",
+      "expires": "Expires on",
+      "days": "Days remaining",
+      "valid": "Valid",
+      "permanent": "No expiration"
+    },
+    "dashboard": {
+      "consultantProgress": "Consultant progress",
+      "validity": "Validity to monitor",
+      "noExpirations": "No expired or expiring badges.",
+      "review": "Review applications",
+      "openReports": "Open reports",
+      "learningPaths": "Learning paths",
+      "greeting": {
+        "welcome": "Welcome",
+        "welcomeBack": "Welcome back",
+        "morning": "Good morning",
+        "afternoon": "Good afternoon",
+        "evening": "Good evening"
+      }
+    },
+    "applications": {
+      "inProgress": "In progress",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "all": "All",
+      "reports": "Reports",
+      "search": "Search application"
+    },
+    "search": {
+      "title": "Search",
+      "subtitle": "Consultants, badges and applications",
+      "placeholder": "Search the whole dashboard",
+      "startTitle": "Start searching",
+      "startDescription": "Enter a name, badge, area or application number.",
+      "emptyTitle": "No results",
+      "emptyDescription": "No results were found for this search.",
+      "viewAllApplications": "View all applications"
+    },
+    "learningPaths": {
+      "title": "Learning Paths",
+      "subtitle": "Progression structure, badges and consultants by area",
+      "search": "Search Learning Path, Service Line or area",
+      "empty": "No Learning Paths",
+      "unassigned": "No Learning Path",
+      "averageProgress": "Average progress",
+      "serviceLineCount_one": "1 Service Line",
+      "serviceLineCount_other": "{{count}} Service Lines",
+      "consultantCount_one": "1 consultant",
+      "consultantCount_other": "{{count}} consultants",
+      "badgeCount_one": "1 badge",
+      "badgeCount_other": "{{count}} badges"
+    },
+    "signature": {
+      "noBadges": "There are no earned badges linked to this account.",
+      "emailSignature": "Email signature",
+      "persistenceRequiresBadge": "The HTML was copied, but the current API only saves a signature when at least one earned badge is selected."
+    },
     "certificate": "PDF certificate",
     "validityLabel": "Validity",
     "specialAchievements": "Special achievements",
