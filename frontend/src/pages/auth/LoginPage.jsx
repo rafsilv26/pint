@@ -7,9 +7,9 @@ import { useAuth } from '../../context/useAuth'
 import { homeForRole } from '../../config/navigation'
 import { useTranslation } from 'react-i18next'
 
-// URL do APK Android. Definir VITE_APK_URL no .env quando o build estiver pronto.
-// Vazia => mostra "disponível brevemente" (link desativado).
-const APK_URL = import.meta.env.VITE_APK_URL || ''
+// URL do APK Android. Por defeito serve o ficheiro em public/. Pode ser
+// substituído por VITE_APK_URL no .env (ex: link externo/CDN).
+const APK_URL = import.meta.env.VITE_APK_URL || '/softinsa-badges.apk'
 
 export default function LoginPage() {
   const { t } = useTranslation()
@@ -108,7 +108,7 @@ export default function LoginPage() {
           <a
             href={APK_URL}
             className="btn btn-outline-brand btn-sm rounded-pill d-inline-flex align-items-center gap-2"
-            download
+            download="softinsa-badges.apk"
           >
             <Smartphone size={16} />
             {t('login.descarregarApp')}
