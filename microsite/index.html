@@ -265,8 +265,6 @@
         <a href="#workflow">Validação</a>
         <a href="#niveis">Níveis</a>
         <a href="#stack">Tecnologia</a>
-        <a class="btn btn-ghost" href="https://github.com/rafsilv26/pint" target="_blank"
-          rel="noopener">Código-fonte</a>
       </div>
     </div>
   </nav>
@@ -287,8 +285,8 @@
           página própria, código de verificação e certificado em PDF.</p>
         <div class="hero-cta">
           <a class="btn btn-primary" href="#" data-link="app">Ver a plataforma</a>
-          <a class="btn btn-ghost" href="https://github.com/rafsilv26/pint" target="_blank"
-            rel="noopener">Repositório</a>
+          <a class="btn btn-ghost" href="#demo">Vídeo demo</a>
+          <a class="btn btn-ghost" href="#" data-link="apk">App Android (.apk)</a>
         </div>
       </div>
 
@@ -351,6 +349,25 @@
       </div>
     </div>
   </section>
+
+  <section id="demo">
+    <div class="wrap">
+      <p class="eyebrow">Demonstração</p>
+      <h2 style="margin-bottom:1.4rem">A plataforma em ação.</h2>
+      <div style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#000;box-shadow:0 10px 40px rgba(0,0,0,.12)">
+        <video controls preload="metadata" playsinline style="display:block;width:100%;height:auto;max-height:78vh;background:#000">
+          <source src="demo.mp4" type="video/mp4" />
+          O teu browser não suporta vídeo embebido. <a data-link="video" href="demo.mp4">Descarrega o vídeo</a>.
+        </video>
+      </div>
+      <p style="margin-top:1rem;color:var(--ink-soft,#5a5f57);font-size:.95rem">
+        Também disponível a app Android:
+        <a href="#" data-link="apk" style="color:var(--brand);font-weight:600;text-decoration:none">descarregar .apk ↓</a>
+      </p>
+    </div>
+  </section>
+
+  <hr class="rule">
 
   <section id="porque">
     <div class="wrap">
@@ -680,7 +697,6 @@
         </div>
         <div class="foot-links">
           <a href="#" data-link="app">↗ Plataforma</a>
-          <a href="https://github.com/rafsilv26/pint" target="_blank" rel="noopener">↗ Repositório</a>
           <a href="#" data-link="video">↗ Vídeo demo</a>
           <a href="#" data-link="apk">↓ App Android</a>
         </div>
@@ -692,13 +708,18 @@
 
   <script>
     const LINKS = {
-      app: "https://project-e69qy.vercel.app/", 
-      video: "",
-      apk: ""
+      app: "https://project-e69qy.vercel.app/",
+      video: "demo.mp4",
+      apk: "https://project-e69qy.vercel.app/softinsa-badges.apk"
     };
     document.querySelectorAll('[data-link]').forEach((el) => {
       const url = LINKS[el.getAttribute('data-link')];
-      if (url) { el.href = url; el.target = "_blank"; el.rel = "noopener"; }
+      if (url) {
+        el.href = url;
+        // O APK deve descarregar; os externos abrem em nova aba.
+        if (el.getAttribute('data-link') === 'apk') { el.setAttribute('download', 'softinsa-badges.apk'); }
+        else { el.target = "_blank"; el.rel = "noopener"; }
+      }
       else { el.addEventListener('click', (e) => { e.preventDefault(); alert('Link ainda por definir — edita o objeto LINKS no fim do ficheiro.'); }); }
     });
 
