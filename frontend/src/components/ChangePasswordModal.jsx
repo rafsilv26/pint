@@ -12,7 +12,10 @@ export default function ChangePasswordModal() {
   const navigate = useNavigate()
   const { user, markPasswordChanged, logout } = useAuth()
   const isConsultor = (user?.roles || []).includes('Consultor') || user?.role === 'Consultor'
-  const { data: areas } = useAsync(() => (isConsultor ? api.getAreasPublicas() : Promise.resolve([])))
+  // Só pede a área se for consultor E ainda não tiver área atribuída. Se o
+  // admin já lhe deu uma, não voltamos a pedir (evita ficar com duas/errada).
+  const precisaArea = isConsultor && !user?.areaId
+  const { data: areas } = useAsync(() => (precisaArea ? api.getAreasPublicas() : Promise.resolve([])))
 
   const [atual, setAtual] = useState('')
   const [nova, setNova] = useState('')
@@ -27,14 +30,14 @@ export default function ChangePasswordModal() {
 
     if (nova.length < 8) return setErro(t('changePasswordModal.erros.comprimento'))
     if (nova !== confirmar) return setErro(t('changePasswordModal.erros.coincidem'))
-    if (isConsultor && !areaId) return setErro(t('changePasswordModal.erros.area'))
+    if (precisaArea && !areaId) return setErro(t('changePasswordModal.erros.area'))
 
     setLoading(true)
     try {
       await api.changePassword({
         currentPassword: atual,
         newPassword: nova,
-        areaId: isConsultor && areaId ? Number(areaId) : undefined,
+        areaId: precisaArea && areaId ? Number(areaId) : undefined,
       })
       markPasswordChanged()
     } catch (err) {
@@ -88,7 +91,7 @@ export default function ChangePasswordModal() {
             onChange={(e) => setConfirmar(e.target.value)}
             required
           />
-          {isConsultor && (
+          {precisaArea && (
             <label className="d-block">
               <span className="mb-1 d-block small fw-medium text-ink">{t('changePasswordModal.campos.areaLabel')}</span>
               <select value={areaId} onChange={(e) => setAreaId(e.target.value)} className="form-select" required>

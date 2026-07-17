@@ -34,6 +34,9 @@ const pendingPoliciesFor = async (userId) => {
 
 const publicUser = async (user) => {
     const roles = await getUserRoles(user.id);
+    // areaId do consultor: permite ao frontend saber se já tem área atribuída
+    // (pelo admin) e, nesse caso, não voltar a pedir/atribuir no primeiro login.
+    const consultant = roles.includes('Consultor') ? await Consultant.findByPk(user.id) : null;
     return {
         id: user.id,
         nome: user.nome,
@@ -43,7 +46,8 @@ const publicUser = async (user) => {
         mustChangePassword: user.mustChangePassword,
         pendingPolicies: await pendingPoliciesFor(user.id),
         role: roles[0] || null,
-        roles
+        roles,
+        areaId: consultant?.areaId ?? null
     };
 };
 
@@ -225,6 +229,7 @@ exports.login = async (req, res) => {
 
         // gerar token JWT e obter os perfis do utilizador
         const roles = await getUserRoles(user.id);
+        const consultant = roles.includes('Consultor') ? await Consultant.findByPk(user.id) : null;
         const token = jwt.sign(
             { id: user.id },
             process.env.JWT_SECRET,
@@ -261,6 +266,7 @@ exports.login = async (req, res) => {
                 idioma: user.idioma,
                 mustChangePassword: user.mustChangePassword,
                 greeting,
+                areaId: consultant?.areaId ?? null,
                 pendingPolicies: await pendingPoliciesFor(user.id)
             }
         });
@@ -439,10 +445,12 @@ exports.changePassword = async (req, res) => {
         user.updatedAt = new Date();
         await user.save();
 
-        // Se for consultor e tiver escolhido área, guarda-a.
+        // Se for consultor e tiver escolhido área, guarda-a — mas SÓ se ainda
+        // não tiver área. Se o admin já lhe atribuiu uma, essa é a autoritária;
+        // não a sobrescrevemos aqui (evitava ficar com a área "errada").
         if (areaId) {
             const consultant = await Consultant.findByPk(user.id);
-            if (consultant) {
+            if (consultant && !consultant.areaId) {
                 consultant.areaId = areaId;
                 await consultant.save();
             }

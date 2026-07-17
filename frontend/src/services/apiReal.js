@@ -56,7 +56,7 @@ export async function login({ email, password }) {
     user: {
       id: u.id, nome: u.nome, email: u.email,
       role: u.role || (u.roles || [])[0] || null,
-      roles: u.roles || [], area: u.area || '',
+      roles: u.roles || [], area: u.area || '', areaId: u.areaId ?? null,
       idioma: u.idioma || null,
       mustChangePassword: u.mustChangePassword,
       pendingPolicies: u.pendingPolicies || [],

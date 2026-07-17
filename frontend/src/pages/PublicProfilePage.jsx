@@ -125,11 +125,9 @@ export default function PublicProfilePage() {
           <h1 className="mt-3 fs-4 fw-bold text-ink mb-0">{nome}</h1>
           <p className="small text-muted mb-0">{cargo}</p>
 
-          {(consultor?.area || consultor?.serviceLine) && (
+          {consultor?.area && (
             <div className="mt-2 d-flex flex-wrap justify-content-center gap-1">
-              {[consultor?.area, consultor?.serviceLine].filter(Boolean).map((tag) => (
-                <span key={tag} className="rounded-pill bg-brand-light text-brand px-2 py-1 fs-xs fw-medium">{tag}</span>
-              ))}
+              <span className="rounded-pill bg-brand-light text-brand px-2 py-1 fs-xs fw-medium">{consultor.area}</span>
             </div>
           )}
 
