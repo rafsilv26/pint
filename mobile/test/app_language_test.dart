@@ -22,8 +22,6 @@ void main() {
     );
     expect(english.translate('Criar objetivo'), 'Create goal');
     expect(spanish.translate('Página pública'), 'Página pública');
-    expect(english.translate('Pendente de envio'), 'Pending upload');
-    expect(spanish.translate('Falha no envio'), 'Error de envío');
     expect(
       english.translate(
         'Enviámos um link de confirmação para user@example.com. Abra o link antes de iniciar sessão.',

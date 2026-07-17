@@ -1,11 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
-import '../services/app_data_refresh_service.dart';
 import '../services/app_sync_service.dart';
 import '../widgets/app_bottom_navigation.dart';
 
@@ -24,26 +21,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
   void initState() {
     super.initState();
     notificationsFuture = repository.getNotifications();
-    AppDataRefreshService.instance.addListener(handleDataChanged);
-  }
-
-  @override
-  void dispose() {
-    AppDataRefreshService.instance.removeListener(handleDataChanged);
-    super.dispose();
-  }
-
-  void handleDataChanged() {
-    unawaited(reloadLocal());
   }
 
   Future<void> reload() async {
     await AppSyncService().synchronizeIfNeeded();
-    await reloadLocal();
-  }
-
-  Future<void> reloadLocal() async {
-    if (!mounted) return;
     final future = repository.getNotifications();
     setState(() {
       notificationsFuture = future;

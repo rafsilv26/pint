@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_language.dart';
 import '../repositories/mobile_api_repository.dart';
-import '../services/app_data_refresh_service.dart';
 
 enum AppBottomNavigationDestination {
   home,
@@ -105,20 +104,6 @@ class _AppBadgeNavigationIconState extends State<AppBadgeNavigationIcon> {
   void initState() {
     super.initState();
     inProgressFuture = _loadInProgressCount();
-    AppDataRefreshService.instance.addListener(handleDataChanged);
-  }
-
-  @override
-  void dispose() {
-    AppDataRefreshService.instance.removeListener(handleDataChanged);
-    super.dispose();
-  }
-
-  void handleDataChanged() {
-    if (!mounted) return;
-    setState(() {
-      inProgressFuture = _loadInProgressCount();
-    });
   }
 
   Future<int> _loadInProgressCount() async {

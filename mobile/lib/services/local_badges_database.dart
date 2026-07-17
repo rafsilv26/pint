@@ -1,6 +1,5 @@
-import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -10,37 +9,16 @@ import 'package:sqflite/sqflite.dart';
 import '../models/consultant_profile.dart';
 import '../models/dashboard_data.dart';
 import '../models/mobile_api_data.dart';
-import '../models/pending_badge_application.dart';
 
 class LocalBadgesDatabase {
-  LocalBadgesDatabase._({
-    DatabaseFactory? databaseFactoryOverride,
-    String? databasePathOverride,
-  }) : _databaseFactoryOverride = databaseFactoryOverride,
-       _databasePathOverride = databasePathOverride;
-
-  @visibleForTesting
-  LocalBadgesDatabase.forTesting({
-    required DatabaseFactory databaseFactory,
-    required String databasePath,
-  }) : this._(
-         databaseFactoryOverride: databaseFactory,
-         databasePathOverride: databasePath,
-       );
+  LocalBadgesDatabase._();
 
   static final LocalBadgesDatabase instance = LocalBadgesDatabase._();
 
-  final DatabaseFactory? _databaseFactoryOverride;
-  final String? _databasePathOverride;
   Database? _database;
   DashboardData? _memoryDashboard;
-  int? _memoryCurrentUserId;
-  LocalUserProfile? _memoryCurrentUserProfile;
-  final Map<String, PendingBadgeApplication> _memoryPendingApplications = {};
-  final Map<String, Future<void>> _pendingEnqueueTails = {};
-  int _nextMemoryPendingApplicationId = 1;
 
-  static const int _databaseVersion = 7;
+  static const int _databaseVersion = 6;
 
   Future<Database> get database async {
     final currentDatabase = _database;
@@ -65,8 +43,6 @@ class LocalBadgesDatabase {
   }
 
   DatabaseFactory _databaseFactory() {
-    final override = _databaseFactoryOverride;
-    if (override != null) return override;
     if (kIsWeb) {
       throw UnsupportedError('A base de dados local nao suporta Web.');
     }
@@ -79,16 +55,8 @@ class LocalBadgesDatabase {
   }
 
   Future<String> _databasePath(DatabaseFactory factory) async {
-    final override = _databasePathOverride;
-    if (override != null) return override;
     final databasesPath = await factory.getDatabasesPath();
     return path.join(databasesPath, 'softinsa_badges.db');
-  }
-
-  @visibleForTesting
-  Future<void> closeForTesting() async {
-    await _database?.close();
-    _database = null;
   }
 
   Future<void> _createDatabase(Database db, int version) async {
@@ -115,9 +83,6 @@ class LocalBadgesDatabase {
     }
     if (oldVersion < 6) {
       await _addEvidenciaRequirementColumn(db);
-    }
-    if (oldVersion < 7) {
-      await _createPendingApplicationTables(db);
     }
   }
 
@@ -356,49 +321,6 @@ class LocalBadgesDatabase {
 
     await _createConsultantDetailTables(db);
     await _createMobileFeatureTables(db);
-    await _createPendingApplicationTables(db);
-  }
-
-  Future<void> _createPendingApplicationTables(Database db) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS pending_badge_applications (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        client_request_id TEXT NOT NULL UNIQUE,
-        owner_user_id INTEGER NOT NULL,
-        badge_id INTEGER NOT NULL,
-        description TEXT,
-        state TEXT NOT NULL DEFAULT 'queued',
-        attempt_count INTEGER NOT NULL DEFAULT 0,
-        last_error TEXT,
-        last_http_status INTEGER,
-        server_application_id INTEGER,
-        created_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL,
-        UNIQUE(owner_user_id, badge_id)
-      )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS pending_badge_evidences (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        pending_application_id INTEGER NOT NULL,
-        requirement_id INTEGER NOT NULL,
-        stored_path TEXT NOT NULL,
-        original_name TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        FOREIGN KEY (pending_application_id)
-          REFERENCES pending_badge_applications(id) ON DELETE CASCADE
-      )
-    ''');
-
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_pending_badge_owner_state '
-      'ON pending_badge_applications (owner_user_id, state, created_at)',
-    );
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_pending_badge_evidence_application '
-      'ON pending_badge_evidences (pending_application_id)',
-    );
   }
 
   Future<void> _createConsultantDetailTables(Database db) async {
@@ -605,37 +527,19 @@ class LocalBadgesDatabase {
     await upsertDashboard(DashboardData.sample());
   }
 
-  Future<bool> upsertDashboard(
+  Future<void> upsertDashboard(
     DashboardData data, {
     DateTime? updatedAt,
-    int? ownerUserId,
   }) async {
     if (_useMemoryStore) {
-      if (ownerUserId != null && _memoryCurrentUserId != ownerUserId) {
-        return false;
-      }
       _memoryDashboard = _mergeMemoryDashboard(data);
-      return true;
+      return;
     }
 
     final db = await database;
     final timestamp = (updatedAt ?? DateTime.now()).toUtc().toIso8601String();
 
-    return db.transaction((transaction) async {
-      if (ownerUserId != null) {
-        final currentRows = await transaction.query(
-          'sync_metadata',
-          columns: ['value'],
-          where: 'key = ?',
-          whereArgs: ['current_user_id'],
-          limit: 1,
-        );
-        final currentUserId = currentRows.isEmpty
-            ? null
-            : int.tryParse(currentRows.first['value'].toString());
-        if (currentUserId != ownerUserId) return false;
-      }
-
+    await db.transaction((transaction) async {
       await transaction.insert('dashboard', {
         'id': 1,
         'user_name': data.userName,
@@ -670,78 +574,16 @@ class LocalBadgesDatabase {
           'updated_at': timestamp,
         }, conflictAlgorithm: ConflictAlgorithm.replace);
       }
-      return true;
     });
   }
 
-  Future<void> upsertApiSnapshot(
-    Object? payload, {
-    DateTime? updatedAt,
-    int? ownerUserId,
-  }) async {
+  Future<void> upsertApiSnapshot(Object? payload, {DateTime? updatedAt}) async {
     if (payload == null || _useMemoryStore) {
       return;
     }
 
     final db = await database;
     final timestamp = (updatedAt ?? DateTime.now()).toUtc().toIso8601String();
-    const candidaturaKeys = <String>[
-      'candidaturas',
-      'candidatura',
-      'Candidatura',
-    ];
-    final hasCandidaturaSnapshot = _payloadHasCollection(
-      payload,
-      candidaturaKeys,
-    );
-    final candidaturaRows = _collectMaps(payload, candidaturaKeys.toSet())
-        .where((row) {
-          if (ownerUserId == null) return true;
-          final rowOwner = _intValue(row, const ['consultorId', 'CONSULTORID']);
-          return rowOwner == null || rowOwner == ownerUserId;
-        })
-        .map((row) {
-          if (ownerUserId == null) return row;
-          return <String, dynamic>{...row, 'consultorId': ownerUserId};
-        })
-        .toList();
-    final scopedCandidaturaIds = candidaturaRows
-        .map(
-          (row) =>
-              _intValue(row, const ['id', 'candidaturaId', 'CANDIDATURAID']),
-        )
-        .whereType<int>()
-        .toSet();
-    final evidenceRows =
-        _collectMaps(payload, const {
-          'evidencias',
-          'evidencia',
-          'Evidencia',
-        }).where((row) {
-          if (ownerUserId == null || !hasCandidaturaSnapshot) return true;
-          final candidaturaId = _intValue(row, const [
-            'candidaturaId',
-            'CANDIDATURAID',
-          ]);
-          return candidaturaId != null &&
-              scopedCandidaturaIds.contains(candidaturaId);
-        }).toList();
-    final historyRows =
-        _collectMaps(payload, const {
-          'historico',
-          'historicos',
-          'history',
-          'HistoricoCandidatura',
-          'HistoricoCandidaturas',
-        }).where((row) {
-          if (ownerUserId == null || !hasCandidaturaSnapshot) return true;
-          final candidaturaId = _intValue(row, const [
-            'candidaturaId',
-            'CANDIDATURAID',
-          ]);
-          return candidaturaId != null &&
-              scopedCandidaturaIds.contains(candidaturaId);
-        }).toList();
 
     await db.transaction((transaction) async {
       await transaction.insert('api_payloads', {
@@ -972,39 +814,14 @@ class LocalBadgesDatabase {
         syncedAt: timestamp,
       );
 
-      if (ownerUserId != null && hasCandidaturaSnapshot) {
-        // A resposta de /candidaturas/minhas e um snapshot completo do owner.
-        // Remove apenas a cache normal desse utilizador e respetivos filhos;
-        // as outboxes usam tabelas separadas e nunca sao tocadas aqui.
-        await transaction.rawDelete(
-          '''
-          DELETE FROM evidencias
-          WHERE candidatura_id IN (
-            SELECT id FROM candidaturas WHERE consultor_id = ?
-          )
-          ''',
-          [ownerUserId],
-        );
-        await transaction.rawDelete(
-          '''
-          DELETE FROM historico_candidaturas
-          WHERE candidatura_id IN (
-            SELECT id FROM candidaturas WHERE consultor_id = ?
-          )
-          ''',
-          [ownerUserId],
-        );
-        await transaction.delete(
-          'candidaturas',
-          where: 'consultor_id = ?',
-          whereArgs: [ownerUserId],
-        );
-      }
-
       await _upsertMaps(
         transaction,
         table: 'candidaturas',
-        maps: candidaturaRows,
+        maps: _collectMaps(payload, const {
+          'candidaturas',
+          'candidatura',
+          'Candidatura',
+        }),
         idKeys: const ['id', 'candidaturaId', 'CANDIDATURAID'],
         values: (row) => {
           'consultor_id': _intValue(row, const ['consultorId', 'CONSULTORID']),
@@ -1049,7 +866,11 @@ class LocalBadgesDatabase {
       await _upsertMaps(
         transaction,
         table: 'evidencias',
-        maps: evidenceRows,
+        maps: _collectMaps(payload, const {
+          'evidencias',
+          'evidencia',
+          'Evidencia',
+        }),
         idKeys: const ['id', 'evidenciaId', 'EVIDENCIAID'],
         values: (row) => {
           'candidatura_id': _intValue(row, const [
@@ -1069,7 +890,13 @@ class LocalBadgesDatabase {
       await _upsertMaps(
         transaction,
         table: 'historico_candidaturas',
-        maps: historyRows,
+        maps: _collectMaps(payload, const {
+          'historico',
+          'historicos',
+          'history',
+          'HistoricoCandidatura',
+          'HistoricoCandidaturas',
+        }),
         idKeys: const ['id', 'historicoId', 'LOGWF_ID'],
         values: (row) => {
           'candidatura_id': _intValue(row, const [
@@ -1103,80 +930,26 @@ class LocalBadgesDatabase {
     });
   }
 
-  Future<bool> upsertCurrentUser(
+  Future<void> upsertCurrentUser(
     Map<String, dynamic> user, {
     DateTime? updatedAt,
   }) async {
-    final id = _intValue(user, const ['id', 'USERID']);
-    if (id == null) return false;
-
-    final role =
-        _textValue(user, const ['role']) ??
-        _firstListTextValue(user, const ['roles']);
     if (_useMemoryStore) {
-      final changed = _memoryCurrentUserId != id;
-      if (changed) _memoryDashboard = null;
-      _memoryCurrentUserId = id;
-      _memoryCurrentUserProfile = LocalUserProfile(
-        id: id,
-        name: _textValue(user, const ['nome', 'NOME', 'name']) ?? '',
-        email: _textValue(user, const ['email', 'EMAIL']) ?? '',
-        role: role ?? '',
-        mustChangePassword:
-            _boolIntValue(user, const ['mustChangePassword']) == 1,
-      );
-      return changed;
+      return;
+    }
+
+    final id = _intValue(user, const ['id', 'USERID']);
+    if (id == null) {
+      return;
     }
 
     final db = await database;
     final timestamp = (updatedAt ?? DateTime.now()).toUtc().toIso8601String();
+    final role =
+        _textValue(user, const ['role']) ??
+        _firstListTextValue(user, const ['roles']);
 
-    return db.transaction((transaction) async {
-      final currentRows = await transaction.query(
-        'sync_metadata',
-        columns: ['value'],
-        where: 'key = ?',
-        whereArgs: ['current_user_id'],
-        limit: 1,
-      );
-      final currentUserId = currentRows.isEmpty
-          ? null
-          : int.tryParse(currentRows.first['value'].toString());
-      final changed = currentUserId != id;
-
-      if (changed) {
-        for (final table in const [
-          'dashboard',
-          'badge_recommendations',
-          'notifications',
-          'gamification_summary',
-          'gamification_achievements',
-          'gamification_ranking',
-          'gamification_timeline',
-          'email_signature_profile',
-          'email_signature_badges',
-        ]) {
-          await transaction.delete(table);
-        }
-        await transaction.update('consultants', {'is_current_user': 0});
-        await transaction.delete(
-          'api_payloads',
-          where: 'key IN (?, ?, ?, ?, ?)',
-          whereArgs: const [
-            'dashboard_sync',
-            'current_user',
-            'notifications',
-            'gamification',
-            'email_signature',
-          ],
-        );
-        await transaction.delete(
-          'sync_metadata',
-          where: 'key = ?',
-          whereArgs: ['last_api_snapshot_at'],
-        );
-      }
-
+    await db.transaction((transaction) async {
       await transaction.insert('api_users', {
         'id': id,
         'nome': _textValue(user, const ['nome', 'NOME', 'name']),
@@ -1202,7 +975,6 @@ class LocalBadgesDatabase {
         'payload_json': jsonEncode(user),
         'updated_at': timestamp,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
-      return changed;
     });
   }
 
@@ -1763,446 +1535,7 @@ class LocalBadgesDatabase {
     );
   }
 
-  Future<PendingBadgeApplication> enqueuePendingBadgeApplication({
-    required String clientRequestId,
-    required int ownerUserId,
-    required int badgeId,
-    required List<EvidenceAttachment> evidenceFiles,
-    String? description,
-  }) {
-    final key = '$ownerUserId:$badgeId';
-    final previous = _pendingEnqueueTails[key] ?? Future<void>.value();
-    final completed = Completer<void>();
-    final current = completed.future;
-    _pendingEnqueueTails[key] = current;
-
-    return () async {
-      try {
-        await previous;
-        return await _enqueuePendingBadgeApplicationUnlocked(
-          clientRequestId: clientRequestId,
-          ownerUserId: ownerUserId,
-          badgeId: badgeId,
-          evidenceFiles: evidenceFiles,
-          description: description,
-        );
-      } finally {
-        completed.complete();
-        if (identical(_pendingEnqueueTails[key], current)) {
-          _pendingEnqueueTails.remove(key);
-        }
-      }
-    }();
-  }
-
-  Future<PendingBadgeApplication> _enqueuePendingBadgeApplicationUnlocked({
-    required String clientRequestId,
-    required int ownerUserId,
-    required int badgeId,
-    required List<EvidenceAttachment> evidenceFiles,
-    String? description,
-  }) async {
-    if (evidenceFiles.length > 10) {
-      throw const FileSystemException(
-        'Uma candidatura não pode ter mais de 10 evidências.',
-      );
-    }
-
-    final existing = await getPendingBadgeApplications(
-      ownerUserId,
-      badgeId: badgeId,
-    );
-    if (existing.isNotEmpty && !existing.first.hasFailed) {
-      return existing.first;
-    }
-    if (existing.isNotEmpty) {
-      await deletePendingBadgeApplication(existing.first.localId);
-    }
-
-    final now = DateTime.now().toUtc();
-    if (_useMemoryStore) {
-      final localId = _nextMemoryPendingApplicationId++;
-      final pending = PendingBadgeApplication(
-        localId: localId,
-        clientRequestId: clientRequestId,
-        ownerUserId: ownerUserId,
-        badgeId: badgeId,
-        description: description,
-        state: 'queued',
-        attemptCount: 0,
-        createdAt: now,
-        updatedAt: now,
-        evidences: evidenceFiles.asMap().entries.map((entry) {
-          return PendingBadgeEvidence(
-            id: entry.key + 1,
-            requirementId: entry.value.requirementId,
-            storedPath: entry.value.path,
-            originalName: entry.value.fileName,
-          );
-        }).toList(),
-      );
-      _memoryPendingApplications[clientRequestId] = pending;
-      return pending;
-    }
-
-    final copiedEvidence = await _copyPendingEvidenceFiles(
-      clientRequestId,
-      evidenceFiles,
-    );
-    final db = await database;
-    try {
-      final localId = await db.transaction((transaction) async {
-        final id = await transaction.insert('pending_badge_applications', {
-          'client_request_id': clientRequestId,
-          'owner_user_id': ownerUserId,
-          'badge_id': badgeId,
-          'description': description,
-          'state': 'queued',
-          'attempt_count': 0,
-          'created_at': now.toIso8601String(),
-          'updated_at': now.toIso8601String(),
-        });
-        for (final evidence in copiedEvidence) {
-          await transaction.insert('pending_badge_evidences', {
-            'pending_application_id': id,
-            'requirement_id': evidence.requirementId,
-            'stored_path': evidence.storedPath,
-            'original_name': evidence.originalName,
-            'created_at': now.toIso8601String(),
-          });
-        }
-        return id;
-      });
-
-      final rows = await db.query(
-        'pending_badge_applications',
-        where: 'id = ?',
-        whereArgs: [localId],
-        limit: 1,
-      );
-      return _pendingBadgeApplicationFromRow(db, rows.single);
-    } catch (_) {
-      await _deleteStoredEvidenceFiles(copiedEvidence);
-      rethrow;
-    }
-  }
-
-  Future<List<PendingBadgeApplication>> getPendingBadgeApplications(
-    int ownerUserId, {
-    int? badgeId,
-    String? clientRequestId,
-    List<String>? states,
-  }) async {
-    if (_useMemoryStore) {
-      final result = _memoryPendingApplications.values.where((item) {
-        return item.ownerUserId == ownerUserId &&
-            (badgeId == null || item.badgeId == badgeId) &&
-            (clientRequestId == null ||
-                item.clientRequestId == clientRequestId) &&
-            (states == null || states.contains(item.state));
-      }).toList()..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-      return result;
-    }
-
-    final clauses = <String>['owner_user_id = ?'];
-    final arguments = <Object?>[ownerUserId];
-    if (badgeId != null) {
-      clauses.add('badge_id = ?');
-      arguments.add(badgeId);
-    }
-    if (clientRequestId != null) {
-      clauses.add('client_request_id = ?');
-      arguments.add(clientRequestId);
-    }
-    if (states != null && states.isNotEmpty) {
-      clauses.add('state IN (${List.filled(states.length, '?').join(', ')})');
-      arguments.addAll(states);
-    }
-
-    final db = await database;
-    final rows = await db.query(
-      'pending_badge_applications',
-      where: clauses.join(' AND '),
-      whereArgs: arguments,
-      orderBy: 'created_at ASC',
-    );
-    return Future.wait(
-      rows.map((row) => _pendingBadgeApplicationFromRow(db, row)),
-    );
-  }
-
-  Future<void> markPendingBadgeApplicationRetry(
-    int localId, {
-    required String error,
-    int? httpStatus,
-  }) async {
-    await _updatePendingBadgeApplication(
-      localId,
-      state: 'queued',
-      error: error,
-      httpStatus: httpStatus,
-      incrementAttempt: true,
-    );
-  }
-
-  Future<void> markPendingBadgeApplicationSent(
-    int localId, {
-    int? serverApplicationId,
-  }) async {
-    await _updatePendingBadgeApplication(
-      localId,
-      state: 'sent',
-      serverApplicationId: serverApplicationId,
-      clearError: true,
-      incrementAttempt: true,
-    );
-  }
-
-  Future<void> markPendingBadgeApplicationFailed(
-    int localId, {
-    required String error,
-    int? httpStatus,
-  }) async {
-    await _updatePendingBadgeApplication(
-      localId,
-      state: 'failed',
-      error: error,
-      httpStatus: httpStatus,
-      incrementAttempt: true,
-    );
-  }
-
-  Future<void> deletePendingBadgeApplication(int localId) async {
-    if (_useMemoryStore) {
-      _memoryPendingApplications.removeWhere(
-        (_, item) => item.localId == localId,
-      );
-      return;
-    }
-
-    final db = await database;
-    final evidenceRows = await db.query(
-      'pending_badge_evidences',
-      where: 'pending_application_id = ?',
-      whereArgs: [localId],
-    );
-    final evidences = evidenceRows.map(_pendingBadgeEvidenceFromRow).toList();
-    await db.transaction((transaction) async {
-      await transaction.delete(
-        'pending_badge_evidences',
-        where: 'pending_application_id = ?',
-        whereArgs: [localId],
-      );
-      await transaction.delete(
-        'pending_badge_applications',
-        where: 'id = ?',
-        whereArgs: [localId],
-      );
-    });
-    await _deleteStoredEvidenceFiles(evidences);
-  }
-
-  Future<void> deleteSentPendingBadgeApplications(int ownerUserId) async {
-    final sent = await getPendingBadgeApplications(
-      ownerUserId,
-      states: const ['sent'],
-    );
-    for (final pending in sent) {
-      await deletePendingBadgeApplication(pending.localId);
-    }
-  }
-
-  Future<void> _updatePendingBadgeApplication(
-    int localId, {
-    required String state,
-    String? error,
-    int? httpStatus,
-    int? serverApplicationId,
-    bool clearError = false,
-    bool incrementAttempt = false,
-  }) async {
-    final now = DateTime.now().toUtc();
-    if (_useMemoryStore) {
-      final entry = _memoryPendingApplications.entries
-          .where((entry) => entry.value.localId == localId)
-          .firstOrNull;
-      if (entry == null) return;
-      final current = entry.value;
-      _memoryPendingApplications[entry.key] = current.copyWith(
-        state: state,
-        attemptCount: current.attemptCount + (incrementAttempt ? 1 : 0),
-        lastError: error,
-        clearLastError: clearError,
-        lastHttpStatus: httpStatus,
-        clearLastHttpStatus: clearError,
-        serverApplicationId: serverApplicationId,
-        updatedAt: now,
-      );
-      return;
-    }
-
-    final db = await database;
-    final values = <String, Object?>{
-      'state': state,
-      'last_error': clearError ? null : error,
-      'last_http_status': clearError ? null : httpStatus,
-      'updated_at': now.toIso8601String(),
-      'server_application_id': ?serverApplicationId,
-    };
-    if (incrementAttempt) {
-      await db.rawUpdate(
-        '''
-        UPDATE pending_badge_applications
-        SET state = ?, attempt_count = attempt_count + 1,
-            last_error = ?, last_http_status = ?,
-            server_application_id = COALESCE(?, server_application_id),
-            updated_at = ?
-        WHERE id = ?
-        ''',
-        [
-          state,
-          values['last_error'],
-          values['last_http_status'],
-          serverApplicationId,
-          values['updated_at'],
-          localId,
-        ],
-      );
-      return;
-    }
-    await db.update(
-      'pending_badge_applications',
-      values,
-      where: 'id = ?',
-      whereArgs: [localId],
-    );
-  }
-
-  Future<List<PendingBadgeEvidence>> _copyPendingEvidenceFiles(
-    String clientRequestId,
-    List<EvidenceAttachment> evidenceFiles,
-  ) async {
-    if (evidenceFiles.isEmpty) return const [];
-    final factory = _databaseFactory();
-    final databasesPath = await factory.getDatabasesPath();
-    final directory = Directory(
-      path.join(databasesPath, 'pending_badge_evidence', clientRequestId),
-    );
-    await directory.create(recursive: true);
-    final copied = <PendingBadgeEvidence>[];
-    try {
-      for (final entry in evidenceFiles.asMap().entries) {
-        final evidence = entry.value;
-        final source = File(evidence.path);
-        if (!await source.exists()) {
-          throw FileSystemException(
-            'O ficheiro selecionado deixou de estar disponível.',
-            evidence.path,
-          );
-        }
-        final length = await source.length();
-        if (length > 10 * 1024 * 1024) {
-          throw FileSystemException(
-            'Cada evidência pode ter no máximo 10 MB.',
-            evidence.path,
-          );
-        }
-        final extension = path.extension(evidence.fileName).toLowerCase();
-        if (!const {'.pdf', '.jpg', '.jpeg', '.png'}.contains(extension)) {
-          throw FileSystemException(
-            'Apenas são aceites ficheiros PDF, JPG e PNG.',
-            evidence.path,
-          );
-        }
-        final safeName = evidence.fileName.replaceAll(
-          RegExp(r'[^A-Za-z0-9._-]'),
-          '_',
-        );
-        final destination = path.join(directory.path, '${entry.key}_$safeName');
-        await source.copy(destination);
-        copied.add(
-          PendingBadgeEvidence(
-            id: 0,
-            requirementId: evidence.requirementId,
-            storedPath: destination,
-            originalName: evidence.fileName,
-          ),
-        );
-      }
-      return copied;
-    } catch (_) {
-      if (await directory.exists()) {
-        await directory.delete(recursive: true);
-      }
-      rethrow;
-    }
-  }
-
-  Future<void> _deleteStoredEvidenceFiles(
-    List<PendingBadgeEvidence> evidences,
-  ) async {
-    final directories = <String>{};
-    for (final evidence in evidences) {
-      final file = File(evidence.storedPath);
-      directories.add(path.dirname(file.path));
-      try {
-        if (await file.exists()) await file.delete();
-      } catch (_) {
-        // A linha já foi removida; a limpeza de um ficheiro órfão é best effort.
-      }
-    }
-    for (final directoryPath in directories) {
-      try {
-        final directory = Directory(directoryPath);
-        if (await directory.exists()) await directory.delete(recursive: true);
-      } catch (_) {
-        // Não bloquear a sincronização por uma falha de limpeza local.
-      }
-    }
-  }
-
-  Future<PendingBadgeApplication> _pendingBadgeApplicationFromRow(
-    DatabaseExecutor db,
-    Map<String, Object?> row,
-  ) async {
-    final localId = row['id'] as int? ?? 0;
-    final evidenceRows = await db.query(
-      'pending_badge_evidences',
-      where: 'pending_application_id = ?',
-      whereArgs: [localId],
-      orderBy: 'id ASC',
-    );
-    return PendingBadgeApplication(
-      localId: localId,
-      clientRequestId: row['client_request_id'] as String? ?? '',
-      ownerUserId: row['owner_user_id'] as int? ?? 0,
-      badgeId: row['badge_id'] as int? ?? 0,
-      description: row['description'] as String?,
-      state: row['state'] as String? ?? 'queued',
-      attemptCount: row['attempt_count'] as int? ?? 0,
-      lastError: row['last_error'] as String?,
-      lastHttpStatus: row['last_http_status'] as int?,
-      serverApplicationId: row['server_application_id'] as int?,
-      createdAt:
-          DateTime.tryParse(row['created_at'] as String? ?? '') ??
-          DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
-      updatedAt:
-          DateTime.tryParse(row['updated_at'] as String? ?? '') ??
-          DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
-      evidences: evidenceRows.map(_pendingBadgeEvidenceFromRow).toList(),
-    );
-  }
-
-  PendingBadgeEvidence _pendingBadgeEvidenceFromRow(Map<String, Object?> row) {
-    return PendingBadgeEvidence(
-      id: row['id'] as int? ?? 0,
-      requirementId: row['requirement_id'] as int? ?? 0,
-      storedPath: row['stored_path'] as String? ?? '',
-      originalName: row['original_name'] as String? ?? '',
-    );
-  }
-
-  Future<List<CatalogBadge>> getCatalogBadges({int? ownerUserId}) async {
+  Future<List<CatalogBadge>> getCatalogBadges() async {
     if (_useMemoryStore) {
       return DashboardData.sample().recommendations.asMap().entries.map((
         entry,
@@ -2246,14 +1579,10 @@ class LocalBadgesDatabase {
       WHERE b.ativo IS NULL OR b.ativo = 1
       ORDER BY b.pontos DESC, b.nome ASC
     ''');
-    final applicationRows = ownerUserId == null
-        ? const <Map<String, Object?>>[]
-        : await db.query(
-            'candidaturas',
-            where: 'consultor_id = ?',
-            whereArgs: [ownerUserId],
-            orderBy: 'updated_at DESC, created_at DESC',
-          );
+    final applicationRows = await db.query(
+      'candidaturas',
+      orderBy: 'updated_at DESC, created_at DESC',
+    );
     final applicationByBadgeId = <int, CatalogApplication>{};
     for (final row in applicationRows) {
       final badgeId = row['badge_id'] as int?;
@@ -2298,9 +1627,7 @@ class LocalBadgesDatabase {
     return result;
   }
 
-  Future<List<MyBadgeApplication>> getMyBadgeApplications({
-    required int ownerUserId,
-  }) async {
+  Future<List<MyBadgeApplication>> getMyBadgeApplications() async {
     if (_useMemoryStore) {
       return [
         MyBadgeApplication(
@@ -2329,24 +1656,19 @@ class LocalBadgesDatabase {
     }
 
     final db = await database;
-    final awardRows = await db.rawQuery(
-      '''
+    final awardRows = await db.rawQuery('''
       SELECT cb.*, b.nome AS badge_nome, b.descricao AS badge_descricao,
              b.imagem AS badge_imagem, b.pontos AS badge_pontos,
              b.uuid AS badge_public_token
       FROM consultant_badges cb
       LEFT JOIN badges b ON b.id = cb.badge_id
-      WHERE cb.consultor_id = ?
       ORDER BY cb.obtained_date DESC
-    ''',
-      [ownerUserId],
-    );
+    ''');
     final awardsByBadge = {
       for (final award in awardRows)
         if (award['badge_id'] is int) award['badge_id'] as int: award,
     };
-    final rows = await db.rawQuery(
-      '''
+    final rows = await db.rawQuery('''
       SELECT
         c.id AS candidatura_id,
         c.badge_id,
@@ -2361,11 +1683,8 @@ class LocalBadgesDatabase {
         b.raw_json AS badge_raw_json
       FROM candidaturas c
       LEFT JOIN badges b ON b.id = c.badge_id
-      WHERE c.consultor_id = ?
       ORDER BY c.updated_at DESC, c.created_at DESC
-    ''',
-      [ownerUserId],
-    );
+    ''');
 
     final applications = <MyBadgeApplication>[];
     for (final row in rows) {
@@ -2567,7 +1886,7 @@ class LocalBadgesDatabase {
 
   Future<LocalUserProfile?> getCurrentUserProfile() async {
     if (_useMemoryStore) {
-      return _memoryCurrentUserProfile;
+      return null;
     }
 
     final db = await database;
@@ -2642,7 +1961,6 @@ class LocalBadgesDatabase {
   }
 
   bool get _useMemoryStore {
-    if (_databaseFactoryOverride != null) return false;
     return WidgetsBinding.instance.runtimeType.toString().contains(
           'TestWidgetsFlutterBinding',
         ) ||

@@ -9,53 +9,48 @@ import 'package:softinsa_badges_mobile/services/auth_service.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test(
-    'auto-registo envia a area e nao inicia sessao antes da confirmacao',
-    () async {
-      SharedPreferences.setMockInitialValues({});
-      late Map<String, dynamic> payload;
-      final service = AuthService(
-        client: MockClient((request) async {
-          expect(request.url.path, endsWith('/auth/signup'));
-          payload = Map<String, dynamic>.from(jsonDecode(request.body) as Map);
-          return http.Response(
-            '{"message":"Conta criada. Confirma o teu email."}',
-            201,
-            headers: {'content-type': 'application/json'},
-          );
-        }),
-      );
+  test('auto-registo envia a area e nao inicia sessao antes da confirmacao', () async {
+    SharedPreferences.setMockInitialValues({});
+    late Map<String, dynamic> payload;
+    final service = AuthService(
+      client: MockClient((request) async {
+        expect(request.url.path, endsWith('/auth/signup'));
+        payload = Map<String, dynamic>.from(jsonDecode(request.body) as Map);
+        return http.Response(
+          '{"message":"Conta criada. Confirma o teu email."}',
+          201,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
 
-      await service.createAccount(
-        name: 'Consultora Teste',
-        email: 'consultora@softinsa.pt',
-        password: 'Password123!',
-        areaId: 7,
-      );
+    await service.createAccount(
+      name: 'Consultora Teste',
+      email: 'consultora@softinsa.pt',
+      password: 'Password123!',
+      areaId: 7,
+    );
 
-      final preferences = await SharedPreferences.getInstance();
-      expect(payload['areaId'], 7);
-      expect(payload['email'], 'consultora@softinsa.pt');
-      expect(preferences.getBool('softinsa_user_logged_in'), isNot(true));
-      expect(await service.getSavedEmail(), 'consultora@softinsa.pt');
-    },
-  );
+    final preferences = await SharedPreferences.getInstance();
+    expect(payload['areaId'], 7);
+    expect(payload['email'], 'consultora@softinsa.pt');
+    expect(preferences.getBool('softinsa_user_logged_in'), isNot(true));
+    expect(await service.getSavedEmail(), 'consultora@softinsa.pt');
+  });
 
   test('login só memoriza o email quando a opção é selecionada', () async {
     SharedPreferences.setMockInitialValues({
       'softinsa_user_email': 'anterior@softinsa.pt',
     });
     final service = AuthService(
-      client: MockClient(
-        (request) async => http.Response(
-          jsonEncode({
-            'token': _fakeValidToken(),
-            'user': {'id': 3, 'nome': 'Consultora', 'role': 'Consultor'},
-          }),
-          200,
-          headers: {'content-type': 'application/json'},
-        ),
-      ),
+      client: MockClient((request) async => http.Response(
+        jsonEncode({
+          'token': _fakeValidToken(),
+          'user': {'id': 3, 'nome': 'Consultora', 'role': 'Consultor'},
+        }),
+        200,
+        headers: {'content-type': 'application/json'},
+      )),
     );
 
     await service.login(
@@ -147,26 +142,10 @@ void main() {
     );
     expect(requestedPaths, isNot(contains(endsWith('/auth/login'))));
   });
-
-  test('snapshot usa identidade e token do mesmo JWT', () async {
-    final token = _fakeValidToken(id: 7);
-    SharedPreferences.setMockInitialValues({
-      'softinsa_user_logged_in': true,
-      'softinsa_auth_token': token,
-      'softinsa_user_id': 99,
-    });
-
-    final snapshot = await AuthService().getSessionSnapshot();
-
-    expect(snapshot?.userId, 7);
-    expect(snapshot?.token, token);
-    expect(await AuthService().getCurrentUserId(), 7);
-  });
 }
 
-String _fakeValidToken({int id = 3}) {
+String _fakeValidToken() {
   final payload = {
-    'id': id,
     'exp':
         DateTime.now().add(const Duration(hours: 2)).millisecondsSinceEpoch ~/
         1000,

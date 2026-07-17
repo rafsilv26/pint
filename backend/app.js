@@ -12,9 +12,7 @@ const sequelize = require('./src/config/database');
 const { ensurePublicBadgeTokens } = require('./src/services/publicBadgeToken.service');
 require('./src/models'); // Regista todos os modelos no Sequelize.
 const { createCorsOptions } = require('./src/config/cors');
-const {
-    prepararBaseDeDadosComRetry
-} = require('./src/services/databaseStartup.service');
+const { prepararBaseDeDados } = require('./src/services/databaseStartup.service');
 const { runMigrations } = require('./src/services/migrationRunner.service');
 
 const app = express();
@@ -59,12 +57,8 @@ app.use((error, _req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 const iniciarServidor = async () => {
-    const servidor = app.listen(PORT, '0.0.0.0', () => {
-        console.log(`Servidor a correr na porta ${PORT}`);
-    });
-
     try {
-        await prepararBaseDeDadosComRetry({
+        await prepararBaseDeDados({
             sequelize,
             executarMigrations: runMigrations,
             tarefasDepoisDasMigrations: [ensurePublicBadgeTokens]
@@ -77,10 +71,13 @@ const iniciarServidor = async () => {
         iniciarJobSLA();
         iniciarJobExpiracoes();
 
-        return servidor;
+        return app.listen(PORT, () => {
+            console.log(`Servidor a correr na porta ${PORT}`);
+        });
     } catch (err) {
         console.error('❌ Erro crucial de ligação:', err);
-        return servidor;
+        process.exitCode = 1;
+        return null;
     }
 };
 

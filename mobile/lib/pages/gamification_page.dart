@@ -1,11 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../l10n/app_language.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
-import '../services/app_data_refresh_service.dart';
 import '../services/app_sync_service.dart';
 
 class GamificationPage extends StatefulWidget {
@@ -23,21 +20,9 @@ class _GamificationPageState extends State<GamificationPage> {
   void initState() {
     super.initState();
     gamificationFuture = repository.getGamification();
-    AppDataRefreshService.instance.addListener(handleDataChanged);
-  }
-
-  @override
-  void dispose() {
-    AppDataRefreshService.instance.removeListener(handleDataChanged);
-    super.dispose();
-  }
-
-  void handleDataChanged() {
-    unawaited(reload());
   }
 
   Future<void> reload() async {
-    if (!mounted) return;
     final future = repository.getGamification();
     setState(() => gamificationFuture = future);
     await future;
@@ -103,7 +88,11 @@ class _GamificationPageState extends State<GamificationPage> {
           child: RefreshIndicator(
             onRefresh: () async {
               await AppSyncService().synchronizeIfNeeded();
-              await reload();
+              final future = repository.getGamification();
+              setState(() {
+                gamificationFuture = future;
+              });
+              await future;
             },
             child: LayoutBuilder(
               builder: (context, constraints) {

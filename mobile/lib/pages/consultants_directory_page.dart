@@ -1,12 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../l10n/app_language.dart';
 import '../models/consultant_profile.dart';
 import '../models/mobile_api_data.dart';
 import '../repositories/mobile_api_repository.dart';
-import '../services/app_data_refresh_service.dart';
 import '../services/app_sync_service.dart';
 import '../widgets/app_bottom_navigation.dart';
 import 'consultant_detail_page.dart';
@@ -29,25 +26,12 @@ class _ConsultantsDirectoryPageState extends State<ConsultantsDirectoryPage> {
   void initState() {
     super.initState();
     directoryFuture = repository.getConsultantsDirectory();
-    AppDataRefreshService.instance.addListener(handleDataChanged);
   }
 
   @override
   void dispose() {
-    AppDataRefreshService.instance.removeListener(handleDataChanged);
     searchController.dispose();
     super.dispose();
-  }
-
-  void handleDataChanged() {
-    unawaited(reloadLocal());
-  }
-
-  Future<void> reloadLocal() async {
-    if (!mounted) return;
-    final future = repository.getConsultantsDirectory();
-    setState(() => directoryFuture = future);
-    await future;
   }
 
   @override
@@ -85,7 +69,11 @@ class _ConsultantsDirectoryPageState extends State<ConsultantsDirectoryPage> {
                       : RefreshIndicator(
                           onRefresh: () async {
                             await AppSyncService().synchronizeIfNeeded();
-                            await reloadLocal();
+                            final future = repository.getConsultantsDirectory();
+                            setState(() {
+                              directoryFuture = future;
+                            });
+                            await future;
                           },
                           child: _DirectoryList(
                             consultants: filteredConsultants,

@@ -6,17 +6,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api_config.dart';
 import 'local_badges_database.dart';
-import 'sync_preferences_service.dart';
 
 class AuthService {
-  AuthService({
-    http.Client? client,
-    LocalBadgesDatabase? database,
-    SyncPreferencesService? syncPreferencesService,
-  }) : client = client ?? http.Client(),
-       database = database ?? LocalBadgesDatabase.instance,
-       syncPreferencesService =
-           syncPreferencesService ?? SyncPreferencesService();
+  AuthService({http.Client? client, LocalBadgesDatabase? database})
+    : client = client ?? http.Client(),
+      database = database ?? LocalBadgesDatabase.instance;
 
   static const String _loggedInKey = 'softinsa_user_logged_in';
   static const String _nameKey = 'softinsa_user_name';
@@ -31,7 +25,6 @@ class AuthService {
 
   final http.Client client;
   final LocalBadgesDatabase database;
-  final SyncPreferencesService syncPreferencesService;
 
   Future<bool> isLoggedIn() async {
     final preferences = await SharedPreferences.getInstance();
@@ -78,24 +71,15 @@ class AuthService {
     }
 
     final user = Map<String, dynamic>.from(body['user'] as Map? ?? {});
-    final activatedUserId = (user['id'] as num?)?.toInt() ?? 0;
-    if (activatedUserId <= 0) {
-      throw const AuthException('A API devolveu um utilizador inválido.');
-    }
-    final userChanged = await database.upsertCurrentUser(user);
-    if (userChanged) {
-      await syncPreferencesService.invalidatePersonalSyncState(activatedUserId);
-    }
-
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setBool(_loggedInKey, false);
+    await preferences.setBool(_loggedInKey, true);
     await preferences.setString(tokenKey, token);
     if (rememberLogin) {
       await preferences.setString(_emailKey, email);
     } else {
       await preferences.remove(_emailKey);
     }
-    await preferences.setInt(_userIdKey, activatedUserId);
+    await preferences.setInt(_userIdKey, (user['id'] as num?)?.toInt() ?? 0);
 
     final name = user['nome'] as String?;
     if (name != null && name.isNotEmpty) {
@@ -119,7 +103,6 @@ class AuthService {
     }
 
     await preferences.setBool('softinsa_remember_login', rememberLogin);
-    await preferences.setBool(_loggedInKey, true);
   }
 
   Future<void> createAccount({
@@ -315,26 +298,6 @@ class AuthService {
     return preferences.getString(tokenKey);
   }
 
-  /// Snapshot atomico da identidade autenticada. O identificador vem do mesmo
-  /// JWT que sera usado no pedido, nunca de uma preferencia separada.
-  Future<AuthSessionSnapshot?> getSessionSnapshot() async {
-    final preferences = await SharedPreferences.getInstance();
-    if (preferences.getBool(_loggedInKey) != true) return null;
-    final token = preferences.getString(tokenKey);
-    if (token == null || token.isEmpty || _isExpiredJwt(token)) return null;
-    final payload = _decodeJwtPayload(token);
-    final rawId = payload?['id'];
-    final userId = rawId is num
-        ? rawId.toInt()
-        : int.tryParse(rawId?.toString() ?? '');
-    if (userId == null || userId <= 0) return null;
-    return AuthSessionSnapshot(userId: userId, token: token);
-  }
-
-  Future<int?> getCurrentUserId() async {
-    return (await getSessionSnapshot())?.userId;
-  }
-
   Future<void> logout() async {
     final preferences = await SharedPreferences.getInstance();
     await _clearSession(preferences);
@@ -430,8 +393,21 @@ class AuthService {
   }
 
   bool _isExpiredJwt(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      return false;
+    }
+
     try {
-      final exp = _decodeJwtPayload(token)?['exp'];
+      final payload = utf8.decode(
+        base64Url.decode(base64Url.normalize(parts[1])),
+      );
+      final decoded = jsonDecode(payload);
+      if (decoded is! Map<String, dynamic>) {
+        return false;
+      }
+
+      final exp = decoded['exp'];
       if (exp is! num) {
         return false;
       }
@@ -445,37 +421,6 @@ class AuthService {
       return false;
     }
   }
-
-  Map<String, dynamic>? _decodeJwtPayload(String token) {
-    final parts = token.split('.');
-    if (parts.length != 3) return null;
-    try {
-      final payload = utf8.decode(
-        base64Url.decode(base64Url.normalize(parts[1])),
-      );
-      final decoded = jsonDecode(payload);
-      return decoded is Map<String, dynamic> ? decoded : null;
-    } catch (_) {
-      return null;
-    }
-  }
-}
-
-class AuthSessionSnapshot {
-  const AuthSessionSnapshot({required this.userId, required this.token});
-
-  final int userId;
-  final String token;
-
-  @override
-  bool operator ==(Object other) {
-    return other is AuthSessionSnapshot &&
-        other.userId == userId &&
-        other.token == token;
-  }
-
-  @override
-  int get hashCode => Object.hash(userId, token);
 }
 
 class PasswordChangeResult {

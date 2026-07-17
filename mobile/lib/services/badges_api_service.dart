@@ -250,10 +250,7 @@ class BadgesApiService {
     required int badgeId,
     List<int> requisitoIds = const [],
     List<EvidenceAttachment> evidenceFiles = const [],
-    List<String> clientEvidenceIds = const [],
     String? descricao,
-    String? clientRequestId,
-    String? authToken,
   }) async {
     if (baseUrl.trim().isEmpty) {
       throw const ApiNotConfiguredException();
@@ -263,15 +260,8 @@ class BadgesApiService {
       'POST',
       Uri.parse('$_normalizedBaseUrl/candidaturas'),
     );
-    request.headers.addAll(
-      authToken != null && authToken.isNotEmpty
-          ? {'Authorization': 'Bearer $authToken'}
-          : await _authHeaders(),
-    );
+    request.headers.addAll(await _authHeaders());
     request.fields['badgeId'] = badgeId.toString();
-    if (clientRequestId != null && clientRequestId.isNotEmpty) {
-      request.fields['clientSubmissionId'] = clientRequestId;
-    }
     if (descricao != null && descricao.isNotEmpty) {
       request.fields['descricao'] = descricao;
     }
@@ -282,12 +272,6 @@ class BadgesApiService {
     for (final requisitoId in requirementIds) {
       request.files.add(
         http.MultipartFile.fromString('requisitoIds', requisitoId.toString()),
-      );
-    }
-
-    for (final clientEvidenceId in clientEvidenceIds) {
-      request.files.add(
-        http.MultipartFile.fromString('clientEvidenceIds', clientEvidenceId),
       );
     }
 
@@ -302,28 +286,20 @@ class BadgesApiService {
       );
     }
 
-    final response = await (() async {
-      final streamedResponse = await client.send(request);
-      return http.Response.fromStream(streamedResponse);
-    })().timeout(const Duration(seconds: 35));
-    Object? decoded;
-    if (response.body.trim().isNotEmpty) {
-      try {
-        decoded = _decodeResponse(response);
-      } on FormatException {
-        if (response.statusCode >= 200 && response.statusCode < 300) {
-          throw const ApiInvalidResponseException();
-        }
-      }
+    final streamedResponse = await client
+        .send(request)
+        .timeout(const Duration(seconds: 35));
+    final response = await http.Response.fromStream(streamedResponse);
+    final decoded = response.body.trim().isEmpty
+        ? null
+        : _decodeResponse(response);
+
+    if (response.statusCode == 204 || response.body.trim().isEmpty) {
+      return null;
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw ApiRequestException(response.statusCode, _apiMessage(decoded));
-    }
-
-    if (response.statusCode == 204) return null;
-    if (response.body.trim().isEmpty) {
-      throw const ApiInvalidResponseException();
     }
 
     if (decoded is Map<String, dynamic>) {
@@ -333,7 +309,7 @@ class BadgesApiService {
       return Map<String, dynamic>.from(decoded);
     }
 
-    throw const ApiInvalidResponseException();
+    return null;
   }
 
   MediaType _contentTypeForFile(String fileName) {

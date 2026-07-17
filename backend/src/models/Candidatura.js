@@ -21,11 +21,6 @@ const Candidatura = sequelize.define('Candidatura', {
     allowNull: false,
     comment: 'Quem está a candidatar-se'
   },
-  clientSubmissionId: {
-    type: DataTypes.STRING(120),
-    allowNull: true,
-    comment: 'Chave idempotente enviada pela aplicação mobile'
-  },
   talentManagerId: {
     type: DataTypes.INTEGER,
     allowNull: true,
@@ -80,12 +75,7 @@ const Candidatura = sequelize.define('Candidatura', {
   }
 }, {
   tableName: 'CANDIDATURABADGE',
-  timestamps: false,
-  indexes: [{
-    unique: true,
-    fields: ['consultorId', 'clientSubmissionId'],
-    name: 'candidatura_consultor_client_submission_unique'
-  }]
+  timestamps: false
 });
 
 module.exports = Candidatura;

@@ -1,6 +1,5 @@
 import { useEffect, useEffectEvent, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { clearHttpCache } from '../services/http'
 
 export function useAsync(fn, deps = []) {
   const { t } = useTranslation()
@@ -45,10 +44,7 @@ export function useAsync(fn, deps = []) {
 
   }, [dependencyKey, tick])
 
-  const reload = () => {
-    clearHttpCache()
-    setTick((t) => t + 1)
-  }
+  const reload = () => setTick((t) => t + 1)
 
   return { data, loading, error, reload }
 }
