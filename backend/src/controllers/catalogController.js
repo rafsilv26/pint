@@ -303,21 +303,18 @@ exports.updateResource = async (req, res) => {
         delete payload.createdAt;
     }
 
-    // Ao EDITAR o conteúdo de uma política RGPD (título/descrição), sobe a
-    // versão e apaga as aceitações antigas desse policyId: assim
-    // getPendingPolicies volta a apresentá-la e TODOS têm de a reaceitar.
-    // Alterar só flags como active/mandatory não conta como novo conteúdo.
+    // EDITAR uma política RGPD obriga TODOS os utilizadores a reaceitá-la:
+    // removemos as aceitações registadas dessa política, para
+    // getPendingPolicies a voltar a apresentar a todos no próximo arranque.
+    // Se o conteúdo (título/descrição) mudou, sobe também a versão.
     if (req.params.resource === 'policies') {
       const conteudoMudou =
         (payload.title !== undefined && payload.title !== row.title) ||
         (payload.description !== undefined && payload.description !== row.description);
-      if (conteudoMudou) {
-        if (!payload.version || payload.version === row.version) {
-          payload.version = proximaVersao(row.version);
-        }
-        payload.effectiveDate = payload.effectiveDate || new Date();
-        await models.PolicyRGPDAcceptance.destroy({ where: { policyId: row.policyId } });
+      if (conteudoMudou && (!payload.version || payload.version === row.version)) {
+        payload.version = proximaVersao(row.version);
       }
+      await models.PolicyRGPDAcceptance.destroy({ where: { policyId: row.policyId } });
     }
 
     // 4. ATUALIZA USANDO O PAYLOAD TRATADO (NÃO O REQ.BODY)
