@@ -1137,7 +1137,9 @@
     "botoes": {
       "entrando": "Logging in…",
       "entrar": "Login"
-    }
+    },
+    "descarregarApp": "Download the Android app",
+    "appBreve": "Android app available soon"
   },
   "sllDashboard": {
     "titulo": "Dashboard",

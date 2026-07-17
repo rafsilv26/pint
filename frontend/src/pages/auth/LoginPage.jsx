@@ -1,11 +1,15 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, Smartphone } from 'lucide-react'
 import AuthShell from '../../components/layout/AuthShell'
 import { Field } from '../../components/ui'
 import { useAuth } from '../../context/useAuth'
 import { homeForRole } from '../../config/navigation'
 import { useTranslation } from 'react-i18next'
+
+// URL do APK Android. Definir VITE_APK_URL no .env quando o build estiver pronto.
+// Vazia => mostra "disponível brevemente" (link desativado).
+const APK_URL = import.meta.env.VITE_APK_URL || ''
 
 export default function LoginPage() {
   const { t } = useTranslation()
@@ -98,6 +102,24 @@ export default function LoginPage() {
           {loading ? t('login.botoes.entrando') : t('login.botoes.entrar')}
         </button>
       </form>
+
+      <div className="text-center mt-3 pt-3 border-top">
+        {APK_URL ? (
+          <a
+            href={APK_URL}
+            className="btn btn-outline-brand btn-sm rounded-pill d-inline-flex align-items-center gap-2"
+            download
+          >
+            <Smartphone size={16} />
+            {t('login.descarregarApp')}
+          </a>
+        ) : (
+          <span className="small text-muted d-inline-flex align-items-center gap-2">
+            <Smartphone size={16} />
+            {t('login.appBreve')}
+          </span>
+        )}
+      </div>
     </AuthShell>
   )
 }

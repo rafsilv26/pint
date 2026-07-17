@@ -1139,7 +1139,9 @@
     "botoes": {
       "entrando": "Entrando…",
       "entrar": "Entrar"
-    }
+    },
+    "descarregarApp": "Descargar la app de Android",
+    "appBreve": "App de Android disponible pronto"
   },
   "sllDashboard": {
     "titulo": "Panel de Control",
