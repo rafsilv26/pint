@@ -5,12 +5,17 @@ const prepararBaseDeDados = async ({
   executarMigrations,
   tarefasDepoisDasMigrations = []
 }) => {
+  console.log('[startup] A autenticar na base de dados...');
   await sequelize.authenticate();
-  await executarMigrations(sequelize);
+  console.log('[startup] Autenticado. A correr migrations...');
+  const executadas = await executarMigrations(sequelize);
+  console.log(`[startup] Migrations OK (${Array.isArray(executadas) ? executadas.length : 0} aplicadas).`);
 
   for (const tarefa of tarefasDepoisDasMigrations) {
+    console.log(`[startup] Tarefa pós-migration: ${tarefa.name || 'anónima'}...`);
     await tarefa();
   }
+  console.log('[startup] Preparação da base de dados concluída.');
 };
 
 module.exports = { prepararBaseDeDados };
