@@ -12,7 +12,9 @@ const sequelize = require('./src/config/database');
 const { ensurePublicBadgeTokens } = require('./src/services/publicBadgeToken.service');
 require('./src/models'); // Regista todos os modelos no Sequelize.
 const { createCorsOptions } = require('./src/config/cors');
-const { prepararBaseDeDados } = require('./src/services/databaseStartup.service');
+const {
+    prepararBaseDeDadosComRetry
+} = require('./src/services/databaseStartup.service');
 const { runMigrations } = require('./src/services/migrationRunner.service');
 
 const app = express();
@@ -62,7 +64,7 @@ const iniciarServidor = async () => {
     });
 
     try {
-        await prepararBaseDeDados({
+        await prepararBaseDeDadosComRetry({
             sequelize,
             executarMigrations: runMigrations,
             tarefasDepoisDasMigrations: [ensurePublicBadgeTokens]
@@ -78,8 +80,6 @@ const iniciarServidor = async () => {
         return servidor;
     } catch (err) {
         console.error('❌ Erro crucial de ligação:', err);
-        // A porta fica disponível para o Render conseguir apresentar os logs e
-        // reiniciar o serviço. A causa da falha continua visível acima.
         return servidor;
     }
 };

@@ -1,5 +1,8 @@
 const migrations = require('../migrations');
 
+const MIGRATION_LOCK_TIMEOUT_MS = 10000;
+const MIGRATION_STATEMENT_TIMEOUT_MS = 60000;
+
 const ensureMigrationTable = (sequelize) => sequelize.query(`
   CREATE TABLE IF NOT EXISTS "SCHEMA_MIGRATION" (
     "name" VARCHAR(255) PRIMARY KEY,
@@ -19,6 +22,17 @@ const runMigrations = async (sequelize, migrationList = migrations) => {
 
     const transaction = await sequelize.transaction();
     try {
+      // Num deploy blue/green, a instância anterior pode manter locks durante
+      // alguns segundos. Sem limites, um ALTER TABLE fica à espera até o
+      // Render terminar o novo processo por não abrir a porta a tempo.
+      await sequelize.query(
+        `SET LOCAL lock_timeout = '${MIGRATION_LOCK_TIMEOUT_MS}ms'`,
+        { transaction }
+      );
+      await sequelize.query(
+        `SET LOCAL statement_timeout = '${MIGRATION_STATEMENT_TIMEOUT_MS}ms'`,
+        { transaction }
+      );
       await migration.up({ sequelize, queryInterface, transaction });
       await sequelize.query(
         'INSERT INTO "SCHEMA_MIGRATION" ("name") VALUES (:name)',
@@ -27,7 +41,17 @@ const runMigrations = async (sequelize, migrationList = migrations) => {
       await transaction.commit();
       executed.push(migration.name);
     } catch (error) {
-      await transaction.rollback();
+      try {
+        await transaction.rollback();
+      } catch (rollbackError) {
+        // Preserva o erro original da migration. Uma ligação já terminada
+        // também pode falhar no ROLLBACK, como aconteceu no Render.
+        error.rollbackError = rollbackError;
+        console.error(
+          `[migration] Falha adicional ao reverter ${migration.name}:`,
+          rollbackError.message
+        );
+      }
       throw error;
     }
   }

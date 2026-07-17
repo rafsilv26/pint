@@ -1,4 +1,9 @@
-// Prepara a base de dados antes de o Express começar a aceitar pedidos.
+const DEFAULT_RETRY_INTERVAL_MS = 10000;
+
+const wait = (milliseconds) => new Promise((resolve) => {
+  setTimeout(resolve, milliseconds);
+});
+
 // O esquema é atualizado por migrations versionadas, nunca por sync alter.
 const prepararBaseDeDados = async ({
   sequelize,
@@ -18,4 +23,26 @@ const prepararBaseDeDados = async ({
   console.log('[startup] Preparação da base de dados concluída.');
 };
 
-module.exports = { prepararBaseDeDados };
+const prepararBaseDeDadosComRetry = async ({
+  retryIntervalMs = DEFAULT_RETRY_INTERVAL_MS,
+  esperar = wait,
+  ...options
+}) => {
+  let tentativa = 0;
+
+  while (true) {
+    tentativa += 1;
+    try {
+      return await prepararBaseDeDados(options);
+    } catch (error) {
+      console.error(
+        `[startup] Preparação da base de dados falhou (tentativa ${tentativa}). `
+          + `Nova tentativa em ${retryIntervalMs} ms:`,
+        error.message
+      );
+      await esperar(retryIntervalMs);
+    }
+  }
+};
+
+module.exports = { prepararBaseDeDados, prepararBaseDeDadosComRetry };

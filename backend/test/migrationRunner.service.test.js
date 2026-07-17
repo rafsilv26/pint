@@ -43,3 +43,28 @@ test('não repete migrations e faz rollback quando uma migration falha', async (
   await assert.rejects(runMigrations(failing.sequelize, failing.migrations), /migration failed/);
   assert.deepEqual(failing.events, ['up:001_test', 'rollback']);
 });
+
+test('preserva o erro original quando o rollback também perde a ligação', async () => {
+  const erroOriginal = new Error('lock timeout');
+  const sequelize = {
+    getQueryInterface: () => ({}),
+    transaction: async () => ({
+      commit: async () => {},
+      rollback: async () => { throw new Error('connection is not queryable'); }
+    }),
+    query: async (sql) => {
+      if (sql.includes('SELECT "name"')) return [[], null];
+      return [[], null];
+    }
+  };
+  const migrations = [{
+    name: '001_lock',
+    up: async () => { throw erroOriginal; }
+  }];
+
+  await assert.rejects(
+    runMigrations(sequelize, migrations),
+    (error) => error === erroOriginal
+      && error.rollbackError?.message === 'connection is not queryable'
+  );
+});
