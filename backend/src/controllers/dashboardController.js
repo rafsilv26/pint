@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const {
   Area,
   Badge,
+  BadgePremium,
   Candidatura,
   ConsultorBadge,
   ConsultorBadgePremium,

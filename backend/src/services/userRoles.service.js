@@ -5,12 +5,16 @@ const {
   ServiceLineLeader
 } = require('../models');
 
-// Estrutura de dados para mapear os perfis aos seus modelos e chaves correspondentes
+// Estrutura de dados para mapear os perfis aos seus modelos e chaves correspondentes.
+// A ORDEM define a prioridade do perfil primário (roles[0]): um utilizador
+// com vários perfis entra sempre pelo mais privilegiado. Consultor fica em
+// último — caso contrário um TM/SLL que também tenha perfil de consultor era
+// tratado como consultor e caía no painel errado.
 const ROLE_MODELS = {
   Admin: { model: Administrator, key: 'adminId' },
-  Consultor: { model: Consultant, key: 'consultorId' },
+  ServiceLineLeader: { model: ServiceLineLeader, key: 'sslId' },
   TalentManager: { model: TalentManager, key: 'tmId' },
-  ServiceLineLeader: { model: ServiceLineLeader, key: 'sslId' }
+  Consultor: { model: Consultant, key: 'consultorId' }
 };
 
 // Normaliza os perfis, garantindo que são válidos e únicos (ex: 'Admin', ['Admin', 'Consultor'], 'InvalidRole' => ['Admin', 'Consultor'])
