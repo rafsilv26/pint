@@ -244,12 +244,22 @@ export async function getBadge(id) {
 }
 
 export async function getMinhasCandidaturas() {
-  const rows = await http('/candidaturas/minhas')
+  const [rows, awards] = await Promise.all([
+    http('/candidaturas/minhas'),
+    http('/catalog/consultor-badges').catch(() => []),
+  ])
+  // O link público de verificação usa o token do PRÉMIO (ConsultorBadge), não
+  // o do template do badge. Mapeia badgeId -> token do award mais recente.
+  const tokenPorBadge = new Map()
+  for (const a of awards || []) {
+    if (a.publicToken && !tokenPorBadge.has(a.badgeId)) tokenPorBadge.set(a.badgeId, a.publicToken)
+  }
   return (rows || []).map((c) => {
     const code = c.status?.code || c.BadgeStatus?.code
+    const badgeId = c.Badge?.id ?? c.badgeId
     return {
       id: c.id,
-      badge: { id: c.Badge?.id ?? c.badgeId, nome: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }), publicToken: c.Badge?.publicToken || '' },
+      badge: { id: badgeId, nome: c.Badge?.nome || i18next.t('api.generic.badgeId', { id: c.badgeId }), publicToken: tokenPorBadge.get(badgeId) || '' },
       tags: [],
       status: { code, name: statusName(code, c.status?.name || code || '—'), cor: CODE_COR[code] || 'gray' },
       progresso: CODE_PROGRESSO[code] ?? 0,
@@ -367,7 +377,10 @@ export async function getMeusBadges() {
       obtainedDate: r.obtainedDate,
       expirationDate: r.expirationDate,
       valid: r.valid !== false,
-      publicToken: b.publicToken || '',
+      // O link público de verificação usa o token do PRÉMIO (ConsultorBadge),
+      // não o do template do badge — é esse que o backend procura em
+      // /relatorios/verificar/:publicToken.
+      publicToken: r.publicToken || '',
       imagem: b.imagem || null,
     }
   })
