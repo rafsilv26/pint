@@ -33,7 +33,11 @@ const buildCandidaturaWhereParaUtilizador = async (user) => {
   return { badgeId: { [Op.in]: badgeIds.length ? badgeIds : [-1] } };
 };
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const findAwardByPublicToken = async (publicToken) => {
+  if (!publicToken || !UUID_REGEX.test(publicToken)) return null;
+
   const award = await ConsultorBadge.findOne({
     where: { publicToken },
     include: [
