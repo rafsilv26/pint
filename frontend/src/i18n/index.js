@@ -15,13 +15,9 @@ i18n
       es: { translation: es }
     },
     fallbackLng: 'pt',
-    // O idioma do utilizador vive na base de dados (aplicado no login pelo
-    // AuthContext). Não guardamos nem lemos cache do browser — só usamos o
-    // idioma do browser como palpite inicial antes do login.
     detection: { order: ['navigator'], caches: [] },
     interpolation: { escapeValue: false }
   })
 
-// Remove a cache antiga deixada por versões anteriores (deixou de ser usada).
 localStorage.removeItem('i18nextLng')
 

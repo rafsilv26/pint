@@ -14,9 +14,6 @@ const TECH_TINTS = {
   violet: 'tint-violet-soft',
 }
 
-// Cache a nível de módulo: cada vista (scope/tipo) faz fetch à DB remota uma
-// vez e fica em memória durante o TTL, sobrevivendo a sair/voltar à página.
-// Trocas de scope/tipo dentro do TTL são instantâneas, sem ir ao backend.
 const CACHE_TTL = 60_000
 const badgesCache = new Map()
 
@@ -42,7 +39,6 @@ export default function BadgesGridView({ titulo, linkBase, permitirCatalogoGloba
   const [q, setQ] = useState('')
 
   if (error) return <ErrorState onRetry={refresh} />
-  // useAsync mantém data antiga durante a troca de tipo; ignora até coincidir shape
   const rowsArePremium = data && data.length > 0 && data[0].requisitos === undefined
   const stale = data && data.length > 0 && rowsArePremium !== (tipo === 'premium')
   if (loading || !data || stale) return <Spinner />

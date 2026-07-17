@@ -4,7 +4,6 @@ const gerarExcelCandidaturas = async (candidaturas) => {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Candidaturas');
 
-  // Estilo do cabeçalho
   sheet.columns = [
     { header: 'ID', key: 'id', width: 8 },
     { header: 'Consultor', key: 'consultor', width: 30 },
@@ -15,18 +14,16 @@ const gerarExcelCandidaturas = async (candidaturas) => {
     { header: 'Data Aprovação', key: 'dataAprovacao', width: 20 }
   ];
 
-  // Estilo cabeçalho
   sheet.getRow(1).eachCell((cell) => {
     cell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF003087' } // azul Softinsa
+      fgColor: { argb: 'FF003087' }
     };
     cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
     cell.alignment = { horizontal: 'center' };
   });
 
-  // Dados
   candidaturas.forEach((c, index) => {
     const row = sheet.addRow({
       id: c.id,
@@ -34,15 +31,14 @@ const gerarExcelCandidaturas = async (candidaturas) => {
       badge: c.Badge?.nome,
       nivel: c.Badge?.nivel,
       estado: c.estado,
-      dataSubmissao: c.createdAt 
-        ? new Date(c.createdAt).toLocaleDateString('pt-PT') 
+      dataSubmissao: c.createdAt
+        ? new Date(c.createdAt).toLocaleDateString('pt-PT')
         : '-',
-      dataAprovacao: c.dataValidacaoServiceLine 
-        ? new Date(c.dataValidacaoServiceLine).toLocaleDateString('pt-PT') 
+      dataAprovacao: c.dataValidacaoServiceLine
+        ? new Date(c.dataValidacaoServiceLine).toLocaleDateString('pt-PT')
         : '-'
     });
 
-    // Alternar cor das linhas
     if (index % 2 === 0) {
       row.eachCell((cell) => {
         cell.fill = {

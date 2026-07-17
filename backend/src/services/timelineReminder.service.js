@@ -13,8 +13,6 @@ const startOfToday = () => {
 
 const dateKey = (value) => new Date(value).toISOString().slice(0, 10);
 
-// Each reminder has a stable title/message pair. This lets the scheduled job
-// run repeatedly without producing duplicate notices or push notifications.
 const createOnce = async ({ userId, title, message, type = 'warning' }) => {
   const existing = await Notice.findOne({ where: { userId, title, message } });
   if (existing) return false;

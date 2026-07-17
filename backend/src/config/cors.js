@@ -14,10 +14,6 @@ const getAllowedOrigins = (env = process.env) => {
   return new Set(configured);
 };
 
-// Padrões de origens permitidas (regex). Por defeito aceita qualquer
-// subdomínio de deploy do Vercel (produção + previews, cujo hash muda a cada
-// deploy e não pode ser fixado numa allowlist). Extensível via env
-// CORS_ORIGIN_PATTERNS (regex separados por vírgula).
 const getAllowedPatterns = (env = process.env) => {
   const configured = String(env.CORS_ORIGIN_PATTERNS || '')
     .split(',')
@@ -34,7 +30,6 @@ const createCorsOptions = (env = process.env) => {
 
   return {
     origin(origin, callback) {
-      // Apps móveis, curl e comunicação servidor-servidor não enviam Origin.
       const normalized = normalizeOrigin(origin);
       if (!origin || allowedOrigins.has(normalized) || allowedPatterns.some((pattern) => pattern.test(normalized))) {
         return callback(null, true);

@@ -1,13 +1,5 @@
 const { ExternalIntegration } = require('../models');
 
-// Integração com ferramentas corporativas (Teams / Slack). Quando um consultor
-// tem uma integração ativa com um webhook configurado, as notificações da
-// plataforma (aprovações, rejeições, SLA, ...) são também empurradas para o
-// canal externo. Falha sempre em silêncio: nunca deve partir o fluxo principal.
-
-// Slack espera { text }. Teams (Incoming Webhook clássico) espera um
-// MessageCard. Detetamos pela plataforma; por defeito assumimos Slack, que é o
-// formato mais simples e o mais tolerante.
 const construirPayload = (platform, { title, message }) => {
   const texto = title ? `*${title}*\n${message || ''}` : (message || '');
 
@@ -45,8 +37,6 @@ const enviarParaWebhook = async (webhookUrl, payload) => {
   }
 };
 
-// Envia uma notificação para todas as integrações ativas (com webhook) de um
-// utilizador. Não lança — devolve o número de webhooks contactados.
 const notificarIntegracoes = async (userId, { title, message }) => {
   if (!userId) return 0;
   try {

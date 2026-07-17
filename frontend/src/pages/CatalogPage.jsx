@@ -25,7 +25,6 @@ export default function CatalogPage() {
   if (error) return <ErrorState onRetry={reload} />
   if (loading || !badges) return <Spinner />
 
-  // Áreas distintas presentes no catálogo, para o filtro. Default = todas.
   const areas = [...new Set(badges.map((b) => b.area).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-PT'))
 
   const filtrados = badges.filter((b) =>

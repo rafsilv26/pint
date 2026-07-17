@@ -24,7 +24,6 @@ export default function TalentCatalogPage() {
   const rows = useMemo(() => data || [], [data])
   const options = useMemo(() => ({ areas: [...new Set(rows.map((row) => row.area).filter(Boolean))].sort(), levels: [...new Set(rows.map((row) => row.nivel).filter(Boolean))].sort() }), [rows])
   const isPremium = tipo === 'premium'
-  // useAsync mantém data antiga durante a troca de tipo; ignora até coincidir shape
   const rowsArePremium = rows.length > 0 && rows[0].requisitos === undefined
   const stale = rows.length > 0 && rowsArePremium !== isPremium
   const filtered = isPremium

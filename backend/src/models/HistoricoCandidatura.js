@@ -6,12 +6,12 @@ const HistoricoCandidatura = sequelize.define('HistoricoCandidatura', {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
-    field: 'logId' // <-- O ID real na tua base de dados Neon
+    field: 'logId'
   },
   candidaturaId: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    field: 'candidaturaId' // Mapeamento exato (camelCase)
+    field: 'candidaturaId'
   },
   userId: {
     type: DataTypes.INTEGER,
@@ -21,17 +21,17 @@ const HistoricoCandidatura = sequelize.define('HistoricoCandidatura', {
   estadoAnterior: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    field: 'oldStatusId' // Em vez de ANTIGO_ESTADOID
+    field: 'oldStatusId'
   },
   estadoNovo: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    field: 'newStatusId' // Em vez de NOVO_ESTADOID
+    field: 'newStatusId'
   },
   motivo: {
     type: DataTypes.STRING(500),
     allowNull: true,
-    field: 'reason' // Em vez de MOTIVO
+    field: 'reason'
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -39,10 +39,8 @@ const HistoricoCandidatura = sequelize.define('HistoricoCandidatura', {
     field: 'createdAt'
   }
 }, {
-  // ATENÇÃO: Confirma se o nome da tabela na Neon continua a ser este. 
-  // Se for algo como 'Histories' ou 'HistoricoCandidaturas', altera aqui!
-  tableName: 'LOGSWORKFLOW_CANDIDATURABADGE', 
-  timestamps: false 
+  tableName: 'LOGSWORKFLOW_CANDIDATURABADGE',
+  timestamps: false
 });
 
 module.exports = HistoricoCandidatura;

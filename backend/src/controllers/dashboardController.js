@@ -83,9 +83,6 @@ const getCurrentUserRanking = async (consultorId) => {
 
 const normalizarOrdemNivel = (ordem) => String(ordem || '').trim().toLocaleUpperCase();
 
-// Os níveis são guardados como letras (A, B, C, ...), mas esta comparação
-// também mantém um comportamento correto caso, no futuro, passem a ser 1, 2,
-// 3, ... . Não dependemos da ordem em que a BD devolve os registos.
 const compararOrdemNivel = (a, b) => normalizarOrdemNivel(a).localeCompare(
   normalizarOrdemNivel(b),
   'pt-PT',
@@ -124,8 +121,6 @@ const getRecommendations = async ({ consultant, acquiredBadges, activeBadgeIds }
   const badges = await Badge.findAll({
     where: {
       ativo: true,
-      // Não recomendamos badges já conquistadas nem uma badge cuja
-      // candidatura já está a decorrer; seria uma sugestão inútil.
       id: { [Op.notIn]: excludedBadgeIds.length ? excludedBadgeIds : [0] }
     },
     include: [
@@ -144,14 +139,10 @@ const getRecommendations = async ({ consultant, acquiredBadges, activeBadgeIds }
     areaId: consultant?.areaId
   });
 
-  // Se já atingiu o nível mais alto disponível, não voltamos a sugerir níveis
-  // inferiores apenas para preencher cartões: não seriam uma progressão real.
   if (ultimoNivelConcluido && !nivelAlvo) return [];
 
   return badges
     .sort((a, b) => {
-      // O nível seguinte é sempre a primeira escolha. Dentro do mesmo nível,
-      // badges com mais pontos aparecem primeiro.
       const prioridadeA = normalizarOrdemNivel(a.Level?.ordem) === nivelAlvo ? 0 : 1;
       const prioridadeB = normalizarOrdemNivel(b.Level?.ordem) === nivelAlvo ? 0 : 1;
       if (prioridadeA !== prioridadeB) return prioridadeA - prioridadeB;
@@ -177,8 +168,6 @@ const getRecommendations = async ({ consultant, acquiredBadges, activeBadgeIds }
   }));
 };
 
-// Progresso do consultor em cada learning path: badges distintos obtidos vs
-// total de badges ativos do path (via Level -> Area -> ServiceLine -> LearningPath).
 const getLearningPathsProgress = async ({ awards, activeBadgeIds, ownLearningPathId }) => {
   const pathBadges = await Badge.findAll({
     attributes: ['id'],
@@ -332,12 +321,8 @@ exports.getDashboard = async (req, res) => {
   }
 };
 
-// Exportado apenas para testes unitários da regra de progressão, sem chamar a BD.
 exports.__private__ = { compararOrdemNivel, planoDeProgressao };
 
-// Atividade recente agregada de várias entidades, para o painel de controlo do Admin.
-// Junta as criações mais recentes de utilizadores, badges, candidaturas, badges
-// atribuídos, avisos e políticas RGPD, ordenadas da mais recente para a mais antiga.
 exports.getAtividadeAdmin = async (req, res) => {
   try {
     const porTipo = Number(req.query.limitePorTipo) || 5;

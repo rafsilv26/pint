@@ -13,8 +13,6 @@ const RESOURCES = {
   badges: {
     model: models.Badge,
     beforeCreate: (body) => ({ publicToken: randomUUID(), ...body }),
-    // Traz a área/service line de cada badge (via Level) para permitir
-    // filtrar o catálogo por área do lado do cliente.
     listInclude: [{
       model: models.Level,
       attributes: ['id', 'ordem', 'nome', 'areaId'],
@@ -52,7 +50,6 @@ const getConfig = (req, res) => {
   return config;
 };
 
-// Sobe a versão (minor) de uma política: '1.0' -> '1.1', '2.3' -> '2.4'.
 const proximaVersao = (versaoAtual) => {
   const partes = String(versaoAtual || '1.0').split('.');
   const major = partes[0] || '1';
@@ -63,7 +60,6 @@ const proximaVersao = (versaoAtual) => {
 const buildWhere = (query) => {
   const where = {};
   Object.entries(query).forEach(([key, value]) => {
-    // scope é uma instrução de apresentação/autorização, não uma coluna da BD.
     if (['limit', 'offset', 'order', 'scope'].includes(key) || value === undefined || value === '') {
       return;
     }
@@ -92,21 +88,14 @@ const assertResourceAccess = (req) => {
   }
 };
 
-// O SLL pode navegar por todas as áreas da sua Service Line, mas não deve
-// obter a hierarquia de outras linhas por chamadas diretas ao catálogo.
 const restringirCatalogoPorServiceLine = async (req, resource, whereClause) => {
   const serviceLineId = await getServiceLineScopeForUser(req.user);
   if (!serviceLineId || !RECURSOS_DA_SERVICE_LINE.has(resource)) return whereClause;
 
-  // O SLL pode consultar o catálogo global de badges (modo scope=all), mas
-  // continua sem acesso às restantes estruturas de outras Service Lines.
-  // Apenas mostramos badges ativas, isto é, realmente disponíveis.
   if (resource === 'badges' && req.query.scope === 'all') {
     return { ...whereClause, ativo: true };
   }
 
-  // Badges "da minha Service Line": resolve direto por join, sem as queries
-  // intermédias de areas/levels que só servem os outros recursos.
   if (resource === 'badges') {
     const badgeIds = await getBadgeIdsDaServiceLine(serviceLineId);
     return { ...whereClause, id: { [Op.in]: badgeIds.length ? badgeIds : [-1] } };
@@ -136,8 +125,6 @@ exports.listResources = async (req, res) => {
 
     let whereClause = buildWhere(req.query);
 
-    // CORREÇÃO APLICADA AQUI:
-    // Se a tabela tiver a coluna 'deletedAt', filtra para listar APENAS os não apagados.
     if (config.model.rawAttributes.deletedAt) {
       whereClause.deletedAt = null;
     }
@@ -146,7 +133,6 @@ exports.listResources = async (req, res) => {
       whereClause = await restringirCatalogoPorServiceLine(req, req.params.resource, whereClause);
     }
 
-    // Recursos pessoais nunca podem expor dados de outros consultores.
     const personalResources = {
       'consultor-badges': 'consultorId',
       'consultor-badge-premium': 'consultorId',
@@ -160,8 +146,6 @@ exports.listResources = async (req, res) => {
       whereClause[personalField] = req.user.id;
     }
 
-    // As aceitações de RGPD são dados pessoais: um consultor só pode ver as
-    // suas próprias, nunca as de outros. Admin continua a ver tudo.
     if (req.params.resource === 'policy-acceptances' && req.user && !req.user.roles.includes('Admin')) {
       whereClause.consultorId = req.user.id;
     }
@@ -200,8 +184,6 @@ exports.getResource = async (req, res) => {
       return res.status(404).json({ erro: 'Registo não encontrado.' });
     }
 
-    // Um SLL pode abrir o detalhe de qualquer badge que encontrou no catálogo
-    // global. As restantes entidades continuam limitadas à sua Service Line.
     if (req.user && RECURSOS_DA_SERVICE_LINE.has(req.params.resource) && !isBadge) {
       const scopedWhere = await restringirCatalogoPorServiceLine(req, req.params.resource, {});
       const primaryKey = config.model.primaryKeyAttribute;
@@ -225,16 +207,12 @@ exports.createResource = async (req, res) => {
 
     let payload = config.beforeCreate ? config.beforeCreate(req.body) : req.body;
 
-    // Garante que campos obrigatórios de políticas não ficam vazios
     if (req.params.resource === 'policies') {
       payload.version = payload.version || '1.0';
       payload.effectiveDate = payload.effectiveDate || new Date();
-      payload.createdBy = req.user?.id || 1; // Se não houver user, força 1
+      payload.createdBy = req.user?.id || 1;
     }
     if (req.params.resource === 'notices') {
-      // Um aviso é enviado a um consultor específico (payload.userId) ou, se o
-      // destinatário for "todos" ('__ALL__') ou vazio, difundido a todos os
-      // consultores. Nunca é atribuído ao próprio admin.
       const tipo = payload.type || 'info';
       const alvo = payload.userId;
 
@@ -263,10 +241,10 @@ exports.createResource = async (req, res) => {
       return res.status(201).json(nova);
     }
     if (req.params.resource === 'information') {
-      payload.createdBy = req.user?.id || 1; // Campo obrigatório no modelo Information
+      payload.createdBy = req.user?.id || 1;
     }
     if (req.params.resource === 'badge-premium') {
-      payload.createdBy = req.user?.id || 1; // Campo obrigatório no modelo BadgePremium
+      payload.createdBy = req.user?.id || 1;
     }
 
     const row = await config.model.create(payload);
@@ -281,32 +259,21 @@ exports.updateResource = async (req, res) => {
     const config = getConfig(req, res);
     if (!config) return;
 
-    // 1. Vai buscar o registo atual à base de dados
     const row = await config.model.findByPk(req.params.id);
     if (!row) {
       return res.status(404).json({ erro: 'Registo não encontrado.' });
     }
 
-    // 2. Prepara o payload com o que vem do formulário
     let payload = { ...req.body };
 
-    // 3. SE FOR AVISO, GARANTIMOS QUE OS CAMPOS OBRIGATÓRIOS TÊM VALOR
     if (req.params.resource === 'notices') {
-        // A difusão a todos os consultores só existe na criação; num update,
-        // '__ALL__' não é um id válido — mantém o destinatário original.
         if (payload.userId === '__ALL__') payload.userId = row.userId;
-        // Se o formulário não enviou o campo, usa o que já existe na BD (row.campo)
         payload.userId = payload.userId || row.userId;
         payload.type = payload.type || row.type || 'info';
 
-        // Remove campos que não devem ser alterados, se necessário
         delete payload.createdAt;
     }
 
-    // EDITAR uma política RGPD obriga TODOS os utilizadores a reaceitá-la:
-    // removemos as aceitações registadas dessa política, para
-    // getPendingPolicies a voltar a apresentar a todos no próximo arranque.
-    // Se o conteúdo (título/descrição) mudou, sobe também a versão.
     if (req.params.resource === 'policies') {
       const conteudoMudou =
         (payload.title !== undefined && payload.title !== row.title) ||
@@ -314,23 +281,17 @@ exports.updateResource = async (req, res) => {
       if (conteudoMudou && (!payload.version || payload.version === row.version)) {
         payload.version = proximaVersao(row.version);
       }
-      // NUNCA deixar a data de eficácia ficar vazia num update: o formulário
-      // pode enviá-la a null (input date não formata o datetime ISO antigo), e
-      // getPendingPolicies exige effectiveDate <= agora — com null a política
-      // nunca reaparecia. Mantém a data original (ou agora, se não houver).
       if (!payload.effectiveDate) {
         payload.effectiveDate = row.effectiveDate || new Date();
       }
       await models.PolicyRGPDAcceptance.destroy({ where: { policyId: row.policyId } });
     }
 
-    // 4. ATUALIZA USANDO O PAYLOAD TRATADO (NÃO O REQ.BODY)
     await row.update({ ...payload, updatedAt: new Date() });
-    
+
     res.json(row);
   } catch (error) {
-    // Agora o erro que aparece no navegador vai ser muito mais específico
-    console.error("ERRO NO UPDATE:", error); 
+    console.error("ERRO NO UPDATE:", error);
     res.status(500).json({ erro: 'Erro ao atualizar.' });
   }
 };

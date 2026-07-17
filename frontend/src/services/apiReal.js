@@ -100,8 +100,6 @@ export async function acceptPolicy(policyId, accepted = true) {
   return http('/auth/accept-policy', { method: 'POST', body: { policyId, accepted } })
 }
 
-// Guarda a preferência de idioma do utilizador na base de dados,
-// para ser reaplicada no próximo login.
 export async function saveIdioma(idioma) {
   return http('/auth/idioma', { method: 'PUT', body: { idioma } })
 }
@@ -255,8 +253,6 @@ export async function getMinhasCandidaturas() {
     http('/candidaturas/minhas'),
     http('/catalog/consultor-badges').catch(() => []),
   ])
-  // O link público de verificação usa o token do PRÉMIO (ConsultorBadge), não
-  // o do template do badge. Mapeia badgeId -> token do award mais recente.
   const tokenPorBadge = new Map()
   for (const a of awards || []) {
     if (a.publicToken && !tokenPorBadge.has(a.badgeId)) tokenPorBadge.set(a.badgeId, a.publicToken)
@@ -387,9 +383,6 @@ export async function getMeusBadges() {
       obtainedDate: r.obtainedDate,
       expirationDate: r.expirationDate,
       valid: r.valid !== false,
-      // O link público de verificação usa o token do PRÉMIO (ConsultorBadge),
-      // não o do template do badge — é esse que o backend procura em
-      // /relatorios/verificar/:publicToken.
       publicToken: r.publicToken || '',
       imagem: b.imagem || null,
     }

@@ -1,16 +1,3 @@
-// =============================================================
-// Templates de email configuráveis (guião — bónus Consultor 23:
-// "Configuração de template de email"; req. Admin 7: "Configuração
-// de notificações").
-//
-// Cada tipo de email tem aqui um template por omissão (assunto +
-// corpo HTML interior com variáveis {{...}}). O Admin pode gravar
-// um override na tabela EMAIL_TEMPLATE; quando existe e está ativo,
-// substitui o padrão. Apagar o override repõe o padrão.
-//
-// O cabeçalho/rodapé (layout) é fixo para manter a identidade visual;
-// o Admin edita apenas o conteúdo interior.
-// =============================================================
 
 const TEMPLATE_DEFS = {
   'candidatura-submetida': {
@@ -216,11 +203,9 @@ const TEMPLATE_DEFS = {
   }
 };
 
-// Substitui {{variavel}} pelos valores; variáveis desconhecidas ficam vazias.
 const render = (texto, vars = {}) =>
   String(texto || '').replace(/\{\{(\w+)\}\}/g, (_m, chave) => (vars[chave] != null ? String(vars[chave]) : ''));
 
-// Layout fixo (cabeçalho Softinsa) aplicado a todos os emails.
 const layoutEmail = (corpoInterior) => `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background-color: #003087; padding: 20px; text-align: center;">
@@ -233,9 +218,6 @@ const layoutEmail = (corpoInterior) => `
     </div>
     `;
 
-// Override do Admin, se existir e estiver ativo. O require é lazy e qualquer
-// falha (BD indisponível, tabela ainda não criada) cai no template padrão —
-// o envio de emails nunca fica bloqueado pela personalização.
 const getOverride = async (code) => {
   try {
     const { EmailTemplate } = require('../models');
@@ -246,7 +228,6 @@ const getOverride = async (code) => {
   }
 };
 
-// Assunto e corpo efetivos (override ou padrão), ainda com {{variáveis}}.
 const getTemplateEfetivo = async (code) => {
   const def = TEMPLATE_DEFS[code];
   if (!def) throw new Error(`Template de email desconhecido: ${code}`);
@@ -258,7 +239,6 @@ const getTemplateEfetivo = async (code) => {
   };
 };
 
-// Renderiza o email completo (assunto + HTML final) para um tipo e variáveis.
 const renderEmail = async (code, vars) => {
   const { assunto, corpo } = await getTemplateEfetivo(code);
   return {

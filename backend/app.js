@@ -1,8 +1,4 @@
 const dns = require('dns');
-// O Render (e muitos outros PaaS) não tem rede de saída IPv6, mas alguns
-// serviços externos devolvem registos AAAA (IPv6) no DNS. Sem isto, o Node
-// pode tentar primeiro o IPv6 e falhar com "ENETUNREACH" ou ficar preso em
-// timeouts. Isto força a preferir sempre IPv4 nas ligações de saída.
 dns.setDefaultResultOrder('ipv4first');
 
 const express = require('express');
@@ -10,30 +6,22 @@ const cors = require('cors');
 require('dotenv').config();
 const sequelize = require('./src/config/database');
 const { ensurePublicBadgeTokens } = require('./src/services/publicBadgeToken.service');
-require('./src/models'); // Regista todos os modelos no Sequelize.
+require('./src/models');
 const { createCorsOptions } = require('./src/config/cors');
 const { prepararBaseDeDados } = require('./src/services/databaseStartup.service');
 const { runMigrations } = require('./src/services/migrationRunner.service');
 
 const app = express();
 
-// Middlewares Globais
 app.use(cors(createCorsOptions()));
-app.use(express.json()); // Permite ler JSON no corpo do pedido (req.body)
+app.use(express.json());
 
-//Importar as rotas
 app.use('/api', require('./src/routes'));
 
 app.get('/api/teste', (req, res) => {
-    // `build` é um marcador para confirmar QUE código está realmente em
-    // produção. Se este valor não aparecer no /api/teste do Render, a deploy
-    // mais recente não foi aplicada (está a servir uma build antiga).
     res.json({ mensagem: 'API funcionando!', data: new Date(), build: 'rgpd-reaccept-2026-07-17' });
 });
 
-// Verificação de SLA acionável por um cron externo (ex.: cron-job.org),
-// útil porque o Render free adormece e o job interno pode não correr.
-// Protegida por chave: GET /api/sla-check?key=<CRON_SECRET>
 const { verificarSLA, iniciarJobSLA } = require('./src/services/sla.service');
 const { iniciarJobExpiracoes } = require('./src/services/expirationAlert.service');
 const { verificarLembretesTimeline, iniciarJobLembretesTimeline } = require('./src/services/timelineReminder.service');
@@ -49,8 +37,6 @@ app.get('/api/sla-check', async (req, res) => {
     }
 });
 
-// Executa também os lembretes de objetivos quando um cron externo desperta o
-// serviço (útil em alojamentos que suspendem processos inativos).
 app.get('/api/timeline-reminders-check', async (req, res) => {
     if (!process.env.CRON_SECRET || req.query.key !== process.env.CRON_SECRET) {
         return res.status(401).json({ message: 'Chave inválida.' });
@@ -85,7 +71,6 @@ const iniciarServidor = async () => {
         console.log('✅ Conetado ao Neon com sucesso!');
         console.log('🔄 Migrations aplicadas no Neon.');
 
-        // Os jobs também dependem da BD e só devem arrancar depois das migrations.
         iniciarJobSLA();
         iniciarJobExpiracoes();
         iniciarJobLembretesTimeline();

@@ -1,10 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-// Override personalizado de um template de email (guião — bónus Consultor 23 /
-// req. Admin 7). Quando existe uma linha ativa para um `code`, o assunto e o
-// corpo aqui guardados substituem o template por omissão definido no código
-// (ver emailTemplate.service.js). Apagar a linha repõe o padrão.
 const EmailTemplate = sequelize.define('EmailTemplate', {
     templateId: {
         type: DataTypes.INTEGER,

@@ -13,22 +13,8 @@ const {
 const { emailAlertaSLA } = require('./email.service');
 const { sendPushToUser } = require('./pushNotification.service');
 
-// =============================================================
-// Verificação de SLA (guião: emails automáticos quando o SLA é ultrapassado).
-//
-// - Candidaturas SUBMITTED há mais de `responseDays` -> alerta aos Talent Managers
-// - Candidaturas VALIDATED há mais de `responseDays` -> alerta aos SLL da Service Line
-//
-// Deduplicação: antes de enviar, é criado um aviso in-app (tabela AVISOS)
-// com título "SLA" para o destinatário; se já existir um aviso desses criado
-// hoje, não volta a enviar — correr o job várias vezes no mesmo dia não spamma.
-// =============================================================
-
 const RESPONSE_DAYS_DEFAULT = 5;
 
-// SLA por equipa (guião — bónus Gestor 10: "Definir e gerir os SLA da equipa
-// de talent e service line"). Resolução: config ativa da equipa -> config
-// ativa global (team null) -> default.
 const getSLAConfigForTeam = async (team) => {
   const configs = await SLAConfig.findAll({
     where: { active: true },
@@ -60,8 +46,6 @@ const inicioDeHoje = () => {
   return d;
 };
 
-// Envia o alerta a um utilizador se ainda não recebeu nenhum hoje.
-// Devolve true se enviou.
 const alertarUser = async (user, atrasadas, responseDays) => {
   const jaAvisadoHoje = await Notice.findOne({
     where: { userId: user.id, title: { [Op.like]: 'SLA%' }, createdAt: { [Op.gte]: inicioDeHoje() } }
@@ -76,8 +60,6 @@ const alertarUser = async (user, atrasadas, responseDays) => {
     console.error(`Erro ao enviar alerta SLA a ${user.email}:`, erro.message);
   }
 
-  // O aviso in-app é criado mesmo que o email falhe: serve de registo e
-  // impede reenvios em ciclo no mesmo dia.
   const pushTitle = `SLA ultrapassado: ${atrasadas.length} candidatura(s) em atraso`;
   const pushMessage = atrasadas.map((c) => `${c.badgeNome} — ${c.consultorNome} (${c.diasEmEspera} dias)`).join('\n');
   await Notice.create({
@@ -108,14 +90,12 @@ const candidaturaIncludeSLA = [
   { model: Consultant, include: [{ model: User, attributes: ['id', 'nome'] }] }
 ];
 
-// Marca a flag slaExcedido nas candidaturas em atraso (registo histórico).
 const marcarSlaExcedido = async (candidaturas) => {
   const ids = candidaturas.filter((c) => !c.slaExcedido).map((c) => c.id);
   if (ids.length === 0) return;
   await Candidatura.update({ slaExcedido: true, updatedAt: new Date() }, { where: { id: ids } });
 };
 
-// Corre a verificação completa. Devolve um resumo (usado pelo endpoint).
 const verificarSLA = async () => {
   const { talent, serviceline } = await getSLAConfig();
   const limiteTalent = new Date(Date.now() - talent.responseDays * 24 * 60 * 60 * 1000);
@@ -124,7 +104,6 @@ const verificarSLA = async () => {
   const statuses = await BadgeStatus.findAll({ where: { code: ['SUBMITTED', 'VALIDATED'] } });
   const porCodigo = Object.fromEntries(statuses.map((s) => [s.code, s.statusId]));
 
-  // --- Talent Managers: SUBMITTED em atraso (globais, o TM vê tudo) ---
   const submetidasAtrasadas = await Candidatura.findAll({
     where: { estadoId: porCodigo.SUBMITTED, createdAt: { [Op.lt]: limiteTalent } },
     include: candidaturaIncludeSLA
@@ -142,7 +121,6 @@ const verificarSLA = async () => {
     }
   }
 
-  // --- Service Line Leaders: VALIDATED em atraso, filtradas pela sua SL ---
   const validadasAtrasadas = await Candidatura.findAll({
     where: { estadoId: porCodigo.VALIDATED, dataValidacao: { [Op.lt]: limiteServiceLine } },
     include: candidaturaIncludeSLA
@@ -179,9 +157,6 @@ const verificarSLA = async () => {
   return resumo;
 };
 
-// Job periódico: corre pouco depois do arranque e depois a cada 12 horas.
-// (Nota: no Render free o serviço adormece sem tráfego; para garantir a
-// verificação diária, aponta um cron externo ao endpoint /api/sla-check.)
 const iniciarJobSLA = () => {
   if (process.env.DISABLE_SLA_JOB === 'true') return;
   const executar = () => verificarSLA().catch((erro) => console.error('Erro na verificação de SLA:', erro.message));

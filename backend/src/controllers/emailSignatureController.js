@@ -57,9 +57,6 @@ exports.saveMyEmailSignature = async (req, res) => {
       { where: { consultorId: req.user.id, active: true } }
     );
 
-    // Sem badges (ex.: Service Line Leader/Talent Manager/Admin, ou consultor
-    // que optou por não mostrar badges) guardamos uma única linha sem badgeId,
-    // só para persistir o templateHtml e os dados pessoais da assinatura.
     const linhasParaCriar = ownedBadgeIds.length
       ? ownedBadgeIds.map((badgeId) => ({ badgeId, templateHtml }))
       : [{ badgeId: null, templateHtml }];

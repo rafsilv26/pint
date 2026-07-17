@@ -30,8 +30,6 @@ const SLA_EQUIPAS = [
   },
 ]
 
-// Prazos de resposta por equipa. Cada equipa tem um só número: ao fim de
-// quantos dias um pedido parado gera um alerta (email + notificação).
 function SlaManagerCard() {
   const { t } = useTranslation()
   const { data, loading, error, reload } = useAsync(() => api.getSlaConfigs())
@@ -44,7 +42,6 @@ function SlaManagerCard() {
   const [verificando, setVerificando] = useState(false)
   const [resumo, setResumo] = useState(null)
 
-  // Preenche os campos com os prazos efetivos assim que chegam do servidor.
   if (data?.efetivo && !carregado) {
     setCarregado(true)
     setDias({
@@ -169,8 +166,6 @@ export default function AdminDefinicoesPage() {
   const [difundindo, setDifundindo] = useState(false)
   const [difResultado, setDifResultado] = useState(null)
 
-  // Sincroniza o formulário quando as definições chegam do servidor
-  // (ajuste de estado durante o render, em vez de useEffect).
   const [definicoesCarregadas, setDefinicoesCarregadas] = useState(null)
   if (data && data !== definicoesCarregadas) {
     setDefinicoesCarregadas(data)

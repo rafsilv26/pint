@@ -1,9 +1,5 @@
 const { ConsultorTimeline, User } = require('../models');
 
-// Objetivos/metas pessoais do consultor (timeline) — base dos "Lembretes":
-// o consultor define uma meta com data esperada e é lembrado quando o prazo
-// se aproxima (ver DashboardAlerts no frontend).
-
 const serialize = (o) => ({
   id: o.timelineId,
   title: o.title,
@@ -14,11 +10,9 @@ const serialize = (o) => ({
   status: o.status,
   priority: o.priority,
   concluido: Boolean(o.completionDate),
-  // Atribuído por um TM/Admin: o consultor pode concluir mas não remover.
   atribuido: Boolean(o.createdBy && o.createdBy !== o.consultorId)
 });
 
-// GET /timeline/minha — objetivos do próprio consultor, mais urgentes primeiro.
 exports.listarMeusObjetivos = async (req, res) => {
   try {
     const objetivos = await ConsultorTimeline.findAll({
@@ -31,7 +25,6 @@ exports.listarMeusObjetivos = async (req, res) => {
   }
 };
 
-// POST /timeline — cria um objetivo.
 exports.criarObjetivo = async (req, res) => {
   try {
     const { title, description, expectedDate, priority } = req.body;
@@ -54,7 +47,6 @@ exports.criarObjetivo = async (req, res) => {
   }
 };
 
-// PUT /timeline/:id/concluir — marca como concluído (ou reabre).
 exports.concluirObjetivo = async (req, res) => {
   try {
     const objetivo = await ConsultorTimeline.findOne({
@@ -74,10 +66,6 @@ exports.concluirObjetivo = async (req, res) => {
   }
 };
 
-// Gestão da timeline de um consultor específico por Talent Managers / Admins:
-// os objetivos criados aqui aparecem na zona de timeline (Objetivos) do consultor.
-
-// GET /timeline/consultor/:consultorId — objetivos de um consultor específico.
 exports.listarObjetivosConsultor = async (req, res) => {
   try {
     const consultor = await User.findByPk(req.params.consultorId);
@@ -93,7 +81,6 @@ exports.listarObjetivosConsultor = async (req, res) => {
   }
 };
 
-// POST /timeline/consultor/:consultorId — cria um objetivo para o consultor.
 exports.criarObjetivoConsultor = async (req, res) => {
   try {
     const consultor = await User.findByPk(req.params.consultorId);
@@ -119,7 +106,6 @@ exports.criarObjetivoConsultor = async (req, res) => {
   }
 };
 
-// DELETE /timeline/consultor/:consultorId/:id — remove um objetivo do consultor (soft delete).
 exports.apagarObjetivoConsultor = async (req, res) => {
   try {
     const objetivo = await ConsultorTimeline.findOne({
@@ -134,7 +120,6 @@ exports.apagarObjetivoConsultor = async (req, res) => {
   }
 };
 
-// DELETE /timeline/:id — remove (soft delete).
 exports.apagarObjetivo = async (req, res) => {
   try {
     const objetivo = await ConsultorTimeline.findOne({
@@ -142,7 +127,6 @@ exports.apagarObjetivo = async (req, res) => {
     });
     if (!objetivo) return res.status(404).json({ erro: 'Objetivo não encontrado.' });
 
-    // Objetivos atribuídos por um TM/Admin só podem ser removidos por quem gere a timeline.
     if (objetivo.createdBy && Number(objetivo.createdBy) !== Number(req.user.id)) {
       return res.status(403).json({ erro: 'Este objetivo foi atribuído pela gestão e não pode ser removido.' });
     }

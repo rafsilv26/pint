@@ -16,9 +16,6 @@ export default function RgpdPolicyModal({ policies }) {
   const total = policies.length
   const obrigatoria = politica.mandatory !== false
 
-  // Regista a decisão na BD: aceitar (accepted=true, conta p/ compliance) ou
-  // não aceitar (accepted=false). Em ambos os casos a política sai dos
-  // pendentes e não volta a ser perguntada — mesmo que limpe o localStorage.
   async function decidir(accepted) {
     if (obrigatoria && !confirmoLeitura) return
     setErro(null)

@@ -18,8 +18,6 @@ function clearAuth() {
   sessionStorage.removeItem(STORAGE_KEY)
 }
 
-// Aplica o idioma guardado na BD (pt/en/es) — a preferência do utilizador
-// sobrepõe-se ao que o browser tinha em cache.
 function applyUserLanguage(idioma) {
   const code = String(idioma || '').toLowerCase()
   if (['pt', 'en', 'es'].includes(code) && !i18n.language?.startsWith(code)) {
@@ -86,8 +84,6 @@ export function AuthProvider({ children }) {
     setUser(null)
     setToken(null)
     clearAuth()
-    // Limpa as caches de módulo dos workspaces — senão o próximo utilizador a
-    // entrar na mesma aba (dentro dos 30s de TTL) podia ver dados do anterior.
     invalidateTalentWorkspace()
     invalidateServiceLineWorkspace()
   }
@@ -99,7 +95,7 @@ export function AuthProvider({ children }) {
       try {
         const saved = JSON.parse(authStore.getItem(STORAGE_KEY) || '{}')
         persistAuth({ ...saved, user: updated })
-      } catch { /* ignora */ }
+      } catch {  }
       return updated
     })
   }
@@ -114,7 +110,7 @@ export function AuthProvider({ children }) {
       try {
         const saved = JSON.parse(authStore.getItem(STORAGE_KEY) || '{}')
         persistAuth({ ...saved, user: updated })
-      } catch { /* ignora */ }
+      } catch {  }
       return updated
     })
     return resultado

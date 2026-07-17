@@ -11,16 +11,10 @@ const { applyUserRoles, getUserRoles, normalizeRoles } = require('../services/us
 const { emailRecuperarPassword, emailBoasVindas } = require('../services/email.service');
 const { getPendingPolicies } = require('../services/rgpd.service');
 
-// URL pública do frontend, usada nos links enviados por email
-// (recuperação de password e página de login).
 const frontendUrl = () => (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
 
-// Guardamos apenas o hash do token na BD: se a BD for comprometida, os
-// tokens em circulação nos emails continuam inutilizáveis.
 const hashToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
 
-// Todos os perfis (Admin, Consultor, TalentManager, ServiceLineLeader) têm de
-// aceitar as políticas RGPD obrigatórias — não só os consultores.
 const pendingPoliciesFor = async (userId) => {
     const pendentes = await getPendingPolicies(userId);
     return pendentes.map((p) => ({
@@ -34,8 +28,6 @@ const pendingPoliciesFor = async (userId) => {
 
 const publicUser = async (user) => {
     const roles = await getUserRoles(user.id);
-    // areaId do consultor: permite ao frontend saber se já tem área atribuída
-    // (pelo admin) e, nesse caso, não voltar a pedir/atribuir no primeiro login.
     const consultant = roles.includes('Consultor') ? await Consultant.findByPk(user.id) : null;
     return {
         id: user.id,
@@ -76,12 +68,6 @@ exports.register = async (req, res) => {
             return res.status(400).json({ message: 'Este email já está registado.' });
         }
 
-        // Envolvemos a criação do utilizador + atribuição de perfis numa
-        // transação: se a atribuição do perfil falhar (ex: ServiceLineLeader
-        // sem serviceLineId), o utilizador criado é revertido também, em vez
-        // de ficar "órfão" na BD sem perfil nenhum atribuído.
-        // Token para o novo utilizador confirmar o endereço de email
-        // (link incluído no email de boas-vindas; na BD fica só o hash).
         const confirmToken = crypto.randomBytes(32).toString('hex');
 
         const t = await sequelize.transaction();
@@ -101,10 +87,6 @@ exports.register = async (req, res) => {
             throw error;
         }
 
-        // Email de boas-vindas em background — o registo não deve falhar
-        // nem atrasar por causa do SMTP.
-        // A password temporária (a que o admin definiu) vai no email para o
-        // utilizador poder entrar no primeiro acesso.
         emailBoasVindas(newUser, `${frontendUrl()}/login`, `${frontendUrl()}/confirmar-email?token=${confirmToken}`, password)
             .catch((erro) => console.error('Erro ao enviar email de boas-vindas:', erro.message));
 
@@ -122,8 +104,6 @@ exports.register = async (req, res) => {
     }
 };
 
-// Auto-registo público de um CONSULTOR (guião req 1). O próprio escolhe a
-// área; recebe um email de confirmação e só pode entrar depois de confirmar.
 exports.signup = async (req, res) => {
     try {
         const { nome, email, password, areaId } = req.body;
@@ -154,7 +134,6 @@ exports.signup = async (req, res) => {
                 password,
                 emailConfirmationToken: hashToken(confirmToken)
             }, { transaction: t });
-            // Perfil Consultor + área escolhida.
             await applyUserRoles(newUser.id, ['Consultor'], { areaId }, t);
             await t.commit();
         } catch (error) {
@@ -171,7 +150,6 @@ exports.signup = async (req, res) => {
     }
 };
 
-// Reenvio de confirmação com resposta neutra para não permitir enumeração.
 exports.resendConfirmation = async (req, res) => {
     const resposta = { message: 'Se a conta estiver pendente, será enviado um novo email de confirmação.' };
     try {
@@ -191,7 +169,6 @@ exports.resendConfirmation = async (req, res) => {
     }
 };
 
-// Lista pública das áreas — para o formulário de auto-registo escolher a área.
 exports.listarAreasPublicas = async (_req, res) => {
     try {
         const areas = await Area.findAll({
@@ -209,25 +186,20 @@ exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // verificar se o email existe e se o utilizador está ativo
         const user = await User.findOne({ where: { email } });
         if (!user || user.ativo === false) {
             return res.status(401).json({ message: 'Credenciais inválidas.' });
         }
 
-        // comparar a password fornecida com a password armazenada (hash)
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Credenciais inválidas.' });
         }
 
-        // Bloqueia enquanto o email não estiver confirmado (guião req 1). Só
-        // afeta quem tem confirmação pendente — contas legadas sem token passam.
         if (user.emailConfirmed === false && user.emailConfirmationToken) {
             return res.status(403).json({ message: 'Confirma o teu email antes de entrar. Verifica a tua caixa de correio.', emailConfirmacaoPendente: true });
         }
 
-        // gerar token JWT e obter os perfis do utilizador
         const roles = await getUserRoles(user.id);
         const consultant = roles.includes('Consultor') ? await Consultant.findByPk(user.id) : null;
         const token = jwt.sign(
@@ -247,7 +219,6 @@ exports.login = async (req, res) => {
                 ? 'Seja bem-vindo novamente'
                 : hora < 12 ? 'Bom dia,' : hora < 20 ? 'Boa tarde,' : 'Boa noite,';
 
-        // atualizar a data do último login e, se for o primeiro login, definir a data do primeiro login
         user.lastLogin = new Date();
         if (!user.firstLoginDate) {
             user.firstLoginDate = new Date();
@@ -280,8 +251,6 @@ exports.me = async (req, res) => {
 };
 
 exports.forgotPassword = async (req, res) => {
-    // Resposta sempre neutra quando o email não existe: não revelamos se
-    // uma conta está registada (evita enumeração de emails).
     const respostaNeutra = {
         message: 'Se o email estiver registado, vais receber uma mensagem com as instruções de recuperação.'
     };
@@ -297,18 +266,15 @@ exports.forgotPassword = async (req, res) => {
             return res.json(respostaNeutra);
         }
 
-        // Token aleatório enviado por email; na BD fica apenas o hash.
         const token = crypto.randomBytes(32).toString('hex');
         user.passwordResetToken = hashToken(token);
-        user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+        user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
         await user.save();
 
         const link = `${frontendUrl()}/atualizar-password?token=${token}`;
         try {
             await emailRecuperarPassword(user, link);
         } catch (erroEmail) {
-            // Sem email entregue o utilizador nunca receberia o link — nesse
-            // caso é mais honesto devolver erro do que a resposta neutra.
             console.error('Erro ao enviar email de recuperação:', erroEmail.message);
             return res.status(500).json({ message: 'Não foi possível enviar o email de recuperação. Tenta novamente mais tarde.' });
         }
@@ -340,7 +306,7 @@ exports.resetPassword = async (req, res) => {
             return res.status(400).json({ message: 'Link de recuperação inválido ou expirado. Pede uma nova recuperação.' });
         }
 
-        user.password = novaPassword; // o hook beforeUpdate trata do hash
+        user.password = novaPassword;
         user.passwordResetToken = null;
         user.passwordResetExpires = null;
         user.mustChangePassword = false;
@@ -353,9 +319,6 @@ exports.resetPassword = async (req, res) => {
     }
 };
 
-// Aceitação de uma política RGPD pelo utilizador autenticado (qualquer perfil).
-// Devolve a lista atualizada de políticas ainda pendentes (para o modal do
-// frontend saber se já pode desbloquear a app ou se ainda falta aceitar mais alguma).
 exports.acceptPolicy = async (req, res) => {
     try {
         const { policyId } = req.body;
@@ -368,14 +331,9 @@ exports.acceptPolicy = async (req, res) => {
             return res.status(404).json({ message: 'Política não encontrada.' });
         }
 
-        // accepted=false só é permitido para políticas NÃO obrigatórias: o
-        // utilizador viu e recusou, deixamos de perguntar mas não conta como
-        // aceitação. As obrigatórias têm de ser sempre aceites.
         const aceite = req.body.accepted !== false || policy.mandatory !== false;
 
         try {
-            // upsert (PK composta policyId+consultorId): uma recusa anterior pode
-            // ser convertida em aceitação numa entrada posterior, e vice-versa.
             await PolicyRGPDAcceptance.upsert({
                 policyId,
                 consultorId: req.user.id,
@@ -385,10 +343,6 @@ exports.acceptPolicy = async (req, res) => {
                 userAgent: req.headers['user-agent'] || null
             });
         } catch (dbError) {
-            // Se a BD tiver uma foreign key que só aceita CONSULTORID de quem
-            // está na tabela CONSULTOR (utilizadores sem perfil Consultor não
-            // têm lá registo), isto falha para Admin/TM/SLL. Ver nota no PR:
-            // é preciso alterar essa FK para apontar para UTILIZADOR(id).
             if (dbError.name === 'SequelizeForeignKeyConstraintError') {
                 console.error('Constraint inválida em ACEITACAO_POLITICA_RGPD:', dbError);
                 return res.status(500).json({ error: 'Erro ao aceitar política.' });
@@ -403,8 +357,6 @@ exports.acceptPolicy = async (req, res) => {
     }
 };
 
-// Confirmação do endereço de email através do link enviado no email de
-// boas-vindas (rota pública: quem tem o token prova que recebeu o email).
 exports.confirmEmail = async (req, res) => {
     try {
         const { token } = req.body;
@@ -429,8 +381,6 @@ exports.confirmEmail = async (req, res) => {
 
 exports.changePassword = async (req, res) => {
     try {
-        // areaId (opcional): no primeiro acesso o consultor escolhe a sua área
-        // aqui, ao definir a nova password (guião req 2).
         const { currentPassword, newPassword, areaId } = req.body;
 
         if (!currentPassword || !newPassword) {
@@ -452,9 +402,6 @@ exports.changePassword = async (req, res) => {
         user.updatedAt = new Date();
         await user.save();
 
-        // Se for consultor e tiver escolhido área, guarda-a — mas SÓ se ainda
-        // não tiver área. Se o admin já lhe atribuiu uma, essa é a autoritária;
-        // não a sobrescrevemos aqui (evitava ficar com a área "errada").
         if (areaId) {
             const consultant = await Consultant.findByPk(user.id);
             if (consultant && !consultant.areaId) {
@@ -469,8 +416,6 @@ exports.changePassword = async (req, res) => {
     }
 };
 
-// O próprio utilizador guarda a sua preferência de idioma (pt/en/es), para
-// que ao voltar a fazer login a plataforma abra no idioma escolhido.
 exports.updateIdioma = async (req, res) => {
     try {
         const idioma = String(req.body.idioma || '').toLowerCase();

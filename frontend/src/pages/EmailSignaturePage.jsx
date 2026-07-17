@@ -101,8 +101,6 @@ export default function EmailSignaturePage() {
       return
     }
 
-    // Guarda sempre, mesmo sem badges: perfis sem badges (SLL/TM/Admin) também
-    // podem persistir a assinatura (nome, cargo, template).
     api.saveEmailSignature({ templateHtml: html, badgeIds: chosen.map((badge) => badge.id) })
       .then((result) => setMessage(result?.mensagem || t('api.mensagens.assinaturaGuardada')))
       .catch((error) => setMessage(error.message))

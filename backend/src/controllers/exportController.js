@@ -1,8 +1,5 @@
 const ExcelJS = require('exceljs');
 
-// Exportação genérica para Excel (.xlsx REAL, não HTML disfarçado). O frontend
-// já tem os dados na tabela; envia colunas + linhas e recebe o ficheiro pronto.
-// Aceita: { filename, columns: [{ key, label }], rows: [ { <key>: valor } ] }
 exports.exportarXlsx = async (req, res) => {
   try {
     const { filename = 'export', columns = [], rows = [] } = req.body || {};
@@ -20,7 +17,6 @@ exports.exportarXlsx = async (req, res) => {
       width: 24
     }));
 
-    // Cabeçalho a azul Softinsa.
     sheet.getRow(1).eachCell((cell) => {
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF003087' } };
       cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };

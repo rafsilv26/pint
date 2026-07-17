@@ -12,8 +12,6 @@ const HERO_TINTS = {
   violet: 'tint-violet',
 }
 
-// Estados de candidatura que ainda estão "vivos" (ainda em processo). APPROVED
-// já é conquista e REJECTED permite recandidatar, por isso ficam de fora.
 const ESTADOS_ATIVOS = ['OPEN', 'SUBMITTED', 'IN_VALIDATION', 'VALIDATED', 'IN_APPROVAL']
 
 export default function BadgeDetailPage() {
@@ -21,8 +19,6 @@ export default function BadgeDetailPage() {
   const { id } = useParams()
   const { data: badge, loading, error, reload } = useAsync(() => api.getBadge(id), [id])
 
-  // Estado do consultor para este badge: já conquistado e/ou com candidatura
-  // em curso. Serve só para decidir que ação mostrar — falha em silêncio.
   const { data: estado } = useAsync(async () => {
     const [conquistados, candidaturas] = await Promise.all([
       api.getMeusBadges().catch(() => []),
@@ -56,9 +52,6 @@ export default function BadgeDetailPage() {
   const candidaturaAtiva = (estado?.candidaturas || []).some(
     (c) => Number(c.badge?.id) === Number(badge.id) && ESTADOS_ATIVOS.includes(c.status?.code),
   )
-  // Só mostra "Candidatar" depois de confirmar o estado (estado != null) e se
-  // não houver conquista nem candidatura em curso. Evita o botão certo piscar
-  // antes da verificação chegar.
   const podeCandidatar = Boolean(estado) && !jaConquistado && !candidaturaAtiva
 
   return (

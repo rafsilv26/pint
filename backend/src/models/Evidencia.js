@@ -7,16 +7,16 @@ const Evidencia = sequelize.define('Evidencia', {
     autoIncrement: true,
     primaryKey: true
   },
-  url: { 
-    type: DataTypes.STRING, 
-    allowNull: false // URL do Cloudinary
+  url: {
+    type: DataTypes.STRING,
+    allowNull: false
   },
-  nomeFicheiro: { 
-    type: DataTypes.STRING 
+  nomeFicheiro: {
+    type: DataTypes.STRING
   },
-  tipo: { 
-    type: DataTypes.ENUM('PDF', 'IMAGEM'), 
-    allowNull: false 
+  tipo: {
+    type: DataTypes.ENUM('PDF', 'IMAGEM'),
+    allowNull: false
   },
   candidaturaId: {
     type: DataTypes.INTEGER,

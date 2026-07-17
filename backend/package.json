@@ -4,7 +4,6 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "node --test test/*.test.js",
     "dev": "nodemon ./app.js",
     "start": "node ./app.js",
     "migrate": "node ./scripts/migrate.js",

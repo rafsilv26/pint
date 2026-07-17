@@ -2,10 +2,6 @@ const { EmailTemplate } = require('../models');
 const { TEMPLATE_DEFS, render, layoutEmail } = require('../services/emailTemplate.service');
 const { enviarEmail } = require('../services/email.service');
 
-// Gestão real de templates de email (guião — bónus Consultor 23 /
-// req. Admin 7). O Admin edita assunto e corpo de cada tipo de email;
-// sem override, é usado o template padrão definido no código.
-
 const juntarComOverride = (code, override) => {
   const def = TEMPLATE_DEFS[code];
   return {
@@ -22,7 +18,6 @@ const juntarComOverride = (code, override) => {
   };
 };
 
-// GET /email-templates — todos os tipos, com override aplicado quando existe.
 exports.listarTemplates = async (_req, res) => {
   try {
     const overrides = await EmailTemplate.findAll({ where: { active: true } });
@@ -33,7 +28,6 @@ exports.listarTemplates = async (_req, res) => {
   }
 };
 
-// PUT /email-templates/:code — grava (ou atualiza) o override do template.
 exports.guardarTemplate = async (req, res) => {
   try {
     const { code } = req.params;
@@ -56,7 +50,6 @@ exports.guardarTemplate = async (req, res) => {
   }
 };
 
-// DELETE /email-templates/:code — remove o override; volta ao padrão.
 exports.reporTemplate = async (req, res) => {
   try {
     const { code } = req.params;
@@ -69,8 +62,6 @@ exports.reporTemplate = async (req, res) => {
   }
 };
 
-// POST /email-templates/:code/preview — renderiza um rascunho (sem gravar)
-// com os dados de exemplo do template, para pré-visualização no frontend.
 exports.previewTemplate = async (req, res) => {
   try {
     const { code } = req.params;
@@ -88,8 +79,6 @@ exports.previewTemplate = async (req, res) => {
   }
 };
 
-// POST /email-templates/:code/test — envia o template efetivo (com os dados
-// de exemplo) para o email do próprio admin.
 exports.enviarTeste = async (req, res) => {
   try {
     const { code } = req.params;

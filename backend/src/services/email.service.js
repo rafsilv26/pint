@@ -1,19 +1,5 @@
 require('dotenv').config();
 
-// ---------------------------------------------------------------
-// Envio de emails pela API HTTPS do Brevo (https://www.brevo.com).
-//
-// Porquê API e não SMTP: desde 26/09/2025 o Render bloqueia TODO o
-// tráfego SMTP de saída (portas 25/465/587) nos serviços gratuitos,
-// pelo que Gmail/SMTP dava sempre "ETIMEDOUT CONN". A API do Brevo
-// usa a porta 443 (HTTPS), que não é bloqueada. Grátis: 300 emails/dia.
-// https://render.com/changelog/free-web-services-will-no-longer-allow-outbound-traffic-to-smtp-ports
-//
-// Config necessária (ver .env.example):
-//   BREVO_API_KEY - chave da aba "API Keys" (começa por xkeysib-)
-//   EMAIL_USER    - remetente; tem de estar verificado em Brevo -> Senders
-// ---------------------------------------------------------------
-
 const { renderEmail } = require('./emailTemplate.service');
 
 const verificarConfig = () => {
@@ -21,8 +7,6 @@ const verificarConfig = () => {
   if (!process.env.EMAIL_USER) throw new Error('EMAIL_USER não está definido no ambiente (é o remetente).');
 };
 
-// Verificação da configuração (usada pelo diagnóstico): valida a chave
-// contra a conta Brevo sem enviar nada.
 const verificarLigacao = async () => {
   verificarConfig();
   const res = await fetch('https://api.brevo.com/v3/account', {
@@ -35,7 +19,6 @@ const verificarLigacao = async () => {
   return { modo: 'brevo-api' };
 };
 
-// Função base
 const enviarEmail = async (para, assunto, html, { fetchImplementation = fetch } = {}) => {
   try {
     verificarConfig();
@@ -66,14 +49,11 @@ const enviarEmail = async (para, assunto, html, { fetchImplementation = fetch } 
   }
 };
 
-// Envia um email de um tipo do registo de templates: resolve o template
-// efetivo (override do Admin ou padrão), substitui as variáveis e envia.
 const enviarComTemplate = async (code, para, vars) => {
   const { assunto, html } = await renderEmail(code, vars);
   return enviarEmail(para, assunto, html);
 };
 
-// Email ao consultor quando submete candidatura
 const emailCandidaturaSubmetida = async (consultor, badge) => {
   await enviarComTemplate('candidatura-submetida', consultor.email, {
     consultor: consultor.nome,
@@ -82,7 +62,6 @@ const emailCandidaturaSubmetida = async (consultor, badge) => {
   });
 };
 
-// Email ao Talent Manager quando há nova candidatura
 const emailNovaSubmissao = async (talentManager, consultor, badge) => {
   await enviarComTemplate('nova-submissao', talentManager.email, {
     consultor: consultor.nome,
@@ -91,7 +70,6 @@ const emailNovaSubmissao = async (talentManager, consultor, badge) => {
   });
 };
 
-// Email ao consultor quando Talent Manager aprova
 const emailEnviadoParaServiceLine = async (consultor, badge) => {
   await enviarComTemplate('enviado-service-line', consultor.email, {
     consultor: consultor.nome,
@@ -99,8 +77,6 @@ const emailEnviadoParaServiceLine = async (consultor, badge) => {
   });
 };
 
-// Email ao Service Line Leader quando o Talent Manager valida uma
-// candidatura e esta fica à espera da decisão final dele
 const emailNovaValidacaoSLL = async (serviceLineLeader, consultor, badge) => {
   await enviarComTemplate('nova-validacao-sll', serviceLineLeader.email, {
     consultor: consultor.nome,
@@ -109,7 +85,6 @@ const emailNovaValidacaoSLL = async (serviceLineLeader, consultor, badge) => {
   });
 };
 
-// Email ao consultor quando badge aprovado
 const emailBadgeAprovado = async (consultor, badge, uuid) => {
   return enviarComTemplate('badge-aprovado', consultor.email, {
     consultor: consultor.nome,
@@ -120,7 +95,6 @@ const emailBadgeAprovado = async (consultor, badge, uuid) => {
   });
 };
 
-// Email ao consultor quando rejeitado
 const emailBadgeRejeitado = async (consultor, badge, motivo) => {
   await enviarComTemplate('badge-rejeitado', consultor.email, {
     consultor: consultor.nome,
@@ -129,7 +103,6 @@ const emailBadgeRejeitado = async (consultor, badge, motivo) => {
   });
 };
 
-// Email com o link de recuperação de password (fluxo "esqueci-me da password")
 const emailRecuperarPassword = async (user, link) => {
   await enviarComTemplate('recuperar-password', user.email, {
     nome: user.nome,
@@ -137,8 +110,6 @@ const emailRecuperarPassword = async (user, link) => {
   });
 };
 
-// Email de boas-vindas quando o Admin regista um novo utilizador.
-// confirmLink (opcional): link para confirmar o endereço de email.
 const emailBoasVindas = async (user, loginLink, confirmLink, tempPassword) => {
   await enviarComTemplate('boas-vindas', user.email, {
     nome: user.nome,
@@ -163,8 +134,6 @@ const emailBoasVindas = async (user, loginLink, confirmLink, tempPassword) => {
   });
 };
 
-// Alerta de SLA ultrapassado, enviado a Talent Managers / Service Line
-// Leaders com a lista de candidaturas em atraso que lhes dizem respeito.
 const emailAlertaSLA = async (user, atrasadas, responseDays) => {
   const linhas = atrasadas.map((c) => `
         <tr>
@@ -181,7 +150,6 @@ const emailAlertaSLA = async (user, atrasadas, responseDays) => {
   });
 };
 
-// Email ao consultor quando send back
 const emailSendBack = async (consultor, badge, comentario) => {
   await enviarComTemplate('send-back', consultor.email, {
     consultor: consultor.nome,
@@ -191,7 +159,6 @@ const emailSendBack = async (consultor, badge, comentario) => {
 };
 
 module.exports = {
-  // exportados para diagnóstico (scripts/test-email.js) e usos genéricos
   verificarLigacao,
   enviarEmail,
   emailCandidaturaSubmetida,

@@ -41,8 +41,6 @@ export default function ExportButtons({ data, columns, filename }) {
     URL.revokeObjectURL(url)
   }
 
-  // Fallback local: tabela HTML com extens\u00e3o .xls. O Excel abre, mas n\u00e3o \u00e9 um
-  // xlsx real. Usado s\u00f3 se o backend falhar (ex.: modo mock / offline).
   const exportarExcelHtml = () => {
     const table = `<table><thead><tr>${cols.map((c) => `<th>${escapeHtml(c.label)}</th>`).join('')}</tr></thead><tbody>${linhas.map((linha) => `<tr>${linha.map((value) => `<td>${escapeHtml(value)}</td>`).join('')}</tr>`).join('')}</tbody></table>`
     const documentHtml = `<html><head><meta charset="utf-8"></head><body>${table}</body></html>`
@@ -54,8 +52,6 @@ export default function ExportButtons({ data, columns, filename }) {
     if (!data || data.length === 0) return alert(t('exportButtons.semDados'))
 
     setBusy('excel')
-    // Reaproveita os valores j\u00e1 formatados de `linhas` (mesma ordem das colunas)
-    // e reconstr\u00f3i objetos indexados pela chave da coluna, para o backend.
     const rows = linhas.map((arr) => cols.reduce((obj, c, i) => ({ ...obj, [c.key]: arr[i] }), {}))
     try {
       const token = getToken()
@@ -66,7 +62,6 @@ export default function ExportButtons({ data, columns, filename }) {
       )
       descarregar(resposta.data, `${nomeFicheiro}.xlsx`)
     } catch {
-      // Backend indispon\u00edvel \u2014 cai para o ficheiro HTML local.
       exportarExcelHtml()
     } finally {
       setBusy(null)

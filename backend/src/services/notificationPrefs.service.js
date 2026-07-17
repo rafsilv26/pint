@@ -1,22 +1,7 @@
 const User = require('../models/User');
 
-// =============================================================
-// Preferências de notificação por email, POR UTILIZADOR.
-//
-// Guardadas em User.notificationPreference (STRING(50) já existente na BD,
-// sem alterações de esquema) como JSON compacto de flags 0/1:
-//   {"e":1,"a":1,"r":1,"n":1,"k":0,"s":1,"m":0}
-//     e = email (interruptor geral)   a = badge aprovado
-//     r = rejeitado/devolvido         n = novos badges
-//     k = ranking                     s = resumo semanal
-//     m = relatório mensal
-// "n", "k", "s" e "m" são guardados para o ecrã de preferências, mas ainda
-// não têm envio implementado no backend.
-// =============================================================
-
 const DEFAULTS = { e: 1, a: 1, r: 1, n: 1, k: 0, s: 1, m: 0 };
 
-// Nomes expostos na API <-> chave compacta na BD
 const CAMPOS = {
   email: 'e',
   aprovado: 'a',
@@ -32,7 +17,6 @@ const parseRaw = (raw) => {
     const parsed = JSON.parse(raw || '');
     return { ...DEFAULTS, ...parsed };
   } catch {
-    // valor vazio ou formato antigo/desconhecido -> tudo por omissão
     return { ...DEFAULTS };
   }
 };
@@ -57,15 +41,11 @@ const savePrefs = async (userId, prefs = {}) => {
     if (typeof prefs[nome] === 'boolean') flags[chave] = prefs[nome] ? 1 : 0;
   }
 
-  user.notificationPreference = JSON.stringify(flags); // ~33 chars, cabe nos 50
+  user.notificationPreference = JSON.stringify(flags);
   await user.save();
   return expandir(flags);
 };
 
-// Usado pelo workflow antes de enviar email ao consultor.
-//   tipo: 'geral' (só interruptor geral) | 'aprovado' | 'rejeitado'
-// Em caso de erro devolve true — uma falha na leitura das preferências
-// nunca deve suprimir um email.
 const podeReceberEmail = async (userId, tipo = 'geral') => {
   try {
     const prefs = await getPrefs(userId);

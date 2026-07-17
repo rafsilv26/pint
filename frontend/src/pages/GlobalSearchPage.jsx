@@ -6,9 +6,6 @@ import { useAsync } from '../hooks/useAsync'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import * as api from '../services/api'
 
-// Carrega consultores + badges + candidaturas conforme o perfil. O TM/Admin
-// partilham a fonte de dados de talento; o SLL usa a sua própria (já restrita à
-// Service Line pelo backend).
 async function loadTalent() {
   const [consultants, badges, applications] = await Promise.all([
     api.getTalentConsultants(),
@@ -27,9 +24,6 @@ async function loadServiceLine() {
   }
 }
 
-// Cada perfil pesquisa nos mesmos tipos de dado, mas os links de detalhe e a
-// fonte de dados diferem. O Admin não tem página de detalhe de badge, por isso
-// aponta para a lista de badges.
 const SEARCH_CONFIG = {
   '/tm': {
     load: loadTalent,

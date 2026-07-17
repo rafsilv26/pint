@@ -2,11 +2,6 @@ const { Op } = require('sequelize');
 const PolicyRGPD = require('../models/PolicyRGPD');
 const PolicyRGPDAcceptance = require('../models/PolicyRGPDAcceptance');
 
-// Devolve as políticas RGPD ativas + em vigor que o consultor indicado
-// (consultorId = User.id) ainda não aceitou/leu. Inclui as OBRIGATÓRIAS
-// (que bloqueiam a entrada até serem aceites) e as NÃO obrigatórias (que não
-// exigem aceitação mas têm de ser apresentadas ao utilizador na mesma). O
-// cliente distingue as duas pelo campo `mandatory`.
 async function getPendingPolicies(consultorId) {
   const now = new Date();
 
@@ -19,7 +14,6 @@ async function getPendingPolicies(consultorId) {
         { expirationDate: { [Op.gt]: now } },
       ],
     },
-    // Obrigatórias primeiro: são as que bloqueiam e devem ser tratadas antes.
     order: [['mandatory', 'DESC'], ['effectiveDate', 'ASC']],
   });
 

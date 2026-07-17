@@ -7,8 +7,6 @@ import { useAuth } from '../../context/useAuth'
 import { homeForRole } from '../../config/navigation'
 import { useTranslation } from 'react-i18next'
 
-// URL do APK Android. Por defeito serve o ficheiro em public/. Pode ser
-// substituído por VITE_APK_URL no .env (ex: link externo/CDN).
 const APK_URL = import.meta.env.VITE_APK_URL || '/softinsa-badges.apk'
 
 export default function LoginPage() {

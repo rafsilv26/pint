@@ -5,9 +5,6 @@ import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import { useTranslation } from 'react-i18next'
 
-// Gestão real de templates de email (guião — bónus Consultor 23 / req. Admin 7):
-// o Admin edita o assunto e o corpo de cada tipo de email da plataforma, com
-// pré-visualização e envio de teste. Repor volta ao template padrão do código.
 export default function AdminEmailTemplatesPage() {
   const { t } = useTranslation()
   const { data, loading, error, reload } = useAsync(() => api.getEmailTemplates())

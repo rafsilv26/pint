@@ -1,9 +1,6 @@
 const { SLAConfig, Candidatura } = require('../models');
 const { getSLAConfigForTeam } = require('../services/sla.service');
 
-// Gestão dedicada de SLAs (guião — bónus Gestor 10: "Definir e gerir os SLA
-// da equipa de talent e service line"). Só o Admin acede a estas rotas.
-
 const TEAMS = ['talent', 'serviceline'];
 
 const serialize = (c) => ({
@@ -18,8 +15,6 @@ const serialize = (c) => ({
 
 const normalizarTeam = (team) => (TEAMS.includes(team) ? team : null);
 
-// Ter mais do que um SLA ativo para a mesma equipa tornaria a resolução
-// ambígua — ao ativar um, os restantes da mesma equipa são desativados.
 const desativarOutrosDaEquipa = async (team) => {
   await SLAConfig.update(
     { active: false, updatedAt: new Date() },
@@ -27,7 +22,6 @@ const desativarOutrosDaEquipa = async (team) => {
   );
 };
 
-// GET /sla/configs — todas as configurações + resolução efetiva por equipa.
 exports.listarConfigs = async (_req, res) => {
   try {
     const configs = await SLAConfig.findAll({ order: [['createdAt', 'DESC']] });
@@ -44,7 +38,6 @@ exports.listarConfigs = async (_req, res) => {
   }
 };
 
-// POST /sla/configs — cria uma configuração de SLA.
 exports.criarConfig = async (req, res) => {
   try {
     const { name, team, responseDays, alertDaysBeforeExpiration, active } = req.body;
@@ -74,7 +67,6 @@ exports.criarConfig = async (req, res) => {
   }
 };
 
-// PUT /sla/configs/:id — atualiza uma configuração (nome, equipa, dias, estado).
 exports.atualizarConfig = async (req, res) => {
   try {
     const config = await SLAConfig.findByPk(req.params.id);
@@ -112,9 +104,6 @@ exports.atualizarConfig = async (req, res) => {
   }
 };
 
-// PUT /sla/team/:team — define, de forma simples, o prazo (dias) de uma
-// equipa. Reaproveita a config existente da equipa ou cria uma; garante que
-// fica a única ativa dessa equipa. É o que a UI simplificada usa.
 exports.definirEquipa = async (req, res) => {
   try {
     const team = normalizarTeam(req.params.team);
@@ -147,8 +136,6 @@ exports.definirEquipa = async (req, res) => {
   }
 };
 
-// DELETE /sla/configs/:id — remove; se estiver associado a candidaturas
-// (FK slaId), não pode ser apagado — desativa-se.
 exports.apagarConfig = async (req, res) => {
   try {
     const config = await SLAConfig.findByPk(req.params.id);

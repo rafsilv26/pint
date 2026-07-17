@@ -12,8 +12,6 @@ const PRIORIDADES = [
 ]
 const TIPOS = ['Meta', 'Milestone', 'Evento']
 
-// Zona de gestão da timeline de um consultor específico (Talent Manager / Admin).
-// Os objetivos criados aqui aparecem na página de Objetivos (timeline) do consultor.
 export default function ConsultorTimelineManager({ consultorId, className = '' }) {
   const { t, i18n } = useTranslation()
   const { data, loading, error, reload } = useAsync(() => api.getObjetivosConsultor(consultorId), [consultorId])

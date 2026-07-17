@@ -12,8 +12,6 @@ export default function ChangePasswordModal() {
   const navigate = useNavigate()
   const { user, markPasswordChanged, logout } = useAuth()
   const isConsultor = (user?.roles || []).includes('Consultor') || user?.role === 'Consultor'
-  // Só pede a área se for consultor E ainda não tiver área atribuída. Se o
-  // admin já lhe deu uma, não voltamos a pedir (evita ficar com duas/errada).
   const precisaArea = isConsultor && !user?.areaId
   const { data: areas } = useAsync(() => (precisaArea ? api.getAreasPublicas() : Promise.resolve([])))
 

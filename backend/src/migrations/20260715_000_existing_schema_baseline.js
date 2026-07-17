@@ -17,7 +17,6 @@ const up = async ({ queryInterface }) => {
   }
 };
 
-// Esta migration apenas regista o esquema legado já existente como baseline.
 const down = async () => {};
 
 module.exports = { name, up, down };

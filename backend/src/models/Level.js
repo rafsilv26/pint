@@ -15,9 +15,9 @@ const Level = sequelize.define('Level', {
         type: DataTypes.STRING(100),
         allowNull: true
     },
-    ordem: { // Para saberem a ordem de progressão (A, B, C...)
-        type: DataTypes.CHAR(1), 
-        allowNull: false 
+    ordem: {
+        type: DataTypes.CHAR(1),
+        allowNull: false
     },
     ativo: {
         type: DataTypes.BOOLEAN,

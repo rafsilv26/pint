@@ -1,8 +1,6 @@
 const crypto = require('crypto');
 const models = require('../models');
 
-// Tabelas que alimentam os ecras da aplicacao movel. A assinatura combina
-// quantidade e data mais recente, detetando insercoes, alteracoes e remocoes.
 const mobileModels = [
   models.User,
   models.Badge,
@@ -43,8 +41,6 @@ async function modelSignature(model) {
     latest: latest instanceof Date ? latest.toISOString() : latest || null
   };
 
-  // AVISOS nao tem updatedAt; estes contadores tornam alteracoes de estado
-  // (lida/email/push) visiveis sem transferir os registos para a app.
   if (model === models.Notice) {
     const [read, emailSent, pushSent, lastReadAt] = await Promise.all([
       model.count({ where: { read: true } }),

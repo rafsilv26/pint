@@ -42,7 +42,6 @@ exports.getMyPushStatus = async (req, res) => {
   }
 };
 
-// Difunde um aviso a TODOS os consultores (uma notificação por consultor).
 exports.broadcastAviso = async (req, res) => {
   try {
     const { title, message, type } = req.body;
@@ -54,8 +53,6 @@ exports.broadcastAviso = async (req, res) => {
   }
 };
 
-// Configuração global de notificações da plataforma (singleton type='global').
-// Usada pelas Definições do Admin (req 7 do guião).
 const CONFIG_GLOBAL = 'global';
 
 exports.getConfigGlobal = async (_req, res) => {
@@ -89,7 +86,6 @@ exports.saveConfigGlobal = async (req, res) => {
 };
 const { verificarSLA } = require('../services/sla.service');
 
-// Preferências de notificação por email do utilizador autenticado.
 exports.getMyNotificationPrefs = async (req, res) => {
   try {
     res.json(await getPrefs(req.user.id));
@@ -107,8 +103,6 @@ exports.saveMyNotificationPrefs = async (req, res) => {
   }
 };
 
-// Corre a verificação de SLA a pedido (só Admin; há também /api/sla-check
-// com CRON_SECRET para crons externos).
 exports.runSlaCheck = async (req, res) => {
   try {
     res.json(await verificarSLA());
@@ -117,9 +111,6 @@ exports.runSlaCheck = async (req, res) => {
   }
 };
 
-// Diagnóstico do envio de emails em produção (só Admin).
-//   GET /api/notifications/email-status         -> valida BREVO_API_KEY/EMAIL_USER + ligação ao Brevo
-//   GET /api/notifications/email-status?send=1  -> além disso envia um email de teste ao próprio admin
 exports.emailStatus = async (req, res) => {
   const status = {
     brevoApiKeyDefinida: Boolean(process.env.BREVO_API_KEY),
@@ -158,8 +149,6 @@ exports.emailStatus = async (req, res) => {
 
 exports.listNotifications = async (req, res) => {
   try {
-    // Garante que os lembretes ficam disponíveis assim que o utilizador abre
-    // o website, mesmo se o alojamento tiver suspendido o job periódico.
     await verificarLembretesTimeline(req.user.id);
     const notices = await Notice.findAll({
       where: { userId: req.user.id },

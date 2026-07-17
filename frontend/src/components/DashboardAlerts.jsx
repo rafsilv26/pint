@@ -18,8 +18,6 @@ export default function DashboardAlerts({ conquistas = [] }) {
   if (!badges) return null
   const validos = badges.filter((b) => b.valid !== false)
 
-  // Celebração de marcos: badges premium (conquistas especiais) recém-atingidos.
-  // Guarda os ids já vistos por consultor; mostra só os que ainda não celebrou.
   const chavePremios = `premios-consultor-${user?.id || 'x'}`
   let vistosPremios = []
   try { vistosPremios = JSON.parse(localStorage.getItem(chavePremios) || '[]') } catch { vistosPremios = [] }

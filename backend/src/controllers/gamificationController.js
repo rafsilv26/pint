@@ -34,7 +34,6 @@ exports.getGamification = async (req, res) => {
   try {
     const [awards, premiumAwards, timeline] = await Promise.all([
       ConsultorBadge.findAll({
-        // REMOVIDO o "where: { valid: true }" para contar badges expiradas
         include: [
           Badge,
           { model: Consultant, include: [{ model: User, attributes: { exclude: ['password'] } }] }

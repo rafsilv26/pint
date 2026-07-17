@@ -9,7 +9,6 @@ const INK = '#2B2B2B';
 const GRAY = '#6B7280';
 const SOFT = '#FBFAF6';
 
-// Losango decorativo (usado nos separadores e cantos).
 const drawDiamond = (doc, cx, cy, size, color) => {
   doc.moveTo(cx, cy - size)
      .lineTo(cx + size, cy)
@@ -37,19 +36,15 @@ const gerarCertificado = (consultor, badge, dataAprovacao) => {
     const centerText = (text, y, options = {}) =>
       doc.text(text, 0, y, { width: W, align: 'center', ...options });
 
-    // Fundo
     doc.rect(0, 0, W, H).fill(SOFT);
 
-    // Moldura dupla
     doc.rect(22, 22, W - 44, H - 44).lineWidth(2.5).stroke(NAVY);
     doc.rect(32, 32, W - 64, H - 64).lineWidth(1).stroke(GOLD);
 
-    // Ornamentos de canto
     [[32, 32], [W - 32, 32], [32, H - 32], [W - 32, H - 32]].forEach(([x, y]) => {
       drawDiamond(doc, x, y, 6, GOLD);
     });
 
-    // Cabeçalho — banda navy com logo (logo é branco, precisa fundo escuro)
     const bandW = 330;
     const bandH = 70;
     const bandX = (W - bandW) / 2;
@@ -72,30 +67,25 @@ const gerarCertificado = (consultor, badge, dataAprovacao) => {
        .fontSize(10.5);
     centerText('AN IBM GROUP COMPANY', 130, { characterSpacing: 3 });
 
-    // Separador com losango central
     doc.moveTo(W / 2 - 150, 156).lineTo(W / 2 - 12, 156).lineWidth(1).stroke(GOLD);
     doc.moveTo(W / 2 + 12, 156).lineTo(W / 2 + 150, 156).lineWidth(1).stroke(GOLD);
     drawDiamond(doc, W / 2, 156, 4, GOLD);
 
-    // Título do certificado
     doc.fillColor(INK)
        .font('Helvetica')
        .fontSize(16);
     centerText('CERTIFICADO DE COMPETÊNCIA DIGITAL', 174, { characterSpacing: 3 });
 
-    // Fórmula
     doc.fillColor(GRAY)
        .font('Helvetica-Oblique')
        .fontSize(13);
     centerText('Certifica-se que', 208);
 
-    // Nome do consultor
     doc.fillColor(NAVY)
        .font('Times-Bold')
        .fontSize(34);
     centerText(consultor.nome || consultor.email, 230);
 
-    // Floreado dourado sob o nome
     doc.moveTo(W / 2 - 90, 272).lineTo(W / 2 + 90, 272).lineWidth(1.2).stroke(GOLD);
 
     doc.fillColor(GRAY)
@@ -103,13 +93,11 @@ const gerarCertificado = (consultor, badge, dataAprovacao) => {
        .fontSize(13);
     centerText('obteve com sucesso o badge', 288);
 
-    // Nome do badge
     doc.fillColor(NAVY)
        .font('Helvetica-Bold')
        .fontSize(22);
     centerText(badge.nome, 312);
 
-    // Área
     if (badge.area) {
       doc.fillColor(GOLD)
          .font('Helvetica-Bold')
@@ -117,11 +105,9 @@ const gerarCertificado = (consultor, badge, dataAprovacao) => {
       centerText(`ÁREA: ${String(badge.area).toUpperCase()}`, 348, { characterSpacing: 2 });
     }
 
-    // Separador inferior
     doc.moveTo(W / 2 - 150, 410).lineTo(W / 2 + 150, 410).lineWidth(1).stroke('#DDD6C4');
     drawDiamond(doc, W / 2, 410, 3, GOLD);
 
-    // Data
     doc.fillColor(INK)
        .font('Helvetica')
        .fontSize(12);
@@ -130,7 +116,6 @@ const gerarCertificado = (consultor, badge, dataAprovacao) => {
       432
     );
 
-    // Link de verificação
     const verifyUrl = `${(process.env.FRONTEND_URL || process.env.APP_URL || '').replace(/\/$/, '')}/badge/${badge.publicToken}`;
     doc.fillColor(NAVY)
        .font('Helvetica')

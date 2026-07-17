@@ -56,7 +56,6 @@ const optionalProtect = async (req, _res, next) => {
 
 const authorize = (...rolesPermitidos) => {
     return (req, res, next) => {
-        // Garantir que o middleware 'protect' correu antes deste
         if (!req.user) {
             return res.status(500).json({ message: 'Erro interno de configuração de segurança.' });
         }

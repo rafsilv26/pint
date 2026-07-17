@@ -11,11 +11,6 @@ const {
 const { getServiceLineScopeForUser } = require('../services/serviceLineScope.service');
 const { criarNotificacao } = require('../services/notification.service');
 
-// Quando `serviceLineId` é indicado (Service Line Leader), o INNER JOIN em
-// Area (required: true) restringe a lista aos consultores dessa Service
-// Line — em linha com o guião: o SLL "não tem acesso às áreas de outras
-// Service Lines". Sem `serviceLineId` (Admin/TalentManager), mantém-se o
-// LEFT JOIN original e vê-se toda a gente.
 const buildConsultantInclude = (serviceLineId) => [
   { model: User, attributes: { exclude: ['password'] } },
   {
@@ -54,8 +49,6 @@ const serialize = (consultant, rank, currentUserId) => ({
   biography: consultant.biography,
   linkedinUrl: consultant.linkedinUrl,
   isCurrentUser: consultant.consultorId === currentUserId,
-  // Lista detalhada dos badges conquistados (usada na página de perfil do
-  // consultor vista pelo TM/SLL/Admin, para além da simples contagem acima).
   badgesConquistados: (consultant.acquiredBadges || [])
     .slice()
     .sort((a, b) => new Date(b.obtainedDate || b.createdAt) - new Date(a.obtainedDate || a.createdAt))
@@ -142,7 +135,6 @@ exports.getConsultant = async (req, res) => {
   }
 };
 
-
 exports.updateConsultant = async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -152,7 +144,6 @@ exports.updateConsultant = async (req, res) => {
       return res.status(400).json({ erro: 'Identificador de consultor inválido.' });
     }
 
-    // Verifica se é o próprio utilizador
     if (req.user.id !== id) {
       return res.status(403).json({ erro: 'Não tens permissão para editar este perfil' });
     }
@@ -161,13 +152,11 @@ exports.updateConsultant = async (req, res) => {
       return res.status(400).json({ erro: 'O nome é obrigatório.' });
     }
 
-    // Atualiza o nome na tabela User
     await User.update(
       { nome: String(name).trim() },
       { where: { id } }
     );
 
-    // Atualiza ou cria o registo na tabela Consultant
     const [consultor, criado] = await Consultant.findOrCreate({
       where: { consultorId: id },
       defaults: { biography: String(biography || '').trim(), linkedinUrl: String(linkedinUrl || '').trim() }
@@ -188,9 +177,6 @@ exports.updateConsultant = async (req, res) => {
   }
 };
 
-// Confirma que o consultor existe e — quando quem pede é um Service Line
-// Leader — que pertence à sua Service Line (reutiliza o mesmo scope da
-// listagem, onde o INNER JOIN em Area restringe por serviceLineId).
 const assertConsultorNoScope = async (user, consultorId) => {
   const serviceLineId = await getServiceLineScopeForUser(user);
   const ranked = await loadRankedConsultants(serviceLineId);
@@ -203,9 +189,6 @@ const assertConsultorNoScope = async (user, consultorId) => {
   return consultor;
 };
 
-// Atribui um badge especial (BadgePremium) a um consultor. Disponível para
-// Admin, TalentManager e ServiceLineLeader (este último só para consultores
-// da sua Service Line). Notifica o consultor da conquista.
 exports.atribuirBadgePremium = async (req, res) => {
   try {
     const consultorId = Number(req.params.id);
@@ -249,7 +232,6 @@ exports.atribuirBadgePremium = async (req, res) => {
   }
 };
 
-// Remove um badge especial atribuído (corrige atribuições erradas).
 exports.revogarBadgePremium = async (req, res) => {
   try {
     const consultorId = Number(req.params.id);

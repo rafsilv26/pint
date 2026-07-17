@@ -325,8 +325,6 @@ async function fetchServiceLineWorkspace() {
     http('/catalog/service-lines'),
     http('/catalog/learning-paths'),
     http('/catalog/requirements'),
-    // Estatística opcional (gráfico "Badges Atribuídos"). Nunca deve rebentar
-    // o workspace inteiro: se falhar, o painel carrega sem esse gráfico.
     http('/candidaturas/badges-semana').catch(() => []),
   ])
   return normalizeServiceLineWorkspace({ consultants, applications, badges, levels, areas, serviceLines, learningPaths, requirements, badgesWeek })

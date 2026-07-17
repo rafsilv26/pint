@@ -3,9 +3,6 @@ const User = require('../models/User');
 const { ServiceLineLeader, Consultant } = require('../models');
 const { getUserRoles, applyUserRoles } = require('../services/userRoles.service');
 
-// Função auxiliar para serializar o utilizador com os seus perfis
-// Inclui serviceLineId/areaId (se aplicável) para que o formulário de edição
-// consiga pré-preencher estes campos corretamente.
 const serializeUser = async (user) => {
     const [roles, ssl, consultor] = await Promise.all([
         getUserRoles(user.id),
@@ -28,7 +25,6 @@ const serializeUser = async (user) => {
     };
 };
 
-// Controladores para gestão de utilizadores
 exports.getAllUsers = async (_req, res) => {
     try {
         const users = await User.findAll({
@@ -86,9 +82,6 @@ exports.updateUser = async (req, res) => {
         if (mustChangePassword !== undefined) user.mustChangePassword = mustChangePassword;
         user.updatedAt = new Date();
 
-        // Transação: se a atualização dos dados base ou a atribuição de
-        // perfis falhar (ex: ServiceLineLeader sem serviceLineId), nada fica
-        // gravado — evita utilizadores com dados a meio ou sem perfil.
         const t = await sequelize.transaction();
         try {
             await user.save({ transaction: t });
@@ -112,7 +105,6 @@ exports.updateUser = async (req, res) => {
     }
 };
 
-// CORRIGIDO: Agora faz Hard Delete em vez de Soft Delete
 exports.deleteUser = async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id);
@@ -120,7 +112,6 @@ exports.deleteUser = async (req, res) => {
             return res.status(404).json({ message: 'Utilizador não encontrado.' });
         }
 
-        // Destrói o registo DEFINITIVAMENTE da base de dados (Hard Delete)
         await user.destroy({ force: true });
 
         res.json({ message: 'Utilizador removido definitivamente com sucesso.' });

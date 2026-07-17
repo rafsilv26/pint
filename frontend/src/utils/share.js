@@ -1,7 +1,5 @@
 
 
-// Abre o formulário "Adicionar certificação" do LinkedIn pré-preenchido
-// (secção Licenças e certificações do perfil), em vez de criar um post.
 export function adicionarCertificacaoLinkedin(badge) {
   if (!badge?.publicToken) return
   const params = new URLSearchParams({

@@ -40,7 +40,6 @@ export default function TalentCandidaturaDetailPage() {
   const requisitosEmFalta = evidenceCoverage.missing
   const todasEvidenciasValidadas = evidenceCoverage.complete
 
-  // Cada decisão do Talent Manager leva a um separador e a um feedback próprios.
   const DECISAO_META = {
     APROVAR: { tab: 'validadas', type: 'success', tituloKey: 'talentCandidaturas.feedback.validadaTitulo', descKey: 'talentCandidaturas.feedback.validadaDescricao' },
     REJEITAR: { tab: 'rejeitadas', type: 'danger', tituloKey: 'talentCandidaturas.feedback.rejeitadaTitulo', descKey: 'talentCandidaturas.feedback.rejeitadaDescricao' },
