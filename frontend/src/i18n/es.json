@@ -217,9 +217,9 @@
     },
     "acoes": {
       "verDetalhes": "Ver Detalles de la Insignia",
-      "partilhar": "Compartir en LinkedIn",
       "reenviar": "Reenviar Candidatura",
-      "adicionarEvidencias": "Añadir Evidencias"
+      "adicionarEvidencias": "Añadir Evidencias",
+      "adicionarCertificacao": "Añadir a LinkedIn"
     }
   },
   "badgeDetail": {
@@ -438,6 +438,14 @@
     "naoEncontrado": "Consultor no encontrado.",
     "voltar": "Volver",
     "defaultRole": "Consultor",
+    "premium": {
+      "atribuir": "Asignar insignia especial",
+      "seleciona": "Selecciona una insignia especial…",
+      "semDisponiveis": "Sin insignias especiales disponibles",
+      "botao": "Asignar",
+      "remover": "Quitar",
+      "erro": "No se pudo completar la operación."
+    },
     "sobre": "Sobre",
     "ranking": "#{{posicao}} en el ranking",
     "linkedin": "LinkedIn",

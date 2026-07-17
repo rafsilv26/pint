@@ -325,6 +325,21 @@ export async function getConsultant(id) {
   const all = await getConsultants()
   return all.find((c) => c.id === Number(id)) || null
 }
+export async function atribuirBadgePremium(consultorId, badgePremiumId) {
+  await delay(300)
+  const premium = (await getBadgesPremium()).find((b) => b.id === Number(badgePremiumId))
+  return {
+    badgePremiumId: Number(badgePremiumId),
+    name: premium?.nome || 'Badge especial',
+    description: premium?.descricao || '',
+    criteriaDescription: premium?.criterio || '',
+    achievementDate: new Date().toISOString()
+  }
+}
+export async function revogarBadgePremium() {
+  await delay(200)
+  return { mensagem: 'Badge especial removido.' }
+}
 export async function getConsultantCandidaturas(id) {
   await delay()
   return Number(id) === 7 ? mockTalentCandidaturas.map((c) => ({ ...c })) : []

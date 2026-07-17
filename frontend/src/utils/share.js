@@ -1,12 +1,5 @@
 
 
-export function partilharLinkedin(token) {
-  if (!token) return
-  const url = `${window.location.origin}/badge/${token}`
-  const share = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
-  window.open(share, '_blank', 'noopener,noreferrer')
-}
-
 // Abre o formulário "Adicionar certificação" do LinkedIn pré-preenchido
 // (secção Licenças e certificações do perfil), em vez de criar um post.
 export function adicionarCertificacaoLinkedin(badge) {

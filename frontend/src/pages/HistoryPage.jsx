@@ -4,7 +4,7 @@ import { PageHeader, Card, Spinner, EmptyState, ErrorState } from '../components
 import LinkedinGlyph from '../components/LinkedinGlyph'
 import { useAsync } from '../hooks/useAsync'
 import * as api from '../services/api'
-import { partilharLinkedin, adicionarCertificacaoLinkedin } from '../utils/share'
+import { adicionarCertificacaoLinkedin } from '../utils/share'
 import { useTranslation } from 'react-i18next'
 
 function formatarData(d, locale = 'pt-PT') {
@@ -93,13 +93,6 @@ export default function HistoryPage() {
                           title={t('historico.adicionarCertificacao')}
                         >
                           <LinkedinGlyph size={15} /> {t('historico.adicionarCertificacao')}
-                        </button>
-                        <button
-                          onClick={() => partilharLinkedin(b.publicToken)}
-                          className="btn btn-sm d-inline-flex align-items-center gap-1 border text-brand bg-white"
-                          title={t('historico.partilhar')}
-                        >
-                          <LinkedinGlyph size={15} /> {t('historico.partilhar')}
                         </button>
                       </>
                     )}

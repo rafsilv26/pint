@@ -9,6 +9,7 @@ const {
   User
 } = require('../models');
 const { getServiceLineScopeForUser } = require('../services/serviceLineScope.service');
+const { criarNotificacao } = require('../services/notification.service');
 
 // Quando `serviceLineId` é indicado (Service Line Leader), o INNER JOIN em
 // Area (required: true) restringe a lista aos consultores dessa Service
@@ -184,5 +185,86 @@ exports.updateConsultant = async (req, res) => {
   } catch (erro) {
     console.error(erro);
     res.status(500).json({ erro: 'Erro ao atualizar perfil' });
+  }
+};
+
+// Confirma que o consultor existe e — quando quem pede é um Service Line
+// Leader — que pertence à sua Service Line (reutiliza o mesmo scope da
+// listagem, onde o INNER JOIN em Area restringe por serviceLineId).
+const assertConsultorNoScope = async (user, consultorId) => {
+  const serviceLineId = await getServiceLineScopeForUser(user);
+  const ranked = await loadRankedConsultants(serviceLineId);
+  const consultor = ranked.find((row) => row.consultorId === Number(consultorId));
+  if (!consultor) {
+    const error = new Error('Consultor não encontrado ou fora da tua Service Line.');
+    error.statusCode = 404;
+    throw error;
+  }
+  return consultor;
+};
+
+// Atribui um badge especial (BadgePremium) a um consultor. Disponível para
+// Admin, TalentManager e ServiceLineLeader (este último só para consultores
+// da sua Service Line). Notifica o consultor da conquista.
+exports.atribuirBadgePremium = async (req, res) => {
+  try {
+    const consultorId = Number(req.params.id);
+    const badgePremiumId = Number(req.body.badgePremiumId);
+    if (!Number.isInteger(badgePremiumId) || badgePremiumId <= 0) {
+      return res.status(400).json({ erro: 'badgePremiumId inválido.' });
+    }
+
+    await assertConsultorNoScope(req.user, consultorId);
+
+    const badge = await BadgePremium.findByPk(badgePremiumId);
+    if (!badge || badge.active === false || badge.deletedAt) {
+      return res.status(404).json({ erro: 'Badge especial não encontrado.' });
+    }
+
+    const [award, criado] = await ConsultorBadgePremium.findOrCreate({
+      where: { consultorId, badgePremiumId },
+      defaults: { achievementDate: new Date() }
+    });
+    if (!criado) {
+      return res.status(409).json({ erro: 'Este consultor já tem este badge especial.' });
+    }
+
+    await criarNotificacao({
+      userId: consultorId,
+      title: 'Nova conquista especial!',
+      message: `Recebeste o badge especial "${badge.name}".`,
+      type: 'success'
+    }).catch(() => null);
+
+    res.status(201).json({
+      badgePremiumId: award.badgePremiumId,
+      name: badge.name,
+      description: badge.description || '',
+      criteriaDescription: badge.criteriaDescription || '',
+      achievementDate: award.achievementDate
+    });
+  } catch (error) {
+    const status = error.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao atribuir badge especial.' : error.message });
+  }
+};
+
+// Remove um badge especial atribuído (corrige atribuições erradas).
+exports.revogarBadgePremium = async (req, res) => {
+  try {
+    const consultorId = Number(req.params.id);
+    const badgePremiumId = Number(req.params.badgePremiumId);
+
+    await assertConsultorNoScope(req.user, consultorId);
+
+    const removidos = await ConsultorBadgePremium.destroy({ where: { consultorId, badgePremiumId } });
+    if (!removidos) {
+      return res.status(404).json({ erro: 'Atribuição não encontrada.' });
+    }
+
+    res.json({ mensagem: 'Badge especial removido.' });
+  } catch (error) {
+    const status = error.statusCode || 500;
+    res.status(status).json({ erro: status >= 500 ? 'Erro ao remover badge especial.' : error.message });
   }
 };

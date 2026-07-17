@@ -217,9 +217,9 @@
     },
     "acoes": {
       "verDetalhes": "Ver Detalhes do Badge",
-      "partilhar": "Partilhar no LinkedIn",
       "reenviar": "Reenviar Candidatura",
-      "adicionarEvidencias": "Adicionar Evidências"
+      "adicionarEvidencias": "Adicionar Evidências",
+      "adicionarCertificacao": "Adicionar ao LinkedIn"
     }
   },
   "badgeDetail": {
@@ -438,6 +438,14 @@
     "naoEncontrado": "Consultor não encontrado.",
     "voltar": "Voltar",
     "defaultRole": "Consultor",
+    "premium": {
+      "atribuir": "Atribuir badge especial",
+      "seleciona": "Seleciona um badge especial…",
+      "semDisponiveis": "Sem badges especiais disponíveis",
+      "botao": "Atribuir",
+      "remover": "Remover",
+      "erro": "Não foi possível concluir a operação."
+    },
     "sobre": "Sobre",
     "ranking": "#{{posicao}} no ranking",
     "linkedin": "LinkedIn",

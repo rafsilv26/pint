@@ -432,6 +432,14 @@ export async function getConsultant(id) {
   return http(`/consultants/${id}`)
 }
 
+export async function atribuirBadgePremium(consultorId, badgePremiumId) {
+  return http(`/consultants/${consultorId}/premium-badges`, { method: 'POST', body: { badgePremiumId } })
+}
+
+export async function revogarBadgePremium(consultorId, badgePremiumId) {
+  return http(`/consultants/${consultorId}/premium-badges/${badgePremiumId}`, { method: 'DELETE' })
+}
+
 export async function updateConsultant(id, body) {
   return http(`/consultants/${id}`, { method: 'PUT', body })
 }

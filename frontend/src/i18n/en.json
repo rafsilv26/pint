@@ -217,9 +217,9 @@
     },
     "acoes": {
       "verDetalhes": "View Badge Details",
-      "partilhar": "Share on LinkedIn",
       "reenviar": "Resubmit Application",
-      "adicionarEvidencias": "Add Evidences"
+      "adicionarEvidencias": "Add Evidences",
+      "adicionarCertificacao": "Add to LinkedIn"
     }
   },
   "badgeDetail": {
@@ -438,6 +438,14 @@
     "naoEncontrado": "Consultant not found.",
     "voltar": "Go back",
     "defaultRole": "Consultant",
+    "premium": {
+      "atribuir": "Award special badge",
+      "seleciona": "Select a special badge…",
+      "semDisponiveis": "No special badges available",
+      "botao": "Award",
+      "remover": "Remove",
+      "erro": "Could not complete the operation."
+    },
     "sobre": "About",
     "ranking": "#{{posicao}} on the ranking",
     "linkedin": "LinkedIn",

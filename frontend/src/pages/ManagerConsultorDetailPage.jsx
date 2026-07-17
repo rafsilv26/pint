@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
-import { ArrowLeft, Award, Star, Sparkles, Calendar, Mail, ExternalLink, Network, Trophy, FileText, FileDown, ChevronRight, Download } from 'lucide-react'
+import { ArrowLeft, Award, Star, Sparkles, Calendar, Mail, ExternalLink, Network, Trophy, FileText, FileDown, ChevronRight, Download, Plus, X } from 'lucide-react'
 import { Card, Spinner, ErrorState, EmptyState, StatusPill } from '../components/ui'
 import ConsultorTimelineManager from '../components/ConsultorTimelineManager'
 import { useAsync } from '../hooks/useAsync'
@@ -16,12 +16,17 @@ export default function ManagerConsultorDetailPage() {
   const location = useLocation()
   const talentView = location.pathname.startsWith('/tm')
   const serviceLineView = location.pathname.startsWith('/sll')
+  const adminView = location.pathname.startsWith('/admin')
   const { data: c, loading, error, reload } = useAsync(() => talentView ? api.getTalentConsultant(id) : api.getConsultant(id), [id, talentView])
   const { data: historico, loading: loadingHistorico, reload: reloadHistorico } = useAsync(() => api.getConsultantCandidaturas(id), [id])
+  const { data: premiumBadges } = useAsync(() => api.getBadgesPremium(), [])
   const [certificateId, setCertificateId] = useState(null)
   const [certificateError, setCertificateError] = useState('')
   const [reportBusy, setReportBusy] = useState(false)
   const [reportError, setReportError] = useState('')
+  const [premiumSelecionado, setPremiumSelecionado] = useState('')
+  const [premiumBusy, setPremiumBusy] = useState(false)
+  const [premiumError, setPremiumError] = useState('')
   useAutoRefresh(() => { reload(); reloadHistorico() })
 
   if (loading) return <Spinner />
@@ -67,6 +72,34 @@ export default function ManagerConsultorDetailPage() {
       setReportError(downloadError.message || t('managerConsultor.report.erroDownload'))
     } finally {
       setReportBusy(false)
+    }
+  }
+
+  const jaAtribuidos = new Set(specialAchievements.map((item) => item.badgePremiumId))
+  const premiumDisponiveis = (premiumBadges || []).filter((b) => !jaAtribuidos.has(b.id))
+
+  const atribuirPremium = async () => {
+    if (!premiumSelecionado) return
+    setPremiumBusy(true)
+    setPremiumError('')
+    try {
+      await api.atribuirBadgePremium(c.id, Number(premiumSelecionado))
+      setPremiumSelecionado('')
+      await reload()
+    } catch (err) {
+      setPremiumError(err.message || t('managerConsultor.premium.erro'))
+    } finally {
+      setPremiumBusy(false)
+    }
+  }
+
+  const revogarPremium = async (badgePremiumId) => {
+    setPremiumError('')
+    try {
+      await api.revogarBadgePremium(c.id, badgePremiumId)
+      await reload()
+    } catch (err) {
+      setPremiumError(err.message || t('managerConsultor.premium.erro'))
     }
   }
 
@@ -184,8 +217,58 @@ export default function ManagerConsultorDetailPage() {
       </Card>
       {certificateError && <div className="mt-3 alert alert-danger py-2 small" role="alert">{certificateError}</div>}
 
-      {(talentView || serviceLineView) && <div className="mt-4 row g-4">
-        <div className="col-lg-6"><Card className="h-100"><h2 className="mb-3 h6 fw-bold"><Sparkles size={17} className="me-2 text-warning" />{t('tmWorkspace.specialAchievements')}</h2>{specialAchievements.length === 0 ? <p className="small text-muted mb-0">{t('tmWorkspace.noSpecialAchievements')}</p> : <div className="d-flex flex-column gap-3">{specialAchievements.map((item) => <div key={`${item.badgePremiumId}-${item.achievementDate}`} className="rounded-3 border p-3"><p className="small fw-bold mb-1">{item.name}</p><p className="fs-xs text-muted mb-1">{item.description || item.criteriaDescription}</p><p className="fs-xs text-muted mb-0">{item.achievementDate ? new Date(item.achievementDate).toLocaleDateString() : '—'}</p></div>)}</div>}</Card></div>
+      {(talentView || serviceLineView || adminView) && <div className="mt-4 row g-4">
+        <div className="col-lg-6">
+          <Card className="h-100">
+            <h2 className="mb-3 h6 fw-bold"><Sparkles size={17} className="me-2 text-warning" />{t('tmWorkspace.specialAchievements')}</h2>
+            {specialAchievements.length === 0 ? (
+              <p className="small text-muted mb-0">{t('tmWorkspace.noSpecialAchievements')}</p>
+            ) : (
+              <div className="d-flex flex-column gap-3">
+                {specialAchievements.map((item) => (
+                  <div key={`${item.badgePremiumId}-${item.achievementDate}`} className="rounded-3 border p-3 position-relative">
+                    <button
+                      type="button"
+                      onClick={() => revogarPremium(item.badgePremiumId)}
+                      className="btn btn-sm btn-link text-danger p-0 position-absolute top-0 end-0 m-2"
+                      title={t('managerConsultor.premium.remover')}
+                    >
+                      <X size={15} />
+                    </button>
+                    <p className="small fw-bold mb-1 pe-3">{item.name}</p>
+                    <p className="fs-xs text-muted mb-1">{item.description || item.criteriaDescription}</p>
+                    <p className="fs-xs text-muted mb-0">{item.achievementDate ? new Date(item.achievementDate).toLocaleDateString() : '—'}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="mt-3 border-top pt-3">
+              <label className="fs-xs fw-semibold text-muted d-block mb-2">{t('managerConsultor.premium.atribuir')}</label>
+              <div className="d-flex gap-2">
+                <select
+                  className="form-select form-select-sm"
+                  value={premiumSelecionado}
+                  onChange={(e) => setPremiumSelecionado(e.target.value)}
+                  disabled={premiumBusy || premiumDisponiveis.length === 0}
+                >
+                  <option value="">{premiumDisponiveis.length ? t('managerConsultor.premium.seleciona') : t('managerConsultor.premium.semDisponiveis')}</option>
+                  {premiumDisponiveis.map((b) => (
+                    <option key={b.id} value={b.id}>{b.nome}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={atribuirPremium}
+                  disabled={!premiumSelecionado || premiumBusy}
+                  className="btn btn-brand btn-sm d-inline-flex align-items-center gap-1 flex-shrink-0"
+                >
+                  <Plus size={15} /> {premiumBusy ? t('exportButtons.processando') : t('managerConsultor.premium.botao')}
+                </button>
+              </div>
+              {premiumError && <div className="mt-2 text-danger fs-xs">{premiumError}</div>}
+            </div>
+          </Card>
+        </div>
         {talentView && <div className="col-lg-6"><ConsultorTimelineManager consultorId={c.id} className="h-100" /></div>}
       </div>}
 
