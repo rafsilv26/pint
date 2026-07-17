@@ -258,6 +258,7 @@ exports.login = async (req, res) => {
                 email: user.email,
                 role: roles[0] || null,
                 roles,
+                idioma: user.idioma,
                 mustChangePassword: user.mustChangePassword,
                 greeting,
                 pendingPolicies: await pendingPoliciesFor(user.id)
