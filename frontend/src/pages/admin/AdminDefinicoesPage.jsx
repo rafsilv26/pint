@@ -1,11 +1,9 @@
 import { useState } from 'react'
-import { Clock, Bell, Megaphone, Users, Award, ClipboardCheck, Layers, Send, PlayCircle } from 'lucide-react'
+import { Clock, Bell, Megaphone, Send, PlayCircle } from 'lucide-react'
 import { PageHeader, Card, Toggle, Spinner, ErrorState } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import * as api from '../../services/api'
 import { useTranslation } from 'react-i18next'
-
-const KPI_ICONS = [Users, Award, ClipboardCheck, Layers]
 
 function ToggleRow({ label, desc, checked, onChange }) {
   return (
@@ -162,7 +160,6 @@ function SlaManagerCard() {
 export default function AdminDefinicoesPage() {
   const { t } = useTranslation()
   const { data, loading } = useAsync(() => api.getDefinicoes())
-  const { data: painel } = useAsync(() => api.getAdminDashboard().catch(() => null))
 
   const [notif, setNotif] = useState({ email: true, push: false, diasExpiracao: 5 })
   const [guardado, setGuardado] = useState(false)
@@ -209,28 +206,9 @@ export default function AdminDefinicoesPage() {
 
   if (loading) return <Spinner />
 
-  const kpis = painel?.stats || []
-
   return (
     <div className="mx-auto" style={{ maxWidth: '46rem' }}>
       <PageHeader title={t('adminDefinicoes.titulo')} subtitle={t('adminDefinicoes.subtitulo')} />
-
-      {kpis.length > 0 && (
-        <div className="row row-cols-2 row-cols-lg-4 g-3 mb-4">
-          {kpis.map((s, i) => {
-            const Icon = KPI_ICONS[i] || Award
-            return (
-              <div className="col" key={s.label}>
-                <Card className="h-100">
-                  <Icon size={18} className="text-brand" />
-                  <p className="fs-3 fw-bold text-ink mb-0 mt-2">{s.value}</p>
-                  <p className="fs-xs text-muted mb-0">{s.label}</p>
-                </Card>
-              </div>
-            )
-          })}
-        </div>
-      )}
 
       <Card>
         <h2 className="mb-1 d-flex align-items-center gap-2 fw-semibold text-ink">
