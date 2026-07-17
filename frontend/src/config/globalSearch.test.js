@@ -4,8 +4,8 @@ import { getGlobalSearchTarget } from './globalSearch'
 describe('getGlobalSearchTarget', () => {
   it.each([
     ['/tm/candidaturas', 'Ana Silva', '/tm/pesquisa?q=Ana%20Silva'],
-    ['/sll/pedidos', 'Azure', '/sll/consultores?search=Azure'],
-    ['/admin/templates-email', 'admin@softinsa.pt', '/admin/utilizadores?search=admin%40softinsa.pt'],
+    ['/sll/pedidos', 'Azure', '/sll/pesquisa?q=Azure'],
+    ['/admin/templates-email', 'admin@softinsa.pt', '/admin/pesquisa?q=admin%40softinsa.pt'],
   ])('encaminha a pesquisa de %s para a página certa', (pathname, query, expected) => {
     expect(getGlobalSearchTarget(pathname, query)).toBe(expected)
   })

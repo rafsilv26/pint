@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { KeyRound, Mail, Users, Settings, ExternalLink } from 'lucide-react'
+import { KeyRound, Mail, Users, Settings, ExternalLink, MessageSquare } from 'lucide-react'
 import { Card } from '../components/ui'
 import LogoutButton from '../components/LogoutButton'
 import { useAuth } from '../context/useAuth'
@@ -17,6 +17,7 @@ export default function ProfilePage() {
     { to: '/perfil/assinatura', icon: Mail, title: t('perfil.acoes.assinatura'), desc: t('perfil.acoes.assinaturaDesc') },
     { to: '/consultores', icon: Users, title: t('perfil.acoes.diretorio'), desc: t('perfil.acoes.diretorioDesc') },
     { to: '/perfil/preferencias', icon: Settings, title: t('perfil.acoes.preferencias'), desc: t('perfil.acoes.preferenciasDesc') },
+    { to: '/perfil/integracoes', icon: MessageSquare, title: t('perfil.acoes.integracoes'), desc: t('perfil.acoes.integracoesDesc') },
   ]
 
   const { data: consultor, loading, reload } = useAsync(

@@ -116,7 +116,7 @@ export function Button({ children, variant = 'primary', className = '', ...props
   )
 }
 
-export function Toggle({ checked, onChange }) {
+export function Toggle({ checked, onChange, disabled = false }) {
   return (
     <div className="form-check form-switch mb-0">
       <input
@@ -125,7 +125,8 @@ export function Toggle({ checked, onChange }) {
         role="switch"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        style={{ cursor: 'pointer' }}
+        disabled={disabled}
+        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
       />
     </div>
   )

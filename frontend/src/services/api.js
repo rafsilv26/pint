@@ -51,6 +51,11 @@ export const markNotificationRead = impl.markNotificationRead
 export const markAllNotificationsRead = impl.markAllNotificationsRead
 export const getNotificationPrefs = impl.getNotificationPrefs
 export const saveNotificationPrefs = impl.saveNotificationPrefs
+export const getIntegrations = impl.getIntegrations
+export const saveIntegration = impl.saveIntegration
+export const testIntegration = impl.testIntegration
+export const updateIntegration = impl.updateIntegration
+export const deleteIntegration = impl.deleteIntegration
 
 export const getGamification = impl.getGamification
 export const getConsultants = impl.getConsultants
