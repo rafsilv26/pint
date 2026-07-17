@@ -101,6 +101,14 @@ export default function AtualizarPasswordPage() {
         >
           {loading ? t('atualizarPassword.botoes.guardando') : t('atualizarPassword.botoes.entrar')}
         </button>
+        <button
+          type="button"
+          onClick={() => navigate('/login')}
+          disabled={loading}
+          className="btn btn-link text-muted text-decoration-none mx-auto"
+        >
+          {t('atualizarPassword.botoes.cancelar', 'Cancelar')}
+        </button>
       </form>
     </AuthShell>
   )
