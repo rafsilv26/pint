@@ -978,7 +978,8 @@
       "aceitando": "Recording…",
       "aceitar": "I have read and accept",
       "sair": "Can't accept right now? Sign out",
-      "prosseguir": "Read and proceed"
+      "naoAceitar": "Do not accept",
+      "aceitarSimples": "Accept"
     }
   },
   "exportButtons": {

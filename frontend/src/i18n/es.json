@@ -980,7 +980,8 @@
       "aceitando": "Registrando…",
       "aceitar": "He leído y acepto",
       "sair": "¿No puedes aceptar ahora? Cerrar sesión",
-      "prosseguir": "Leído, continuar"
+      "naoAceitar": "No aceptar",
+      "aceitarSimples": "Aceptar"
     }
   },
   "exportButtons": {

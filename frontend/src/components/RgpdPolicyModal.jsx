@@ -4,18 +4,38 @@ import { ShieldCheck } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
 import { useTranslation } from 'react-i18next'
 
+// Políticas não obrigatórias recusadas ficam guardadas por utilizador+versão no
+// localStorage: o utilizador escolheu "Não aceitar", não gravamos nada na BD
+// (só a aceitação é registada), mas não voltamos a perguntar em cada login.
+const chaveRecusadas = (userId) => `politicas-recusadas-${userId || 'x'}`
+const idRecusa = (p) => `${p.policyId}:${p.version || ''}`
+
+function carregarRecusadas(userId) {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(chaveRecusadas(userId)) || '[]'))
+  } catch {
+    return new Set()
+  }
+}
+
 export default function RgpdPolicyModal({ policies }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { acceptPolicy, logout } = useAuth()
+  const { user, acceptPolicy, logout } = useAuth()
   const [erro, setErro] = useState(null)
   const [loading, setLoading] = useState(false)
   const [confirmoLeitura, setConfirmoLeitura] = useState(false)
+  const [recusadas, setRecusadas] = useState(() => carregarRecusadas(user?.id))
 
-  const politica = policies[0]
-  const total = policies.length
-  // Políticas obrigatórias exigem marcar a caixa para avançar; as não
-  // obrigatórias mostram a MESMA caixa mas deixam avançar sem a marcar.
+  // Mostra as obrigatórias sempre; as não obrigatórias só se ainda não foram
+  // recusadas localmente por este utilizador.
+  const visiveis = (policies || []).filter(
+    (p) => p.mandatory !== false || !recusadas.has(idRecusa(p))
+  )
+  if (visiveis.length === 0) return null
+
+  const politica = visiveis[0]
+  const total = visiveis.length
   const obrigatoria = politica.mandatory !== false
 
   async function handleAceitar() {
@@ -30,6 +50,18 @@ export default function RgpdPolicyModal({ policies }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  // "Não aceitar": não grava na BD, apenas marca localmente para não voltar a
+  // perguntar. Avança para a próxima política (ou fecha o modal).
+  function handleNaoAceitar() {
+    const proximas = new Set(recusadas)
+    proximas.add(idRecusa(politica))
+    try {
+      localStorage.setItem(chaveRecusadas(user?.id), JSON.stringify([...proximas]))
+    } catch { /* ignora */ }
+    setConfirmoLeitura(false)
+    setRecusadas(proximas)
   }
 
   return (
@@ -69,33 +101,38 @@ export default function RgpdPolicyModal({ policies }) {
 
         {erro && <div className="mb-3 rounded-3 bg-danger-subtle px-3 py-2 small text-danger">{erro}</div>}
 
-        {obrigatoria && (
-          <label className="mb-3 d-flex align-items-start gap-2 small text-ink" style={{ cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              className="form-check-input mt-1 flex-shrink-0"
-              checked={confirmoLeitura}
-              onChange={(e) => setConfirmoLeitura(e.target.checked)}
-            />
-            {t('rgpdPolicyModal.confirmoLeitura')}
-          </label>
-        )}
+        {obrigatoria ? (
+          <>
+            <label className="mb-3 d-flex align-items-start gap-2 small text-ink" style={{ cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                className="form-check-input mt-1 flex-shrink-0"
+                checked={confirmoLeitura}
+                onChange={(e) => setConfirmoLeitura(e.target.checked)}
+              />
+              {t('rgpdPolicyModal.confirmoLeitura')}
+            </label>
 
-        <button onClick={handleAceitar} disabled={loading || (obrigatoria && !confirmoLeitura)} className="btn btn-primary w-100">
-          {loading
-            ? t('rgpdPolicyModal.botoes.aceitando')
-            : obrigatoria
-              ? t('rgpdPolicyModal.botoes.aceitar')
-              : t('rgpdPolicyModal.botoes.prosseguir')}
-        </button>
+            <button onClick={handleAceitar} disabled={loading || !confirmoLeitura} className="btn btn-primary w-100">
+              {loading ? t('rgpdPolicyModal.botoes.aceitando') : t('rgpdPolicyModal.botoes.aceitar')}
+            </button>
 
-        {obrigatoria && (
-          <button
-            onClick={() => { logout(); navigate('/login') }}
-            className="btn btn-link mt-2 w-100 text-center text-muted text-decoration-none"
-          >
-            {t('rgpdPolicyModal.botoes.sair')}
-          </button>
+            <button
+              onClick={() => { logout(); navigate('/login') }}
+              className="btn btn-link mt-2 w-100 text-center text-muted text-decoration-none"
+            >
+              {t('rgpdPolicyModal.botoes.sair')}
+            </button>
+          </>
+        ) : (
+          <div className="d-flex gap-2">
+            <button onClick={handleNaoAceitar} disabled={loading} className="btn btn-outline-secondary w-50">
+              {t('rgpdPolicyModal.botoes.naoAceitar')}
+            </button>
+            <button onClick={handleAceitar} disabled={loading} className="btn btn-primary w-50">
+              {loading ? t('rgpdPolicyModal.botoes.aceitando') : t('rgpdPolicyModal.botoes.aceitarSimples')}
+            </button>
+          </div>
         )}
       </div>
     </div>
