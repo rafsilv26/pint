@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Calendar, Clock, FileText, Award, Plus, RefreshCw } from 'lucide-react'
+import { Search, Calendar, Clock, FileText, Award, Plus, RefreshCw, Download } from 'lucide-react'
 import { Spinner, EmptyState, StatusPill, ErrorState } from '../components/ui'
 import LinkedinGlyph from '../components/LinkedinGlyph'
 import { useAsync } from '../hooks/useAsync'
@@ -42,13 +42,21 @@ function Acoes({ c }) {
       <>
         {detalhes}
         {c.badge.publicToken && (
-          <button
-            onClick={() => adicionarCertificacaoLinkedin(c.badge)}
-            className="btn d-flex align-items-center gap-1 fs-xs fw-semibold text-white"
-            style={{ backgroundColor: '#0a66c2' }}
-          >
-            <LinkedinGlyph size={14} /> {t('candidaturas.acoes.adicionarCertificacao')}
-          </button>
+          <>
+            <Link
+              to={`/certificado/${c.badge.publicToken}`}
+              className="btn btn-brand d-flex align-items-center gap-1 fs-xs fw-semibold"
+            >
+              <Download size={14} /> {t('candidaturas.acoes.verCertificado')}
+            </Link>
+            <button
+              onClick={() => adicionarCertificacaoLinkedin(c.badge)}
+              className="btn d-flex align-items-center gap-1 fs-xs fw-semibold text-white"
+              style={{ backgroundColor: '#0a66c2' }}
+            >
+              <LinkedinGlyph size={14} /> {t('candidaturas.acoes.adicionarCertificacao')}
+            </button>
+          </>
         )}
       </>
     )

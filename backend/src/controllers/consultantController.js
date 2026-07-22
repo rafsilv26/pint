@@ -64,13 +64,17 @@ const serialize = (consultant, rank, currentUserId) => ({
       publicToken: award.publicToken || '',
       expirationDate: award.expirationDate
     })),
-  specialAchievements: (consultant.premiumBadges || []).map((award) => ({
-    badgePremiumId: award.badgePremiumId,
-    name: award.BadgePremium?.name || '',
-    description: award.BadgePremium?.description || '',
-    criteriaDescription: award.BadgePremium?.criteriaDescription || '',
-    achievementDate: award.achievementDate
-  }))
+  specialAchievements: (consultant.premiumBadges || [])
+    .slice()
+    .sort((a, b) => new Date(b.achievementDate || 0) - new Date(a.achievementDate || 0))
+    .map((award) => ({
+      badgePremiumId: award.badgePremiumId,
+      name: award.BadgePremium?.name || '',
+      description: award.BadgePremium?.description || '',
+      criteriaDescription: award.BadgePremium?.criteriaDescription || '',
+      icon: award.BadgePremium?.icon || '',
+      achievementDate: award.achievementDate
+    }))
 });
 
 const loadRankedConsultants = async (serviceLineId) => {

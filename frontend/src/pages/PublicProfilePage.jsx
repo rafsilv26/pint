@@ -67,6 +67,7 @@ export default function PublicProfilePage() {
 
   const consultor = data?.consultor
   const badges = data?.badges || []
+  const conquistas = consultor?.specialAchievements || []
 
   const nome = consultor?.name || (isSelf ? user?.nome : '') || 'Consultor'
   const email = isSelf ? user?.email : consultor?.email
@@ -236,15 +237,36 @@ export default function PublicProfilePage() {
               </div>
             )
           ) : (
-            (consultor?.specials ?? 0) === 0 ? (
+            conquistas.length === 0 ? (
               <EmptyState icon={Sparkles} title={t('perfilPublico.vazioEspecialTitulo')} description={t('perfilPublico.vazioEspecialDesc')} />
             ) : (
-              <Card className="d-flex align-items-center gap-3">
-                <div className="d-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning-emphasis flex-shrink-0" style={{ height: '3rem', width: '3rem' }}>
-                  <Sparkles size={22} />
-                </div>
-                <p className="fw-semibold text-ink mb-0">{consultor.specials} {t('perfilPublico.conquistasCount')}</p>
-              </Card>
+              <div className="row row-cols-1 row-cols-sm-2 g-3">
+                {conquistas.map((c) => (
+                  <div className="col" key={c.badgePremiumId}>
+                    <Card className="h-100 d-flex align-items-start gap-3">
+                      <div className="d-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning-emphasis flex-shrink-0 overflow-hidden" style={{ height: '3rem', width: '3rem' }}>
+                        {!c.icon
+                          ? <Sparkles size={22} />
+                          : /^(https?:\/\/|\/)/.test(c.icon)
+                            ? <img src={c.icon} alt="" className="w-100 h-100 object-fit-cover" />
+                            : <span className="fs-5">{c.icon}</span>}
+                      </div>
+                      <div className="flex-grow-1 min-w-0">
+                        <p className="fw-semibold text-ink mb-1">{c.name}</p>
+                        {c.description && <p className="fs-xs text-muted mb-1">{c.description}</p>}
+                        {c.criteriaDescription && (
+                          <p className="fs-xs text-muted fst-italic mb-1">{c.criteriaDescription}</p>
+                        )}
+                        {c.achievementDate && (
+                          <p className="fs-xs text-muted mb-0 d-flex align-items-center gap-1">
+                            <Calendar size={11} /> {t('perfilPublico.obtidoEm')} {formatarData(c.achievementDate)}
+                          </p>
+                        )}
+                      </div>
+                    </Card>
+                  </div>
+                ))}
+              </div>
             )
           )}
         </div>

@@ -219,7 +219,8 @@
       "verDetalhes": "View Badge Details",
       "reenviar": "Resubmit Application",
       "adicionarEvidencias": "Add Evidences",
-      "adicionarCertificacao": "Add to LinkedIn"
+      "adicionarCertificacao": "Add to LinkedIn",
+      "verCertificado": "View certificate"
     }
   },
   "badgeDetail": {
