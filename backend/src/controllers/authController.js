@@ -100,7 +100,7 @@ exports.register = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao registar o utilizador.', error: error });
+        res.status(500).json({ error1: 'Erro ao registar o utilizador.', error: error });
     }
 };
 
