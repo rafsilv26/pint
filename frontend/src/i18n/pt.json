@@ -9,7 +9,7 @@
       "perfil": "Perfil"
     },
     "tm": {
-      "dashboard": "Dashboard",
+      "dashboard": "Painel de Controlo",
       "candidaturas": "Pedidos de Badge",
       "catalogo": "Catálogo de Badges",
       "learningPaths": "Learning Paths",
@@ -1432,7 +1432,7 @@
     }
   },
   "talentDashboard": {
-    "titulo": "Dashboard",
+    "titulo": "Painel de controlo",
     "pontuacaoGlobal": "Pontuação Global",
     "tabela": {
       "posicao": "#",
