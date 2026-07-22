@@ -10,10 +10,16 @@ const {
   SLAConfig,
   Notice
 } = require('../models');
+const sequelize = require('../config/database');
 const { emailAlertaSLA } = require('./email.service');
 const { sendPushToUser } = require('./pushNotification.service');
 
 const RESPONSE_DAYS_DEFAULT = 5;
+
+const FASE_POR_EQUIPA = {
+  talent: { code: 'SUBMITTED', base: 'COALESCE("dataSubmicao", "createdAt")' },
+  serviceline: { code: 'VALIDATED', base: '"dataValidacao"' }
+};
 
 const getSLAConfigForTeam = async (team) => {
   const configs = await SLAConfig.findAll({
@@ -165,6 +171,39 @@ const verificarSLA = async () => {
   return resumo;
 };
 
+const reaplicarSlaEmCurso = async (team) => {
+  const fase = FASE_POR_EQUIPA[team];
+  if (!fase) return 0;
+
+  const status = await BadgeStatus.findOne({ where: { code: fase.code } });
+  if (!status) return 0;
+
+  const { slaId, responseDays } = await getSLAConfigForTeam(team);
+  const novoLimite = `${fase.base} + (:dias * INTERVAL '1 day')`;
+
+  const [, metadata] = await sequelize.query(
+    `UPDATE "CANDIDATURABADGE"
+        SET "dataSlaLimite" = ${novoLimite},
+            "slaExcedido"   = (${novoLimite}) < NOW(),
+            "slaId"         = :slaId,
+            "updatedAt"     = NOW()
+      WHERE "estadoId" = :estadoId
+        AND ${fase.base} IS NOT NULL`,
+    { replacements: { dias: responseDays, slaId: slaId ?? null, estadoId: status.statusId } }
+  );
+
+  return metadata?.rowCount ?? 0;
+};
+
+const reaplicarSlaEquipas = async (team) => {
+  const equipas = team ? [team] : Object.keys(FASE_POR_EQUIPA);
+  const resultado = {};
+  for (const equipa of equipas) {
+    resultado[equipa] = await reaplicarSlaEmCurso(equipa);
+  }
+  return resultado;
+};
+
 const iniciarJobSLA = () => {
   if (process.env.DISABLE_SLA_JOB === 'true') return;
   const executar = () => verificarSLA().catch((erro) => console.error('Erro na verificação de SLA:', erro.message));
@@ -172,4 +211,4 @@ const iniciarJobSLA = () => {
   setInterval(executar, 12 * 60 * 60 * 1000);
 };
 
-module.exports = { verificarSLA, iniciarJobSLA, getSLAConfigForTeam };
+module.exports = { verificarSLA, iniciarJobSLA, getSLAConfigForTeam, reaplicarSlaEquipas };

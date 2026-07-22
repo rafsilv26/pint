@@ -1,5 +1,5 @@
 const { SLAConfig, Candidatura } = require('../models');
-const { getSLAConfigForTeam } = require('../services/sla.service');
+const { getSLAConfigForTeam, reaplicarSlaEquipas } = require('../services/sla.service');
 
 const TEAMS = ['talent', 'serviceline'];
 
@@ -61,6 +61,7 @@ exports.criarConfig = async (req, res) => {
       createdBy: req.user.id,
       active: ativa
     });
+    if (ativa) await reaplicarSlaEquipas(teamNormalizado);
     res.status(201).json(serialize(config));
   } catch (erro) {
     res.status(500).json({ erro: 'Erro ao criar SLA.' });
@@ -98,6 +99,7 @@ exports.atualizarConfig = async (req, res) => {
     if (alteracoes.active) await desativarOutrosDaEquipa(teamFinal);
 
     await config.update(alteracoes);
+    await reaplicarSlaEquipas(teamFinal);
     res.json(serialize(config));
   } catch (erro) {
     res.status(500).json({ erro: 'Erro ao atualizar SLA.' });
@@ -130,6 +132,7 @@ exports.definirEquipa = async (req, res) => {
         active: true
       });
     }
+    await reaplicarSlaEquipas(team);
     res.json(serialize(config));
   } catch (erro) {
     res.status(500).json({ erro: 'Erro ao definir SLA.' });
