@@ -62,11 +62,21 @@ const PORT = process.env.PORT || 3000;
 
 const iniciarServidor = async () => {
     try {
+
+        /*
         await prepararBaseDeDados({
             sequelize,
             executarMigrations: runMigrations,
             tarefasDepoisDasMigrations: [ensurePublicBadgeTokens]
-        });
+        });*/
+        sequelize.authenticate()
+            .then(() => {
+                console.log('✅ Conetado ao Neon com sucesso!');
+                // Sincroniza os modelos com as tabelas reais da BD
+                return sequelize.sync({ alter: true });
+            })
+            .then(() => console.log('🔄 Tabelas sincronizadas no Neon.'))
+            .catch(err => console.error('❌ Erro crucial de ligação:', err));
 
         console.log('✅ Conetado ao Neon com sucesso!');
         console.log('🔄 Migrations aplicadas no Neon.');
