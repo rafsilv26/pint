@@ -43,6 +43,20 @@ const STATUS = {
   REJECTED: 'REJECTED'
 };
 
+const DIA_MS = 24 * 60 * 60 * 1000;
+
+const slaAoEntrarNaFase = async (equipa, agora = new Date()) => {
+  const config = await getSLAConfigForTeam(equipa).catch(() => null);
+  if (!config) return { slaId: null, dataSlaLimite: null, slaExcedido: false };
+  return {
+    slaId: config.slaId ?? null,
+    dataSlaLimite: new Date(agora.getTime() + config.responseDays * DIA_MS),
+    slaExcedido: false
+  };
+};
+
+const SLA_SEM_PRAZO_ATIVO = { dataSlaLimite: null };
+
 const getStatus = async (code) => {
   const status = await BadgeStatus.findOne({ where: { code } });
   if (!status) {
@@ -275,13 +289,11 @@ exports.submeterCandidatura = async (req, res) => {
       return res.status(200).json({ mensagem: 'Rascunho guardado.', candidaturaId: candidatura.id, estado: STATUS.OPEN });
     }
 
-    const slaTalent = await getSLAConfigForTeam('talent').catch(() => null);
+    const agoraSubmissao = new Date();
     await candidatura.update({
       estadoId: submittedId,
-      dataSubmicao: new Date(),
-      slaId: slaTalent?.slaId ?? null,
-      dataSlaLimite: slaTalent ? new Date(Date.now() + slaTalent.responseDays * 24 * 60 * 60 * 1000) : null,
-      slaExcedido: false
+      dataSubmicao: agoraSubmissao,
+      ...(await slaAoEntrarNaFase('talent', agoraSubmissao))
     });
     await HistoricoCandidatura.create({
       candidaturaId: candidatura.id,
@@ -618,11 +630,15 @@ exports.validarTalentManager = async (req, res) => {
       }
     }
 
+    const agoraValidacao = new Date();
     await candidatura.update({
       estadoId: nextStatus.statusId,
       talentManagerId: req.user.roles.includes('TalentManager') ? req.user.id : null,
-      dataValidacao: new Date(),
-      comentario
+      dataValidacao: agoraValidacao,
+      comentario,
+      ...(decisao === 'APROVAR'
+        ? await slaAoEntrarNaFase('serviceline', agoraValidacao)
+        : SLA_SEM_PRAZO_ATIVO)
     });
 
     await HistoricoCandidatura.create({
@@ -758,7 +774,8 @@ exports.validarServiceLine = async (req, res) => {
       estadoId: nextStatus.statusId,
       serviceLineLeaderId: req.user.roles.includes('ServiceLineLeader') ? req.user.id : null,
       dataAprovacao: decisao === 'APROVAR' ? new Date() : null,
-      comentario
+      comentario,
+      ...SLA_SEM_PRAZO_ATIVO
     });
 
     await HistoricoCandidatura.create({

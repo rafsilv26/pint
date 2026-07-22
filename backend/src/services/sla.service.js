@@ -98,14 +98,22 @@ const marcarSlaExcedido = async (candidaturas) => {
 
 const verificarSLA = async () => {
   const { talent, serviceline } = await getSLAConfig();
-  const limiteTalent = new Date(Date.now() - talent.responseDays * 24 * 60 * 60 * 1000);
-  const limiteServiceLine = new Date(Date.now() - serviceline.responseDays * 24 * 60 * 60 * 1000);
+  const agora = new Date();
+  const limiteTalent = new Date(agora.getTime() - talent.responseDays * 24 * 60 * 60 * 1000);
+  const limiteServiceLine = new Date(agora.getTime() - serviceline.responseDays * 24 * 60 * 60 * 1000);
+
+  const prazoUltrapassado = (colunaLegado, limiteLegado) => ({
+    [Op.or]: [
+      { dataSlaLimite: { [Op.lt]: agora } },
+      { dataSlaLimite: null, [colunaLegado]: { [Op.lt]: limiteLegado } }
+    ]
+  });
 
   const statuses = await BadgeStatus.findAll({ where: { code: ['SUBMITTED', 'VALIDATED'] } });
   const porCodigo = Object.fromEntries(statuses.map((s) => [s.code, s.statusId]));
 
   const submetidasAtrasadas = await Candidatura.findAll({
-    where: { estadoId: porCodigo.SUBMITTED, createdAt: { [Op.lt]: limiteTalent } },
+    where: { estadoId: porCodigo.SUBMITTED, ...prazoUltrapassado('createdAt', limiteTalent) },
     include: candidaturaIncludeSLA
   });
   await marcarSlaExcedido(submetidasAtrasadas);
@@ -122,7 +130,7 @@ const verificarSLA = async () => {
   }
 
   const validadasAtrasadas = await Candidatura.findAll({
-    where: { estadoId: porCodigo.VALIDATED, dataValidacao: { [Op.lt]: limiteServiceLine } },
+    where: { estadoId: porCodigo.VALIDATED, ...prazoUltrapassado('dataValidacao', limiteServiceLine) },
     include: candidaturaIncludeSLA
   });
   await marcarSlaExcedido(validadasAtrasadas);
