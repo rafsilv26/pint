@@ -35,7 +35,7 @@ export default function CertificatePage() {
     <div className="min-vh-100 bg-light px-3 py-4">
       <div className="mx-auto" style={{ maxWidth: '48rem' }}>
         <div className="mb-3 d-flex align-items-center justify-content-between d-print-none">
-          <Link to="/historico" className="d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
+          <Link to="/candidaturas" className="d-inline-flex align-items-center gap-1 small text-muted text-decoration-none">
             <ArrowLeft size={16} /> {t('certificado.voltar')}
           </Link>
           <button

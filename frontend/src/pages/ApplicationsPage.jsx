@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Calendar, Clock, FileText, Award, Plus, RefreshCw, Download } from 'lucide-react'
+import { Search, Calendar, Clock, FileText, Award, Plus, RefreshCw, Download, ExternalLink } from 'lucide-react'
 import { Spinner, EmptyState, StatusPill, ErrorState } from '../components/ui'
 import LinkedinGlyph from '../components/LinkedinGlyph'
 import { useAsync } from '../hooks/useAsync'
@@ -27,6 +27,20 @@ const BAR = {
 
 function Acoes({ c }) {
   const { t } = useTranslation()
+  const [aDescarregar, setADescarregar] = useState(false)
+  const [erroCertificado, setErroCertificado] = useState(false)
+
+  async function descarregarCertificado() {
+    setADescarregar(true)
+    setErroCertificado(false)
+    try {
+      await api.downloadCertificado(c.badge.publicToken)
+    } catch {
+      setErroCertificado(true)
+    } finally {
+      setADescarregar(false)
+    }
+  }
 
   const detalhes = (
     <Link
@@ -43,11 +57,19 @@ function Acoes({ c }) {
         {detalhes}
         {c.badge.publicToken && (
           <>
-            <Link
-              to={`/certificado/${c.badge.publicToken}`}
+            <button
+              onClick={descarregarCertificado}
+              disabled={aDescarregar}
               className="btn btn-brand d-flex align-items-center gap-1 fs-xs fw-semibold"
             >
-              <Download size={14} /> {t('candidaturas.acoes.verCertificado')}
+              <Download size={14} />
+              {aDescarregar ? t('candidaturas.acoes.aDescarregar') : t('candidaturas.acoes.verCertificado')}
+            </button>
+            <Link
+              to={`/badge/${c.badge.publicToken}`}
+              className="btn btn-outline-secondary bg-white d-flex align-items-center gap-1 fs-xs fw-semibold"
+            >
+              <ExternalLink size={14} /> {t('candidaturas.acoes.paginaPublica')}
             </Link>
             <button
               onClick={() => adicionarCertificacaoLinkedin(c.badge)}
@@ -56,6 +78,9 @@ function Acoes({ c }) {
             >
               <LinkedinGlyph size={14} /> {t('candidaturas.acoes.adicionarCertificacao')}
             </button>
+            {erroCertificado && (
+              <p className="w-100 text-end fs-xs text-danger mb-0">{t('candidaturas.acoes.erroCertificado')}</p>
+            )}
           </>
         )}
       </>

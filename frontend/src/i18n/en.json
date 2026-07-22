@@ -220,7 +220,10 @@
       "reenviar": "Resubmit Application",
       "adicionarEvidencias": "Add Evidences",
       "adicionarCertificacao": "Add to LinkedIn",
-      "verCertificado": "View certificate"
+      "verCertificado": "View certificate",
+      "aDescarregar": "Downloading…",
+      "erroCertificado": "Could not download the certificate.",
+      "paginaPublica": "Public page"
     }
   },
   "badgeDetail": {
@@ -348,21 +351,6 @@
       "avancado": "Advanced"
     }
   },
-  "historico": {
-    "titulo": "Badge History",
-    "subtitulo": "The badges you have already earned.",
-    "vazioTitulo": "You don't have any badges yet",
-    "vazioDesc": "Earn your first badge!",
-    "valido": "Valid",
-    "obtidoA": "Earned on",
-    "expiraA": "expires on",
-    "naoExpira": "does not expire",
-    "pontos": "pts",
-    "certificado": "Certificate",
-    "paginaPublica": "Public page",
-    "partilhar": "Share",
-    "adicionarCertificacao": "Add to LinkedIn"
-  },
   "dashboardAlertas": {
     "marcoTitulo": "Milestone reached! 🎉",
     "marcoTexto": "You've earned {{count}} badge!",
@@ -372,7 +360,7 @@
     "expiraItem": "{{nome}} — expires in {{dias}} day",
     "expiraItem_other": "{{nome}} — expires in {{dias}} days",
     "expiraHoje": "{{nome}} — expires today",
-    "verHistorico": "View history",
+    "verHistorico": "View my badges",
     "objetivosTitulo": "Goal reminders",
     "objetivoItem": "{{title}} — {{dias}} day left",
     "objetivoItem_other": "{{title}} — {{dias}} days left",

@@ -75,7 +75,7 @@ export default function DashboardAlerts({ conquistas = [] }) {
               </li>
             ))}
           </ul>
-          <Link to="/historico" className="small fw-medium text-warning-emphasis text-decoration-none">
+          <Link to="/candidaturas" className="small fw-medium text-warning-emphasis text-decoration-none">
             {t('dashboardAlertas.verHistorico')} →
           </Link>
         </div>

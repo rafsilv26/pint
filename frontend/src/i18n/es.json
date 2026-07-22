@@ -220,7 +220,10 @@
       "reenviar": "Reenviar Candidatura",
       "adicionarEvidencias": "Añadir Evidencias",
       "adicionarCertificacao": "Añadir a LinkedIn",
-      "verCertificado": "Ver certificado"
+      "verCertificado": "Ver certificado",
+      "aDescarregar": "Descargando…",
+      "erroCertificado": "No se pudo descargar el certificado.",
+      "paginaPublica": "Página pública"
     }
   },
   "badgeDetail": {
@@ -348,21 +351,6 @@
       "avancado": "Avanzado"
     }
   },
-  "historico": {
-    "titulo": "Historial de Insignias",
-    "subtitulo": "Las insignias que ya has obtenido.",
-    "vazioTitulo": "Aún no tienes insignias",
-    "vazioDesc": "¡Consigue tu primera insignia!",
-    "valido": "Válido",
-    "obtidoA": "Obtenida el",
-    "expiraA": "expira el",
-    "naoExpira": "no expira",
-    "pontos": "pts",
-    "certificado": "Certificado",
-    "paginaPublica": "Página pública",
-    "partilhar": "Compartir",
-    "adicionarCertificacao": "Añadir a LinkedIn"
-  },
   "dashboardAlertas": {
     "marcoTitulo": "¡Hito alcanzado! 🎉",
     "marcoTexto": "¡Ya has conseguido {{count}} insignia!",
@@ -372,7 +360,7 @@
     "expiraItem": "{{nome}} — caduca en {{dias}} día",
     "expiraItem_other": "{{nome}} — caduca en {{dias}} días",
     "expiraHoje": "{{nome}} — caduca hoy",
-    "verHistorico": "Ver historial",
+    "verHistorico": "Ver mis insignias",
     "objetivosTitulo": "Recordatorios de objetivos",
     "objetivoItem": "{{title}} — queda {{dias}} día",
     "objetivoItem_other": "{{title}} — quedan {{dias}} días",

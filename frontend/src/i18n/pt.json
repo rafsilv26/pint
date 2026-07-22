@@ -220,7 +220,10 @@
       "reenviar": "Reenviar Candidatura",
       "adicionarEvidencias": "Adicionar Evidências",
       "adicionarCertificacao": "Adicionar ao LinkedIn",
-      "verCertificado": "Ver certificado"
+      "verCertificado": "Ver certificado",
+      "aDescarregar": "A descarregar…",
+      "erroCertificado": "Não foi possível descarregar o certificado.",
+      "paginaPublica": "Página pública"
     }
   },
   "badgeDetail": {
@@ -348,21 +351,6 @@
       "avancado": "Avançado"
     }
   },
-  "historico": {
-    "titulo": "Histórico de Badges",
-    "subtitulo": "Os badges que já conquistaste.",
-    "vazioTitulo": "Ainda não tens badges",
-    "vazioDesc": "Conquista o teu primeiro badge!",
-    "valido": "Válido",
-    "obtidoA": "Obtido a",
-    "expiraA": "expira a",
-    "naoExpira": "não expira",
-    "pontos": "pts",
-    "certificado": "Certificado",
-    "paginaPublica": "Página pública",
-    "partilhar": "Partilhar",
-    "adicionarCertificacao": "Adicionar ao LinkedIn"
-  },
   "dashboardAlertas": {
     "marcoTitulo": "Marco alcançado! 🎉",
     "marcoTexto": "Já conquistaste {{count}} badge!",
@@ -372,7 +360,7 @@
     "expiraItem": "{{nome}} — expira em {{dias}} dia",
     "expiraItem_other": "{{nome}} — expira em {{dias}} dias",
     "expiraHoje": "{{nome}} — expira hoje",
-    "verHistorico": "Ver histórico",
+    "verHistorico": "Ver os meus badges",
     "objetivosTitulo": "Lembretes de objetivos",
     "objetivoItem": "{{title}} — faltam {{dias}} dia",
     "objetivoItem_other": "{{title}} — faltam {{dias}} dias",

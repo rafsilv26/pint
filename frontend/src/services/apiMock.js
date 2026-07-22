@@ -629,6 +629,9 @@ export async function validarServiceLine() {
 export async function downloadManagerCertificate() {
   return { ok: true }
 }
+export async function downloadCertificado() {
+  return { ok: true }
+}
 
 let _adminId = 1000
 const adminStore = {

@@ -17,7 +17,6 @@ import BadgeDetailPage from './pages/BadgeDetailPage'
 import SubmitApplicationPage from './pages/SubmitApplicationPage'
 import ObjetivosPage from './pages/ObjetivosPage'
 import ApplicationsPage from './pages/ApplicationsPage'
-import HistoryPage from './pages/HistoryPage'
 import NotificationsPage from './pages/NotificationsPage'
 import RankingPage from './pages/RankingPage'
 import ProfilePage from './pages/ProfilePage'
@@ -85,7 +84,6 @@ export default function App() {
           <Route path="/candidaturas" element={<ApplicationsPage />} />
           <Route path="/candidaturas/nova" element={<SubmitApplicationPage />} />
           <Route path="/objetivos" element={<ObjetivosPage />} />
-          <Route path="/historico" element={<HistoryPage />} />
           <Route path="/notificacoes" element={<NotificationsPage />} />
           <Route path="/ranking" element={<RankingPage />} />
           <Route path="/perfil" element={<ProfilePage />} />

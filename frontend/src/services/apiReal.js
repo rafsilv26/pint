@@ -703,14 +703,9 @@ export async function validarServiceLine(id, { decisao, comentario } = {}) {
   return result
 }
 
-export async function downloadManagerCertificate(consultantId, badgeId) {
-  const token = getToken()
-  const response = await api.get(`/relatorios/certificado-gestao/${consultantId}/${badgeId}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    responseType: 'blob',
-  })
+function guardarPdf(response, fallbackFilename) {
   const disposition = response.headers['content-disposition'] || ''
-  const filename = disposition.match(/filename="?([^";]+)"?/i)?.[1] || `certificado-${badgeId}.pdf`
+  const filename = disposition.match(/filename="?([^";]+)"?/i)?.[1] || fallbackFilename
   const url = URL.createObjectURL(response.data)
   const link = document.createElement('a')
   link.href = url
@@ -718,6 +713,24 @@ export async function downloadManagerCertificate(consultantId, badgeId) {
   link.click()
   URL.revokeObjectURL(url)
   return { ok: true }
+}
+
+export async function downloadManagerCertificate(consultantId, badgeId) {
+  const token = getToken()
+  const response = await api.get(`/relatorios/certificado-gestao/${consultantId}/${badgeId}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    responseType: 'blob',
+  })
+  return guardarPdf(response, `certificado-${badgeId}.pdf`)
+}
+
+export async function downloadCertificado(publicToken) {
+  const token = getToken()
+  const response = await api.get(`/relatorios/certificado/${publicToken}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    responseType: 'blob',
+  })
+  return guardarPdf(response, `certificado-${publicToken}.pdf`)
 }
 
 export async function listResource(resource) {

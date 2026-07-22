@@ -87,6 +87,7 @@ export const getServiceLineDecisionHistory = impl.getServiceLineDecisionHistory
 export const getServiceLineReports = impl.getServiceLineReports
 export const validarServiceLine = impl.validarServiceLine
 export const downloadManagerCertificate = impl.downloadManagerCertificate
+export const downloadCertificado = impl.downloadCertificado
 export const atribuirBadgePremium = impl.atribuirBadgePremium
 export const revogarBadgePremium = impl.revogarBadgePremium
 
