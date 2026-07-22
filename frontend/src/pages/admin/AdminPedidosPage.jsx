@@ -68,6 +68,7 @@ export default function AdminPedidosPage() {
                     <td className="px-3 py-2 text-ink">{c.badge}</td>
                     <td className="px-3 py-2 text-muted">{c.nivel}</td>
                     <td className="px-3 py-2 text-muted">{c.pontos}</td>
+                    <td className="px-3 py-2 text-muted">{c.data}</td>
                     <td className="px-3 py-2">
                       {c.slaExcedido
                         ? <span className="badge rounded-pill text-bg-danger">{t('adminPedidos.slaExcedido')}</span>
