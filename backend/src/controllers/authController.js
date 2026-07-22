@@ -87,8 +87,8 @@ exports.register = async (req, res) => {
             throw error;
         }
 
-        emailBoasVindas(newUser, `${frontendUrl()}/login`, `${frontendUrl()}/confirmar-email?token=${confirmToken}`, password)
-            .catch((erro) => console.error('Erro ao enviar email de boas-vindas:', erro.message));
+        //emailBoasVindas(newUser, `${frontendUrl()}/login`, `${frontendUrl()}/confirmar-email?token=${confirmToken}`, password)
+          //  .catch((erro) => console.error('Erro ao enviar email de boas-vindas:', erro.message));
 
         res.status(201).json({
             message: 'Utilizador registado com sucesso!',
