@@ -911,7 +911,8 @@
       "talentManager": "Talent Manager",
       "serviceLineLeader": "Service Line Leader",
       "admin": "Administrador"
-    }
+    },
+    "emailFalhou": "Usuario creado, pero el email de bienvenida falló: {{motivo}}"
   },
   "badgesGrid": {
     "tituloDefault": "Catálogo de Insignias",

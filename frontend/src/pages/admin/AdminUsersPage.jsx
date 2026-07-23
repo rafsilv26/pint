@@ -58,7 +58,13 @@ export default function AdminUsersPage() {
         const areaId = form.role === 'Consultor' ? Number(form.areaId) : undefined
         await api.updateUser(editing.id, { nome: form.nome, email: form.email, roles: [form.role], ativo: form.ativo, serviceLineId, areaId })
       } else {
-        await api.createUser({ nome: form.nome, email: form.email, password: form.password, roles: [form.role], serviceLineId })
+        const criado = await api.createUser({ nome: form.nome, email: form.email, password: form.password, roles: [form.role], serviceLineId })
+        if (criado && criado.emailEnviado === false) {
+          setErroForm(t('adminUsers.emailFalhou', { motivo: criado.emailErro || '—' }))
+          setSaving(false)
+          reload()
+          return
+        }
       }
       fechar()
       reload()

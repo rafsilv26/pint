@@ -911,7 +911,8 @@
       "talentManager": "Talent Manager",
       "serviceLineLeader": "Service Line Leader",
       "admin": "Administrador"
-    }
+    },
+    "emailFalhou": "Utilizador criado, mas o email de boas-vindas falhou: {{motivo}}"
   },
   "badgesGrid": {
     "tituloDefault": "Catálogo de Badges",

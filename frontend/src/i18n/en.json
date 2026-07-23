@@ -909,7 +909,8 @@
       "talentManager": "Talent Manager",
       "serviceLineLeader": "Service Line Leader",
       "admin": "Administrador"
-    }
+    },
+    "emailFalhou": "User created, but the welcome email failed: {{motivo}}"
   },
   "badgesGrid": {
     "tituloDefault": "Badge Catalog",
