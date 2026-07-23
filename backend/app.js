@@ -62,6 +62,7 @@ const PORT = process.env.PORT || 3000;
 
 const iniciarServidor = async () => {
     try {
+
         await prepararBaseDeDados({
             sequelize,
             executarMigrations: runMigrations,

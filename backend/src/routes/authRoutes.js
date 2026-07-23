@@ -3,7 +3,7 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
-router.post('/register', protect, authorize('Admin'), authController.register);
+router.post('/register', protect, authorize('Admin'), authController.register); 
 router.post('/signup', authController.signup);
 router.post('/resend-confirmation', authController.resendConfirmation);
 router.get('/areas', authController.listarAreasPublicas);

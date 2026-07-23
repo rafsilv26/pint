@@ -114,7 +114,7 @@ exports.register = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao registar o utilizador.' });
+        res.status(500).json({ error1: 'Erro ao registar o utilizador.', error: error });
     }
 };
 
@@ -179,7 +179,7 @@ exports.resendConfirmation = async (req, res) => {
         await emailBoasVindas(user, `${frontendUrl()}/login`, `${frontendUrl()}/confirmar-email?token=${confirmToken}`);
         return res.json(resposta);
     } catch (error) {
-        return res.status(500).json({ message: 'Não foi possível reenviar o email de confirmação.' });
+        return res.status(500).json({ message: 'Não foi possível reenviar o email de confirmação.', error: error });
     }
 };
 
